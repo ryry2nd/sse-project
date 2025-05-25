@@ -60,12 +60,14 @@ std::vector<float> makeTexturedCube(float size = 1.0f)
 std::vector<Light *> RenderObject::allLights;
 float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
+std::vector<RenderObject *> RenderObject::renderObjects;
 
 RenderObject::RenderObject(Backend *backend, Shader *shady, Image *im, Camera *cam, glm::vec3 emissionColor, Bigint emissionIntensity, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
     : position(pos),
       rotation(rot), scale(scl), shader(shady), image(im), camera(cam), velocity(BigVec3(Bigint(), Bigint(), Bigint())), acceleration(BigVec3(Bigint(), Bigint(), Bigint()))
 {
     this->backend = backend;
+    renderObjects.push_back(this);
     if (emissionIntensity != 0.0f)
     {
         thisLight = new Light{position, emissionColor, emissionIntensity};
@@ -82,34 +84,48 @@ RenderObject::~RenderObject()
     if (thisLight != nullptr)
     {
         allLights.erase(std::find(allLights.begin(), allLights.end(), thisLight));
+        renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
         delete thisLight;
     }
 }
 
 void RenderObject::setupObject()
 {
+    calculateSizes();
+
     backend->setupObject(vertices);
 }
 
-glm::mat4 RenderObject::getModelMatrix() const
+void RenderObject::calculateSizes()
 {
-    glm::mat4 model = glm::mat4(1.0f);
+    minCorner = glm::vec3(FLT_MAX);
+    maxCorner = glm::vec3(-FLT_MAX);
 
-    // converts the position to be local to the camera
-    model = glm::translate(model, tempLocalPosition.toFloatVec3());
+    for (size_t i = 0; i < vertices.size(); i += NUM_VECTOR_NUMBERS)
+    {
+        glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
+        minCorner = glm::min(minCorner, pos);
+        maxCorner = glm::max(maxCorner, pos);
+    }
 
-    // rotates the model
-    model = glm::rotate(model, rotation.x, glm::vec3(1, 0, 0));
-    model = glm::rotate(model, rotation.y, glm::vec3(0, 1, 0));
-    model = glm::rotate(model, rotation.z, glm::vec3(0, 0, 1));
+    localSize = maxCorner - minCorner;
+}
 
-    // scales the model
-    model = glm::scale(model, scale.toFloatVec3());
-    return model;
+void RenderObject::updateVerts()
+{
+    calculateSizes();
+    backend->updateVerts(vertices);
+}
+
+void RenderObject::appendUpdate(const float &deltaTime)
+{
+    rotation.y -= deltaTime;
+    rotation.x -= deltaTime;
+    rotation.z -= deltaTime;
 }
 
 // I just made the default update to rotate all around
-void RenderObject::Update(float deltaTime)
+void RenderObject::Update(const float &deltaTime)
 {
 
     if (!velocity.isZero())
@@ -121,9 +137,7 @@ void RenderObject::Update(float deltaTime)
         velocity += acceleration * deltaTime;
     }
 
-    rotation.y -= deltaTime;
-    rotation.x -= deltaTime;
-    rotation.z -= deltaTime;
+    appendUpdate(deltaTime);
 }
 
 // it culls everything close and its different depending on the near value
@@ -146,10 +160,53 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
            subtractedPos.z * subtractedPos.z;
 }
 
+void RenderObject::appendCustomShaderValues() {}
+
 void RenderObject::addVarsToShader()
 {
-    glm::mat4 matrix = getModelMatrix();
+    Bigint realSize = (BigVec3(localSize) * scale).getMaxAbs();
+    glm::vec3 newPos;
+    glm::vec3 newSize;
+
+    if (realSize == 0)
+    {
+        return;
+    }
+
+    if (realSize > bigObjectThresholdSize) // || calculateDistanceSquared(tempLocalPosition) > bigObjectThresholdDistanceSquared)
+    {
+        Bigint transform = realSize / Bigint(10);
+
+        newPos = (tempLocalPosition / transform).toFloatVec3();
+        newSize = (scale / transform).toFloatVec3();
+
+        if (newSize.x < 0.001)
+        {
+            return;
+        }
+        std::cout << newPos.x << "\n";
+    }
+    else
+    {
+        newPos = tempLocalPosition.toFloatVec3();
+        newSize = scale.toFloatVec3();
+    }
+
+    glm::mat4 matrix = glm::mat4(1.0f);
+
+    // converts the position to be local to the camera
+    matrix = glm::translate(matrix, newPos);
+
+    // rotates the model
+    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
+    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
+    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
+
+    // scales the model
+    matrix = glm::scale(matrix, newSize);
+
     backend->includeMat4("uModel", matrix);
+    // backend->includeFloat("uScaleFactor", transform.toFloat());
     backend->includeMat4("uView", camera->getViewMatrix());
     backend->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
     backend->includeFloat("u_CullRadius", nearCullFunction());
@@ -195,6 +252,7 @@ void RenderObject::Draw()
     tempLocalPosition = camera->convertToLocal(position);
     backend->includeShader(shader);
     addVarsToShader();
+    appendCustomShaderValues();
     backend->includeTexture(image);
     backend->finalizeShaders(vertices);
 }

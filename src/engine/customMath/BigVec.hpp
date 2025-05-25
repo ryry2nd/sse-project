@@ -100,6 +100,14 @@ struct BigVec3
         return x.isZero() && y.isZero() && z.isZero();
     }
 
+    Bigint getMaxAbs() const
+    {
+        Bigint a = x.getAbs();
+        Bigint b = y.getAbs();
+        Bigint c = z.getAbs();
+        return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+    }
+
     glm::vec3 toFloatVec3() const
     {
         return glm::vec3(

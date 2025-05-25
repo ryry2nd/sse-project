@@ -12,7 +12,6 @@
 #include <cctype>
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_dec_float.hpp>
 
 class Bigint
 {
@@ -20,7 +19,8 @@ public:
     boost::multiprecision::cpp_int MAX_DOUBLE = boost::multiprecision::cpp_int(std::numeric_limits<double>::max());
     boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
 
-    static constexpr int SCALE = 100000; // fixed scale = 5 digits
+    static constexpr unsigned long long DIGITS = 5;
+    static constexpr unsigned long long SCALE = 100000; // fixed scale = 5 digits
     boost::multiprecision::cpp_int value;
 
     Bigint()
@@ -30,22 +30,26 @@ public:
 
     Bigint(double d)
     {
-        value = boost::multiprecision::cpp_int(static_cast<long long>(d * SCALE));
+        double fd = floor(d);
+        value = boost::multiprecision::cpp_int(fd) * SCALE;
+        value += boost::multiprecision::cpp_int((d - fd) * SCALE);
     }
 
     Bigint(float f)
     {
-        value = boost::multiprecision::cpp_int(static_cast<long long>(f * SCALE));
+        float fd = floor(f);
+        value = boost::multiprecision::cpp_int(fd) * SCALE;
+        value += boost::multiprecision::cpp_int((f - fd) * SCALE);
     }
 
     Bigint(int i)
     {
-        value = boost::multiprecision::cpp_int(static_cast<long long>(i * SCALE));
+        value = boost::multiprecision::cpp_int(i) * SCALE;
     }
 
     Bigint(long l)
     {
-        value = boost::multiprecision::cpp_int(static_cast<long long>(l * SCALE));
+        value = boost::multiprecision::cpp_int(l) * SCALE;
     }
 
     Bigint(const std::string &s)
@@ -54,10 +58,10 @@ public:
         std::string intPart = (dot == std::string::npos) ? s : s.substr(0, dot);
         std::string fracPart = (dot == std::string::npos) ? "" : s.substr(dot + 1);
 
-        while (fracPart.length() < 5)
+        while (fracPart.length() < DIGITS)
             fracPart += '0';
-        if (fracPart.length() > 5)
-            fracPart = fracPart.substr(0, 5);
+        if (fracPart.length() > DIGITS)
+            fracPart = fracPart.substr(0, DIGITS);
 
         value = boost::multiprecision::cpp_int(intPart + fracPart);
     }
@@ -122,7 +126,7 @@ public:
 
     bool operator>(const Bigint &other) const
     {
-        return value < other.value;
+        return value > other.value;
     }
 
     bool operator==(const Bigint &other) const
@@ -151,21 +155,28 @@ public:
         boost::multiprecision::cpp_int fracPart = abs(value % SCALE);
 
         std::ostringstream out;
-        out << intPart << "." << std::setw(5) << std::setfill('0') << fracPart;
+        out << intPart << "." << std::setw(DIGITS) << std::setfill('0') << fracPart;
         return out.str();
+    }
+
+    Bigint getAbs() const
+    {
+        Bigint ret;
+        ret.value = boost::multiprecision::abs(this->value);
+        return ret;
     }
 
     float toFloat() const
     {
         if (value > MAX_FLOAT)
             return INFINITY;
-        return static_cast<float>(value) / 100000.0f;
+        return static_cast<float>(value) / SCALE;
     }
 
     double toDouble() const
     {
         if (value > MAX_DOUBLE)
             return INFINITY;
-        return static_cast<double>(value) / 100000.0;
+        return static_cast<double>(value) / SCALE;
     }
 };

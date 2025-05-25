@@ -24,7 +24,7 @@ public:
     RenderObject(Backend *backend, Shader *shady, Image *im, Camera *cam, glm::vec3 emissionColor = glm::vec3(0, 0, 0), Bigint emissionIntensity = Bigint(), BigVec3 pos = BigVec3(0.0f), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scl = glm::vec3(1.0f));
     ~RenderObject();
 
-    void Update(float deltaTime);
+    void Update(const float &deltaTime);
     void Draw();
 
     BigVec3 position;
@@ -38,27 +38,39 @@ public:
     float near = 0.1f;
     float far = 10000.0f;
 
+    static std::vector<RenderObject *> renderObjects;
+
     static float gamma;
     static bool disableBrightness;
 
+    const int NUM_VECTOR_NUMBERS = 8; // the number of stupid numbers in the vector per vert, it is x, y, z, tex1, tex2, normx, normy, normz
+    const Bigint bigObjectThresholdSize = Bigint(10000);
+    const Bigint bigObjectThresholdDistanceSquared = Bigint("10000000000");
+
 protected:
-    void
-    addVarsToShader();
+    Backend *backend;
+    Light *thisLight = nullptr;
+    virtual void appendUpdate(const float &deltaTime);
+    virtual void appendCustomShaderValues();
     RenderObject *parent = nullptr;
-    void setupObject();
-    float nearCullFunction() const;
-    glm::mat4 getModelMatrix() const;
+    virtual float nearCullFunction() const;
     BigVec3 tempLocalPosition;
+    static std::vector<Light *> allLights;
+    std::vector<float> vertices;
 
 private:
-    Backend *backend;
     Shader *shader;
     Image *image;
     Camera *camera;
-    Light *thisLight = nullptr;
-    std::vector<float> vertices;
+    void calculateSizes();
+    void addVarsToShader();
     Bigint calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const;
     Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
 
-    static std::vector<Light *> allLights;
+    void updateVerts();
+    void setupObject();
+
+    glm::vec3 minCorner;
+    glm::vec3 maxCorner;
+    glm::vec3 localSize;
 };

@@ -9,15 +9,51 @@
 #include <string>
 #include <memory>
 
+Bigint *getHoweverManyDigits(unsigned long long numZeros)
+{
+    if (numZeros == 0)
+    {
+        return new Bigint();
+    }
+    std::string pos;
+    pos.reserve(numZeros + 1);
+    pos.append("1");
+
+    for (unsigned long long i = 0; i < numZeros; i++)
+    {
+        pos.append("0");
+    }
+
+    return new Bigint(pos);
+}
+
 class Sun : public RenderObject
 {
 public:
     Sun(Shader *shader, Image *image, Camera *camera)
         : RenderObject(new OpenGlBackend(), shader, image, camera, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
     {
-        scale *= Bigint("150000000000");
-        near = 100000;
-        far = 1000000000000;
+        scale *= Bigint("1392000000");
+    }
+
+    void appendUpdate(const float &deltaTime) override
+    {
+        rotation.y += deltaTime / 10;
+    }
+};
+
+class Earth : public RenderObject
+{
+public:
+    Earth(Shader *shader, Image *image, Camera *camera)
+        : RenderObject(new OpenGlBackend(), shader, image, camera)
+    {
+        scale *= Bigint("12756000");
+    }
+
+    void appendUpdate(const float &deltaTime) override
+    {
+        rotation.y += deltaTime / 10;
     }
 };
 
@@ -46,45 +82,43 @@ int main(int argc, char *argv[])
     // this is the constants
     const float MOUSE_SENSITIVITY = 2;
     const float WALK_SPEED = 10;
-    const float RUN_SPEED = 100;
-
-    // put objects in here to render them
-    std::vector<RenderObject *> renderObjects;
+    const float RUN_SPEED = 1000000000;
 
     // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
-    std::string pos = "0";
 
-    for (int i = 0; i < 0; i++)
-    {
-        pos += "0";
-    }
+    Bigint *pos = getHoweverManyDigits(0);
 
     // this is the camera, cameras are neat
-    Camera *camera = new Camera(RES, Bigint(pos), 0.0f, -2.0f);
+    Camera *camera = new Camera(RES, *pos, 0.0f, -2.0f);
     float speed = 10;
 
     // this sets up the shader and texture
-    Shader *shader = new ShaderOpenGl("assets/shaders/nearVertex.glsl", "assets/shaders/nearFragment.glsl");
+    Shader *shader = new ShaderOpenGl("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
     Image *image = new ImageOpenGl("assets/textures/FISH.png");
 
     // makes the cubes
     RenderObject cube(new OpenGlBackend(), shader, image, camera);
+    cube.position.x += *pos;
     // cube.velocity.z = 5;
-    renderObjects.push_back(&cube);
-
-    cube.disableBrightness = true;
 
     RenderObject cube2(new OpenGlBackend(), shader, image, camera);
     cube2.position.x -= Bigint(10);
-    renderObjects.push_back(&cube2);
+    cube2.position.x += *pos;
 
     RenderObject cube3(new OpenGlBackend(), shader, image, camera, glm::vec3(1.0f), 10.0f);
-    renderObjects.push_back(&cube3);
     cube3.position.x += Bigint("10");
+    cube3.position.x += *pos;
 
     Sun sun(shader, image, camera);
-    renderObjects.push_back(&sun);
-    sun.position.x -= Bigint("150000000000"); // Bigint("21392000000");
+    sun.position.x -= Bigint("150000000000");
+    sun.position.x += *pos;
+
+    Earth earth(shader, image, camera);
+    earth.position.x += *pos;
+    // earth.position.x -= Bigint("150000000000");
+    // earth.position.z -= Bigint("150000000000");
+    delete pos;
+    pos = nullptr;
 
     // starts running the game loop
     bool running = true;
@@ -168,18 +202,18 @@ int main(int argc, char *argv[])
         }
 
         // update all objects
-        for (i = 0; i < renderObjects.size(); i++)
+        for (i = 0; i < RenderObject::renderObjects.size(); i++)
         {
-            renderObjects[i]->Update(deltaTime);
+            RenderObject::renderObjects[i]->Update(deltaTime);
         }
 
         // clear background
         renderingEngine->clearBackground();
 
         // draw all objects
-        for (i = 0; i < renderObjects.size(); i++)
+        for (i = 0; i < RenderObject::renderObjects.size(); i++)
         {
-            renderObjects[i]->Draw();
+            RenderObject::renderObjects[i]->Draw();
         }
 
         // swap buffer

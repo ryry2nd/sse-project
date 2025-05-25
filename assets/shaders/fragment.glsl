@@ -3,6 +3,7 @@
 in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
+flat in int doSimple;
 
 out vec4 FragColor;
 
@@ -22,15 +23,36 @@ uniform bool u_fullBright;
 
 void main()
 {
-    if (length(FragPos) < u_CullRadius) discard;
+    if (doSimple == 0 && dot(FragPos, FragPos) < u_CullRadius) discard;
 
-    vec3 norm = normalize(Normal);
-    vec3 viewDir = normalize(-FragPos);
     vec3 texColor = texture(texture1, TexCoord).rgb;
     vec3 finalColor = vec3(0.0);
 
-    if (!u_fullBright) {
+    if (false) {//u_fullBright) {
+        finalColor = texColor + emissionColor * emissionIntensity;
+    }
+    else if (false) {//doSimple == 1) {
         vec3 lighting = vec3(0.0);
+        vec3 norm = Normal;
+        // Directional Light
+        for (int i = 0; i < numLights; i++)
+        {
+            vec3 lightDir = -lightPositions[i];
+
+            float ambientStrength = 0.1;
+            vec3 ambient = ambientStrength * lightColors[i] * lightIntensities[i];
+
+            float diff = max(dot(norm, lightDir), 0.0);
+            vec3 diffuse = diff * lightColors[i] * lightIntensities[i];
+
+            lighting += ambient + diffuse;
+        }
+        finalColor = lighting * texColor + emissionColor * emissionIntensity;
+    }
+    else {
+        vec3 norm = normalize(Normal);
+        vec3 lighting = vec3(0.0);
+        vec3 viewDir = normalize(-FragPos);
         // Directional Light
         for (int i = 0; i < numLights; i++)
         {
@@ -50,9 +72,6 @@ void main()
             lighting += ambient + diffuse + specular;
         }
         finalColor = lighting * texColor + emissionColor * emissionIntensity;
-    }
-    else {
-        finalColor = texColor + emissionColor * emissionIntensity;
     }
     FragColor = vec4(pow(finalColor, vec3(1.0 / gamma)), 1.0);
 }
