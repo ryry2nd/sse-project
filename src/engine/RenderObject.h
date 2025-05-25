@@ -47,6 +47,9 @@ public:
     const Bigint bigObjectThresholdSize = Bigint(10000);
     const Bigint bigObjectThresholdDistanceSquared = Bigint("10000000000");
 
+    static void UpdateAllObjects(const float &deltaTime);
+    static void DrawAllObjects();
+
 protected:
     Backend *backend;
     Light *thisLight = nullptr;

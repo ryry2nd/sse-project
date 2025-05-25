@@ -115,8 +115,7 @@ int main(int argc, char *argv[])
 
     Earth earth(shader, image, camera);
     earth.position.x += *pos;
-    // earth.position.x -= Bigint("150000000000");
-    // earth.position.z -= Bigint("150000000000");
+
     delete pos;
     pos = nullptr;
 
@@ -201,22 +200,12 @@ int main(int argc, char *argv[])
             camera->position += (down * deltaTime * speed);
         }
 
-        // update all objects
-        for (i = 0; i < RenderObject::renderObjects.size(); i++)
-        {
-            RenderObject::renderObjects[i]->Update(deltaTime);
-        }
+        RenderObject::UpdateAllObjects(deltaTime);
 
-        // clear background
         renderingEngine->clearBackground();
 
-        // draw all objects
-        for (i = 0; i < RenderObject::renderObjects.size(); i++)
-        {
-            RenderObject::renderObjects[i]->Draw();
-        }
+        RenderObject::DrawAllObjects();
 
-        // swap buffer
         renderingEngine->swapBuffer();
     }
 

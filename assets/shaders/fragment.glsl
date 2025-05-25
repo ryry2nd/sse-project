@@ -28,10 +28,10 @@ void main()
     vec3 texColor = texture(texture1, TexCoord).rgb;
     vec3 finalColor = vec3(0.0);
 
-    if (false) {//u_fullBright) {
+    if (u_fullBright) {
         finalColor = texColor + emissionColor * emissionIntensity;
     }
-    else if (false) {//doSimple == 1) {
+    else if (doSimple == 1) {
         vec3 lighting = vec3(0.0);
         vec3 norm = Normal;
         // Directional Light

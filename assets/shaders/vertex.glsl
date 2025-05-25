@@ -20,7 +20,6 @@ void main()
     vec4 viewPos = uView * worldPos;
 
     if (uScaleFactor != 1 && uScaleFactor != 0) {
-        //viewPos.z /= uScaleFactor;
         doSimple = 1;
     }
     else {

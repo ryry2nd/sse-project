@@ -256,3 +256,19 @@ void RenderObject::Draw()
     backend->includeTexture(image);
     backend->finalizeShaders(vertices);
 }
+
+void RenderObject::UpdateAllObjects(const float &deltaTime)
+{
+    for (unsigned long long i = 0; i < renderObjects.size(); i++)
+    {
+        renderObjects[i]->Update(deltaTime);
+    }
+}
+
+void RenderObject::DrawAllObjects()
+{
+    for (unsigned long long i = 0; i < renderObjects.size(); i++)
+    {
+        renderObjects[i]->Draw();
+    }
+}
