@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
     // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
 
-    Bigint *pos = getHoweverManyDigits(0);
+    Bigint *pos = getHoweverManyDigits(100);
 
     // this is the camera, cameras are neat
     Camera *camera = new Camera(RES, *pos, 0.0f, -2.0f);
@@ -102,9 +102,10 @@ int main(int argc, char *argv[])
     Image *image = new ImageOpenGl("assets/textures/FISH.png");
 
     // makes the cubes
-    RenderObject cube(shader, pointShader, image, camera);
-    cube.position.x += *pos;
-    // cube.velocity.z = 5;
+
+    Sun sun(shader, pointShader, image, camera);
+    sun.position.x -= Bigint("150000000000");
+    sun.position.x += *pos;
 
     RenderObject cube2(shader, pointShader, image, camera);
     cube2.position.x -= Bigint(10);
@@ -114,12 +115,12 @@ int main(int argc, char *argv[])
     cube3.position.x += Bigint("10");
     cube3.position.x += *pos;
 
-    Sun sun(shader, pointShader, image, camera);
-    sun.position.x -= Bigint("150000000000");
-    sun.position.x += *pos;
-
     Earth earth(shader, pointShader, image, camera);
     earth.position.x += *pos;
+
+    RenderObject cube(shader, pointShader, image, camera);
+    cube.position.x += *pos;
+    // cube.velocity.z = 5;
 
     delete pos;
     pos = nullptr;

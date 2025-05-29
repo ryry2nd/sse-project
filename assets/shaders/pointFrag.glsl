@@ -2,6 +2,7 @@
 out vec4 FragColor;
 uniform vec3 color;
 uniform float gamma;
+uniform float depth;
 
 void main() {
     vec2 coord = gl_PointCoord - vec2(0.5);
@@ -15,4 +16,6 @@ void main() {
     vec3 correctedColor = pow(color, vec3(1.0 / gamma));
 
     FragColor = vec4(correctedColor, alpha); // white, soft-edged
+
+    gl_FragDepth = depth;
 }

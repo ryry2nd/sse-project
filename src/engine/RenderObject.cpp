@@ -183,6 +183,8 @@ void RenderObject::Draw()
     Bigint realSize = (localSize * scale).getMaxAbs();
     Bigint distanceSquared = calculateDistanceSquared(tempLocalPosition);
 
+    float mappedDepth = glm::clamp((glm::sqrt(distanceSquared.toFloat()) - near) / (far - near), 0.0f, 0.99999f);
+
     if (distanceSquared / (realSize * realSize) >= Bigint("10000"))
     {
         // usePointMesh
@@ -193,6 +195,7 @@ void RenderObject::Draw()
         matrix = glm::translate(matrix, newPos);
 
         pointMesh->includeShader(pointShader);
+        pointMesh->includeFloat("depth", mappedDepth);
         pointMesh->includeMat4("uModel", matrix);
         pointMesh->includeMat4("uView", camera->getViewMatrix());
         pointMesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
@@ -233,7 +236,7 @@ void RenderObject::Draw()
 
         mesh->includeShader(shader);
         mesh->includeMat4("uModel", matrix);
-        // backend->includeFloat("uScaleFactor", transform.toFloat());
+        mesh->includeFloat("depth", mappedDepth);
         mesh->includeMat4("uView", camera->getViewMatrix());
         mesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
         mesh->includeFloat("u_CullRadius", nearCullFunction());

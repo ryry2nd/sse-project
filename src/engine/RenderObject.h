@@ -36,7 +36,7 @@ public:
     BigVec3 acceleration;
 
     // change near and far values if you want to have big objects, if you change them to the right value it could be as big as the floating points will allow
-    float near = 0.1f;
+    float near = 0.01f;
     float far = 10000.0f;
 
     static std::vector<RenderObject *> renderObjects;

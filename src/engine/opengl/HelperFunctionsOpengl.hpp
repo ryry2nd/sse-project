@@ -50,6 +50,8 @@ public:
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_STENCIL_TEST);
         glEnable(GL_PROGRAM_POINT_SIZE);
+        glDepthFunc(GL_LESS); // or GL_LEQUAL
+        glDepthMask(GL_TRUE); // enable writing to depth buffer
     }
 
     void clearBackground()

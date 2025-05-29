@@ -20,6 +20,7 @@ uniform float lightIntensities[MAX_LIGHTS];
 
 uniform float gamma;
 uniform bool u_fullBright;
+uniform float depth;
 
 void main()
 {
@@ -74,4 +75,6 @@ void main()
         finalColor = lighting * texColor + emissionColor * emissionIntensity;
     }
     FragColor = vec4(pow(finalColor, vec3(1.0 / gamma)), 1.0);
+
+    gl_FragDepth = depth;
 }
