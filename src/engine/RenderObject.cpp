@@ -61,12 +61,24 @@ std::vector<Light *> RenderObject::allLights;
 float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
+Mesh *RenderObject::defaultMeshAPI = new OpenGlMesh();
 
-RenderObject::RenderObject(Backend *backend, Shader *shady, Image *im, Camera *cam, glm::vec3 emissionColor, Bigint emissionIntensity, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
-    : position(pos),
-      rotation(rot), scale(scl), shader(shady), image(im), camera(cam), velocity(BigVec3(Bigint(), Bigint(), Bigint())), acceleration(BigVec3(Bigint(), Bigint(), Bigint()))
+void RenderObject::addStaticLight(Light *light)
 {
-    this->backend = backend;
+    allLights.push_back(light);
+}
+
+void RenderObject::removeStaticLight(Light *light)
+{
+    allLights.erase(std::find(allLights.begin(), allLights.end(), light));
+}
+
+RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, glm::vec3 emissionColor, Bigint emissionIntensity, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
+    : position(pos), rotation(rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam), velocity(BigVec3(Bigint(), Bigint(), Bigint())), acceleration(BigVec3(Bigint(), Bigint(), Bigint()))
+{
+    this->mesh = defaultMeshAPI->makeNewMesh();
+    pointMesh = defaultMeshAPI->makeNewMesh();
+
     renderObjects.push_back(this);
     if (emissionIntensity != 0.0f)
     {
@@ -80,7 +92,8 @@ RenderObject::RenderObject(Backend *backend, Shader *shady, Image *im, Camera *c
 
 RenderObject::~RenderObject()
 {
-    delete backend;
+    delete mesh;
+    delete pointMesh;
     if (thisLight != nullptr)
     {
         allLights.erase(std::find(allLights.begin(), allLights.end(), thisLight));
@@ -93,13 +106,14 @@ void RenderObject::setupObject()
 {
     calculateSizes();
 
-    backend->setupObject(vertices);
+    mesh->setupObject(vertices, vertLogic);
+    pointMesh->setupObject(pointVert, {3}, MeshTypes::Points);
 }
 
 void RenderObject::calculateSizes()
 {
-    minCorner = glm::vec3(FLT_MAX);
-    maxCorner = glm::vec3(-FLT_MAX);
+    glm::vec3 minCorner(FLT_MAX);
+    glm::vec3 maxCorner(-FLT_MAX);
 
     for (size_t i = 0; i < vertices.size(); i += NUM_VECTOR_NUMBERS)
     {
@@ -108,13 +122,13 @@ void RenderObject::calculateSizes()
         maxCorner = glm::max(maxCorner, pos);
     }
 
-    localSize = maxCorner - minCorner;
+    localSize = BigVec3(maxCorner - minCorner);
 }
 
 void RenderObject::updateVerts()
 {
     calculateSizes();
-    backend->updateVerts(vertices);
+    mesh->updateVerts(vertices);
 }
 
 void RenderObject::appendUpdate(const float &deltaTime)
@@ -162,104 +176,111 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
 
 void RenderObject::appendCustomShaderValues() {}
 
-void RenderObject::addVarsToShader()
-{
-    Bigint realSize = (BigVec3(localSize) * scale).getMaxAbs();
-    glm::vec3 newPos;
-    glm::vec3 newSize;
-
-    if (realSize == 0)
-    {
-        return;
-    }
-
-    if (realSize > bigObjectThresholdSize) // || calculateDistanceSquared(tempLocalPosition) > bigObjectThresholdDistanceSquared)
-    {
-        Bigint transform = realSize / Bigint(10);
-
-        newPos = (tempLocalPosition / transform).toFloatVec3();
-        newSize = (scale / transform).toFloatVec3();
-
-        if (newSize.x < 0.001)
-        {
-            return;
-        }
-        std::cout << newPos.x << "\n";
-    }
-    else
-    {
-        newPos = tempLocalPosition.toFloatVec3();
-        newSize = scale.toFloatVec3();
-    }
-
-    glm::mat4 matrix = glm::mat4(1.0f);
-
-    // converts the position to be local to the camera
-    matrix = glm::translate(matrix, newPos);
-
-    // rotates the model
-    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
-    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
-    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
-
-    // scales the model
-    matrix = glm::scale(matrix, newSize);
-
-    backend->includeMat4("uModel", matrix);
-    // backend->includeFloat("uScaleFactor", transform.toFloat());
-    backend->includeMat4("uView", camera->getViewMatrix());
-    backend->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
-    backend->includeFloat("u_CullRadius", nearCullFunction());
-    backend->includeFloat("gamma", gamma);
-    backend->includeBool("u_fullBright", disableBrightness);
-
-    if (thisLight != nullptr)
-    {
-        backend->includeTripleFloat("emissionColor", thisLight->color.x, thisLight->color.y, thisLight->color.z);
-        backend->includeFloat("emissionIntensity", calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat());
-    }
-    else
-    {
-        backend->includeTripleFloat("emissionColor", 0.0f, 0.0f, 0.0f);
-        backend->includeFloat("emissionIntensity", 0.0f);
-    }
-
-    int i = 0;
-    glm::dvec3 temp;
-    BigVec3 bigTemp;
-    for (const Light *l : allLights)
-    {
-        if (l != thisLight)
-        {
-            bigTemp = l->position - position;
-            temp = bigTemp.toDoubleVec3();
-            if (!std::isinf(temp.x) && !std::isinf(temp.y) && !std::isinf(temp.z))
-            {
-                glm::dvec3 lightPos = glm::normalize(temp);
-                backend->includeTripleFloat("lightPositions[" + std::to_string(i) + "]", lightPos.x, lightPos.y, lightPos.z);
-                backend->includeTripleFloat("lightColors[" + std::to_string(i) + "]", l->color.x, l->color.y, l->color.z);
-                backend->includeFloat("lightIntensities[" + std::to_string(i) + "]", calculateInverseSquareLaw(bigTemp, l->intensity).toFloat());
-                i++;
-            }
-        }
-    }
-
-    backend->includeInt("numLights", i);
-}
-
 void RenderObject::Draw()
 {
     tempLocalPosition = camera->convertToLocal(position);
-    backend->includeShader(shader);
-    addVarsToShader();
-    appendCustomShaderValues();
-    backend->includeTexture(image);
-    backend->finalizeShaders(vertices);
+
+    Bigint realSize = (localSize * scale).getMaxAbs();
+    Bigint distanceSquared = calculateDistanceSquared(tempLocalPosition);
+
+    if (distanceSquared / (realSize * realSize) >= Bigint("10000"))
+    {
+        // usePointMesh
+        glm::vec3 newPos = tempLocalPosition.toFloatVec3() / sqrt((distanceSquared / Bigint(100)).toFloat());
+
+        glm::mat4 matrix = glm::mat4(1.0f);
+
+        matrix = glm::translate(matrix, newPos);
+
+        pointMesh->includeShader(pointShader);
+        pointMesh->includeMat4("uModel", matrix);
+        pointMesh->includeMat4("uView", camera->getViewMatrix());
+        pointMesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
+        pointMesh->includeFloat("gamma", gamma);
+        pointMesh->includeTripleFloat("color", 1.0f, 1.0f, 1.0f);
+        pointMesh->finalizeShaders(pointVert);
+    }
+    else
+    {
+        glm::vec3 newPos;
+        glm::vec3 newSize;
+
+        if (realSize > bigObjectThresholdSize) // || calculateDistanceSquared(tempLocalPosition) > bigObjectThresholdDistanceSquared)
+        {
+            Bigint transform = realSize / Bigint(10);
+
+            newPos = (tempLocalPosition / transform).toFloatVec3();
+            newSize = (scale / transform).toFloatVec3();
+        }
+        else
+        {
+            newPos = tempLocalPosition.toFloatVec3();
+            newSize = scale.toFloatVec3();
+        }
+
+        glm::mat4 matrix = glm::mat4(1.0f);
+
+        // converts the position to be local to the camera
+        matrix = glm::translate(matrix, newPos);
+
+        // rotates the model
+        matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
+        matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
+        matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
+
+        // scales the model
+        matrix = glm::scale(matrix, newSize);
+
+        mesh->includeShader(shader);
+        mesh->includeMat4("uModel", matrix);
+        // backend->includeFloat("uScaleFactor", transform.toFloat());
+        mesh->includeMat4("uView", camera->getViewMatrix());
+        mesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
+        mesh->includeFloat("u_CullRadius", nearCullFunction());
+        mesh->includeFloat("gamma", gamma);
+        mesh->includeBool("u_fullBright", disableBrightness);
+
+        if (thisLight != nullptr)
+        {
+            mesh->includeTripleFloat("emissionColor", thisLight->color.x, thisLight->color.y, thisLight->color.z);
+            mesh->includeFloat("emissionIntensity", calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat());
+        }
+        else
+        {
+            mesh->includeTripleFloat("emissionColor", 0.0f, 0.0f, 0.0f);
+            mesh->includeFloat("emissionIntensity", 0.0f);
+        }
+
+        int i = 0;
+        glm::dvec3 temp;
+        BigVec3 bigTemp;
+        for (const Light *l : allLights)
+        {
+            if (l != thisLight)
+            {
+                bigTemp = l->position - position;
+                temp = bigTemp.toDoubleVec3();
+                if (!std::isinf(temp.x) && !std::isinf(temp.y) && !std::isinf(temp.z))
+                {
+                    glm::dvec3 lightPos = glm::normalize(temp);
+                    mesh->includeTripleFloat("lightPositions[" + std::to_string(i) + "]", lightPos.x, lightPos.y, lightPos.z);
+                    mesh->includeTripleFloat("lightColors[" + std::to_string(i) + "]", l->color.x, l->color.y, l->color.z);
+                    mesh->includeFloat("lightIntensities[" + std::to_string(i) + "]", calculateInverseSquareLaw(bigTemp, l->intensity).toFloat());
+                    i++;
+                }
+            }
+        }
+
+        mesh->includeInt("numLights", i);
+        appendCustomShaderValues();
+        mesh->includeTexture(image);
+        mesh->finalizeShaders(vertices);
+    }
 }
 
 void RenderObject::UpdateAllObjects(const float &deltaTime)
 {
-    for (unsigned long long i = 0; i < renderObjects.size(); i++)
+    for (size_t i = 0; i < renderObjects.size(); i++)
     {
         renderObjects[i]->Update(deltaTime);
     }
@@ -267,7 +288,7 @@ void RenderObject::UpdateAllObjects(const float &deltaTime)
 
 void RenderObject::DrawAllObjects()
 {
-    for (unsigned long long i = 0; i < renderObjects.size(); i++)
+    for (size_t i = 0; i < renderObjects.size(); i++)
     {
         renderObjects[i]->Draw();
     }

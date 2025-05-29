@@ -4,7 +4,6 @@
 #include "engine/RenderObject.h"
 #include "engine/HelperFunctions.hpp"
 #include "engine/Camera.hpp"
-#include "engine/opengl/OpenGlBackend.hpp"
 #include "engine/opengl/HelperFunctionsOpengl.hpp"
 #include <string>
 #include <memory>
@@ -30,8 +29,8 @@ Bigint *getHoweverManyDigits(unsigned long long numZeros)
 class Sun : public RenderObject
 {
 public:
-    Sun(Shader *shader, Image *image, Camera *camera)
-        : RenderObject(new OpenGlBackend(), shader, image, camera, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
+    Sun(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
+        : RenderObject(shader, slimShady, image, camera, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
     {
         scale *= Bigint("1392000000");
     }
@@ -45,8 +44,8 @@ public:
 class Earth : public RenderObject
 {
 public:
-    Earth(Shader *shader, Image *image, Camera *camera)
-        : RenderObject(new OpenGlBackend(), shader, image, camera)
+    Earth(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
+        : RenderObject(shader, slimShady, image, camera)
     {
         scale *= Bigint("12756000");
     }
@@ -66,9 +65,12 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+
     // this makes the window
-    const glm::vec2 RES{800, 600};
-    SDL_Window *window = SDL_CreateWindow("Game", 100, 100, RES.x, RES.y, SDL_WINDOW_OPENGL);
+    const glm::vec2 RES{900, 500};
+    SDL_Window *window = SDL_CreateWindow("Game", 100, 100, RES.x, RES.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!window)
     {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
@@ -78,6 +80,8 @@ int main(int argc, char *argv[])
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(window);
 
     SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
+    // SDL_MaximizeWindow(window);
+    glEnable(GL_MULTISAMPLE);
 
     // this is the constants
     const float MOUSE_SENSITIVITY = 2;
@@ -94,26 +98,27 @@ int main(int argc, char *argv[])
 
     // this sets up the shader and texture
     Shader *shader = new ShaderOpenGl("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
+    Shader *pointShader = new ShaderOpenGl("assets/shaders/pointVert.glsl", "assets/shaders/pointFrag.glsl");
     Image *image = new ImageOpenGl("assets/textures/FISH.png");
 
     // makes the cubes
-    RenderObject cube(new OpenGlBackend(), shader, image, camera);
+    RenderObject cube(shader, pointShader, image, camera);
     cube.position.x += *pos;
     // cube.velocity.z = 5;
 
-    RenderObject cube2(new OpenGlBackend(), shader, image, camera);
+    RenderObject cube2(shader, pointShader, image, camera);
     cube2.position.x -= Bigint(10);
     cube2.position.x += *pos;
 
-    RenderObject cube3(new OpenGlBackend(), shader, image, camera, glm::vec3(1.0f), 10.0f);
+    RenderObject cube3(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f);
     cube3.position.x += Bigint("10");
     cube3.position.x += *pos;
 
-    Sun sun(shader, image, camera);
+    Sun sun(shader, pointShader, image, camera);
     sun.position.x -= Bigint("150000000000");
     sun.position.x += *pos;
 
-    Earth earth(shader, image, camera);
+    Earth earth(shader, pointShader, image, camera);
     earth.position.x += *pos;
 
     delete pos;

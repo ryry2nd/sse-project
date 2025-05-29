@@ -49,6 +49,7 @@ public:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_STENCIL_TEST);
+        glEnable(GL_PROGRAM_POINT_SIZE);
     }
 
     void clearBackground()
