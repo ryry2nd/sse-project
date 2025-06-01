@@ -19,6 +19,14 @@ struct Light
     Bigint intensity;
 };
 
+enum class CullPriority
+{
+    Max,
+    High,
+    Medium,
+    Low
+};
+
 class RenderObject
 {
 public:
@@ -47,12 +55,15 @@ public:
 
     const int NUM_VECTOR_NUMBERS = 8; // the number of stupid numbers in the vector per vert, it is x, y, z, tex1, tex2, normx, normy, normz
     const Bigint bigObjectThresholdSize = Bigint(10000);
-    const Bigint bigObjectThresholdDistanceSquared = Bigint("10000000000");
 
     static void UpdateAllObjects(const float &deltaTime);
     static void DrawAllObjects();
     static void addStaticLight(Light *light);
     static void removeStaticLight(Light *light);
+
+    Bigint maxDistanceMediumSquared = Bigint(100000l * 100000l);
+    Bigint maxDistanceLowSquared = Bigint(300l * 300l);
+    Bigint maxDistanceHighSquared = Bigint("1000000000000000000000000000000000000");
 
 protected:
     Mesh *mesh;
@@ -67,6 +78,8 @@ protected:
     std::vector<float> vertices;
     const std::vector<short> vertLogic = {3, 2, 3};
     const std::vector<float> pointVert = {0, 0, 0};
+    CullPriority cullPriority = CullPriority::Medium;
+    bool culled = false;
 
 private:
     Shader *shader;
@@ -76,6 +89,9 @@ private:
     void calculateSizes();
     Bigint calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const;
     Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
+    Bigint distanceSquared;
+    void renderAsPoint(const float &mappedDepth);
+    void renderAsMesh(const float &mappedDepth, const Bigint &realSize);
 
     void updateVerts();
     void setupObject();

@@ -66,9 +66,9 @@ public:
         }
     }
 
+    // updates the vertices (you dont need to run this unless you changed the vertices)
     void updateVerts(const std::vector<float> &vertices)
     {
-        // updates the vertices (you dont need to run this unless you changed the vertices)
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(float), vertices.data());
     }

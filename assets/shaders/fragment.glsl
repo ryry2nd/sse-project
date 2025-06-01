@@ -10,13 +10,11 @@ out vec4 FragColor;
 uniform float u_CullRadius;
 uniform sampler2D texture1;
 uniform vec3 emissionColor;
-uniform float emissionIntensity;
 
 const int MAX_LIGHTS = 127;
 uniform int numLights;
 uniform vec3 lightPositions[MAX_LIGHTS];
 uniform vec3 lightColors[MAX_LIGHTS];
-uniform float lightIntensities[MAX_LIGHTS];
 
 uniform float gamma;
 uniform bool u_fullBright;
@@ -30,7 +28,7 @@ void main()
     vec3 finalColor = vec3(0.0);
 
     if (u_fullBright) {
-        finalColor = texColor + emissionColor * emissionIntensity;
+        finalColor = texColor + emissionColor;
     }
     else if (doSimple == 1) {
         vec3 lighting = vec3(0.0);
@@ -41,14 +39,14 @@ void main()
             vec3 lightDir = -lightPositions[i];
 
             float ambientStrength = 0.1;
-            vec3 ambient = ambientStrength * lightColors[i] * lightIntensities[i];
+            vec3 ambient = ambientStrength * lightColors[i];
 
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColors[i] * lightIntensities[i];
+            vec3 diffuse = diff * lightColors[i];
 
             lighting += ambient + diffuse;
         }
-        finalColor = lighting * texColor + emissionColor * emissionIntensity;
+        finalColor = lighting * texColor + emissionColor;
     }
     else {
         vec3 norm = normalize(Normal);
@@ -60,19 +58,19 @@ void main()
             vec3 lightDir = normalize(-lightPositions[i]);
 
             float ambientStrength = 0.1;
-            vec3 ambient = ambientStrength * lightColors[i] * lightIntensities[i];
+            vec3 ambient = ambientStrength * lightColors[i];
 
             float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColors[i] * lightIntensities[i];
+            vec3 diffuse = diff * lightColors[i];
 
             float specularStrength = 0.5;
             vec3 reflectDir = reflect(-lightDir, norm);
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-            vec3 specular = specularStrength * spec * lightColors[i] * lightIntensities[i];
+            vec3 specular = specularStrength * spec * lightColors[i];
 
             lighting += ambient + diffuse + specular;
         }
-        finalColor = lighting * texColor + emissionColor * emissionIntensity;
+        finalColor = lighting * texColor + emissionColor;
     }
     FragColor = vec4(pow(finalColor, vec3(1.0 / gamma)), 1.0);
 

@@ -141,6 +141,10 @@ void RenderObject::appendUpdate(const float &deltaTime)
 // I just made the default update to rotate all around
 void RenderObject::Update(const float &deltaTime)
 {
+    if (culled)
+    {
+        return;
+    }
 
     if (!velocity.isZero())
     {
@@ -176,108 +180,145 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
 
 void RenderObject::appendCustomShaderValues() {}
 
-void RenderObject::Draw()
+void RenderObject::renderAsPoint(const float &mappedDepth)
 {
-    tempLocalPosition = camera->convertToLocal(position);
+    glm::vec3 newPos = tempLocalPosition.toFloatVec3() / sqrt((distanceSquared / Bigint(100)).toFloat());
 
-    Bigint realSize = (localSize * scale).getMaxAbs();
-    Bigint distanceSquared = calculateDistanceSquared(tempLocalPosition);
+    glm::mat4 matrix = glm::mat4(1.0f);
 
-    float mappedDepth = glm::clamp((glm::sqrt(distanceSquared.toFloat()) - near) / (far - near), 0.0f, 0.99999f);
+    matrix = glm::translate(matrix, newPos);
 
-    if (distanceSquared / (realSize * realSize) >= Bigint("10000"))
+    pointMesh->includeShader(pointShader);
+    pointMesh->includeFloat("depth", mappedDepth);
+    pointMesh->includeMat4("uModel", matrix);
+    pointMesh->includeMat4("uView", camera->getViewMatrix());
+    pointMesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
+    pointMesh->includeFloat("gamma", gamma);
+    pointMesh->includeTripleFloat("color", 1.0f, 1.0f, 1.0f);
+    pointMesh->finalizeShaders(pointVert);
+}
+
+void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize)
+{
+    glm::vec3 newPos;
+    glm::vec3 newSize;
+
+    if (realSize > bigObjectThresholdSize)
     {
-        // usePointMesh
-        glm::vec3 newPos = tempLocalPosition.toFloatVec3() / sqrt((distanceSquared / Bigint(100)).toFloat());
+        Bigint transform = realSize / Bigint(10);
 
-        glm::mat4 matrix = glm::mat4(1.0f);
-
-        matrix = glm::translate(matrix, newPos);
-
-        pointMesh->includeShader(pointShader);
-        pointMesh->includeFloat("depth", mappedDepth);
-        pointMesh->includeMat4("uModel", matrix);
-        pointMesh->includeMat4("uView", camera->getViewMatrix());
-        pointMesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
-        pointMesh->includeFloat("gamma", gamma);
-        pointMesh->includeTripleFloat("color", 1.0f, 1.0f, 1.0f);
-        pointMesh->finalizeShaders(pointVert);
+        newPos = (tempLocalPosition / transform).toFloatVec3();
+        newSize = (scale / transform).toFloatVec3();
     }
     else
     {
-        glm::vec3 newPos;
-        glm::vec3 newSize;
+        newPos = tempLocalPosition.toFloatVec3();
+        newSize = scale.toFloatVec3();
+    }
 
-        if (realSize > bigObjectThresholdSize) // || calculateDistanceSquared(tempLocalPosition) > bigObjectThresholdDistanceSquared)
+    glm::mat4 matrix = glm::mat4(1.0f);
+
+    // converts the position to be local to the camera
+    matrix = glm::translate(matrix, newPos);
+
+    // rotates the model
+    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
+    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
+    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
+
+    // scales the model
+    matrix = glm::scale(matrix, newSize);
+
+    mesh->includeShader(shader);
+    mesh->includeMat4("uModel", matrix);
+    mesh->includeFloat("depth", mappedDepth);
+    mesh->includeMat4("uView", camera->getViewMatrix());
+    mesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
+    mesh->includeFloat("u_CullRadius", nearCullFunction());
+    mesh->includeFloat("gamma", gamma);
+    mesh->includeBool("u_fullBright", disableBrightness);
+
+    if (thisLight != nullptr)
+    {
+        float intensity = calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat();
+        mesh->includeTripleFloat("emissionColor", thisLight->color.x * intensity, thisLight->color.y * intensity, thisLight->color.z * intensity);
+    }
+    else
+    {
+        mesh->includeTripleFloat("emissionColor", 0.0f, 0.0f, 0.0f);
+    }
+
+    int i = 0;
+    glm::dvec3 temp;
+    BigVec3 bigTemp;
+    glm::dvec3 lightPos;
+    float intensity;
+    for (const Light *l : allLights)
+    {
+        if (l != thisLight)
         {
-            Bigint transform = realSize / Bigint(10);
-
-            newPos = (tempLocalPosition / transform).toFloatVec3();
-            newSize = (scale / transform).toFloatVec3();
-        }
-        else
-        {
-            newPos = tempLocalPosition.toFloatVec3();
-            newSize = scale.toFloatVec3();
-        }
-
-        glm::mat4 matrix = glm::mat4(1.0f);
-
-        // converts the position to be local to the camera
-        matrix = glm::translate(matrix, newPos);
-
-        // rotates the model
-        matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
-        matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
-        matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
-
-        // scales the model
-        matrix = glm::scale(matrix, newSize);
-
-        mesh->includeShader(shader);
-        mesh->includeMat4("uModel", matrix);
-        mesh->includeFloat("depth", mappedDepth);
-        mesh->includeMat4("uView", camera->getViewMatrix());
-        mesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
-        mesh->includeFloat("u_CullRadius", nearCullFunction());
-        mesh->includeFloat("gamma", gamma);
-        mesh->includeBool("u_fullBright", disableBrightness);
-
-        if (thisLight != nullptr)
-        {
-            mesh->includeTripleFloat("emissionColor", thisLight->color.x, thisLight->color.y, thisLight->color.z);
-            mesh->includeFloat("emissionIntensity", calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat());
-        }
-        else
-        {
-            mesh->includeTripleFloat("emissionColor", 0.0f, 0.0f, 0.0f);
-            mesh->includeFloat("emissionIntensity", 0.0f);
-        }
-
-        int i = 0;
-        glm::dvec3 temp;
-        BigVec3 bigTemp;
-        for (const Light *l : allLights)
-        {
-            if (l != thisLight)
+            bigTemp = l->position - position;
+            temp = bigTemp.toDoubleVec3();
+            if (!std::isinf(temp.x) && !std::isinf(temp.y) && !std::isinf(temp.z))
             {
-                bigTemp = l->position - position;
-                temp = bigTemp.toDoubleVec3();
-                if (!std::isinf(temp.x) && !std::isinf(temp.y) && !std::isinf(temp.z))
+                lightPos = glm::normalize(temp);
+                intensity = calculateInverseSquareLaw(bigTemp, l->intensity).toFloat();
+                if (intensity < 0.005)
                 {
-                    glm::dvec3 lightPos = glm::normalize(temp);
-                    mesh->includeTripleFloat("lightPositions[" + std::to_string(i) + "]", lightPos.x, lightPos.y, lightPos.z);
-                    mesh->includeTripleFloat("lightColors[" + std::to_string(i) + "]", l->color.x, l->color.y, l->color.z);
-                    mesh->includeFloat("lightIntensities[" + std::to_string(i) + "]", calculateInverseSquareLaw(bigTemp, l->intensity).toFloat());
-                    i++;
+                    continue;
                 }
+                mesh->includeTripleFloat("lightPositions[" + std::to_string(i) + "]", lightPos.x, lightPos.y, lightPos.z);
+                mesh->includeTripleFloat("lightColors[" + std::to_string(i) + "]", l->color.x * intensity, l->color.y * intensity, l->color.z * intensity);
+                i++;
             }
         }
+    }
 
-        mesh->includeInt("numLights", i);
-        appendCustomShaderValues();
-        mesh->includeTexture(image);
-        mesh->finalizeShaders(vertices);
+    mesh->includeInt("numLights", i);
+    appendCustomShaderValues();
+    mesh->includeTexture(image);
+    mesh->finalizeShaders(vertices);
+}
+
+void RenderObject::Draw()
+{
+    tempLocalPosition = camera->convertToLocal(position);
+    distanceSquared = calculateDistanceSquared(tempLocalPosition);
+
+    if (cullPriority == CullPriority::High && distanceSquared > maxDistanceHighSquared)
+    {
+        std::cout << distanceSquared.toString() << "\n";
+        culled = true;
+        return;
+    }
+
+    if (cullPriority == CullPriority::Medium && distanceSquared > maxDistanceMediumSquared)
+    {
+        culled = true;
+        return;
+    }
+    if (cullPriority == CullPriority::Low && distanceSquared > maxDistanceLowSquared)
+    {
+        culled = true;
+        return;
+    }
+
+    Bigint realSize = (localSize * scale).getMaxAbs();
+    float mappedDepth = glm::clamp((glm::sqrt(distanceSquared.toFloat()) - near) / (far - near), 0.0f, 0.99999f);
+
+    if (distanceSquared / (realSize * realSize) < Bigint("30000"))
+    {
+        culled = false;
+        renderAsMesh(mappedDepth, realSize);
+    }
+    else if (cullPriority == CullPriority::High)
+    {
+        culled = false;
+        renderAsPoint(mappedDepth);
+    }
+    else
+    {
+        culled = true;
     }
 }
 
