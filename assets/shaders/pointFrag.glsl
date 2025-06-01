@@ -5,8 +5,7 @@ uniform float gamma;
 uniform float depth;
 
 void main() {
-    vec2 coord = gl_PointCoord - vec2(0.5);
-    float dist = length(coord * 2.0);
+    float dist = length((gl_PointCoord - vec2(0.5)) * 2.0);
 
     if (dist > 1.0)
         discard;

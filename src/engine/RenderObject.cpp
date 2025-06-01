@@ -158,12 +158,6 @@ void RenderObject::Update(const float &deltaTime)
     appendUpdate(deltaTime);
 }
 
-// it culls everything close and its different depending on the near value
-float RenderObject::nearCullFunction() const
-{
-    return near <= 0.1f ? 0.0f : 100.0f;
-}
-
 Bigint RenderObject::calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const
 {
     if (subtractedPos.x == 0 && subtractedPos.y == 0 && subtractedPos.z == 0)
@@ -182,7 +176,7 @@ void RenderObject::appendCustomShaderValues() {}
 
 void RenderObject::renderAsPoint(const float &mappedDepth)
 {
-    glm::vec3 newPos = tempLocalPosition.toFloatVec3() / sqrt((distanceSquared / Bigint(100)).toFloat());
+    glm::vec3 newPos = (tempLocalPosition / (distanceSquared.sqrt() / Bigint(10))).toFloatVec3();
 
     glm::mat4 matrix = glm::mat4(1.0f);
 
@@ -192,9 +186,10 @@ void RenderObject::renderAsPoint(const float &mappedDepth)
     pointMesh->includeFloat("depth", mappedDepth);
     pointMesh->includeMat4("uModel", matrix);
     pointMesh->includeMat4("uView", camera->getViewMatrix());
-    pointMesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
+    pointMesh->includeMat4("uProjection", camera->getProjectionMatrix());
     pointMesh->includeFloat("gamma", gamma);
     pointMesh->includeTripleFloat("color", 1.0f, 1.0f, 1.0f);
+    pointMesh->includeFloat("pointSize", 10.0f);
     pointMesh->finalizeShaders(pointVert);
 }
 
@@ -233,8 +228,8 @@ void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize
     mesh->includeMat4("uModel", matrix);
     mesh->includeFloat("depth", mappedDepth);
     mesh->includeMat4("uView", camera->getViewMatrix());
-    mesh->includeMat4("uProjection", camera->getProjectionMatrix(near, far));
-    mesh->includeFloat("u_CullRadius", nearCullFunction());
+    mesh->includeMat4("uProjection", camera->getProjectionMatrix());
+    // mesh->includeFloat("u_CullRadius", nearCullFunction());
     mesh->includeFloat("gamma", gamma);
     mesh->includeBool("u_fullBright", disableBrightness);
 
@@ -287,7 +282,6 @@ void RenderObject::Draw()
 
     if (cullPriority == CullPriority::High && distanceSquared > maxDistanceHighSquared)
     {
-        std::cout << distanceSquared.toString() << "\n";
         culled = true;
         return;
     }
@@ -303,8 +297,12 @@ void RenderObject::Draw()
         return;
     }
 
-    Bigint realSize = (localSize * scale).getMaxAbs();
-    float mappedDepth = glm::clamp((glm::sqrt(distanceSquared.toFloat()) - near) / (far - near), 0.0f, 0.99999f);
+    BigVec3 lockedSize = localSize * scale;
+
+    Bigint realSize = lockedSize.getMaxAbs();
+    Bigint small = lockedSize.getMinAbs() / 10;
+
+    float mappedDepth = glm::clamp(((distanceSquared.sqrt() - small) / ((realSize * Bigint(100)) - small)).toFloat(), 0.0f, 0.999999f);
 
     if (distanceSquared / (realSize * realSize) < Bigint("30000"))
     {

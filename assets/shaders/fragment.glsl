@@ -26,6 +26,8 @@ void main()
 
     vec3 texColor = texture(texture1, TexCoord).rgb;
     vec3 finalColor = vec3(0.0);
+    float ambientStrength = 0.1;
+    float specularStrength = 0.5;
 
     if (u_fullBright) {
         finalColor = texColor + emissionColor;
@@ -33,16 +35,19 @@ void main()
     else if (doSimple == 1) {
         vec3 lighting = vec3(0.0);
         vec3 norm = Normal;
+        vec3 lightDir;
+        vec3 ambient;
+        float diff;
+        vec3 diffuse;
         // Directional Light
         for (int i = 0; i < numLights; i++)
         {
-            vec3 lightDir = -lightPositions[i];
+            lightDir = -lightPositions[i];
 
-            float ambientStrength = 0.1;
-            vec3 ambient = ambientStrength * lightColors[i];
+            ambient = ambientStrength * lightColors[i];
 
-            float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColors[i];
+            diff = max(dot(norm, lightDir), 0.0);
+            diffuse = diff * lightColors[i];
 
             lighting += ambient + diffuse;
         }
@@ -52,21 +57,26 @@ void main()
         vec3 norm = normalize(Normal);
         vec3 lighting = vec3(0.0);
         vec3 viewDir = normalize(-FragPos);
+        vec3 lightDir;
+        vec3 ambient;
+        float diff;
+        vec3 diffuse;
+        vec3 reflectDir;
+        float spec;
+        vec3 specular;
         // Directional Light
         for (int i = 0; i < numLights; i++)
         {
-            vec3 lightDir = normalize(-lightPositions[i]);
+            lightDir = normalize(-lightPositions[i]);
 
-            float ambientStrength = 0.1;
-            vec3 ambient = ambientStrength * lightColors[i];
+            ambient = ambientStrength * lightColors[i];
 
-            float diff = max(dot(norm, lightDir), 0.0);
-            vec3 diffuse = diff * lightColors[i];
+            diff = max(dot(norm, lightDir), 0.0);
+            diffuse = diff * lightColors[i];
 
-            float specularStrength = 0.5;
-            vec3 reflectDir = reflect(-lightDir, norm);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-            vec3 specular = specularStrength * spec * lightColors[i];
+            reflectDir = reflect(-lightDir, norm);
+            spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+            specular = specularStrength * spec * lightColors[i];
 
             lighting += ambient + diffuse + specular;
         }

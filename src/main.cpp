@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
     const Bigint WALK_SPEED = Bigint(10);
-    const Bigint RUN_SPEED = Bigint("10000000000");
+    const Bigint RUN_SPEED = Bigint("1000000000");
 
     // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
 

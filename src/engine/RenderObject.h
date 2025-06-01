@@ -43,10 +43,6 @@ public:
     BigVec3 velocity;
     BigVec3 acceleration;
 
-    // change near and far values if you want to have big objects, if you change them to the right value it could be as big as the floating points will allow
-    float near = 0.01f;
-    float far = 10000.0f;
-
     static std::vector<RenderObject *> renderObjects;
 
     static float gamma;
@@ -63,7 +59,7 @@ public:
 
     Bigint maxDistanceMediumSquared = Bigint(100000l * 100000l);
     Bigint maxDistanceLowSquared = Bigint(300l * 300l);
-    Bigint maxDistanceHighSquared = Bigint("1000000000000000000000000000000000000");
+    Bigint maxDistanceHighSquared = Bigint("10000000000000000000000000");
 
 protected:
     Mesh *mesh;
@@ -72,7 +68,6 @@ protected:
     virtual void appendUpdate(const float &deltaTime);
     virtual void appendCustomShaderValues();
     RenderObject *parent = nullptr;
-    virtual float nearCullFunction() const;
     BigVec3 tempLocalPosition;
     static std::vector<Light *> allLights;
     std::vector<float> vertices;

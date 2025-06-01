@@ -102,10 +102,18 @@ struct BigVec3
 
     Bigint getMaxAbs() const
     {
-        Bigint a = x.getAbs();
-        Bigint b = y.getAbs();
-        Bigint c = z.getAbs();
+        const Bigint &a = x.getAbs();
+        const Bigint &b = y.getAbs();
+        const Bigint &c = z.getAbs();
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
+    }
+
+    Bigint getMinAbs() const
+    {
+        const Bigint &a = x.getAbs();
+        const Bigint &b = y.getAbs();
+        const Bigint &c = z.getAbs();
+        return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
     }
 
     glm::vec3 toFloatVec3() const

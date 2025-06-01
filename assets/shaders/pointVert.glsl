@@ -5,9 +5,10 @@ layout (location = 0) in vec3 aPos;
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
+uniform float pointSize;
 
 void main()
 {
     gl_Position = uProjection * uView * uModel * vec4(aPos, 1.0);
-    gl_PointSize = 10.0; // Size of the point in pixels
+    gl_PointSize = pointSize;
 }

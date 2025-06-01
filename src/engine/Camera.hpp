@@ -14,6 +14,10 @@ public:
     float pitch = 0.0f; // up and down
     float roll = 0.0f;  // all sideways and stuff
 
+    // the two clip distances
+    float near = 0.01f;
+    float far = 10000.0f;
+
     float fov = 90.0f; // if this number isn't 90 then your not a man (or your zooming in which is chill but only if your zooming in)
 
     Camera(const glm::vec2 &RES, Bigint x = Bigint(0), Bigint y = Bigint(0), Bigint z = Bigint(0)) : position(BigVec3(x, y, z)), RES(RES) {}
@@ -25,7 +29,7 @@ public:
     }
 
     // do the thing with the projection, but like pass in near and far
-    glm::mat4 getProjectionMatrix(float near, float far) const
+    glm::mat4 getProjectionMatrix() const
     {
         return glm::perspective(glm::radians(fov), RES.x / RES.y, near, far);
     }
