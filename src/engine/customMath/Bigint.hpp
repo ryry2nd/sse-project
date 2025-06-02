@@ -20,7 +20,7 @@ public:
     boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
 
     static constexpr unsigned long long DIGITS = 5;
-    static constexpr unsigned long long SCALE = 100000; // fixed scale = 5 digits
+    static constexpr unsigned long long SCALE = 100000;
     boost::multiprecision::cpp_int value;
 
     Bigint()
@@ -188,10 +188,8 @@ public:
         if (value == 0)
             return Bigint(0);
 
-        // Initial guess (scaled)
         boost::multiprecision::cpp_int x = value;
-        boost::multiprecision::cpp_int guess = value;
-        guess = (guess + SCALE) / 2;
+        boost::multiprecision::cpp_int guess = x / SCALE;
 
         // Newton-Raphson iterations
         for (int i = 0; i < 100; ++i)

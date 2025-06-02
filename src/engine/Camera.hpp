@@ -63,9 +63,9 @@ public:
         return glm::normalize(glm::cross(right, forward));
     }
 
-    glm::vec3 convertToLocal(const BigVec3 &otherPosition) const
+    BigVec3 convertToLocal(const BigVec3 &otherPosition) const
     {
-        return (position - otherPosition).toFloatVec3();
+        return position - otherPosition;
     }
 
 private:

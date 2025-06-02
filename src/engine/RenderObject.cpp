@@ -176,7 +176,7 @@ void RenderObject::appendCustomShaderValues() {}
 
 void RenderObject::renderAsPoint(const float &mappedDepth)
 {
-    glm::vec3 newPos = (tempLocalPosition / (distanceSquared.sqrt() / Bigint(10))).toFloatVec3();
+    glm::vec3 newPos = (tempLocalPosition / distanceSquared.sqrt()).toFloatVec3() * 10.0f;
 
     glm::mat4 matrix = glm::mat4(1.0f);
 
