@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
-project(A-compleatly-normal-fishing-game VERSION 0.0.1 LANGUAGES CXX)
+project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(OpenGL_GL_PREFERENCE "GLVND")
 
 # Packages
 find_package(SDL2 REQUIRED)
@@ -27,9 +26,9 @@ link_directories(
     ${GLEW_LIBRARY_DIRS}
 )
 
-# subdirectories
-add_subdirectory( src/engine )
-add_subdirectory( src/game )
+# Add subdirectories for your engine and game logic
+add_subdirectory(src/engine)
+add_subdirectory(src/game)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
@@ -45,11 +44,11 @@ target_link_libraries(${PROJECT_NAME}
     game
 )
 
-# Copy assets (e.g. shaders)
+# Post-build asset copy
 add_custom_command(
     TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/assets
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+            ${CMAKE_CURRENT_SOURCE_DIR}/assets
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
     COMMENT "---- Copying assets to output directory ----"
 )

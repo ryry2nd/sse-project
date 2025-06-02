@@ -62,6 +62,7 @@ float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
 Mesh *RenderObject::defaultMeshAPI = new OpenGlMesh();
+Uint64 RenderObject::now = SDL_GetTicks();
 
 void RenderObject::addStaticLight(Light *light)
 {
@@ -174,6 +175,11 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
 
 void RenderObject::appendCustomShaderValues() {}
 
+void RenderObject::updateTime()
+{
+    now = SDL_GetTicks64();
+}
+
 void RenderObject::renderAsPoint(const float &mappedDepth)
 {
     glm::vec3 newPos = (tempLocalPosition / distanceSquared.sqrt()).toFloatVec3() * 10.0f;
@@ -277,23 +283,36 @@ void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize
 
 void RenderObject::Draw()
 {
-    tempLocalPosition = camera->convertToLocal(position);
-    distanceSquared = calculateDistanceSquared(tempLocalPosition);
-
-    if (cullPriority == CullPriority::High && distanceSquared > maxDistanceHighSquared)
+    if (culled && (now - lastCullCheck) > 1)
     {
-        culled = true;
+        lastCullCheck = now;
         return;
     }
+
+    tempLocalPosition = camera->convertToLocal(position);
+    distanceSquared = calculateDistanceSquared(tempLocalPosition);
 
     if (cullPriority == CullPriority::Medium && distanceSquared > maxDistanceMediumSquared)
     {
         culled = true;
+        startTimeCulled = now;
+        lastCullCheck = now;
         return;
     }
+
     if (cullPriority == CullPriority::Low && distanceSquared > maxDistanceLowSquared)
     {
         culled = true;
+        startTimeCulled = now;
+        lastCullCheck = now;
+        return;
+    }
+
+    if (cullPriority == CullPriority::High && distanceSquared > maxDistanceHighSquared)
+    {
+        culled = true;
+        startTimeCulled = now;
+        lastCullCheck = now;
         return;
     }
 
@@ -317,6 +336,8 @@ void RenderObject::Draw()
     else
     {
         culled = true;
+        startTimeCulled = now;
+        lastCullCheck = now;
     }
 }
 

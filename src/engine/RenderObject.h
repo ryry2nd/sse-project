@@ -54,12 +54,15 @@ public:
 
     static void UpdateAllObjects(const float &deltaTime);
     static void DrawAllObjects();
+    static void updateTime();
     static void addStaticLight(Light *light);
     static void removeStaticLight(Light *light);
 
     Bigint maxDistanceMediumSquared = Bigint(100000l * 100000l);
     Bigint maxDistanceLowSquared = Bigint(300l * 300l);
     Bigint maxDistanceHighSquared = Bigint("10000000000000000000000000");
+    bool culled = false;
+    RenderObject *parent = nullptr;
 
 protected:
     Mesh *mesh;
@@ -67,14 +70,12 @@ protected:
     Light *thisLight = nullptr;
     virtual void appendUpdate(const float &deltaTime);
     virtual void appendCustomShaderValues();
-    RenderObject *parent = nullptr;
     BigVec3 tempLocalPosition;
     static std::vector<Light *> allLights;
     std::vector<float> vertices;
     const std::vector<short> vertLogic = {3, 2, 3};
     const std::vector<float> pointVert = {0, 0, 0};
     CullPriority cullPriority = CullPriority::Medium;
-    bool culled = false;
 
 private:
     Shader *shader;
@@ -92,4 +93,9 @@ private:
     void setupObject();
 
     BigVec3 localSize;
+
+    Uint64 startTimeCulled = -1;
+    Uint64 lastCullCheck = -1;
+
+    static Uint64 now;
 };

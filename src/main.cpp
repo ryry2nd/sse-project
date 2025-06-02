@@ -109,6 +109,13 @@ int main(int argc, char *argv[])
     sun.position.x -= Bigint("150000000000");
     sun.position.x += *pos;
 
+    Earth earth(shader, pointShader, image, camera);
+    earth.position.x += *pos;
+
+    RenderObject cube(shader, pointShader, image, camera);
+    cube.position.x += *pos;
+    // cube.velocity.z = 5;
+
     RenderObject cube2(shader, pointShader, image, camera);
     cube2.position.x -= Bigint(10);
     cube2.position.x += *pos;
@@ -117,20 +124,23 @@ int main(int argc, char *argv[])
     cube3.position.x += Bigint(10);
     cube3.position.x += *pos;
 
-    Earth earth(shader, pointShader, image, camera);
-    earth.position.x += *pos;
+    const int NUM_TEMPS = 11;
+    std::vector<RenderObject *> temp;
 
-    RenderObject cube(shader, pointShader, image, camera);
-    cube.position.x += *pos;
-    // cube.velocity.z = 5;
+    for (int i = 0; i < NUM_TEMPS; i++)
+    {
+        temp.push_back(new RenderObject(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f));
+        temp[i]->position.z += Bigint(10 * i);
+        temp[i]->position.x += *pos;
+    }
 
     delete pos;
     pos = nullptr;
 
     // starts running the game loop
     bool running = true;
-    Uint32 lastTicks = SDL_GetTicks();
-    Uint32 currentTicks;
+    Uint64 lastTicks = SDL_GetTicks64();
+    Uint64 currentTicks;
     SDL_Event event;
     float deltaTime;
     const Bigint *speed;
@@ -142,11 +152,11 @@ int main(int argc, char *argv[])
     int accumulatedMouseX = 0;
     int accumulatedMouseY = 0;
     int frames;
-    Uint32 start = SDL_GetTicks();
+    Uint64 start = SDL_GetTicks64();
 
     while (running)
     {
-        currentTicks = SDL_GetTicks();
+        currentTicks = SDL_GetTicks64();
         deltaTime = (currentTicks - lastTicks) / 1000.0f;
         lastTicks = currentTicks;
 
@@ -217,6 +227,8 @@ int main(int argc, char *argv[])
             accumulatedMouseY = 0;
         }
 
+        RenderObject::updateTime();
+
         RenderObject::UpdateAllObjects(deltaTime);
 
         renderingEngine->clearBackground();
@@ -225,11 +237,11 @@ int main(int argc, char *argv[])
 
         frames++;
 
-        if (SDL_GetTicks() - start >= 1000)
+        if (SDL_GetTicks64() - start >= 1000)
         {
             std::cout << frames << "\n";
             frames = 0;
-            start = SDL_GetTicks();
+            start = SDL_GetTicks64();
         }
 
         renderingEngine->swapBuffer();
