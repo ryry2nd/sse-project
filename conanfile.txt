@@ -1,7 +1,6 @@
 [requires]
 sdl/2.28.3
 glm/1.0.1
-bullet3/3.25
 glew/2.2.0
 opengl/system
 boost/1.88.0

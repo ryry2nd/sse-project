@@ -2,13 +2,16 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "engine/RenderObject.h"
+#include "engine/PhysicsObject.h"
 #include "engine/HelperFunctions.hpp"
 #include "engine/Camera.hpp"
 #include "engine/opengl/HelperFunctionsOpengl.hpp"
 #include <string>
 #include <memory>
+#include <iostream>
+// #include <Jolt/Jolt.h>
 
-Bigint *getHoweverManyDigits(unsigned long long numZeros)
+Bigint *getHoweverManyDigits(size_t numZeros)
 {
     if (numZeros == 0)
     {
@@ -18,7 +21,7 @@ Bigint *getHoweverManyDigits(unsigned long long numZeros)
     pos.reserve(numZeros + 1);
     pos.append("1");
 
-    for (unsigned long long i = 0; i < numZeros; i++)
+    for (size_t i = 0; i < numZeros; i++)
     {
         pos.append("0");
     }
@@ -112,15 +115,15 @@ int main(int argc, char *argv[])
     Earth earth(shader, pointShader, image, camera);
     earth.position.x += *pos;
 
-    RenderObject cube(shader, pointShader, image, camera);
+    PhysicsObject cube(shader, pointShader, image, camera);
     cube.position.x += *pos;
     // cube.velocity.z = 5;
 
-    RenderObject cube2(shader, pointShader, image, camera);
+    PhysicsObject cube2(shader, pointShader, image, camera);
     cube2.position.x -= Bigint(10);
     cube2.position.x += *pos;
 
-    RenderObject cube3(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f);
+    PhysicsObject cube3(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f);
     cube3.position.x += Bigint(10);
     cube3.position.x += *pos;
 
@@ -129,7 +132,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < NUM_TEMPS; i++)
     {
-        temp.push_back(new RenderObject(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f));
+        temp.push_back(new PhysicsObject(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f));
         temp[i]->position.z += Bigint(10 * i);
         temp[i]->position.x += *pos;
     }
