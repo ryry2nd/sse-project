@@ -13,6 +13,7 @@ find_package(Jolt REQUIRED)
 find_package(glm REQUIRED)
 find_package(glew REQUIRED)
 find_package(SQLite3 REQUIRED)
+find_package(sol2 REQUIRED)
 find_package(PkgConfig REQUIRED)
 
 #Add subdirectories for your engine and game logic
@@ -28,6 +29,7 @@ target_link_libraries(${PROJECT_NAME}
     boost::boost            # Boost linking
     Jolt::Jolt              # Jolt linking
     SQLite::SQLite3         # Sqlite linking
+    sol2::sol2              # sol2 linking
     engine
     game
 )
