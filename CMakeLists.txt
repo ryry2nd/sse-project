@@ -14,24 +14,42 @@ find_package(glm REQUIRED)
 find_package(glew REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(sol2 REQUIRED)
-find_package(PkgConfig REQUIRED)
+
+if (NOT WIN32)
+    find_package(PkgConfig REQUIRED)
+endif()
+
 
 add_library(common_libs INTERFACE)
 target_link_libraries(common_libs INTERFACE
     SDL2::SDL2              # SDL2 linking
     SDL2_image::SDL2_image  # SDL images
-    OpenGL::GL              # Linking OpenGL
     GLEW::GLEW              # GLEW linking
     boost::boost            # Boost linking
     Jolt::Jolt              # Jolt linking
     SQLite::SQLite3         # Sqlite linking
     sol2::sol2              # sol2 linking
+    glm::glm                # glm linking
 )
+
+
+if (WIN32)
+    target_link_libraries(common_libs INTERFACE
+        SDL2::SDL2main        # SDL2 main on Windows
+        opengl32              # Windows OpenGL lib
+    )
+else()
+    target_link_libraries(common_libs INTERFACE
+        OpenGL::GL            # Unix-like OpenGL
+    )
+endif()
 
 #Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
 add_subdirectory(src/game)
 add_executable(${PROJECT_NAME} src/main.cpp)
+
+target_compile_definitions(common_libs INTERFACE GLM_ENABLE_EXPERIMENTAL)
 
 target_link_libraries(${PROJECT_NAME}
     common_libs
