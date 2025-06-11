@@ -10,8 +10,8 @@
 #include "opengl/OpenGlMesh.hpp"
 #include "Camera.hpp"
 #include "customMath/BigVec.hpp"
-// #include <Jolt/Jolt.h>
-// #include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Jolt.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
 class PhysicsObject : public RenderObject
 {
