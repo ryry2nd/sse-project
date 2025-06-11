@@ -150,11 +150,11 @@ int main(int argc, char *argv[])
 
     glm::mat4 cameraMatrixTmp;
 
-    int i;
+    int i = 0;
 
     int accumulatedMouseX = 0;
     int accumulatedMouseY = 0;
-    int frames;
+    int frames = 0.0f;
     Uint64 start = SDL_GetTicks64();
 
     while (running)
