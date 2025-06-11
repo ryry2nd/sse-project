@@ -16,8 +16,8 @@
 class Bigint
 {
 public:
-    boost::multiprecision::cpp_int MAX_DOUBLE = boost::multiprecision::cpp_int(std::numeric_limits<double>::max());
-    boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
+    static inline const boost::multiprecision::cpp_int MAX_DOUBLE = boost::multiprecision::cpp_int(std::numeric_limits<double>::max());
+    static inline const boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
 
     static constexpr unsigned long long DIGITS = 5;
     static constexpr unsigned long long SCALE = 100000;
@@ -190,6 +190,8 @@ public:
 
         boost::multiprecision::cpp_int x = value;
         boost::multiprecision::cpp_int guess = x / SCALE;
+        if (guess == 0)
+            guess = 1;
 
         // Newton-Raphson iterations
         for (int i = 0; i < 100; ++i)

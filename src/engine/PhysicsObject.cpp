@@ -7,5 +7,4 @@ PhysicsObject::PhysicsObject(Shader *shady, Shader *slimShady, Image *im, Camera
 
 PhysicsObject::~PhysicsObject()
 {
-    RenderObject::~RenderObject();
 }

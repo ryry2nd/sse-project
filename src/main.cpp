@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
     }
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(window);
 
-    SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
-    // SDL_MaximizeWindow(window);
+    // SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
+    //  SDL_MaximizeWindow(window);
     glEnable(GL_MULTISAMPLE);
     SDL_GL_SetSwapInterval(0);
 
@@ -249,9 +249,9 @@ int main(int argc, char *argv[])
 
         renderingEngine->swapBuffer();
     }
-
     // delete everything
     delete shader;
+    delete pointShader;
     delete image;
     delete renderingEngine;
     delete camera;

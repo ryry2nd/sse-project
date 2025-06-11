@@ -6,6 +6,7 @@ opengl/system
 boost/1.88.0
 joltphysics/5.2.0
 sdl_image/2.8.2
+sqlite3/3.49.1
 
 [generators]
 CMakeDeps

@@ -77,7 +77,7 @@ void RenderObject::removeStaticLight(Light *light)
 RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, glm::vec3 emissionColor, Bigint emissionIntensity, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
     : position(pos), rotation(rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam), velocity(BigVec3(Bigint(), Bigint(), Bigint())), acceleration(BigVec3(Bigint(), Bigint(), Bigint()))
 {
-    this->mesh = defaultMeshAPI->makeNewMesh();
+    mesh = defaultMeshAPI->makeNewMesh();
     pointMesh = defaultMeshAPI->makeNewMesh();
 
     renderObjects.push_back(this);
@@ -93,14 +93,15 @@ RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *
 
 RenderObject::~RenderObject()
 {
-    delete mesh;
-    delete pointMesh;
     if (thisLight != nullptr)
     {
         allLights.erase(std::find(allLights.begin(), allLights.end(), thisLight));
-        renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
         delete thisLight;
     }
+
+    renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
+    delete mesh;
+    delete pointMesh;
 }
 
 void RenderObject::setupObject()
