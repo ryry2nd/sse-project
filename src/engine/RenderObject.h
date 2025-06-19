@@ -6,9 +6,8 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "Mesh.hpp"
 #include "HelperFunctions.hpp"
-#include "opengl/OpenGlMesh.hpp"
+#include "opengl/HelperFunctionsOpengl.hpp"
 #include "Camera.hpp"
 #include "customMath/BigVec.hpp"
 
@@ -96,6 +95,9 @@ private:
 
     Uint64 startTimeCulled = -1;
     Uint64 lastCullCheck = -1;
+
+    const static Bigint near;
+    const static Bigint far;
 
     static Uint64 now;
 };

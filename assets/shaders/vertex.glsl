@@ -6,25 +6,15 @@ layout(location = 2) in vec3 aNormal;
 out vec2 TexCoord;
 out vec3 FragPos;
 out vec3 Normal;
-flat out int doSimple;
 
 uniform mat4 uModel;
 uniform mat4 uView;
 uniform mat4 uProjection;
 
-uniform float uScaleFactor;
-
 void main()
 {
     vec4 worldPos = uModel * vec4(aPos, 1.0);
     vec4 viewPos = uView * worldPos;
-
-    if (uScaleFactor != 1 && uScaleFactor != 0) {
-        doSimple = 1;
-    }
-    else {
-        doSimple = 0;
-    }
 
     gl_Position = uProjection *  viewPos;
 

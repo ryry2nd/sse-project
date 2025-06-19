@@ -15,8 +15,8 @@ public:
     float roll = 0.0f;  // all sideways and stuff
 
     // the two clip distances
-    float near = 0.01f;
-    float far = 10000.0f;
+    float near = 0.00001f;
+    float far = 100000.0f;
 
     float fov = 90.0f; // if this number isn't 90 then your not a man (or your zooming in which is chill but only if your zooming in)
 
@@ -65,7 +65,7 @@ public:
 
     BigVec3 convertToLocal(const BigVec3 &otherPosition) const
     {
-        return position - otherPosition;
+        return otherPosition - position;
     }
 
 private:

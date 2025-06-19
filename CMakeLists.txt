@@ -4,6 +4,8 @@ project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Packages
 find_package(SDL2 REQUIRED)
 find_package(SDL2_IMAGE REQUIRED)

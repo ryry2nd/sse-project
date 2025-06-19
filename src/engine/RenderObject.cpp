@@ -63,6 +63,8 @@ bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
 Mesh *RenderObject::defaultMeshAPI = new OpenGlMesh();
 Uint64 RenderObject::now = SDL_GetTicks();
+const Bigint RenderObject::near = Bigint(0.1);
+const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
 void RenderObject::addStaticLight(Light *light)
 {
@@ -129,8 +131,8 @@ void RenderObject::calculateSizes()
 
 void RenderObject::updateVerts()
 {
-    calculateSizes();
-    mesh->updateVerts(vertices);
+    // calculateSizes();
+    // mesh->updateVerts(vertices);
 }
 
 void RenderObject::appendUpdate(const float &deltaTime)
@@ -189,15 +191,15 @@ void RenderObject::renderAsPoint(const float &mappedDepth)
 
     matrix = glm::translate(matrix, newPos);
 
-    pointMesh->includeShader(pointShader);
-    pointMesh->includeFloat("depth", mappedDepth);
-    pointMesh->includeMat4("uModel", matrix);
-    pointMesh->includeMat4("uView", camera->getViewMatrix());
-    pointMesh->includeMat4("uProjection", camera->getProjectionMatrix());
-    pointMesh->includeFloat("gamma", gamma);
-    pointMesh->includeTripleFloat("color", 1.0f, 1.0f, 1.0f);
-    pointMesh->includeFloat("pointSize", 10.0f);
-    pointMesh->finalizeShaders(pointVert);
+    pointShader->includeShader();
+    pointShader->setUniform("depth", mappedDepth);
+    pointShader->setUniform("uModel", matrix);
+    pointShader->setUniform("uView", camera->getViewMatrix());
+    pointShader->setUniform("uProjection", camera->getProjectionMatrix());
+    pointShader->setUniform("gamma", gamma);
+    pointShader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
+    pointShader->setUniform("pointSize", 10.0f);
+    pointMesh->finalizeShaders();
 }
 
 void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize)
@@ -231,23 +233,22 @@ void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize
     // scales the model
     matrix = glm::scale(matrix, newSize);
 
-    mesh->includeShader(shader);
-    mesh->includeMat4("uModel", matrix);
-    mesh->includeFloat("depth", mappedDepth);
-    mesh->includeMat4("uView", camera->getViewMatrix());
-    mesh->includeMat4("uProjection", camera->getProjectionMatrix());
-    // mesh->includeFloat("u_CullRadius", nearCullFunction());
-    mesh->includeFloat("gamma", gamma);
-    mesh->includeBool("u_fullBright", disableBrightness);
+    shader->includeShader();
+    shader->setUniform("uModel", matrix);
+    shader->setUniform("depth", mappedDepth);
+    shader->setUniform("uView", camera->getViewMatrix());
+    shader->setUniform("uProjection", camera->getProjectionMatrix());
+    shader->setUniform("gamma", gamma);
+    shader->setUniform("u_fullBright", disableBrightness);
 
     if (thisLight != nullptr)
     {
         float intensity = calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat();
-        mesh->includeTripleFloat("emissionColor", thisLight->color.x * intensity, thisLight->color.y * intensity, thisLight->color.z * intensity);
+        shader->setUniform("emissionColor", thisLight->color * intensity);
     }
     else
     {
-        mesh->includeTripleFloat("emissionColor", 0.0f, 0.0f, 0.0f);
+        shader->setUniform("emissionColor", glm::vec3(0.0f, 0.0f, 0.0f));
     }
 
     int i = 0;
@@ -269,17 +270,17 @@ void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize
                 {
                     continue;
                 }
-                mesh->includeTripleFloat("lightPositions[" + std::to_string(i) + "]", lightPos.x, lightPos.y, lightPos.z);
-                mesh->includeTripleFloat("lightColors[" + std::to_string(i) + "]", l->color.x * intensity, l->color.y * intensity, l->color.z * intensity);
+                shader->setUniform("lightPositions[" + std::to_string(i) + "]", lightPos);
+                shader->setUniform("lightColors[" + std::to_string(i) + "]", l->color * intensity);
                 i++;
             }
         }
     }
 
-    mesh->includeInt("numLights", i);
+    shader->setUniform("numLights", i);
     appendCustomShaderValues();
-    mesh->includeTexture(image);
-    mesh->finalizeShaders(vertices);
+    shader->setUniform("texture1", image);
+    mesh->finalizeShaders();
 }
 
 void RenderObject::Draw()
@@ -317,12 +318,25 @@ void RenderObject::Draw()
         return;
     }
 
-    BigVec3 lockedSize = localSize * scale;
+    Bigint realSize = (localSize * scale).getMaxAbs();
 
-    Bigint realSize = lockedSize.getMaxAbs();
-    Bigint small = lockedSize.getMinAbs() / 10;
+    float mappedDepth;
 
-    float mappedDepth = glm::clamp(((distanceSquared.sqrt() - small) / ((realSize * Bigint(100)) - small)).toFloat(), 0.0f, 0.999999f);
+    if (realSize < Bigint(100000))
+    {
+        mappedDepth = glm::clamp(((distanceSquared.sqrt() - near) / (Bigint(100000) - near)).toFloat() * 0.5f, 0.0f, 0.5f);
+    }
+    else if (realSize < Bigint(10000000000))
+    {
+        mappedDepth = glm::clamp((((distanceSquared.sqrt() - Bigint(100000)) / (Bigint(10000000000) - Bigint(100000))).toFloat() * 0.2f) + 0.5f, 0.5f, 0.9f);
+    }
+    else
+    {
+        mappedDepth = glm::clamp((((distanceSquared.sqrt() - Bigint(10000000000)) / (far - Bigint(10000000000))).toFloat() * 0.3f) + 0.7f, 0.7f, 0.999999f);
+    }
+    // mappedDepth = glm::clamp(((far - near) / (distanceSquared.sqrt() - near)).toFloat(), 0.0f, 0.999999f);
+
+    // std::cout << mappedDepth << std::endl;
 
     if (distanceSquared / (realSize * realSize) < Bigint("30000"))
     {

@@ -5,9 +5,8 @@
 #include <vector>
 #include <cmath>
 #include <memory>
-#include "Mesh.hpp"
 #include "HelperFunctions.hpp"
-#include "opengl/OpenGlMesh.hpp"
+#include "opengl/HelperFunctionsOpengl.hpp"
 #include "Camera.hpp"
 #include "customMath/BigVec.hpp"
 #include <Jolt/Jolt.h>

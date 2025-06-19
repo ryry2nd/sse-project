@@ -52,12 +52,13 @@ public:
         : RenderObject(shader, slimShady, image, camera)
     {
         scale *= Bigint("12756000");
+        position.y -= (Bigint("12756000") / 2);
         cullPriority = CullPriority::High;
     }
 
     void appendUpdate(const float &deltaTime) override
     {
-        rotation.y += deltaTime / 10;
+        // rotation.y += deltaTime / 10;
     }
 };
 
@@ -84,15 +85,14 @@ int main(int argc, char *argv[])
     }
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(window);
 
-    // SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
-    //  SDL_MaximizeWindow(window);
-    glEnable(GL_MULTISAMPLE);
+    SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
+    // SDL_MaximizeWindow(window);
     SDL_GL_SetSwapInterval(0);
 
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
     const Bigint WALK_SPEED = Bigint(10);
-    const Bigint RUN_SPEED = Bigint("1000000000");
+    Bigint run_speed = Bigint("100");
 
     // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
 
@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
 
     // this is the camera, cameras are neat
     Camera *camera = new Camera(RES, *pos, 0.0f, -2.0f);
+    camera->yaw = 180.0f;
 
     // this sets up the shader and texture
     Shader *shader = new ShaderOpenGl("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < NUM_TEMPS; i++)
     {
-        temp.push_back(new PhysicsObject(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f));
+        temp.push_back(new PhysicsObject(shader, pointShader, image, camera));
         temp[i]->position.z += Bigint(10 * i);
         temp[i]->position.x += *pos;
     }
@@ -183,6 +184,14 @@ int main(int argc, char *argv[])
                 {
                     running = false;
                 }
+                if (event.key.keysym.sym == SDLK_z)
+                {
+                    run_speed *= Bigint(10);
+                }
+                if (event.key.keysym.sym == SDLK_x)
+                {
+                    run_speed /= Bigint(10);
+                }
             }
         }
 
@@ -190,34 +199,34 @@ int main(int argc, char *argv[])
         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
 
         // if your running, run, otherwise dont
-        speed = keystates[SDL_SCANCODE_LSHIFT] ? &RUN_SPEED : &WALK_SPEED;
+        speed = keystates[SDL_SCANCODE_LSHIFT] ? &run_speed : &WALK_SPEED;
 
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            camera->position += BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+            camera->position -= BigVec3(camera->getForwardVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            camera->position -= BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+            camera->position += BigVec3(camera->getForwardVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
-            camera->position += BigVec3(camera->getRightVector() * deltaTime) * *speed;
+            camera->position -= BigVec3(camera->getRightVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_A])
         {
-            camera->position -= BigVec3(camera->getRightVector() * deltaTime) * *speed;
+            camera->position += BigVec3(camera->getRightVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
-            camera->position -= BigVec3(camera->getDownVector() * deltaTime) * *speed;
+            camera->position += BigVec3(camera->getDownVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
-            camera->position += BigVec3(camera->getDownVector() * deltaTime) * *speed;
+            camera->position -= BigVec3(camera->getDownVector() * deltaTime) * *speed;
         }
 
         if (deltaTime > 0)
@@ -255,5 +264,7 @@ int main(int argc, char *argv[])
     delete image;
     delete renderingEngine;
     delete camera;
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
