@@ -1,15 +1,11 @@
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "engine/RenderObject.h"
-#include "engine/PhysicsObject.h"
+#include "engine/objects/Objects.hpp"
 #include "engine/HelperFunctions.hpp"
-#include "engine/Camera.hpp"
-#include "engine/opengl/HelperFunctionsOpengl.hpp"
 #include <string>
 #include <memory>
 #include <iostream>
-// #include <Jolt/Jolt.h>
 
 Bigint *getHoweverManyDigits(size_t numZeros)
 {
@@ -33,7 +29,7 @@ class Sun : public RenderObject
 {
 public:
     Sun(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
-        : RenderObject(shader, slimShady, image, camera, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
+        : RenderObject(shader, slimShady, image, camera) //, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
     {
         scale *= Bigint("1392000000");
         cullPriority = CullPriority::High;
@@ -99,8 +95,8 @@ int main(int argc, char *argv[])
     Bigint *pos = getHoweverManyDigits(0);
 
     // this is the camera, cameras are neat
-    Camera *camera = new Camera(RES, *pos, 0.0f, -2.0f);
-    camera->yaw = 180.0f;
+    Camera *camera = new Camera(RES, BigVec3(*pos, 0.0f, -2.0f));
+    camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
     Shader *shader = new ShaderOpenGl("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
@@ -124,7 +120,7 @@ int main(int argc, char *argv[])
     cube2.position.x -= Bigint(10);
     cube2.position.x += *pos;
 
-    PhysicsObject cube3(shader, pointShader, image, camera, glm::vec3(1.0f), 10.0f);
+    PhysicsObject cube3(shader, pointShader, image, camera);
     cube3.position.x += Bigint(10);
     cube3.position.x += *pos;
 
@@ -232,8 +228,8 @@ int main(int argc, char *argv[])
         if (deltaTime > 0)
         {
 
-            camera->yaw -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-            camera->pitch -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+            camera->rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+            camera->rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
 
             accumulatedMouseX = 0;
             accumulatedMouseY = 0;

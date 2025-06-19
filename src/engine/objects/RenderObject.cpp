@@ -1,4 +1,4 @@
-#include "RenderObject.h"
+#include "Objects.hpp"
 
 void addFace(std::vector<float> &verts,
              glm::vec3 vert0,
@@ -57,7 +57,6 @@ std::vector<float> makeTexturedCube(float size = 1.0f)
     return verts;
 }
 
-std::vector<Light *> RenderObject::allLights;
 float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
@@ -66,28 +65,13 @@ Uint64 RenderObject::now = SDL_GetTicks();
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
-void RenderObject::addStaticLight(Light *light)
-{
-    allLights.push_back(light);
-}
-
-void RenderObject::removeStaticLight(Light *light)
-{
-    allLights.erase(std::find(allLights.begin(), allLights.end(), light));
-}
-
-RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, glm::vec3 emissionColor, Bigint emissionIntensity, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
-    : position(pos), rotation(rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam), velocity(BigVec3(Bigint(), Bigint(), Bigint())), acceleration(BigVec3(Bigint(), Bigint(), Bigint()))
+RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
+    : position(pos), rotation(rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam), velocity(BigVec3()), acceleration(BigVec3())
 {
     mesh = defaultMeshAPI->makeNewMesh();
     pointMesh = defaultMeshAPI->makeNewMesh();
 
     renderObjects.push_back(this);
-    if (emissionIntensity != 0.0f)
-    {
-        thisLight = new Light{position, emissionColor, emissionIntensity};
-        allLights.push_back(thisLight);
-    }
 
     vertices = makeTexturedCube();
     setupObject();
@@ -95,12 +79,6 @@ RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *
 
 RenderObject::~RenderObject()
 {
-    if (thisLight != nullptr)
-    {
-        allLights.erase(std::find(allLights.begin(), allLights.end(), thisLight));
-        delete thisLight;
-    }
-
     renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
     delete mesh;
     delete pointMesh;
@@ -241,43 +219,6 @@ void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize
     shader->setUniform("gamma", gamma);
     shader->setUniform("u_fullBright", disableBrightness);
 
-    if (thisLight != nullptr)
-    {
-        float intensity = calculateInverseSquareLaw(tempLocalPosition, thisLight->intensity).toFloat();
-        shader->setUniform("emissionColor", thisLight->color * intensity);
-    }
-    else
-    {
-        shader->setUniform("emissionColor", glm::vec3(0.0f, 0.0f, 0.0f));
-    }
-
-    int i = 0;
-    glm::dvec3 temp;
-    BigVec3 bigTemp;
-    glm::dvec3 lightPos;
-    float intensity;
-    for (const Light *l : allLights)
-    {
-        if (l != thisLight)
-        {
-            bigTemp = l->position - position;
-            temp = bigTemp.toDoubleVec3();
-            if (!std::isinf(temp.x) && !std::isinf(temp.y) && !std::isinf(temp.z))
-            {
-                lightPos = glm::normalize(temp);
-                intensity = calculateInverseSquareLaw(bigTemp, l->intensity).toFloat();
-                if (intensity < 0.005)
-                {
-                    continue;
-                }
-                shader->setUniform("lightPositions[" + std::to_string(i) + "]", lightPos);
-                shader->setUniform("lightColors[" + std::to_string(i) + "]", l->color * intensity);
-                i++;
-            }
-        }
-    }
-
-    shader->setUniform("numLights", i);
     appendCustomShaderValues();
     shader->setUniform("texture1", image);
     mesh->finalizeShaders();
@@ -334,9 +275,6 @@ void RenderObject::Draw()
     {
         mappedDepth = glm::clamp((((distanceSquared.sqrt() - Bigint(10000000000)) / (far - Bigint(10000000000))).toFloat() * 0.3f) + 0.7f, 0.7f, 0.999999f);
     }
-    // mappedDepth = glm::clamp(((far - near) / (distanceSquared.sqrt() - near)).toFloat(), 0.0f, 0.999999f);
-
-    // std::cout << mappedDepth << std::endl;
 
     if (distanceSquared / (realSize * realSize) < Bigint("30000"))
     {

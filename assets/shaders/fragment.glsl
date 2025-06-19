@@ -7,12 +7,6 @@ in vec3 Normal;
 out vec4 FragColor;
 
 uniform sampler2D texture1;
-uniform vec3 emissionColor;
-
-const int MAX_LIGHTS = 127;
-uniform int numLights;
-uniform vec3 lightPositions[MAX_LIGHTS];
-uniform vec3 lightColors[MAX_LIGHTS];
 
 uniform float gamma;
 uniform bool u_fullBright;
@@ -25,7 +19,7 @@ void main()
     float ambientStrength = 0.1;
     float specularStrength = 0.5;
 
-    finalColor = texColor + emissionColor;
+    finalColor = texColor;
     // if (u_fullBright) {
     //     finalColor = texColor + emissionColor;
 //     }
