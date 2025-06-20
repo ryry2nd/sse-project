@@ -65,8 +65,12 @@ Uint64 RenderObject::now = SDL_GetTicks();
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
+const Bigint RenderObject::maxDistanceMediumSquared = Bigint(100000l * 100000l);
+const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
+const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
+
 RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
-    : position(pos), rotation(rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam), velocity(BigVec3()), acceleration(BigVec3())
+    : BaseObject(pos, rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam)
 {
     mesh = defaultMeshAPI->makeNewMesh();
     pointMesh = defaultMeshAPI->makeNewMesh();
@@ -126,15 +130,6 @@ void RenderObject::Update(const float &deltaTime)
     if (culled)
     {
         return;
-    }
-
-    if (!velocity.isZero())
-    {
-        position += velocity * deltaTime;
-    }
-    if (!acceleration.isZero())
-    {
-        velocity += acceleration * deltaTime;
     }
 
     appendUpdate(deltaTime);

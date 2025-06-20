@@ -1,6 +1,6 @@
 #include "Objects.hpp"
 
-virtual BaseObject::~BaseObject()
+BaseObject::~BaseObject()
 {
     removeParent();
 

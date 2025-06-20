@@ -60,6 +60,8 @@ public:
 
 int main(int argc, char *argv[])
 {
+    const bool FULLSCREEN = true;
+
     // it initialises sdl
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
@@ -71,8 +73,13 @@ int main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 
     // this makes the window
-    const glm::vec2 RES{900, 500};
-    SDL_Window *window = SDL_CreateWindow("Game", 100, 100, RES.x, RES.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+    glm::vec2 res;
+    if (FULLSCREEN)
+        res = glm::vec2(1920, 1080);
+    else
+        res = glm::vec2(900, 500);
+
+    SDL_Window *window = SDL_CreateWindow("Game", 100, 100, res.x, res.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
     if (!window)
     {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
@@ -82,7 +89,8 @@ int main(int argc, char *argv[])
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(window);
 
     SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
-    // SDL_MaximizeWindow(window);
+    if (FULLSCREEN)
+        SDL_MaximizeWindow(window);
     SDL_GL_SetSwapInterval(0);
 
     // this is the constants
@@ -95,7 +103,7 @@ int main(int argc, char *argv[])
     Bigint *pos = getHoweverManyDigits(0);
 
     // this is the camera, cameras are neat
-    Camera *camera = new Camera(RES, BigVec3(*pos, 0.0f, -2.0f));
+    Camera *camera = new Camera(res, BigVec3(*pos, 0.0f, -2.0f));
     camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
@@ -114,7 +122,6 @@ int main(int argc, char *argv[])
 
     PhysicsObject cube(shader, pointShader, image, camera);
     cube.position.x += *pos;
-    // cube.velocity.z = 5;
 
     PhysicsObject cube2(shader, pointShader, image, camera);
     cube2.position.x -= Bigint(10);

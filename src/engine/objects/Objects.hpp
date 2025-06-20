@@ -29,7 +29,7 @@ public:
 
     BaseObject() : position(BigVec3()) {}
     BaseObject(BigVec3 pos, glm::vec3 rot) : position(pos), rotation(rot) {}
-    virtual ~BaseObject();
+    ~BaseObject();
     void makeParent(BaseObject &other);
     BigVec3 getTruePos();
 
@@ -67,23 +67,16 @@ private:
     glm::mat4 getRotationMatrix() const;
 };
 
-class RenderObject
+class RenderObject : public BaseObject
 {
 public:
-    RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos = BigVec3(0.0f), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scl = glm::vec3(1.0f));
+    RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos = BigVec3(0), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scl = glm::vec3(1.0f));
     ~RenderObject();
 
     void Update(const float &deltaTime);
     void Draw();
 
-    BigVec3 position;
-    glm::vec3 rotation;
     BigVec3 scale;
-
-    BigVec3 velocity;
-    BigVec3 acceleration;
-
-    static std::vector<RenderObject *> renderObjects;
 
     static float gamma;
     static bool disableBrightness;
@@ -96,11 +89,6 @@ public:
     static void DrawAllObjects();
     static void updateTime();
 
-    const static Bigint maxDistanceMediumSquared = Bigint(100000l * 100000l);
-    const static Bigint maxDistanceLowSquared = Bigint(300l * 300l);
-    const static Bigint maxDistanceHighSquared = Bigint("10000000000000000000000000");
-    bool culled = false;
-
 protected:
     Mesh *mesh;
     Mesh *pointMesh;
@@ -111,6 +99,12 @@ protected:
     const std::vector<short> vertLogic = {3, 2, 3};
     const std::vector<float> pointVert = {0, 0, 0};
     CullPriority cullPriority = CullPriority::Medium;
+
+    const static Bigint maxDistanceMediumSquared;
+    const static Bigint maxDistanceLowSquared;
+    const static Bigint maxDistanceHighSquared;
+
+    bool culled = false;
 
 private:
     Shader *shader;
@@ -128,6 +122,7 @@ private:
     void setupObject();
 
     BigVec3 localSize;
+    static std::vector<RenderObject *> renderObjects;
 
     Uint64 startTimeCulled = -1;
     Uint64 lastCullCheck = -1;
