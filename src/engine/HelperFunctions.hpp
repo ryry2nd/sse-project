@@ -26,11 +26,43 @@ enum class UniformTypes
 class HelperFunctions
 {
 public:
+    HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false)
+    {
+        // it initialises sdl
+        if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        {
+            std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
+            throw std::runtime_error("Sdl cant initialise");
+        }
+
+        if (aa == 0)
+        {
+            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+            SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
+        }
+
+        window = SDL_CreateWindow(name, 100, 100, res.x, res.y, flags);
+        if (!window)
+        {
+            std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
+            SDL_Quit();
+            throw std::runtime_error("cant create sdl window");
+        }
+
+        if (hideMouse)
+            SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
+        if (fullscreen)
+            SDL_MaximizeWindow(window);
+    }
     virtual void clearBackground() = 0;
 
     virtual void swapBuffer() = 0;
 
-    virtual ~HelperFunctions() = default;
+    ~HelperFunctions()
+    {
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+    }
 
 protected:
     SDL_Window *window;

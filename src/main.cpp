@@ -58,40 +58,22 @@ public:
     }
 };
 
+class MegaCube : public RenderObject
+{
+public:
+    MegaCube(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
+        : RenderObject(shader, slimShady, image, camera)
+    {
+        scale *= 128;
+    }
+
+    void appendUpdate(const float &deltaTime) override {}
+};
+
 int main(int argc, char *argv[])
 {
-    const bool FULLSCREEN = true;
-
-    // it initialises sdl
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-    {
-        std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
-        return 1;
-    }
-
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
-
-    // this makes the window
-    glm::vec2 res;
-    if (FULLSCREEN)
-        res = glm::vec2(1920, 1080);
-    else
-        res = glm::vec2(900, 500);
-
-    SDL_Window *window = SDL_CreateWindow("Game", 100, 100, res.x, res.y, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    if (!window)
-    {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
-        SDL_Quit();
-        return 1;
-    }
-    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(window);
-
-    SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
-    if (FULLSCREEN)
-        SDL_MaximizeWindow(window);
-    SDL_GL_SetSwapInterval(0);
+    glm::vec2 res(900, 500);
+    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0);
 
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
@@ -130,6 +112,22 @@ int main(int argc, char *argv[])
     PhysicsObject cube3(shader, pointShader, image, camera);
     cube3.position.x += Bigint(10);
     cube3.position.x += *pos;
+
+    std::vector<MegaCube *> megaCubes;
+    MegaCube *megaCube = nullptr;
+
+    for (int x = 0; x < 10; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            megaCube = new MegaCube(shader, pointShader, image, camera);
+            megaCube->position.y += Bigint(200);
+            megaCube->position.x += *pos;
+            megaCube->position.x += x * 128;
+            megaCube->position.z += y * 128;
+            megaCubes.push_back(megaCube);
+        }
+    }
 
     const int NUM_TEMPS = 11;
     std::vector<RenderObject *> temp;
@@ -267,7 +265,5 @@ int main(int argc, char *argv[])
     delete image;
     delete renderingEngine;
     delete camera;
-    SDL_DestroyWindow(window);
-    SDL_Quit();
     return 0;
 }

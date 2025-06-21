@@ -1,8 +1,8 @@
 #include "HelperFunctionsOpengl.hpp"
 
-HelperFunctionsOpenGl::HelperFunctionsOpenGl(SDL_Window *window)
+HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
+    : HelperFunctions(res, name, flags, aa, fullscreen, hideMouse)
 {
-    this->window = window;
     // this does what it says
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
@@ -27,6 +27,8 @@ HelperFunctionsOpenGl::HelperFunctionsOpenGl(SDL_Window *window)
         SDL_Quit();
         throw std::runtime_error("Failed to initialize GLEW\n");
     }
+
+    SDL_GL_SetSwapInterval(vsync);
 
     // this turns on all the cool opengl settings that probably should be the default
     glEnable(GL_DEPTH_TEST);

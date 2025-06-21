@@ -19,13 +19,12 @@
 class HelperFunctionsOpenGl : public HelperFunctions
 {
 public:
-    HelperFunctionsOpenGl(SDL_Window *window);
+    HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
     void clearBackground();
     void swapBuffer();
     ~HelperFunctionsOpenGl();
 
 private:
-    SDL_Window *window;
     SDL_GLContext glContext;
 };
 

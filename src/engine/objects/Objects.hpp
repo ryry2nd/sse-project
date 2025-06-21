@@ -30,7 +30,10 @@ public:
     BaseObject() : position(BigVec3()) {}
     BaseObject(BigVec3 pos, glm::vec3 rot) : position(pos), rotation(rot) {}
     ~BaseObject();
+
+    // makes the other object the parent to the current object
     void makeParent(BaseObject &other);
+    // gets the exact position in the world instead of relative
     BigVec3 getTruePos();
 
 protected:
