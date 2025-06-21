@@ -16,8 +16,8 @@ void main()
 {
     vec3 texColor = texture(texture1, TexCoord).rgb;
     vec3 finalColor = vec3(0.0);
-    float ambientStrength = 0.1;
-    float specularStrength = 0.5;
+    // float ambientStrength = 0.1;
+    // float specularStrength = 0.5;
 
     finalColor = texColor;
     // if (u_fullBright) {

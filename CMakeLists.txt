@@ -63,10 +63,9 @@ target_link_libraries(engine PRIVATE common_libs)
 target_link_libraries(game PRIVATE common_libs)
 
 # Post-build asset copy
-add_custom_command(
-    TARGET ${PROJECT_NAME} POST_BUILD
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/assets
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
+            ${CMAKE_CURRENT_BINARY_DIR}/assets
     COMMENT "---- Copying assets to output directory ----"
 )
