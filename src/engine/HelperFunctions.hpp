@@ -72,6 +72,7 @@ class Image
 {
 public:
     virtual ~Image() = default;
+    virtual Image *makeNewImage(const std::string &filePath) const = 0;
 };
 
 class Shader
@@ -88,6 +89,7 @@ public:
     virtual void setUniform(const std::string &location, const glm::mat4 &x) = 0;
     virtual void setUniform(const std::string &location, const Image *x) = 0;
     virtual void setUniform(const std::string &location, const bool &x) = 0;
+    virtual Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
 };
 
 class Mesh
@@ -98,5 +100,5 @@ public:
     virtual void setupObject(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
     virtual void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
     virtual void finalizeShaders() = 0;
-    virtual Mesh *makeNewMesh() = 0;
+    virtual Mesh *makeNewMesh() const = 0;
 };

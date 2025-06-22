@@ -60,7 +60,6 @@ std::vector<float> makeTexturedCube(float size = 1.0f)
 float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
-Mesh *RenderObject::defaultMeshAPI = new OpenGlMesh();
 Uint64 RenderObject::now = SDL_GetTicks();
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
@@ -69,8 +68,11 @@ const Bigint RenderObject::maxDistanceMediumSquared = Bigint(100000l * 100000l);
 const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
 const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
 
+Mesh *RenderObject::defaultMeshAPI = nullptr;
+
 RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
-    : BaseObject(pos, rot), scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam)
+    : BaseObject(pos, rot),
+      scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam)
 {
     mesh = defaultMeshAPI->makeNewMesh();
     pointMesh = defaultMeshAPI->makeNewMesh();

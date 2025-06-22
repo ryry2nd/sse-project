@@ -34,3 +34,8 @@ GLuint ImageOpenGl::getID() const
 {
     return textureID;
 }
+
+Image *ImageOpenGl::makeNewImage(const std::string &filePath) const
+{
+    return new ImageOpenGl(filePath);
+}

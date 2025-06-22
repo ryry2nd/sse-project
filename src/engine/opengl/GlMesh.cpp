@@ -66,7 +66,7 @@ void OpenGlMesh::finalizeShaders()
     glBindVertexArray(0);
 }
 
-Mesh *OpenGlMesh::makeNewMesh()
+Mesh *OpenGlMesh::makeNewMesh() const
 {
     return new OpenGlMesh();
 }

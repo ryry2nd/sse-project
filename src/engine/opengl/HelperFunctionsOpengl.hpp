@@ -32,11 +32,14 @@ class ImageOpenGl : public Image
 {
 public:
     // it makes the image
+    ImageOpenGl() {}
     ImageOpenGl(const std::string &filePath);
     // it unmakes the image
     ~ImageOpenGl();
     // it gets the id
     GLuint getID() const;
+
+    Image *makeNewImage(const std::string &filePath) const;
 
 private:
     GLuint textureID = 0;
@@ -45,6 +48,7 @@ private:
 class ShaderOpenGl : public Shader
 {
 public:
+    ShaderOpenGl() {}
     ShaderOpenGl(const char *vertexPath, const char *fragmentPath);
 
     void createUniform(const std::string &location, const UniformTypes &type);
@@ -56,11 +60,26 @@ public:
     void setUniform(const std::string &location, const Image *x);
     void setUniform(const std::string &location, const bool &x);
 
+    Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
+
     // deletes the thing
     ~ShaderOpenGl();
 
-private:
+protected:
     GLuint id;
+};
+
+class ComputeShaderOpenGl : public ShaderOpenGl
+{
+public:
+    ComputeShaderOpenGl(const char *computePath);
+    ~ComputeShaderOpenGl();
+    void setupSsbo(ulong size);
+    void dispatch(uint xGroups, uint yGroups, uint zGroups);
+    std::vector<char> joinShaderThread(ulong size);
+
+private:
+    GLuint ssbo;
 };
 
 class OpenGlMesh : public Mesh
@@ -72,7 +91,7 @@ public:
     // updates the vertices (you dont need to run this unless you changed the vertices)
     void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     void finalizeShaders();
-    Mesh *makeNewMesh();
+    Mesh *makeNewMesh() const;
 
 private:
     GLuint VAO, VBO;

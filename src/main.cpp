@@ -74,6 +74,9 @@ int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0);
+    RenderObject::defaultMeshAPI = new OpenGlMesh();
+    Shader *apiShader = new ShaderOpenGl();
+    Image *apiImage = new ImageOpenGl();
 
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
@@ -89,9 +92,12 @@ int main(int argc, char *argv[])
     camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
-    Shader *shader = new ShaderOpenGl("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
-    Shader *pointShader = new ShaderOpenGl("assets/shaders/pointVert.glsl", "assets/shaders/pointFrag.glsl");
-    Image *image = new ImageOpenGl("assets/textures/FISH.png");
+    Shader *shader = apiShader->makeNewShader("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
+    Shader *pointShader = apiShader->makeNewShader("assets/shaders/pointVert.glsl", "assets/shaders/pointFrag.glsl");
+    Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
+
+    delete apiImage;
+    delete apiShader;
 
     // makes the cubes
 
