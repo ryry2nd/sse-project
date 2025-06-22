@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
     camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
-    Shader *shader = apiShader->makeNewShader("assets/shaders/vertex.glsl", "assets/shaders/fragment.glsl");
-    Shader *pointShader = apiShader->makeNewShader("assets/shaders/pointVert.glsl", "assets/shaders/pointFrag.glsl");
+    Shader *shader = apiShader->makeNewShader("shaders/vertex.glsl", "shaders/fragment.glsl");
+    Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
     Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
 
     delete apiImage;

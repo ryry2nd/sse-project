@@ -48,7 +48,6 @@ endif()
 
 #Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
-add_subdirectory(src/game)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
 target_compile_definitions(common_libs INTERFACE GLM_ENABLE_EXPERIMENTAL)
@@ -56,11 +55,9 @@ target_compile_definitions(common_libs INTERFACE GLM_ENABLE_EXPERIMENTAL)
 target_link_libraries(${PROJECT_NAME}
     common_libs
     engine
-    game
 )
 
 target_link_libraries(engine PRIVATE common_libs)
-target_link_libraries(game PRIVATE common_libs)
 
 # Post-build asset copy
 add_custom_target(copy_assets ALL
@@ -68,4 +65,11 @@ add_custom_target(copy_assets ALL
             ${CMAKE_CURRENT_SOURCE_DIR}/assets
             ${CMAKE_CURRENT_BINARY_DIR}/assets
     COMMENT "---- Copying assets to output directory ----"
+)
+
+add_custom_target(copy_directory ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/game
+            ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "---- Copying game to output directory ----"
 )
