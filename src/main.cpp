@@ -66,9 +66,10 @@ public:
     {
         meshes[0]->sizeOffset *= 128;
 
-        for (int x = 0; x < 10; x++)
+        int x, y;
+        for (x = 0; x < 100; x++)
         {
-            for (int y = 0; y < 10; y++)
+            for (y = 0; y < 50; y++)
             {
                 if (x == 0 && y == 0)
                 {

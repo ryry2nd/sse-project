@@ -60,7 +60,7 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vect
     meshSize = calculateSizes();
 }
 
-void OpenGlMesh::finalizeShaders()
+void OpenGlMesh::Draw()
 {
     glBindVertexArray(VAO); // ngl who knows what this crap means, according to the names it applies and binds stuff
     glDrawArrays(glMeshType, 0, size);

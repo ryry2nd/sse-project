@@ -98,7 +98,7 @@ public:
     virtual ~Mesh() = default;
 
     virtual void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
-    virtual void finalizeShaders() = 0;
+    virtual void Draw() = 0;
     virtual Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
 
     virtual Mesh *makeCopy() const = 0;

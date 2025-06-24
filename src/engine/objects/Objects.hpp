@@ -111,7 +111,7 @@ private:
     Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
     Bigint distanceSquared;
     void renderAsPoint();
-    void renderAsMesh(Mesh *mesh);
+    void renderAsMesh(Mesh *mesh, glm::mat4 matrix, const float &transform, float mappedDepth);
 
     void setupObject();
 

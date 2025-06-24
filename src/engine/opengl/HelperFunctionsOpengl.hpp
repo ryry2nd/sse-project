@@ -90,7 +90,7 @@ public:
     ~OpenGlMesh();
     // updates the vertices (you dont need to run this unless you changed the vertices)
     void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
-    void finalizeShaders();
+    void Draw();
     Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
 
     Mesh *makeCopy() const;
