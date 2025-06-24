@@ -85,15 +85,23 @@ private:
 class OpenGlMesh : public Mesh
 {
 public:
-    OpenGlMesh() : VAO(0), VBO(0) {}
+    OpenGlMesh() {}
+    OpenGlMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     ~OpenGlMesh();
-    void setupObject(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     // updates the vertices (you dont need to run this unless you changed the vertices)
     void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     void finalizeShaders();
-    Mesh *makeNewMesh() const;
+    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
+
+    Mesh *makeCopy() const;
+
+    glm::vec3 meshSize;
 
 private:
+    glm::vec3 calculateSizes();
+    std::vector<float> vertices;
+    std::vector<short> vertLogic;
+    MeshTypes meshType;
     GLuint VAO, VBO;
     GLenum glMeshType;
     GLsizei size;

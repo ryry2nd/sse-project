@@ -27,8 +27,8 @@ public:
     BigVec3 position;
     glm::vec3 rotation;
 
-    BaseObject() : position(BigVec3()) {}
-    BaseObject(BigVec3 pos, glm::vec3 rot) : position(pos), rotation(rot) {}
+    BaseObject() : position(BigVec3()), rotation(glm::vec3()) {}
+    BaseObject(const BigVec3 &pos, const glm::vec3 &rot) : position(pos), rotation(rot) {}
     ~BaseObject();
 
     // makes the other object the parent to the current object
@@ -73,34 +73,29 @@ private:
 class RenderObject : public BaseObject
 {
 public:
-    RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos = BigVec3(0), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scl = glm::vec3(1.0f));
+    // run before you setup any object
+    static void init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera);
+    RenderObject(Shader *shady, Image *im, const BigVec3 &pos = BigVec3(), const glm::vec3 &rot = glm::vec3(), const glm::vec3 &scl = glm::vec3(1.0f));
     ~RenderObject();
 
     void Update(const float &deltaTime);
     void Draw();
 
-    BigVec3 scale;
-
     static float gamma;
     static bool disableBrightness;
-    static Mesh *defaultMeshAPI;
-
-    const int NUM_VECTOR_NUMBERS = 8; // the number of stupid numbers in the vector per vert, it is x, y, z, tex1, tex2, norm x, norm y, norm z
-    const Bigint bigObjectThresholdSize = Bigint(10000);
 
     static void UpdateAllObjects(const float &deltaTime);
     static void DrawAllObjects();
     static void updateTime();
 
 protected:
-    Mesh *mesh;
-    Mesh *pointMesh;
+    // the list of meshes
+    std::vector<Mesh *> meshes;
+
+    void setupObject(Shader *shady, Image *im, const BigVec3 &pos = BigVec3(), const glm::vec3 &rot = glm::vec3());
     virtual void appendUpdate(const float &deltaTime);
     virtual void appendCustomShaderValues();
     BigVec3 tempLocalPosition;
-    std::vector<float> vertices;
-    const std::vector<short> vertLogic = {3, 2, 3};
-    const std::vector<float> pointVert = {0, 0, 0};
     CullPriority cullPriority = CullPriority::Medium;
 
     const static Bigint maxDistanceMediumSquared;
@@ -111,17 +106,13 @@ protected:
 
 private:
     Shader *shader;
-    Shader *pointShader;
     Image *image;
-    Camera *camera;
-    void calculateSizes();
     Bigint calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const;
     Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
     Bigint distanceSquared;
-    void renderAsPoint(const float &mappedDepth);
-    void renderAsMesh(const float &mappedDepth, const Bigint &realSize);
+    void renderAsPoint();
+    void renderAsMesh(Mesh *mesh);
 
-    void updateVerts();
     void setupObject();
 
     BigVec3 localSize;
@@ -134,11 +125,16 @@ private:
     const static Bigint far;
 
     static Uint64 now;
+
+    static Shader *pointShader;
+    static Camera *camera;
+    static Mesh *pointMesh;
+    static Mesh *defaultMeshAPI;
 };
 
 class PhysicsObject : public RenderObject
 {
 public:
-    PhysicsObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos = BigVec3(0.0f), glm::vec3 rot = glm::vec3(0.0f), glm::vec3 scl = glm::vec3(1.0f));
+    PhysicsObject(Shader *shady, Image *im, const BigVec3 &pos = BigVec3(), const glm::vec3 &rot = glm::vec3(), const glm::vec3 &scl = glm::vec3(1.0f));
     ~PhysicsObject();
 };

@@ -61,6 +61,9 @@ float RenderObject::gamma = 2.5f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
 Uint64 RenderObject::now = SDL_GetTicks();
+Mesh *RenderObject::pointMesh = nullptr;
+Shader *RenderObject::pointShader = nullptr;
+Camera *RenderObject::camera = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
@@ -70,53 +73,41 @@ const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000
 
 Mesh *RenderObject::defaultMeshAPI = nullptr;
 
-RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im, Camera *cam, BigVec3 pos, glm::vec3 rot, glm::vec3 scl)
-    : BaseObject(pos, rot),
-      scale(scl), shader(shady), pointShader(slimShady), image(im), camera(cam)
+void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera)
 {
-    mesh = defaultMeshAPI->makeNewMesh();
-    pointMesh = defaultMeshAPI->makeNewMesh();
+    RenderObject::pointShader = pointShader;
+    RenderObject::camera = camera;
+    RenderObject::defaultMeshAPI = defaultMeshAPI;
+    RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {3}, MeshTypes::Points);
+}
 
+RenderObject::RenderObject(Shader *shady, Image *im, const BigVec3 &pos, const glm::vec3 &rot, const glm::vec3 &scl)
+{
+    setupObject(shady, im, pos, rot);
+    meshes.push_back(defaultMeshAPI->makeNewMesh(makeTexturedCube(), {3, 2, 3}));
+    meshes.back()->sizeOffset = scl;
+}
+
+void RenderObject::setupObject(Shader *shady, Image *im, const BigVec3 &pos, const glm::vec3 &rot)
+{
+    position = pos;
+    rotation = rot;
+    shader = shady;
+    image = im;
+    if (pointShader == nullptr || camera == nullptr || defaultMeshAPI == nullptr)
+    {
+        throw std::runtime_error("You have to run RenderObject::init(pointShader, meshApi, camera) to setup objects");
+    }
     renderObjects.push_back(this);
-
-    vertices = makeTexturedCube();
-    setupObject();
 }
 
 RenderObject::~RenderObject()
 {
     renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
-    delete mesh;
-    delete pointMesh;
-}
-
-void RenderObject::setupObject()
-{
-    calculateSizes();
-
-    mesh->setupObject(vertices, vertLogic);
-    pointMesh->setupObject(pointVert, {3}, MeshTypes::Points);
-}
-
-void RenderObject::calculateSizes()
-{
-    glm::vec3 minCorner(FLT_MAX);
-    glm::vec3 maxCorner(-FLT_MAX);
-
-    for (size_t i = 0; i < vertices.size(); i += NUM_VECTOR_NUMBERS)
+    for (Mesh *mesh : meshes)
     {
-        glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
-        minCorner = glm::min(minCorner, pos);
-        maxCorner = glm::max(maxCorner, pos);
+        delete mesh;
     }
-
-    localSize = BigVec3(maxCorner - minCorner);
-}
-
-void RenderObject::updateVerts()
-{
-    // calculateSizes();
-    // mesh->updateVerts(vertices);
 }
 
 void RenderObject::appendUpdate(const float &deltaTime)
@@ -158,11 +149,14 @@ void RenderObject::updateTime()
     now = SDL_GetTicks64();
 }
 
-void RenderObject::renderAsPoint(const float &mappedDepth)
+void RenderObject::renderAsPoint()
 {
-    glm::vec3 newPos = (tempLocalPosition / distanceSquared.sqrt()).toFloatVec3() * 10.0f;
+    Bigint distance = distanceSquared.sqrt();
+    glm::vec3 newPos = (tempLocalPosition / distance).toFloatVec3() * 10.0f;
 
     glm::mat4 matrix = glm::mat4(1.0f);
+
+    float mappedDepth = glm::clamp(((distance - near) / (Bigint(100000) - near)).toFloat(), 0.0f, 0.9f);
 
     matrix = glm::translate(matrix, newPos);
 
@@ -177,25 +171,43 @@ void RenderObject::renderAsPoint(const float &mappedDepth)
     pointMesh->finalizeShaders();
 }
 
-void RenderObject::renderAsMesh(const float &mappedDepth, const Bigint &realSize)
+void RenderObject::renderAsMesh(Mesh *mesh)
 {
     glm::vec3 newPos;
     glm::vec3 newSize;
 
-    if (realSize > bigObjectThresholdSize)
-    {
-        Bigint transform = realSize / Bigint(10);
+    BigVec3 oldPos = tempLocalPosition + BigVec3(mesh->posOffset);
 
-        newPos = (tempLocalPosition / transform).toFloatVec3();
-        newSize = (scale / transform).toFloatVec3();
+    Bigint distance = calculateDistanceSquared(oldPos).sqrt();
+
+    if (distance > Bigint(10000))
+    {
+        Bigint transform = distance * Bigint(0.1f) + Bigint(0.1f);
+        newPos = (oldPos / transform).toFloatVec3();
+        newSize = (BigVec3(mesh->sizeOffset) / transform).toFloatVec3();
     }
     else
     {
-        newPos = tempLocalPosition.toFloatVec3();
-        newSize = scale.toFloatVec3();
+        newPos = oldPos.toFloatVec3();
+        newSize = mesh->sizeOffset;
     }
 
-    glm::mat4 matrix = glm::mat4(1.0f);
+    float mappedDepth;
+
+    if (distance < Bigint(10000))
+    {
+        mappedDepth = glm::clamp(((distance - near) / (Bigint(10000) - near)).toFloat() * 0.5f, 0.0f, 0.5f);
+    }
+    else if (distance < Bigint(10000000000))
+    {
+        mappedDepth = glm::clamp((((distance - Bigint(10000)) / (Bigint(10000000000) - Bigint(10000))).toFloat() * 0.2f) + 0.5f, 0.5f, 0.9f);
+    }
+    else
+    {
+        mappedDepth = glm::clamp((((distance - Bigint(10000000000)) / (far - Bigint(10000000000))).toFloat() * 0.3f) + 0.7f, 0.7f, 0.999999f);
+    }
+
+    glm::mat4 matrix(1.0f);
 
     // converts the position to be local to the camera
     matrix = glm::translate(matrix, newPos);
@@ -256,32 +268,16 @@ void RenderObject::Draw()
         return;
     }
 
-    Bigint realSize = (localSize * scale).getMaxAbs();
-
-    float mappedDepth;
-
-    if (realSize < Bigint(100000))
-    {
-        mappedDepth = glm::clamp(((distanceSquared.sqrt() - near) / (Bigint(100000) - near)).toFloat() * 0.5f, 0.0f, 0.5f);
-    }
-    else if (realSize < Bigint(10000000000))
-    {
-        mappedDepth = glm::clamp((((distanceSquared.sqrt() - Bigint(100000)) / (Bigint(10000000000) - Bigint(100000))).toFloat() * 0.2f) + 0.5f, 0.5f, 0.9f);
-    }
-    else
-    {
-        mappedDepth = glm::clamp((((distanceSquared.sqrt() - Bigint(10000000000)) / (far - Bigint(10000000000))).toFloat() * 0.3f) + 0.7f, 0.7f, 0.999999f);
-    }
-
-    if (distanceSquared / (realSize * realSize) < Bigint("30000"))
+    if (distanceSquared < Bigint("100000000000000000000000"))
     {
         culled = false;
-        renderAsMesh(mappedDepth, realSize);
+        for (Mesh *mesh : meshes)
+            renderAsMesh(mesh);
     }
     else if (cullPriority == CullPriority::High)
     {
         culled = false;
-        renderAsPoint(mappedDepth);
+        renderAsPoint();
     }
     else
     {

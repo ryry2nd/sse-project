@@ -8,13 +8,8 @@ OpenGlMesh::~OpenGlMesh()
         glDeleteBuffers(1, &VBO);
 }
 
-void OpenGlMesh::setupObject(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType)
+OpenGlMesh::OpenGlMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0)
 {
-    if (VAO != 0)
-        glDeleteVertexArrays(1, &VAO);
-    if (VBO != 0)
-        glDeleteBuffers(1, &VBO);
-
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
@@ -45,6 +40,10 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vect
         numsSoFar += vertLogic[i];
     }
 
+    this->vertices = vertices;
+    this->vertLogic = vertLogic;
+    this->meshType = meshType;
+
     switch (meshType)
     {
     case MeshTypes::Points:
@@ -57,6 +56,8 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vect
         glMeshType = GL_TRIANGLES;
         break;
     }
+
+    meshSize = calculateSizes();
 }
 
 void OpenGlMesh::finalizeShaders()
@@ -66,7 +67,35 @@ void OpenGlMesh::finalizeShaders()
     glBindVertexArray(0);
 }
 
-Mesh *OpenGlMesh::makeNewMesh() const
+glm::vec3 OpenGlMesh::calculateSizes()
 {
-    return new OpenGlMesh();
+    glm::vec3 minCorner(FLT_MAX);
+    glm::vec3 maxCorner(-FLT_MAX);
+
+    int total = 0;
+    for (short &i : vertLogic)
+        total += i;
+
+    for (size_t i = 0; i < vertices.size(); i += total)
+    {
+        glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
+        minCorner = glm::min(minCorner, pos);
+        maxCorner = glm::max(maxCorner, pos);
+    }
+
+    return maxCorner - minCorner;
+}
+
+Mesh *OpenGlMesh::makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
+{
+    return new OpenGlMesh(vertices, vertLogic, meshType);
+}
+
+Mesh *OpenGlMesh::makeCopy() const
+{
+    OpenGlMesh *ret = new OpenGlMesh(vertices, vertLogic, meshType);
+    ret->sizeOffset = sizeOffset;
+    ret->posOffset = posOffset;
+    ret->rotOffset = rotOffset;
+    return ret;
 }

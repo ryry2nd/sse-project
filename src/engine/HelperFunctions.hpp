@@ -97,8 +97,13 @@ class Mesh
 public:
     virtual ~Mesh() = default;
 
-    virtual void setupObject(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
     virtual void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
     virtual void finalizeShaders() = 0;
-    virtual Mesh *makeNewMesh() const = 0;
+    virtual Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
+
+    virtual Mesh *makeCopy() const = 0;
+
+    glm::vec3 posOffset = glm::vec3(0.0f);
+    glm::vec3 sizeOffset = glm::vec3(1.0f);
+    glm::vec3 rotOffset = glm::vec3(0.0f);
 };

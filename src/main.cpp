@@ -28,10 +28,10 @@ Bigint *getHoweverManyDigits(size_t numZeros)
 class Sun : public RenderObject
 {
 public:
-    Sun(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
-        : RenderObject(shader, slimShady, image, camera) //, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
+    Sun(Shader *shader, Image *image)
+        : RenderObject(shader, image) //, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
     {
-        scale *= Bigint("1392000000");
+        meshes[0]->sizeOffset *= 1392000000;
         cullPriority = CullPriority::High;
     }
 
@@ -44,10 +44,10 @@ public:
 class Earth : public RenderObject
 {
 public:
-    Earth(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
-        : RenderObject(shader, slimShady, image, camera)
+    Earth(Shader *shader, Image *image)
+        : RenderObject(shader, image)
     {
-        scale *= Bigint("12756000");
+        meshes[0]->sizeOffset *= 12756000;
         position.y -= (Bigint("12756000") / 2);
         cullPriority = CullPriority::High;
     }
@@ -58,13 +58,27 @@ public:
     }
 };
 
-class MegaCube : public RenderObject
+class MegaCubes : public RenderObject
 {
 public:
-    MegaCube(Shader *shader, Shader *slimShady, Image *image, Camera *camera)
-        : RenderObject(shader, slimShady, image, camera)
+    MegaCubes(Shader *shader, Image *image)
+        : RenderObject(shader, image)
     {
-        scale *= 128;
+        meshes[0]->sizeOffset *= 128;
+
+        for (int x = 0; x < 10; x++)
+        {
+            for (int y = 0; y < 10; y++)
+            {
+                if (x == 0 && y == 0)
+                {
+                    continue;
+                }
+                meshes.push_back(meshes[0]->makeCopy());
+                std::cout << meshes.back()->sizeOffset.x << std::endl;
+                meshes.back()->posOffset = glm::vec3(x * meshes[0]->sizeOffset.x, 0, y * meshes[0]->sizeOffset.x);
+            }
+        }
     }
 
     void appendUpdate(const float &deltaTime) override {}
@@ -74,7 +88,6 @@ int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0);
-    RenderObject::defaultMeshAPI = new OpenGlMesh();
     Shader *apiShader = new ShaderOpenGl();
     Image *apiImage = new ImageOpenGl();
 
@@ -96,51 +109,41 @@ int main(int argc, char *argv[])
     Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
     Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
 
+    RenderObject::init(pointShader, new OpenGlMesh(), camera);
+
     delete apiImage;
     delete apiShader;
 
     // makes the cubes
 
-    Sun sun(shader, pointShader, image, camera);
+    Sun sun(shader, image);
     sun.position.x -= Bigint("150000000000");
     sun.position.x += *pos;
 
-    Earth earth(shader, pointShader, image, camera);
+    Earth earth(shader, image);
     earth.position.x += *pos;
 
-    PhysicsObject cube(shader, pointShader, image, camera);
+    PhysicsObject cube(shader, image);
     cube.position.x += *pos;
 
-    PhysicsObject cube2(shader, pointShader, image, camera);
+    PhysicsObject cube2(shader, image);
     cube2.position.x -= Bigint(10);
     cube2.position.x += *pos;
 
-    PhysicsObject cube3(shader, pointShader, image, camera);
+    PhysicsObject cube3(shader, image);
     cube3.position.x += Bigint(10);
     cube3.position.x += *pos;
 
-    std::vector<MegaCube *> megaCubes;
-    MegaCube *megaCube = nullptr;
-
-    for (int x = 0; x < 10; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            megaCube = new MegaCube(shader, pointShader, image, camera);
-            megaCube->position.y += Bigint(200);
-            megaCube->position.x += *pos;
-            megaCube->position.x += x * 128;
-            megaCube->position.z += y * 128;
-            megaCubes.push_back(megaCube);
-        }
-    }
+    MegaCubes megaCubes(shader, image);
+    megaCubes.position.y += Bigint(200);
+    megaCubes.position.x += *pos;
 
     const int NUM_TEMPS = 11;
     std::vector<RenderObject *> temp;
 
     for (int i = 0; i < NUM_TEMPS; i++)
     {
-        temp.push_back(new PhysicsObject(shader, pointShader, image, camera));
+        temp.push_back(new PhysicsObject(shader, image));
         temp[i]->position.z += Bigint(10 * i);
         temp[i]->position.x += *pos;
     }
