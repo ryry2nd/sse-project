@@ -171,18 +171,105 @@ void RenderObject::renderAsPoint()
     pointMesh->Draw();
 }
 
-void RenderObject::renderAsMesh(Mesh *mesh, glm::mat4 matrix, const float &transform, float mappedDepth)
+void RenderObject::renderAsMesh()
 {
-    if (transform != 0)
+    shader->includeShader();
+    shader->setUniform("gamma", gamma);
+    shader->setUniform("u_fullBright", disableBrightness);
+    shader->setUniform("uView", camera->getViewMatrix());
+    shader->setUniform("uProjection", camera->getProjectionMatrix());
+    shader->setUniform("texture1", image);
+
+    glm::vec3 newPos;
+    // glm::vec3 newSize;
+
+    Bigint distance = distanceSquared.sqrt();
+
+    Bigint transform;
+
+    if (distance > Bigint(10000))
     {
-        matrix = glm::translate(matrix, mesh->posOffset / transform);
-        matrix = glm::scale(matrix, mesh->sizeOffset / transform);
+        transform = distance * Bigint(0.1f) + Bigint(0.1f);
+        newPos = (tempLocalPosition / transform).toFloatVec3();
+        // newSize = (BigVec3(mesh->sizeOffset) / transform).toFloatVec3();
+    }
+    else
+    {
+        transform = Bigint(1);
+        newPos = tempLocalPosition.toFloatVec3();
+        // newSize = mesh->sizeOffset;
     }
 
-    shader->setUniform("uModel", matrix);
-    shader->setUniform("depth", mappedDepth);
-    appendCustomShaderValues();
-    mesh->Draw();
+    glm::mat4 matrix(1.0f);
+    matrix = glm::translate(matrix, newPos);
+    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
+    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
+    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
+
+    float passedTransform = transform.toFloat();
+    if (std::isinf(passedTransform))
+    {
+        passedTransform = 0;
+    }
+
+    Bigint passedNear;
+    Bigint passedFar;
+    float clampedNear, clampedFar;
+
+    if (distance < Bigint(10000))
+    {
+        passedNear = near;
+        passedFar = Bigint(10000);
+        clampedNear = 0.0f;
+        clampedFar = 0.5f;
+    }
+    else if (distance < Bigint(10000000000))
+    {
+        passedNear = Bigint(10000);
+        passedFar = Bigint(10000000000);
+        clampedNear = 0.5f;
+        clampedFar = 0.7f;
+    }
+    else
+    {
+        passedNear = Bigint(10000000000);
+        passedFar = far;
+        clampedNear = 0.7f;
+        clampedFar = 0.999999f;
+    }
+
+    float mappedDepth;
+    float floatTransform = transform.toFloat();
+
+    glm::mat4 uModel;
+
+    bool isInf = std::isinf(floatTransform);
+    bool check = floatTransform != 0 && !isInf;
+
+    float floatPassedNear = passedNear.toFloat();
+    float floatPassedFar = passedFar.toFloat();
+
+    for (Mesh *mesh : meshes)
+    {
+        if (check)
+        {
+            uModel = glm::translate(matrix, mesh->posOffset / floatTransform);
+            uModel = glm::scale(uModel, mesh->sizeOffset / floatTransform);
+        }
+
+        if (isInf)
+        {
+            mappedDepth = glm::clamp(((Bigint(glm::length(glm::vec3(uModel[3]))) * transform - passedNear) / (passedFar - passedNear)).toFloat() * (clampedFar - clampedNear) + clampedNear, clampedNear, clampedFar);
+        }
+        else
+        {
+            mappedDepth = glm::clamp(((glm::length(glm::vec3(uModel[3])) * floatTransform - floatPassedNear) / (floatPassedFar - floatPassedNear)) * (clampedFar - clampedNear) + clampedNear, clampedNear, clampedFar);
+        }
+        shader->setUniform("uModel", uModel);
+        shader->setUniform("depth", mappedDepth);
+        appendCustomShaderValues();
+        mesh->Draw();
+    }
 }
 
 void RenderObject::Draw()
@@ -223,62 +310,7 @@ void RenderObject::Draw()
     if (distanceSquared < Bigint("100000000000000000000000"))
     {
         culled = false;
-        shader->includeShader();
-        shader->setUniform("gamma", gamma);
-        shader->setUniform("u_fullBright", disableBrightness);
-        shader->setUniform("uView", camera->getViewMatrix());
-        shader->setUniform("uProjection", camera->getProjectionMatrix());
-        shader->setUniform("texture1", image);
-
-        glm::vec3 newPos;
-        // glm::vec3 newSize;
-
-        Bigint distance = distanceSquared.sqrt();
-
-        Bigint transform;
-
-        if (distance > Bigint(10000))
-        {
-            transform = distance * Bigint(0.1f) + Bigint(0.1f);
-            newPos = (tempLocalPosition / transform).toFloatVec3();
-            // newSize = (BigVec3(mesh->sizeOffset) / transform).toFloatVec3();
-        }
-        else
-        {
-            newPos = tempLocalPosition.toFloatVec3();
-            // newSize = mesh->sizeOffset;
-            transform = Bigint(1);
-        }
-
-        glm::mat4 matrix(1.0f);
-        matrix = glm::translate(matrix, newPos);
-        matrix = glm::rotate(matrix, rotation.x, glm::vec3(1, 0, 0));
-        matrix = glm::rotate(matrix, rotation.y, glm::vec3(0, 1, 0));
-        matrix = glm::rotate(matrix, rotation.z, glm::vec3(0, 0, 1));
-
-        float passedTransform = transform.toFloat();
-        if (std::isinf(passedTransform))
-        {
-            passedTransform = 0;
-        }
-
-        float mappedDepth;
-
-        if (distance < Bigint(10000))
-        {
-            mappedDepth = glm::clamp(((distance - near) / (Bigint(10000) - near)).toFloat() * 0.5f, 0.0f, 0.5f);
-        }
-        else if (distance < Bigint(10000000000))
-        {
-            mappedDepth = glm::clamp((((distance - Bigint(10000)) / (Bigint(10000000000) - Bigint(10000))).toFloat() * 0.2f) + 0.5f, 0.5f, 0.9f);
-        }
-        else
-        {
-            mappedDepth = glm::clamp((((distance - Bigint(10000000000)) / (far - Bigint(10000000000))).toFloat() * 0.3f) + 0.7f, 0.7f, 0.999999f);
-        }
-
-        for (Mesh *mesh : meshes)
-            renderAsMesh(mesh, matrix, passedTransform, mappedDepth);
+        renderAsMesh();
     }
     else if (cullPriority == CullPriority::High)
     {
