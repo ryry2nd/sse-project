@@ -216,16 +216,16 @@ void RenderObject::renderAsMesh()
     Bigint passedFar;
     float clampedNear, clampedFar;
 
-    if (distance < Bigint(10000))
+    if (distance < Bigint(100000))
     {
         passedNear = near;
-        passedFar = Bigint(10000);
+        passedFar = Bigint(100000);
         clampedNear = 0.0f;
         clampedFar = 0.5f;
     }
     else if (distance < Bigint(10000000000))
     {
-        passedNear = Bigint(10000);
+        passedNear = Bigint(100000);
         passedFar = Bigint(10000000000);
         clampedNear = 0.5f;
         clampedFar = 0.7f;
