@@ -106,4 +106,8 @@ public:
     glm::vec3 posOffset = glm::vec3(0.0f);
     glm::vec3 sizeOffset = glm::vec3(1.0f);
     glm::vec3 rotOffset = glm::vec3(0.0f);
+
+    std::vector<float> vertices;
+    std::vector<short> vertLogic;
+    MeshTypes meshType;
 };

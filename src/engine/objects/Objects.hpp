@@ -74,15 +74,10 @@ class RenderObject : public BaseObject
 {
 public:
     // run before you setup any object
-    static void init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera);
+    static void init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera, float gamma = 2.5f, bool disableBrightness = false);
+    RenderObject() {}
     RenderObject(Shader *shady, Image *im, const BigVec3 &pos = BigVec3(), const glm::vec3 &rot = glm::vec3(), const glm::vec3 &scl = glm::vec3(1.0f));
     ~RenderObject();
-
-    void Update(const float &deltaTime);
-    void Draw();
-
-    static float gamma;
-    static bool disableBrightness;
 
     static void UpdateAllObjects(const float &deltaTime);
     static void DrawAllObjects();
@@ -98,11 +93,26 @@ protected:
     BigVec3 tempLocalPosition;
     CullPriority cullPriority = CullPriority::Medium;
 
+    const static std::vector<float> cubeMesh;
+    static Mesh *defaultMeshAPI;
+
     const static Bigint maxDistanceMediumSquared;
     const static Bigint maxDistanceLowSquared;
     const static Bigint maxDistanceHighSquared;
 
     bool culled = false;
+
+    void Update(const float &deltaTime);
+    void Draw();
+
+    static std::vector<float> makeTexturedCube(float size = 1.0f);
+    static void addFace(std::vector<float> &verts,
+                        glm::vec3 vert0,
+                        glm::vec3 vert1,
+                        glm::vec3 vert2,
+                        glm::vec3 vert3,
+                        glm::vec2 uvMin,
+                        glm::vec2 uvMax);
 
 private:
     Shader *shader;
@@ -124,12 +134,14 @@ private:
     const static Bigint near;
     const static Bigint far;
 
+    static float gamma;
+    static bool disableBrightness;
+
     static Uint64 now;
 
     static Shader *pointShader;
     static Camera *camera;
     static Mesh *pointMesh;
-    static Mesh *defaultMeshAPI;
 };
 
 class PhysicsObject : public RenderObject

@@ -99,9 +99,6 @@ public:
 
 private:
     glm::vec3 calculateSizes();
-    std::vector<float> vertices;
-    std::vector<short> vertLogic;
-    MeshTypes meshType;
     GLuint VAO, VBO;
     GLenum glMeshType;
     GLsizei size;

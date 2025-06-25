@@ -1,12 +1,12 @@
 #include "Objects.hpp"
 
-void addFace(std::vector<float> &verts,
-             glm::vec3 vert0,
-             glm::vec3 vert1,
-             glm::vec3 vert2,
-             glm::vec3 vert3,
-             glm::vec2 uvMin,
-             glm::vec2 uvMax)
+void RenderObject::addFace(std::vector<float> &verts,
+                           glm::vec3 vert0,
+                           glm::vec3 vert1,
+                           glm::vec3 vert2,
+                           glm::vec3 vert3,
+                           glm::vec2 uvMin,
+                           glm::vec2 uvMax)
 {
     glm::vec2 uv0 = {uvMin.x, uvMax.y}; // bottom-left
     glm::vec2 uv1 = {uvMax.x, uvMax.y}; // bottom-right
@@ -36,7 +36,7 @@ void addFace(std::vector<float> &verts,
     add(vert0, uv0);
 }
 
-std::vector<float> makeTexturedCube(float size = 1.0f)
+std::vector<float> RenderObject::makeTexturedCube(float size)
 {
     std::vector<float> verts;
     float s = size / 2.0f;
@@ -57,7 +57,9 @@ std::vector<float> makeTexturedCube(float size = 1.0f)
     return verts;
 }
 
-float RenderObject::gamma = 2.5f;
+const std::vector<float> RenderObject::cubeMesh = makeTexturedCube();
+
+float RenderObject::gamma = 1.0f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
 Uint64 RenderObject::now = SDL_GetTicks();
@@ -73,18 +75,20 @@ const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000
 
 Mesh *RenderObject::defaultMeshAPI = nullptr;
 
-void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera)
+void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera, float gamma, bool disableBrightness)
 {
     RenderObject::pointShader = pointShader;
     RenderObject::camera = camera;
     RenderObject::defaultMeshAPI = defaultMeshAPI;
     RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {3}, MeshTypes::Points);
+    RenderObject::gamma = gamma;
+    RenderObject::disableBrightness = disableBrightness;
 }
 
 RenderObject::RenderObject(Shader *shady, Image *im, const BigVec3 &pos, const glm::vec3 &rot, const glm::vec3 &scl)
 {
     setupObject(shady, im, pos, rot);
-    meshes.push_back(defaultMeshAPI->makeNewMesh(makeTexturedCube(), {3, 2, 3}));
+    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeMesh, {3, 2, 3}));
     meshes.back()->sizeOffset = scl;
 }
 
@@ -181,7 +185,6 @@ void RenderObject::renderAsMesh()
     shader->setUniform("texture1", image);
 
     glm::vec3 newPos;
-    // glm::vec3 newSize;
 
     Bigint distance = distanceSquared.sqrt();
 
@@ -191,13 +194,11 @@ void RenderObject::renderAsMesh()
     {
         transform = distance * Bigint(0.1f) + Bigint(0.1f);
         newPos = (tempLocalPosition / transform).toFloatVec3();
-        // newSize = (BigVec3(mesh->sizeOffset) / transform).toFloatVec3();
     }
     else
     {
         transform = Bigint(1);
         newPos = tempLocalPosition.toFloatVec3();
-        // newSize = mesh->sizeOffset;
     }
 
     glm::mat4 matrix(1.0f);
@@ -255,6 +256,10 @@ void RenderObject::renderAsMesh()
         {
             uModel = glm::translate(matrix, mesh->posOffset / floatTransform);
             uModel = glm::scale(uModel, mesh->sizeOffset / floatTransform);
+        }
+        else
+        {
+            uModel = matrix;
         }
 
         if (isInf)
