@@ -85,17 +85,14 @@ void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camer
     RenderObject::disableBrightness = disableBrightness;
 }
 
-RenderObject::RenderObject(Shader *shady, Image *im, const BigVec3 &pos, const glm::vec3 &rot, const glm::vec3 &scl)
+RenderObject::RenderObject(Shader *shady, Image *im)
 {
-    setupObject(shady, im, pos, rot);
+    setupObject(shady, im);
     meshes.push_back(defaultMeshAPI->makeNewMesh(cubeMesh, {3, 2, 3}));
-    meshes.back()->sizeOffset = scl;
 }
 
-void RenderObject::setupObject(Shader *shady, Image *im, const BigVec3 &pos, const glm::vec3 &rot)
+void RenderObject::setupObject(Shader *shady, Image *im)
 {
-    position = pos;
-    rotation = rot;
     shader = shady;
     image = im;
     if (pointShader == nullptr || camera == nullptr || defaultMeshAPI == nullptr)

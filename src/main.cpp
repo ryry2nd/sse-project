@@ -3,130 +3,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "engine/objects/Objects.hpp"
 #include "engine/HelperFunctions.hpp"
+#include "engine/scripting/ScriptingHeaders.hpp"
 #include <string>
 #include <memory>
 #include <iostream>
 
-Bigint *getHoweverManyDigits(size_t numZeros)
-{
-    if (numZeros == 0)
-    {
-        return new Bigint();
-    }
-    std::string pos;
-    pos.reserve(numZeros + 1);
-    pos.append("1");
-
-    for (size_t i = 0; i < numZeros; i++)
-    {
-        pos.append("0");
-    }
-
-    return new Bigint(pos);
-}
-
-class Sun : public RenderObject
-{
-public:
-    Sun(Shader *shader, Image *image)
-        : RenderObject(shader, image) //, glm::vec3(1.0f), Bigint("384600000000000000000000000"))
-    {
-        meshes[0]->sizeOffset *= 1392000000;
-        cullPriority = CullPriority::High;
-    }
-
-    void appendUpdate(const float &deltaTime) override
-    {
-        rotation.y += deltaTime / 10;
-    }
-};
-
-class Earth : public RenderObject
-{
-public:
-    Earth(Shader *shader, Image *image)
-        : RenderObject(shader, image)
-    {
-        meshes[0]->sizeOffset *= 12756000;
-        position.y -= (Bigint("12756000") / 2);
-        cullPriority = CullPriority::High;
-    }
-
-    void appendUpdate(const float &deltaTime) override
-    {
-        // rotation.y += deltaTime / 10;
-    }
-};
-
-class MegaCubes : public RenderObject
-{
-public:
-    MegaCubes(Shader *shader, Image *image)
-    {
-        setupObject(shader, image, BigVec3(), glm::vec3());
-
-        float size = 512.0f;
-        float s = 1.0f;
-        glm::vec2 grid(2, 2);
-        int x, y, z, i;
-        float fx, fy, fz;
-
-        std::vector<float> bigMesh;
-        std::vector<float> tempVerts;
-        for (x = 0; x < size; x++)
-        {
-            for (y = 0; y < size; y++)
-            {
-                for (z = 0; z < size; z++)
-                {
-                    tempVerts.clear();
-                    fx = s * x * 2;
-                    fy = s * y * 2;
-                    fz = s * z * 2;
-                    // // Front face (+Z)
-                    // if (z == size - 1)
-                    //     addFace(tempVerts, {fx - s, fy - s, fz + s}, {fx + s, fy - s, fz + s}, {fx + s, fy + s, fz + s}, {fx - s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Back face (-Z)
-                    // if (z == 0)
-                    //     addFace(tempVerts, {fx + s, fy - s, fz - s}, {fx - s, fy - s, fz - s}, {fx - s, fy + s, fz - s}, {fx + s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Left face (-X)
-                    // if (x == 0)
-                    //     addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx - s, fy - s, fz + s}, {fx - s, fy + s, fz + s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Right face (+X)
-                    // if (x == size - 1)
-                    //     addFace(tempVerts, {fx + s, fy - s, fz + s}, {fx + s, fy - s, fz - s}, {fx + s, fy + s, fz - s}, {fx + s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // Top face (+Y)
-                    if (y == size - 1)
-                        addFace(tempVerts, {fx - s, fy + s, fz + s}, {fx + s, fy + s, fz + s}, {fx + s, fy + s, fz - s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // Bottom face (-Y)
-                    if (y == 0)
-                        addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx + s, fy - s, fz - s}, {fx + s, fy - s, fz + s}, {fx - s, fy - s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-
-                    bigMesh.insert(bigMesh.end(), tempVerts.begin(), tempVerts.end());
-                }
-            }
-        }
-
-        Mesh *tempMesh;
-        for (x = 0; x < grid.x; x++)
-        {
-            for (y = 0; y < grid.y; y++)
-            {
-                tempMesh = defaultMeshAPI->makeNewMesh(bigMesh, {3, 2, 3});
-                tempMesh->posOffset = glm::vec3(x * size, 0, y * size);
-                // tempMesh->sizeOffset = glm::vec3(size);
-                meshes.push_back(tempMesh);
-            }
-        }
-    }
-
-    void appendUpdate(const float &deltaTime) override {}
-};
-
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
-    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0);
+    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
     Shader *apiShader = new ShaderOpenGl();
     Image *apiImage = new ImageOpenGl();
 
@@ -135,12 +20,8 @@ int main(int argc, char *argv[])
     const Bigint WALK_SPEED = Bigint(10);
     Bigint run_speed = Bigint("100");
 
-    // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
-
-    Bigint *pos = getHoweverManyDigits(0);
-
     // this is the camera, cameras are neat
-    Camera *camera = new Camera(res, BigVec3(*pos, 0.0f, -2.0f));
+    Camera *camera = new Camera(res, BigVec3(0.0f, 0.0f, -2.0f));
     camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
@@ -153,42 +34,17 @@ int main(int argc, char *argv[])
     delete apiImage;
     delete apiShader;
 
-    // makes the cubes
+    LuaHeaders::LuaScriptLib lua;
+    lua.include(LuaHeaders::LuaLibEnum::glm);
+    lua.include(LuaHeaders::LuaLibEnum::bigvars);
+    lua.include(LuaHeaders::LuaLibEnum::objects);
 
-    Sun sun(shader, image);
-    sun.position.x -= Bigint("150000000000");
-    sun.position.x += *pos;
+    lua.includeInitialized("shader1", *shader);
+    lua.includeInitialized("image1", *image);
 
-    Earth earth(shader, image);
-    earth.position.x += *pos;
+    lua.includeScripts("./scripts");
 
-    PhysicsObject cube(shader, image);
-    cube.position.x += *pos;
-
-    PhysicsObject cube2(shader, image);
-    cube2.position.x -= Bigint(10);
-    cube2.position.x += *pos;
-
-    PhysicsObject cube3(shader, image);
-    cube3.position.x += Bigint(10);
-    cube3.position.x += *pos;
-
-    MegaCubes megaCubes(shader, image);
-    megaCubes.position.y += Bigint(200);
-    megaCubes.position.x += *pos;
-
-    const int NUM_TEMPS = 11;
-    std::vector<RenderObject *> temp;
-
-    for (int i = 0; i < NUM_TEMPS; i++)
-    {
-        temp.push_back(new PhysicsObject(shader, image));
-        temp[i]->position.z += Bigint(10 * i);
-        temp[i]->position.x += *pos;
-    }
-
-    delete pos;
-    pos = nullptr;
+    // lua.getFunction("test")();
 
     // starts running the game loop
     bool running = true;

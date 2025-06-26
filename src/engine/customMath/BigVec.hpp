@@ -2,11 +2,12 @@
 
 #include "Bigint.hpp"
 
-struct BigVec3
+class BigVec3
 {
+public:
     Bigint x, y, z;
 
-    BigVec3() : x(Bigint(0)), y(Bigint(0)), z(Bigint(0)) {}
+    BigVec3() : x(Bigint()), y(Bigint()), z(Bigint()) {}
 
     BigVec3(Bigint x_, Bigint y_, Bigint z_)
         : x(x_), y(y_), z(z_) {}
@@ -133,11 +134,12 @@ struct BigVec3
     }
 };
 
-struct BigVec2
+class BigVec2
 {
+public:
     Bigint x, y;
 
-    BigVec2() : x(Bigint(0)), y(Bigint(0)) {}
+    BigVec2() : x(Bigint()), y(Bigint()) {}
 
     BigVec2(Bigint x, Bigint y)
         : x(x), y(y) {}

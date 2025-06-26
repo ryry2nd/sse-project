@@ -13,9 +13,8 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-class Bigint
+struct Bigint
 {
-public:
     static inline const boost::multiprecision::cpp_int MAX_DOUBLE = boost::multiprecision::cpp_int(std::numeric_limits<double>::max());
     static inline const boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
 
@@ -206,4 +205,23 @@ public:
         result.value = guess;
         return result;
     }
+
+    // uuhhh, this is for fun, in case i want to make things a googl meters apart, put whatever number here, see what happens, its pritty cool
+    static Bigint getHoweverManyDigits(size_t numZeros)
+    {
+        if (numZeros == 0)
+        {
+            return Bigint();
+        }
+        std::string pos;
+        pos.reserve(numZeros + 1);
+        pos.append("1");
+
+        for (size_t i = 0; i < numZeros; i++)
+        {
+            pos.append("0");
+        }
+
+        return Bigint(pos);
+    };
 };
