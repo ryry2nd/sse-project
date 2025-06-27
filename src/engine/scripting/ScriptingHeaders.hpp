@@ -191,6 +191,7 @@ namespace LuaHeaders
             sol::table objects = lua.create_table();
             objects.new_usertype<Shader>("Shader");
             objects.new_usertype<Image>("Image");
+            objects.new_usertype<Camera>("Camera", "position", &Camera::position, "rotation", &Camera::rotation, "fov", &Camera::fov);
             objects.new_usertype<Mesh>("Mesh", "posOffset", &Mesh::posOffset, "rotOffset", &Mesh::rotOffset, "sizeOffset", &Mesh::sizeOffset);
             objects["CullPriority"] = lua.create_table_with(
                 "Low", CullPriority::Low,

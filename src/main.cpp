@@ -11,7 +11,29 @@
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
-    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, false);
+
+    Font defaultFont("assets/unifont-16.0.04.otf", 48);
+    Mesh *mesh2d = new OpenGlMesh({
+                                      0.0f,
+                                      0.0f,
+                                      0.0f,
+                                      0.0f,
+                                      1.0f,
+                                      0.0f,
+                                      1.0f,
+                                      0.0f,
+                                      1.0f,
+                                      1.0f,
+                                      1.0f,
+                                      1.0f,
+                                      0.0f,
+                                      1.0f,
+                                      0.0f,
+                                      1.0f,
+                                  },
+                                  {2, 2});
+    Shader *shader2d = new ShaderOpenGl("shaders/2dVertex", "shaders/2dFragment");
     Shader *apiShader = new ShaderOpenGl();
     Image *apiImage = new ImageOpenGl();
 
@@ -34,15 +56,16 @@ int main(int argc, char *argv[])
     delete apiImage;
     delete apiShader;
 
-    LuaHeaders::LuaScriptLib lua;
-    lua.include(LuaHeaders::LuaLibEnum::glm);
-    lua.include(LuaHeaders::LuaLibEnum::bigvars);
-    lua.include(LuaHeaders::LuaLibEnum::objects);
-
-    lua.includeInitialized("shader1", *shader);
-    lua.includeInitialized("image1", *image);
-
-    lua.includeScripts("./scripts");
+    //     LuaHeaders::LuaScriptLib lua;
+    //     lua.include(LuaHeaders::LuaLibEnum::glm);
+    //     lua.include(LuaHeaders::LuaLibEnum::bigvars);
+    //     lua.include(LuaHeaders::LuaLibEnum::objects);
+    //
+    //     lua.includeInitialized("shader1", *shader);
+    //     lua.includeInitialized("image1", *image);
+    //     lua.includeInitialized("camera1", *camera);
+    //
+    //     lua.includeScripts("./scripts");
 
     // lua.getFunction("test")();
 
@@ -75,82 +98,82 @@ int main(int argc, char *argv[])
             if (event.type == SDL_QUIT)
                 running = false;
 
-            // rotates camera
-            if (event.type == SDL_MOUSEMOTION)
-            {
-                accumulatedMouseX += event.motion.xrel;
-                accumulatedMouseY += event.motion.yrel;
-            }
-
-            // when you press escape, leave
-            if (event.type == SDL_KEYDOWN)
-            {
-                if (event.key.keysym.sym == SDLK_ESCAPE)
-                {
-                    running = false;
-                }
-                if (event.key.keysym.sym == SDLK_z)
-                {
-                    run_speed *= Bigint(10);
-                }
-                if (event.key.keysym.sym == SDLK_x)
-                {
-                    run_speed /= Bigint(10);
-                }
-            }
+            //             // rotates camera
+            //             if (event.type == SDL_MOUSEMOTION)
+            //             {
+            //                 accumulatedMouseX += event.motion.xrel;
+            //                 accumulatedMouseY += event.motion.yrel;
+            //             }
+            //
+            //             // when you press escape, leave
+            //             if (event.type == SDL_KEYDOWN)
+            //             {
+            //                 if (event.key.keysym.sym == SDLK_ESCAPE)
+            //                 {
+            //                     running = false;
+            //                 }
+            //                 if (event.key.keysym.sym == SDLK_z)
+            //                 {
+            //                     run_speed *= Bigint(10);
+            //                 }
+            //                 if (event.key.keysym.sym == SDLK_x)
+            //                 {
+            //                     run_speed /= Bigint(10);
+            //                 }
+            //             }
         }
 
-        // gets all keystates
-        const Uint8 *keystates = SDL_GetKeyboardState(NULL);
-
-        // if your running, run, otherwise dont
-        speed = keystates[SDL_SCANCODE_LSHIFT] ? &run_speed : &WALK_SPEED;
-
-        // movement
-        if (keystates[SDL_SCANCODE_W])
-        {
-            camera->position -= BigVec3(camera->getForwardVector() * deltaTime) * *speed;
-        }
-        if (keystates[SDL_SCANCODE_S])
-        {
-            camera->position += BigVec3(camera->getForwardVector() * deltaTime) * *speed;
-        }
-
-        if (keystates[SDL_SCANCODE_D])
-        {
-            camera->position -= BigVec3(camera->getRightVector() * deltaTime) * *speed;
-        }
-        if (keystates[SDL_SCANCODE_A])
-        {
-            camera->position += BigVec3(camera->getRightVector() * deltaTime) * *speed;
-        }
-
-        if (keystates[SDL_SCANCODE_SPACE])
-        {
-            camera->position += BigVec3(camera->getDownVector() * deltaTime) * *speed;
-        }
-        if (keystates[SDL_SCANCODE_LCTRL])
-        {
-            camera->position -= BigVec3(camera->getDownVector() * deltaTime) * *speed;
-        }
-
-        if (deltaTime > 0)
-        {
-
-            camera->rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-            camera->rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-
-            accumulatedMouseX = 0;
-            accumulatedMouseY = 0;
-        }
-
-        RenderObject::updateTime();
-
-        RenderObject::UpdateAllObjects(deltaTime);
+        //         // gets all keystates
+        //         const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+        //
+        //         // if your running, run, otherwise dont
+        //         speed = keystates[SDL_SCANCODE_LSHIFT] ? &run_speed : &WALK_SPEED;
+        //
+        //         // movement
+        //         if (keystates[SDL_SCANCODE_W])
+        //         {
+        //             camera->position -= BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+        //         }
+        //         if (keystates[SDL_SCANCODE_S])
+        //         {
+        //             camera->position += BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+        //         }
+        //
+        //         if (keystates[SDL_SCANCODE_D])
+        //         {
+        //             camera->position -= BigVec3(camera->getRightVector() * deltaTime) * *speed;
+        //         }
+        //         if (keystates[SDL_SCANCODE_A])
+        //         {
+        //             camera->position += BigVec3(camera->getRightVector() * deltaTime) * *speed;
+        //         }
+        //
+        //         if (keystates[SDL_SCANCODE_SPACE])
+        //         {
+        //             camera->position += BigVec3(camera->getDownVector() * deltaTime) * *speed;
+        //         }
+        //         if (keystates[SDL_SCANCODE_LCTRL])
+        //         {
+        //             camera->position -= BigVec3(camera->getDownVector() * deltaTime) * *speed;
+        //         }
+        //
+        //         if (deltaTime > 0)
+        //         {
+        //
+        //             camera->rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+        //             camera->rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+        //
+        //             accumulatedMouseX = 0;
+        //             accumulatedMouseY = 0;
+        //         }
+        //
+        //         RenderObject::updateTime();
+        //
+        //         RenderObject::UpdateAllObjects(deltaTime);
 
         renderingEngine->clearBackground();
 
-        RenderObject::DrawAllObjects();
+        // RenderObject::DrawAllObjects();
 
         frames++;
 
@@ -161,7 +184,18 @@ int main(int argc, char *argv[])
             start = SDL_GetTicks64();
         }
 
+        Image *test = new ImageOpenGl(defaultFont.renderText("test", {255, 255, 255, 255}));
+        shader2d->includeShader();
+        shader2d->setUniform("texture1", test);
+        shader2d->setUniform("uProjection", camera->getProjectionMatrix());
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(10, 10, 0.0f));
+        shader2d->setUniform("model", model);
+        mesh2d->Draw();
+
         renderingEngine->swapBuffer();
+        delete test;
     }
     // delete everything
     delete shader;

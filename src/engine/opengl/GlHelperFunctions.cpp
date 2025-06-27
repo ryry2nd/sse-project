@@ -42,7 +42,6 @@ HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Ui
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDepthFunc(GL_LESS); // or GL_LEQUAL
     glDepthMask(GL_TRUE); // enable writing to depth buffer
-    glEnable(GL_MULTISAMPLE);
 }
 
 void HelperFunctionsOpenGl::clearBackground()

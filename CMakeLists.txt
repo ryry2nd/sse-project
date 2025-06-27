@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 4.0.2)
 project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -16,6 +16,7 @@ find_package(glm REQUIRED)
 find_package(glew REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(sol2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 if (NOT WIN32)
     find_package(PkgConfig REQUIRED)
@@ -32,6 +33,7 @@ target_link_libraries(common_libs INTERFACE
     SQLite::SQLite3         # Sqlite linking
     sol2::sol2              # sol2 linking
     glm::glm                # glm linking
+    sdl_ttf::sdl_ttf      # sdl ttf linking
 )
 
 

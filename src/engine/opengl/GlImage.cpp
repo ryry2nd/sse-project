@@ -8,6 +8,16 @@ ImageOpenGl::ImageOpenGl(const std::string &filePath)
         std::cerr << "Image load fail: " << IMG_GetError() << "\n";
         return;
     }
+    setupObject(surface);
+}
+
+ImageOpenGl::ImageOpenGl(SDL_Surface *surface)
+{
+    setupObject(surface);
+}
+
+void ImageOpenGl::setupObject(SDL_Surface *surface)
+{
 
     GLenum format = surface->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
 
@@ -29,6 +39,10 @@ ImageOpenGl::~ImageOpenGl()
 {
     if (textureID)
         glDeleteTextures(1, &textureID);
+    if (font)
+    {
+        TTF_CloseFont(font);
+    }
 }
 
 GLuint ImageOpenGl::getID() const

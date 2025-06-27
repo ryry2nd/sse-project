@@ -78,7 +78,14 @@ glm::vec3 OpenGlMesh::calculateSizes()
 
     for (size_t i = 0; i < vertices.size(); i += total)
     {
-        glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
+        if (vertLogic[0] == 3)
+        {
+            glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
+        }
+        else
+        {
+            glm::vec3 pos(vertices[i], vertices[i + 1], 0);
+        }
         minCorner = glm::min(minCorner, pos);
         maxCorner = glm::max(maxCorner, pos);
     }

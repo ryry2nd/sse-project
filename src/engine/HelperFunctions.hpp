@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -28,14 +29,19 @@ class HelperFunctions
 public:
     HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false)
     {
+        this->res = res;
         // it initialises sdl
         if (SDL_Init(SDL_INIT_VIDEO) != 0)
         {
             std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
             throw std::runtime_error("Sdl cant initialise");
         }
+        if (TTF_Init() == -1)
+        {
+            SDL_Log("TTF_Init error: %s", TTF_GetError());
+        }
 
-        if (aa == 0)
+        if (aa >= 0)
         {
             SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
             SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
@@ -64,8 +70,12 @@ public:
         SDL_Quit();
     }
 
+    virtual void include_font(const std::string &fontPath, int size) = 0;
+    virtual void renderText(const std::string &message, SDL_Color color, int x, int y, float scale) = 0;
+
 protected:
     SDL_Window *window;
+    glm::vec2 res;
 };
 
 class Image
@@ -111,3 +121,35 @@ public:
     std::vector<short> vertLogic;
     MeshTypes meshType;
 };
+
+class Font
+{
+    Font(const std::string &fontPath, int size)
+    {
+        font = TTF_OpenFont(fontPath.c_str(), size);
+        if (!font)
+            throw std::runtime_error("Failed to load font \"" + fontPath + "\": " + TTF_GetError());
+    }
+
+    ~Font()
+    {
+        TTF_CloseFont(font);
+    }
+
+    SDL_Surface *renderText(const std::string &message, SDL_Color color)
+    {
+        if (!font)
+            throw std::runtime_error("no font defined");
+
+        SDL_Surface *surf = TTF_RenderUTF8_Blended(font, message.c_str(), color);
+        if (!surf)
+            throw std::runtime_error("surface failed to initialise");
+
+        SDL_Surface *formattedSurf = SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_ABGR8888, 0);
+        SDL_FreeSurface(surf);
+        return formattedSurf;
+    }
+
+private:
+    TTF_Font *font;
+}

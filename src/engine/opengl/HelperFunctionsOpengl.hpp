@@ -34,6 +34,7 @@ public:
     // it makes the image
     ImageOpenGl() {}
     ImageOpenGl(const std::string &filePath);
+    ImageOpenGl(SDL_Surface *surface);
     // it unmakes the image
     ~ImageOpenGl();
     // it gets the id
@@ -42,6 +43,7 @@ public:
     Image *makeNewImage(const std::string &filePath) const;
 
 private:
+    void setupObject(SDL_Surface *surface);
     GLuint textureID = 0;
 };
 
@@ -94,8 +96,6 @@ public:
     Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
 
     Mesh *makeCopy() const;
-
-    glm::vec3 meshSize;
 
 private:
     glm::vec3 calculateSizes();

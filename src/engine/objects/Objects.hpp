@@ -47,10 +47,6 @@ private:
 class Camera : public BaseObject
 {
 public:
-    const glm::vec2 RES;
-    // the two clip distances
-    float near = 0.00001f;
-    float far = 100000.0f;
     float fov = 90.0f; // if this number isn't 90 then you got a small wiener (or your zooming in which is chill but only if your zooming in)
     Camera(const glm::vec2 &RES, BigVec3 pos = BigVec3(), glm::vec3 rot = glm::vec3()) : BaseObject(pos, rot), RES(RES) {}
     glm::mat4 getViewMatrix() const;
@@ -68,6 +64,10 @@ public:
 private:
     // it gets all them rotation craziness
     glm::mat4 getRotationMatrix() const;
+    const glm::vec2 RES;
+    // the two clip distances
+    float near = 0.00001f;
+    float far = 100000.0f;
 };
 
 class RenderObject : public BaseObject
