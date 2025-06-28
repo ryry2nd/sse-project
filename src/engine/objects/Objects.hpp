@@ -49,9 +49,12 @@ class Camera : public BaseObject
 public:
     float fov = 90.0f; // if this number isn't 90 then you got a small wiener (or your zooming in which is chill but only if your zooming in)
     Camera(const glm::vec2 &RES, BigVec3 pos = BigVec3(), glm::vec3 rot = glm::vec3()) : BaseObject(pos, rot), RES(RES) {}
+    // takes the cameras rotation into account
     glm::mat4 getViewMatrix() const;
     // do the thing with the projection, but like pass in near and far
     glm::mat4 getProjectionMatrix() const;
+    // does all of them projections but in 2d
+    glm::mat4 getProjectionMatrix2d() const;
     // it gets the vector right in front
     glm::vec3 getForwardVector() const;
     // it gets the vector to the right
@@ -93,7 +96,8 @@ protected:
     BigVec3 tempLocalPosition;
     CullPriority cullPriority = CullPriority::Medium;
 
-    const static std::vector<float> cubeMesh;
+    static std::vector<float> cubeMesh;
+    static std::vector<unsigned int> cubeIndices;
     static Mesh *defaultMeshAPI;
 
     const static Bigint maxDistanceMediumSquared;
@@ -104,15 +108,6 @@ protected:
 
     void Update(const float &deltaTime);
     void Draw();
-
-    static std::vector<float> makeTexturedCube(float size = 1.0f);
-    static void addFace(std::vector<float> &verts,
-                        glm::vec3 vert0,
-                        glm::vec3 vert1,
-                        glm::vec3 vert2,
-                        glm::vec3 vert3,
-                        glm::vec2 uvMin,
-                        glm::vec2 uvMax);
 
 private:
     Shader *shader;
@@ -142,66 +137,95 @@ private:
     static Mesh *pointMesh;
 };
 
+class RenderObject2d
+{
+public:
+    glm::vec2 position;
+    glm::vec2 rotation;
+    glm::vec2 scale;
+
+    RenderObject2d(Mesh *mesh, Shader *shader, Camera *cam) : mesh2d(mesh), shader2d(shader), camera(cam) {}
+
+    void Draw(const Image *image)
+    {
+        glm::mat4 model(1.0f);
+        model = glm::translate(model, glm::vec3(position, 0));
+        model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
+        model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
+        model = glm::scale(model, glm::vec3(scale, 1));
+        shader2d->includeShader();
+        shader2d->setUniform("texture1", image);
+        shader2d->setUniform("uProjection", camera->getProjectionMatrix2d());
+        shader2d->setUniform("uModel", model);
+        mesh2d->Draw();
+    }
+
+private:
+    Mesh *mesh2d;
+    Shader *shader2d;
+    Camera *camera;
+};
+
 class MeshChunks : public RenderObject
 {
 public:
     MeshChunks(Shader *shader, Image *image)
     {
-        setupObject(shader, image);
-
-        float size = 512.0f;
-        float s = 0.5f;
-        glm::vec2 grid(2, 2);
-        int x, y, z, i;
-        float fx, fy, fz;
-
-        std::vector<float> bigMesh;
-        std::vector<float> tempVerts;
-        for (x = 0; x < size; x++)
-        {
-            for (y = 0; y < size; y++)
-            {
-                for (z = 0; z < size; z++)
-                {
-                    tempVerts.clear();
-                    fx = s * x * 2 - size;
-                    fy = s * y * 2 - size;
-                    fz = s * z * 2 - size;
-                    // // Front face (+Z)
-                    // if (z == size - 1)
-                    //     addFace(tempVerts, {fx - s, fy - s, fz + s}, {fx + s, fy - s, fz + s}, {fx + s, fy + s, fz + s}, {fx - s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Back face (-Z)
-                    // if (z == 0)
-                    //     addFace(tempVerts, {fx + s, fy - s, fz - s}, {fx - s, fy - s, fz - s}, {fx - s, fy + s, fz - s}, {fx + s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Left face (-X)
-                    // if (x == 0)
-                    //     addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx - s, fy - s, fz + s}, {fx - s, fy + s, fz + s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // // Right face (+X)
-                    // if (x == size - 1)
-                    //     addFace(tempVerts, {fx + s, fy - s, fz + s}, {fx + s, fy - s, fz - s}, {fx + s, fy + s, fz - s}, {fx + s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // Top face (+Y)
-                    if (y == size - 1)
-                        addFace(tempVerts, {fx - s, fy + s, fz + s}, {fx + s, fy + s, fz + s}, {fx + s, fy + s, fz - s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-                    // Bottom face (-Y)
-                    if (y == 0)
-                        addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx + s, fy - s, fz - s}, {fx + s, fy - s, fz + s}, {fx - s, fy - s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-
-                    bigMesh.insert(bigMesh.end(), tempVerts.begin(), tempVerts.end());
-                }
-            }
-        }
-
-        Mesh *tempMesh;
-        for (x = 0; x < grid.x; x++)
-        {
-            for (y = 0; y < grid.y; y++)
-            {
-                tempMesh = defaultMeshAPI->makeNewMesh(bigMesh, {3, 2, 3});
-                tempMesh->posOffset = glm::vec3(x * size, 0, y * size);
-                // tempMesh->sizeOffset = glm::vec3(size);
-                meshes.push_back(tempMesh);
-            }
-        }
+        //         setupObject(shader, image);
+        //
+        //         float size = 512.0f;
+        //         float s = 0.5f;
+        //         glm::vec2 grid(2, 2);
+        //         int x, y, z, i;
+        //         float fx, fy, fz;
+        //
+        //         std::vector<float> bigMesh;
+        //         std::vector<float> tempVerts;
+        //         for (x = 0; x < size; x++)
+        //         {
+        //             for (y = 0; y < size; y++)
+        //             {
+        //                 for (z = 0; z < size; z++)
+        //                 {
+        //                     tempVerts.clear();
+        //                     fx = s * x * 2 - size;
+        //                     fy = s * y * 2 - size;
+        //                     fz = s * z * 2 - size;
+        //                     // // Front face (+Z)
+        //                     // if (z == size - 1)
+        //                     //     addFace(tempVerts, {fx - s, fy - s, fz + s}, {fx + s, fy - s, fz + s}, {fx + s, fy + s, fz + s}, {fx - s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //                     // // Back face (-Z)
+        //                     // if (z == 0)
+        //                     //     addFace(tempVerts, {fx + s, fy - s, fz - s}, {fx - s, fy - s, fz - s}, {fx - s, fy + s, fz - s}, {fx + s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //                     // // Left face (-X)
+        //                     // if (x == 0)
+        //                     //     addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx - s, fy - s, fz + s}, {fx - s, fy + s, fz + s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //                     // // Right face (+X)
+        //                     // if (x == size - 1)
+        //                     //     addFace(tempVerts, {fx + s, fy - s, fz + s}, {fx + s, fy - s, fz - s}, {fx + s, fy + s, fz - s}, {fx + s, fy + s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //                     // Top face (+Y)
+        //                     if (y == size - 1)
+        //                         makeFace(tempVerts, {fx - s, fy + s, fz + s}, {fx + s, fy + s, fz + s}, {fx + s, fy + s, fz - s}, {fx - s, fy + s, fz - s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //                     // Bottom face (-Y)
+        //                     if (y == 0)
+        //                         addFace(tempVerts, {fx - s, fy - s, fz - s}, {fx + s, fy - s, fz - s}, {fx + s, fy - s, fz + s}, {fx - s, fy - s, fz + s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+        //
+        //                     bigMesh.insert(bigMesh.end(), tempVerts.begin(), tempVerts.end());
+        //                 }
+        //             }
+        //         }
+        //
+        //         Mesh *tempMesh;
+        //         for (x = 0; x < grid.x; x++)
+        //         {
+        //             for (y = 0; y < grid.y; y++)
+        //             {
+        //                 tempMesh = defaultMeshAPI->makeNewMesh(bigMesh, {3, 2, 3});
+        //                 tempMesh->posOffset = glm::vec3(x * size, 0, y * size);
+        //                 // tempMesh->sizeOffset = glm::vec3(size);
+        //                 meshes.push_back(tempMesh);
+        //             }
+        //         }
     }
 
     void appendUpdate(const float &deltaTime) override {}

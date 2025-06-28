@@ -70,9 +70,6 @@ public:
         SDL_Quit();
     }
 
-    virtual void include_font(const std::string &fontPath, int size) = 0;
-    virtual void renderText(const std::string &message, SDL_Color color, int x, int y, float scale) = 0;
-
 protected:
     SDL_Window *window;
     glm::vec2 res;
@@ -107,9 +104,9 @@ class Mesh
 public:
     virtual ~Mesh() = default;
 
-    virtual void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
+    virtual void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
     virtual void Draw() = 0;
-    virtual Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
+    virtual Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
 
     virtual Mesh *makeCopy() const = 0;
 
@@ -118,12 +115,14 @@ public:
     glm::vec3 rotOffset = glm::vec3(0.0f);
 
     std::vector<float> vertices;
+    std::vector<unsigned int> indices;
     std::vector<short> vertLogic;
     MeshTypes meshType;
 };
 
 class Font
 {
+public:
     Font(const std::string &fontPath, int size)
     {
         font = TTF_OpenFont(fontPath.c_str(), size);
@@ -152,4 +151,4 @@ class Font
 
 private:
     TTF_Font *font;
-}
+};

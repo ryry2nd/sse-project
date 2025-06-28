@@ -28,6 +28,8 @@ HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Ui
         throw std::runtime_error("Failed to initialize GLEW\n");
     }
 
+    glViewport(0, 0, res.x, res.y);
+
     SDL_GL_SetSwapInterval(vsync);
 
     // this turns on all the cool opengl settings that probably should be the default

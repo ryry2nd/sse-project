@@ -8,7 +8,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -88,18 +87,20 @@ class OpenGlMesh : public Mesh
 {
 public:
     OpenGlMesh() {}
-    OpenGlMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+    OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     ~OpenGlMesh();
     // updates the vertices (you dont need to run this unless you changed the vertices)
-    void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+    void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     void Draw();
-    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
+    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
 
     Mesh *makeCopy() const;
 
+    glm::vec3 meshSize;
+
 private:
     glm::vec3 calculateSizes();
-    GLuint VAO, VBO;
+    GLuint VAO, VBO, EBO;
     GLenum glMeshType;
     GLsizei size;
 };

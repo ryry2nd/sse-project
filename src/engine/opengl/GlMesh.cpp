@@ -6,33 +6,41 @@ OpenGlMesh::~OpenGlMesh()
         glDeleteVertexArrays(1, &VAO);
     if (VBO != 0)
         glDeleteBuffers(1, &VBO);
+    if (EBO != 0)
+        glDeleteBuffers(1, &EBO);
 }
 
-OpenGlMesh::OpenGlMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0)
+OpenGlMesh::OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
-    updateVerts(vertices, vertLogic, meshType);
+    updateVerts(vertices, indices, vertLogic, meshType);
 }
 
-void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType)
+void OpenGlMesh::updateVerts(const std::vector<float> &vertices,
+                             const std::vector<unsigned int> &indices,
+                             const std::vector<short> &vertLogic,
+                             const MeshTypes &meshType)
 {
+    glBindVertexArray(VAO); // Make sure the VAO is bound
+
+    // Upload vertex data
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
-    float floatsPerVert = 0;
+    // Upload index data
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
+    // Set vertex attribute pointers
+    int floatsPerVert = 0;
     for (short s : vertLogic)
-    {
         floatsPerVert += s;
-    }
-
-    size = vertices.size() / floatsPerVert;
 
     size_t numsSoFar = 0;
-
     for (size_t i = 0; i < vertLogic.size(); i++)
     {
         glVertexAttribPointer(i, vertLogic[i], GL_FLOAT, GL_FALSE, floatsPerVert * sizeof(float), (void *)(numsSoFar * sizeof(float)));
@@ -41,6 +49,7 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vect
     }
 
     this->vertices = vertices;
+    this->indices = indices;
     this->vertLogic = vertLogic;
     this->meshType = meshType;
 
@@ -63,7 +72,7 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices, const std::vect
 void OpenGlMesh::Draw()
 {
     glBindVertexArray(VAO); // ngl who knows what this crap means, according to the names it applies and binds stuff
-    glDrawArrays(glMeshType, 0, size);
+    glDrawElements(glMeshType, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
@@ -76,15 +85,17 @@ glm::vec3 OpenGlMesh::calculateSizes()
     for (short &i : vertLogic)
         total += i;
 
+    glm::vec3 pos;
+
     for (size_t i = 0; i < vertices.size(); i += total)
     {
         if (vertLogic[0] == 3)
         {
-            glm::vec3 pos(vertices[i], vertices[i + 1], vertices[i + 2]);
+            pos = glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
         }
         else
         {
-            glm::vec3 pos(vertices[i], vertices[i + 1], 0);
+            pos = glm::vec3(vertices[i], vertices[i + 1], 0);
         }
         minCorner = glm::min(minCorner, pos);
         maxCorner = glm::max(maxCorner, pos);
@@ -93,14 +104,14 @@ glm::vec3 OpenGlMesh::calculateSizes()
     return maxCorner - minCorner;
 }
 
-Mesh *OpenGlMesh::makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
+Mesh *OpenGlMesh::makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
 {
-    return new OpenGlMesh(vertices, vertLogic, meshType);
+    return new OpenGlMesh(vertices, indices, vertLogic, meshType);
 }
 
 Mesh *OpenGlMesh::makeCopy() const
 {
-    OpenGlMesh *ret = new OpenGlMesh(vertices, vertLogic, meshType);
+    OpenGlMesh *ret = new OpenGlMesh(vertices, indices, vertLogic, meshType);
     ret->sizeOffset = sizeOffset;
     ret->posOffset = posOffset;
     ret->rotOffset = rotOffset;
