@@ -89,6 +89,16 @@ ShaderOpenGl::~ShaderOpenGl()
     glDeleteProgram(id);
 }
 
+void ShaderOpenGl::enableCulling()
+{
+    glEnable(GL_CULL_FACE);
+}
+
+void ShaderOpenGl::disableCulling()
+{
+    glDisable(GL_CULL_FACE);
+}
+
 void ShaderOpenGl::createUniform(const std::string &location, const UniformTypes &type)
 {
 }
@@ -105,7 +115,7 @@ void ShaderOpenGl::setUniform(const std::string &location, const glm::vec3 &x)
 
 void ShaderOpenGl::setUniform(const std::string &location, const int &x)
 {
-    glUniform1f(glGetUniformLocation(id, location.c_str()), x);
+    glUniform1i(glGetUniformLocation(id, location.c_str()), x);
 }
 
 void ShaderOpenGl::setUniform(const std::string &location, const bool &x)

@@ -8,6 +8,7 @@ joltphysics/5.2.0
 sdl_image/2.8.2
 sqlite3/3.49.1
 sol2/3.5.0
+sdl_ttf/2.24.0
 
 [generators]
 CMakeDeps
@@ -18,4 +19,3 @@ cmake_layout
 
 [options]
 boost/*:without_test=True
-

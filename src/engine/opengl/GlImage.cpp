@@ -8,6 +8,16 @@ ImageOpenGl::ImageOpenGl(const std::string &filePath)
         std::cerr << "Image load fail: " << IMG_GetError() << "\n";
         return;
     }
+    setupObject(surface);
+}
+
+ImageOpenGl::ImageOpenGl(SDL_Surface *surface)
+{
+    setupObject(surface);
+}
+
+void ImageOpenGl::setupObject(SDL_Surface *surface)
+{
 
     GLenum format = surface->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
 
@@ -16,7 +26,6 @@ ImageOpenGl::ImageOpenGl(const std::string &filePath)
 
     glTexImage2D(GL_TEXTURE_2D, 0, format, surface->w, surface->h, 0,
                  format, GL_UNSIGNED_BYTE, surface->pixels);
-    glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

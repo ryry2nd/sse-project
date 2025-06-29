@@ -8,10 +8,23 @@
 #include <memory>
 #include <iostream>
 
+std::vector<float> vertices = {
+    //  x,     y,    u,   v
+    -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+    0.5f, -0.5f, 1.0f, 1.0f,  // bottom-right
+    0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+    -0.5f, 0.5f, 0.0f, 0.0f   // top-left
+};
+
+std::vector<unsigned int> indices = {
+    0, 1, 2,
+    2, 3, 0};
+
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
     HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+
     Shader *apiShader = new ShaderOpenGl();
     Image *apiImage = new ImageOpenGl();
 
@@ -29,6 +42,15 @@ int main(int argc, char *argv[])
     Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
     Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
 
+    Font defaultFont("assets/unifont-16.0.04.otf", 48);
+    Mesh *mesh2d = new OpenGlMesh(vertices, indices, {2, 2});
+    Shader *shader2d = new ShaderOpenGl("shaders/2dVertex.glsl", "shaders/2dFragment.glsl");
+
+    RenderObject2d object2d(mesh2d, shader2d, camera);
+    object2d.scale = glm::vec2(48.0f);
+    object2d.position.x = 24;
+    object2d.position.y = res.y - 24;
+
     RenderObject::init(pointShader, new OpenGlMesh(), camera);
 
     delete apiImage;
@@ -41,6 +63,7 @@ int main(int argc, char *argv[])
 
     lua.includeInitialized("shader1", *shader);
     lua.includeInitialized("image1", *image);
+    lua.includeInitialized("camera1", *camera);
 
     lua.includeScripts("./scripts");
 
@@ -54,14 +77,11 @@ int main(int argc, char *argv[])
     float deltaTime;
     const Bigint *speed;
 
-    glm::mat4 cameraMatrixTmp;
-
-    int i = 0;
-
     int accumulatedMouseX = 0;
     int accumulatedMouseY = 0;
-    int frames = 0.0f;
-    Uint64 start = SDL_GetTicks64();
+
+    std::ostringstream ss;
+    Image *text;
 
     while (running)
     {
@@ -152,16 +172,15 @@ int main(int argc, char *argv[])
 
         RenderObject::DrawAllObjects();
 
-        frames++;
+        ss.str("");
+        ss.clear();
+        ss << std::fixed << std::setprecision(0) << 1.0f / deltaTime;
+        text = new ImageOpenGl(defaultFont.renderText(ss.str(), {255, 255, 255, 255}));
 
-        if (SDL_GetTicks64() - start >= 1000)
-        {
-            std::cout << frames << "\n";
-            frames = 0;
-            start = SDL_GetTicks64();
-        }
+        object2d.Draw(text);
 
         renderingEngine->swapBuffer();
+        delete text;
     }
     // delete everything
     delete shader;

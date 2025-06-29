@@ -10,6 +10,11 @@ glm::mat4 Camera::getProjectionMatrix() const
     return glm::perspective(glm::radians(fov), RES.x / RES.y, near, far);
 }
 
+glm::mat4 Camera::getProjectionMatrix2d() const
+{
+    return glm::ortho(0.0f, RES.x, 0.0f, RES.y);
+}
+
 glm::vec3 Camera::getForwardVector() const
 {
     float yawRad = glm::radians(rotation.y);

@@ -1,64 +1,70 @@
 #include "Objects.hpp"
 
-void RenderObject::addFace(std::vector<float> &verts,
-                           glm::vec3 vert0,
-                           glm::vec3 vert1,
-                           glm::vec3 vert2,
-                           glm::vec3 vert3,
-                           glm::vec2 uvMin,
-                           glm::vec2 uvMax)
-{
-    glm::vec2 uv0 = {uvMin.x, uvMax.y}; // bottom-left
-    glm::vec2 uv1 = {uvMax.x, uvMax.y}; // bottom-right
-    glm::vec2 uv2 = {uvMax.x, uvMin.y}; // top-right
-    glm::vec2 uv3 = {uvMin.x, uvMin.y}; // top-left
+static std::vector<float> vertices = {
+    // Positions          // Tex Coords (U, flipped V) // Normals
+    // Front face
+    -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
+    0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0, 0, 1,
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0, 0, 1,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0, 0, 1,
 
-    // normals
-    glm::vec3 edge1 = vert1 - vert0;
-    glm::vec3 edge2 = vert2 - vert0;
-    glm::vec3 normal = glm::normalize(glm::cross(edge1, edge2));
+    // Back face
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, 0, -1,
+    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, 0, -1,
+    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 0, -1,
+    -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 0, -1,
 
-    auto add = [&](glm::vec3 pos, glm::vec2 uv)
-    {
-        verts.insert(verts.end(), {pos.x, pos.y, pos.z,
-                                   uv.x, uv.y,
-                                   normal.x, normal.y, normal.z});
-    };
+    // Left face
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1, 0, 0,
+    -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1, 0, 0,
+    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1, 0, 0,
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1, 0, 0,
 
-    // Triangle 1
-    add(vert0, uv0);
-    add(vert1, uv1);
-    add(vert2, uv2);
+    // Right face
+    0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1, 0, 0,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1, 0, 0,
+    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1, 0, 0,
+    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1, 0, 0,
 
-    // Triangle 2
-    add(vert2, uv2);
-    add(vert3, uv3);
-    add(vert0, uv0);
-}
+    // Top face
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0, 1, 0,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0, 1, 0,
+    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 1, 0,
+    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 1, 0,
 
-std::vector<float> RenderObject::makeTexturedCube(float size)
-{
-    std::vector<float> verts;
-    float s = size / 2.0f;
+    // Bottom face
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, -1, 0,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, -1, 0,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
 
-    // Front face (+Z)
-    addFace(verts, {-s, -s, s}, {s, -s, s}, {s, s, s}, {-s, s, s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-    // Back face (-Z)
-    addFace(verts, {s, -s, -s}, {-s, -s, -s}, {-s, s, -s}, {s, s, -s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-    // Left face (-X)
-    addFace(verts, {-s, -s, -s}, {-s, -s, s}, {-s, s, s}, {-s, s, -s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-    // Right face (+X)
-    addFace(verts, {s, -s, s}, {s, -s, -s}, {s, s, -s}, {s, s, s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-    // Top face (+Y)
-    addFace(verts, {-s, s, s}, {s, s, s}, {s, s, -s}, {-s, s, -s}, {0.0f, 0.0f}, {1.0f, 1.0f});
-    // Bottom face (-Y)
-    addFace(verts, {-s, -s, -s}, {s, -s, -s}, {s, -s, s}, {-s, -s, s}, {0.0f, 0.0f}, {1.0f, 1.0f});
+static std::vector<unsigned int> indices = {
+    // Front face
+    0, 1, 2,
+    1, 3, 2,
 
-    return verts;
-}
+    // Back face
+    4, 5, 6,
+    5, 7, 6,
 
-const std::vector<float> RenderObject::cubeMesh = makeTexturedCube();
+    // Left face
+    8, 9, 10,
+    9, 11, 10,
 
+    // Right face
+    12, 13, 14,
+    13, 15, 14,
+
+    // Top face
+    16, 17, 18,
+    17, 19, 18,
+
+    // Bottom face
+    20, 21, 22,
+    21, 23, 22};
+
+std::vector<float> RenderObject::cubeMesh = vertices;
+std::vector<unsigned int> RenderObject::cubeIndices = indices;
 float RenderObject::gamma = 1.0f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
@@ -80,7 +86,7 @@ void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camer
     RenderObject::pointShader = pointShader;
     RenderObject::camera = camera;
     RenderObject::defaultMeshAPI = defaultMeshAPI;
-    RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {3}, MeshTypes::Points);
+    RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {0}, {3}, MeshTypes::Points);
     RenderObject::gamma = gamma;
     RenderObject::disableBrightness = disableBrightness;
 }
@@ -88,7 +94,7 @@ void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camer
 RenderObject::RenderObject(Shader *shady, Image *im)
 {
     setupObject(shady, im);
-    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeMesh, {3, 2, 3}));
+    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeMesh, cubeIndices, {3, 2, 3}));
 }
 
 void RenderObject::setupObject(Shader *shady, Image *im)
@@ -152,6 +158,7 @@ void RenderObject::updateTime()
 
 void RenderObject::renderAsPoint()
 {
+    shader->disableCulling();
     Bigint distance = distanceSquared.sqrt();
     glm::vec3 newPos = (tempLocalPosition / distance).toFloatVec3() * 10.0f;
 
@@ -174,6 +181,7 @@ void RenderObject::renderAsPoint()
 
 void RenderObject::renderAsMesh()
 {
+    shader->enableCulling();
     shader->includeShader();
     shader->setUniform("gamma", gamma);
     shader->setUniform("u_fullBright", disableBrightness);

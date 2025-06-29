@@ -8,7 +8,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -34,6 +33,7 @@ public:
     // it makes the image
     ImageOpenGl() {}
     ImageOpenGl(const std::string &filePath);
+    ImageOpenGl(SDL_Surface *surface);
     // it unmakes the image
     ~ImageOpenGl();
     // it gets the id
@@ -42,6 +42,7 @@ public:
     Image *makeNewImage(const std::string &filePath) const;
 
 private:
+    void setupObject(SDL_Surface *surface);
     GLuint textureID = 0;
 };
 
@@ -59,6 +60,9 @@ public:
     void setUniform(const std::string &location, const glm::mat4 &x);
     void setUniform(const std::string &location, const Image *x);
     void setUniform(const std::string &location, const bool &x);
+
+    void enableCulling();
+    void disableCulling();
 
     Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
 
@@ -86,12 +90,12 @@ class OpenGlMesh : public Mesh
 {
 public:
     OpenGlMesh() {}
-    OpenGlMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+    OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     ~OpenGlMesh();
     // updates the vertices (you dont need to run this unless you changed the vertices)
-    void updateVerts(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+    void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
     void Draw();
-    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
+    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
 
     Mesh *makeCopy() const;
 
@@ -99,7 +103,7 @@ public:
 
 private:
     glm::vec3 calculateSizes();
-    GLuint VAO, VBO;
+    GLuint VAO, VBO, EBO;
     GLenum glMeshType;
     GLsizei size;
 };

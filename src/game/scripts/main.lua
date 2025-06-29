@@ -58,10 +58,10 @@ sceneObjects = {}
 
 -- makes the cubes
 
-local chunks = objects.MeshChunks:new(shader1, image1)
---chunks.position.y = chunks.position.y + bigvars.Bigint:new(200)
-chunks.position.x = chunks.position.x + pos
-table.insert(sceneObjects, chunks)
+-- local chunks = objects.MeshChunks:new(shader1, image1)
+-- --chunks.position.y = chunks.position.y + bigvars.Bigint:new(200)
+-- chunks.position.x = chunks.position.x + pos
+-- table.insert(sceneObjects, chunks)
 
 local cube = objects.RenderObject:new(shader1, image1)
 cube.position.x = cube.position.x + pos
