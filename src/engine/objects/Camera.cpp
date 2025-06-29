@@ -12,7 +12,7 @@ glm::mat4 Camera::getProjectionMatrix() const
 
 glm::mat4 Camera::getProjectionMatrix2d() const
 {
-    return glm::ortho(0.0f, RES.x, RES.y, 0.0f);
+    return glm::ortho(0.0f, RES.x, 0.0f, RES.y);
 }
 
 glm::vec3 Camera::getForwardVector() const

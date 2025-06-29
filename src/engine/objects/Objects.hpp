@@ -141,7 +141,7 @@ class RenderObject2d
 {
 public:
     glm::vec2 position = glm::vec2(0.0f);
-    glm::vec2 rotation = glm::vec2(0.0f);
+    float rotation = 0.0f;
     glm::vec2 scale = glm::vec2(1.0f);
 
     RenderObject2d(Mesh *mesh, Shader *shader, Camera *cam) : mesh2d(mesh), shader2d(shader), camera(cam) {}
@@ -150,10 +150,9 @@ public:
     {
         shader2d->disableCulling();
         glm::mat4 model(1.0f);
-        model = glm::translate(model, glm::vec3(position, 0));
-        model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));
-        model = glm::rotate(model, glm::radians(rotation.y), glm::vec3(0, 1, 0));
-        model = glm::scale(model, glm::vec3(scale, 1));
+        model = glm::translate(model, glm::vec3(position, 0.0f));
+        model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(scale, 1.0f));
         shader2d->includeShader();
         shader2d->setUniform("texture1", image);
         shader2d->setUniform("uProjection", camera->getProjectionMatrix2d());
