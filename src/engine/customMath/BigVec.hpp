@@ -7,7 +7,35 @@ class BigVec3
 public:
     Bigint x, y, z;
 
-    BigVec3() : x(Bigint()), y(Bigint()), z(Bigint()) {}
+    BigVec3(const BigVec3 &other) noexcept
+        : x(other.x), y(other.y), z(other.z)
+    {
+    }
+
+    BigVec3(BigVec3 &&other) noexcept
+        : x(std::move(other.x)), y(std::move(other.y)), z(std::move(other.z)) {}
+
+    // Copy assignment
+    BigVec3 &operator=(const BigVec3 &other) noexcept
+    {
+        x = other.x;
+        y = other.y;
+        z = other.z;
+        return *this;
+    }
+
+    // Move assignment
+    BigVec3 &operator=(BigVec3 &&other) noexcept
+    {
+        x = std::move(other.x);
+        y = std::move(other.y);
+        z = std::move(other.z);
+        return *this;
+    }
+
+    BigVec3()
+    {
+    }
 
     BigVec3(Bigint x_, Bigint y_, Bigint z_)
         : x(x_), y(y_), z(z_) {}
@@ -16,57 +44,89 @@ public:
 
     BigVec3(glm::vec3 vec) : x(Bigint(vec.x)), y(Bigint(vec.y)), z(Bigint(vec.z)) {}
 
-    BigVec3 operator+(const BigVec3 &other) const
+    inline BigVec3 operator+(const BigVec3 &other) const noexcept
     {
-        return BigVec3(x + other.x, y + other.y, z + other.z);
+        BigVec3 result;
+        result.x = std::move(x + other.x);
+        result.y = std::move(y + other.y);
+        result.z = std::move(z + other.z);
+        return result;
     }
 
-    BigVec3 operator-(const BigVec3 &other) const
+    inline BigVec3 operator-(const BigVec3 &other) const noexcept
     {
-        return BigVec3(x - other.x, y - other.y, z - other.z);
+        BigVec3 result;
+        result.x = std::move(x - other.x);
+        result.y = std::move(y - other.y);
+        result.z = std::move(z - other.z);
+        return result;
     }
 
-    BigVec3 operator*(const BigVec3 &other) const
+    inline BigVec3 operator*(const BigVec3 &other) const noexcept
     {
-        return BigVec3(x * other.x, y * other.y, z * other.z);
+        BigVec3 result;
+        result.x = std::move(x * other.x);
+        result.y = std::move(y * other.y);
+        result.z = std::move(z * other.z);
+        return result;
     }
 
-    BigVec3 operator/(const BigVec3 &other) const
+    inline BigVec3 operator/(const BigVec3 &other) const
     {
-        return BigVec3(x / other.x, y / other.y, z / other.z);
+        BigVec3 result;
+        result.x = std::move(x / other.x);
+        result.y = std::move(y / other.y);
+        result.z = std::move(z / other.z);
+        return result;
     }
 
-    BigVec3 operator+(const Bigint &other) const
+    inline BigVec3 operator+(const Bigint &other) const noexcept
     {
-        return BigVec3(x + other, y + other, z + other);
+        BigVec3 result;
+        result.x = std::move(x + other);
+        result.y = std::move(y + other);
+        result.z = std::move(z + other);
+        return result;
     }
 
-    BigVec3 operator-(const Bigint &other) const
+    inline BigVec3 operator-(const Bigint &other) const noexcept
     {
-        return BigVec3(x - other, y - other, z - other);
+        BigVec3 result;
+        result.x = std::move(x - other);
+        result.y = std::move(y - other);
+        result.z = std::move(z - other);
+        return result;
     }
 
-    BigVec3 operator*(const Bigint &other) const
+    inline BigVec3 operator*(const Bigint &other) const noexcept
     {
-        return BigVec3(x * other, y * other, z * other);
+        BigVec3 result;
+        result.x = std::move(x * other);
+        result.y = std::move(y * other);
+        result.z = std::move(z * other);
+        return result;
     }
 
-    BigVec3 operator/(const Bigint &other) const
+    inline BigVec3 operator/(const Bigint &other) const
     {
-        return BigVec3(x / other, y / other, z / other);
+        BigVec3 result;
+        result.x = std::move(x / other);
+        result.y = std::move(y / other);
+        result.z = std::move(z / other);
+        return result;
     }
 
-    void operator+=(const BigVec3 &other)
+    void operator+=(const BigVec3 &other) noexcept
     {
         *this = *this + other;
     }
 
-    void operator-=(const BigVec3 &other)
+    void operator-=(const BigVec3 &other) noexcept
     {
         *this = *this - other;
     }
 
-    void operator*=(const BigVec3 &other)
+    void operator*=(const BigVec3 &other) noexcept
     {
         *this = *this * other;
     }
@@ -76,17 +136,17 @@ public:
         *this = *this / other;
     }
 
-    void operator+=(const Bigint &other)
+    void operator+=(const Bigint &other) noexcept
     {
         *this = *this + other;
     }
 
-    void operator-=(const Bigint &other)
+    void operator-=(const Bigint &other) noexcept
     {
         *this = *this - other;
     }
 
-    void operator*=(const Bigint &other)
+    void operator*=(const Bigint &other) noexcept
     {
         *this = *this * other;
     }
@@ -96,12 +156,12 @@ public:
         *this = *this / other;
     }
 
-    bool isZero() const
+    inline bool isZero() const noexcept
     {
         return x.isZero() && y.isZero() && z.isZero();
     }
 
-    Bigint getMaxAbs() const
+    inline Bigint getMaxAbs() const noexcept
     {
         const Bigint &a = x.getAbs();
         const Bigint &b = y.getAbs();
@@ -109,7 +169,7 @@ public:
         return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
     }
 
-    Bigint getMinAbs() const
+    inline Bigint getMinAbs() const noexcept
     {
         const Bigint &a = x.getAbs();
         const Bigint &b = y.getAbs();
@@ -117,7 +177,7 @@ public:
         return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
     }
 
-    glm::vec3 toFloatVec3() const
+    inline glm::vec3 toFloatVec3() const noexcept
     {
         return glm::vec3(
             x.toFloat(),
@@ -125,60 +185,11 @@ public:
             z.toFloat());
     }
 
-    glm::dvec3 toDoubleVec3() const
+    inline glm::dvec3 toDoubleVec3() const noexcept
     {
         return glm::dvec3(
             x.toDouble(),
             y.toDouble(),
             z.toDouble());
-    }
-};
-
-class BigVec2
-{
-public:
-    Bigint x, y;
-
-    BigVec2() : x(Bigint()), y(Bigint()) {}
-
-    BigVec2(Bigint x, Bigint y)
-        : x(x), y(y) {}
-
-    BigVec2(Bigint x_) : x(x_), y(x_) {}
-
-    BigVec2(glm::vec2 vec) : x(Bigint(vec.x)), y(Bigint(vec.y)) {}
-
-    BigVec2 operator+(const BigVec2 &other) const
-    {
-        return BigVec2(x + other.x, y + other.y);
-    }
-
-    BigVec2 operator-(const BigVec2 &other) const
-    {
-        return BigVec2(x - other.x, y - other.y);
-    }
-
-    void operator+=(const BigVec2 &other)
-    {
-        *this = *this + other;
-    }
-
-    void operator-=(const BigVec2 &other)
-    {
-        *this = *this - other;
-    }
-
-    glm::vec2 toFloatVec3() const
-    {
-        return glm::vec2(
-            x.toFloat(),
-            y.toFloat());
-    }
-
-    glm::dvec2 toDoubleVec3() const
-    {
-        return glm::dvec2(
-            x.toDouble(),
-            y.toDouble());
     }
 };

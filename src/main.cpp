@@ -20,6 +20,9 @@ std::vector<unsigned int> indices = {
     0, 1, 2,
     2, 3, 0};
 
+int Bigint::numCopies = 0;
+int Bigint::numMoves = 0;
+
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
@@ -71,8 +74,8 @@ int main(int argc, char *argv[])
 
     // starts running the game loop
     bool running = true;
-    Uint64 lastTicks = SDL_GetTicks64();
-    Uint64 currentTicks;
+    Uint64 lastCounter = SDL_GetPerformanceCounter();
+    Uint64 currentCounter;
     SDL_Event event;
     float deltaTime;
     const Bigint *speed;
@@ -85,9 +88,9 @@ int main(int argc, char *argv[])
 
     while (running)
     {
-        currentTicks = SDL_GetTicks64();
-        deltaTime = (currentTicks - lastTicks) / 1000.0f;
-        lastTicks = currentTicks;
+        currentCounter = SDL_GetPerformanceCounter();
+        deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
+        lastCounter = currentCounter;
 
         // gets events
         while (SDL_PollEvent(&event))
@@ -156,7 +159,6 @@ int main(int argc, char *argv[])
 
         if (deltaTime > 0)
         {
-
             camera->rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
             camera->rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
 
@@ -171,6 +173,11 @@ int main(int argc, char *argv[])
         renderingEngine->clearBackground();
 
         RenderObject::DrawAllObjects();
+
+        // std::cout << "copies: " << Bigint::numCopies << std::endl;
+        // Bigint::numCopies = 0;
+        // std::cout << "moves: " << Bigint::numMoves << std::endl;
+        // Bigint::numMoves = 0;
 
         ss.str("");
         ss.clear();

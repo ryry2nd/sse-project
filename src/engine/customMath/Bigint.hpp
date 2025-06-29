@@ -20,11 +20,45 @@ struct Bigint
 
     static constexpr unsigned long long DIGITS = 5;
     static constexpr unsigned long long SCALE = 100000;
+
+    static int numCopies;
+    static int numMoves;
+
     boost::multiprecision::cpp_int value;
+
+    Bigint(const Bigint &other) noexcept
+        : value(other.value)
+    {
+        // numCopies++;
+    }
+
+    Bigint(Bigint &&other) noexcept : value(std::move(other.value))
+    {
+        // numMoves++;
+    }
+
+    Bigint &operator=(const Bigint &other) noexcept
+    {
+        if (this != &other)
+        {
+            value = other.value;
+            numCopies++;
+        }
+        return *this;
+    }
+
+    Bigint &operator=(Bigint &&other) noexcept
+    {
+        if (this != &other)
+        {
+            value = std::move(other.value);
+            numMoves++;
+        }
+        return *this;
+    }
 
     Bigint()
     {
-        value = boost::multiprecision::cpp_int();
     }
 
     Bigint(double d)
@@ -65,45 +99,45 @@ struct Bigint
         value = boost::multiprecision::cpp_int(intPart + fracPart);
     }
 
-    Bigint operator+(const Bigint &other) const
+    inline Bigint operator+(const Bigint &other) const noexcept
     {
         Bigint result;
         result.value = value + other.value;
         return result;
     }
 
-    Bigint operator-(const Bigint &other) const
+    inline Bigint operator-(const Bigint &other) const noexcept
     {
         Bigint result;
         result.value = value - other.value;
         return result;
     }
 
-    Bigint operator*(const Bigint &other) const
+    inline Bigint operator*(const Bigint &other) const noexcept
     {
         Bigint result;
         result.value = (value * other.value) / SCALE;
         return result;
     }
 
-    Bigint operator/(const Bigint &other) const
+    inline Bigint operator/(const Bigint &other) const
     {
         Bigint result;
         result.value = (value * SCALE) / other.value;
         return result;
     }
 
-    void operator+=(const Bigint &other)
+    void operator+=(const Bigint &other) noexcept
     {
         *this = *this + other;
     }
 
-    void operator-=(const Bigint &other)
+    void operator-=(const Bigint &other) noexcept
     {
         *this = *this - other;
     }
 
-    void operator*=(const Bigint &other)
+    void operator*=(const Bigint &other) noexcept
     {
         *this = *this * other;
     }
@@ -113,37 +147,37 @@ struct Bigint
         *this = *this / other;
     }
 
-    bool isZero() const
+    inline bool isZero() const noexcept
     {
         return value.is_zero();
     }
 
-    bool operator<(const Bigint &other) const
+    inline bool operator<(const Bigint &other) const noexcept
     {
         return value < other.value;
     }
 
-    bool operator>(const Bigint &other) const
+    inline bool operator>(const Bigint &other) const noexcept
     {
         return value > other.value;
     }
 
-    bool operator==(const Bigint &other) const
+    inline bool operator==(const Bigint &other) const noexcept
     {
         return value == other.value;
     }
 
-    bool operator!=(const Bigint &other) const
+    inline bool operator!=(const Bigint &other) const noexcept
     {
         return value != other.value;
     }
 
-    bool operator<=(const Bigint &other) const
+    inline bool operator<=(const Bigint &other) const noexcept
     {
         return value <= other.value;
     }
 
-    bool operator>=(const Bigint &other) const
+    inline bool operator>=(const Bigint &other) const noexcept
     {
         return value >= other.value;
     }
@@ -158,21 +192,21 @@ struct Bigint
         return out.str();
     }
 
-    Bigint getAbs() const
+    inline Bigint getAbs() const noexcept
     {
         Bigint ret;
         ret.value = boost::multiprecision::abs(this->value);
         return ret;
     }
 
-    float toFloat() const
+    inline float toFloat() const noexcept
     {
         if (value > MAX_FLOAT)
             return INFINITY;
         return static_cast<float>(value) / SCALE;
     }
 
-    double toDouble() const
+    inline double toDouble() const noexcept
     {
         if (value > MAX_DOUBLE)
             return INFINITY;
