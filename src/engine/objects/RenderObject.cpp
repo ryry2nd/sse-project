@@ -158,6 +158,7 @@ void RenderObject::updateTime()
 
 void RenderObject::renderAsPoint()
 {
+    shader->disableCulling();
     Bigint distance = distanceSquared.sqrt();
     glm::vec3 newPos = (tempLocalPosition / distance).toFloatVec3() * 10.0f;
 
@@ -180,6 +181,7 @@ void RenderObject::renderAsPoint()
 
 void RenderObject::renderAsMesh()
 {
+    shader->enableCulling();
     shader->includeShader();
     shader->setUniform("gamma", gamma);
     shader->setUniform("u_fullBright", disableBrightness);

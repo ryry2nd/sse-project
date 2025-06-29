@@ -140,14 +140,15 @@ private:
 class RenderObject2d
 {
 public:
-    glm::vec2 position;
-    glm::vec2 rotation;
-    glm::vec2 scale;
+    glm::vec2 position = glm::vec2(0.0f);
+    glm::vec2 rotation = glm::vec2(0.0f);
+    glm::vec2 scale = glm::vec2(1.0f);
 
     RenderObject2d(Mesh *mesh, Shader *shader, Camera *cam) : mesh2d(mesh), shader2d(shader), camera(cam) {}
 
     void Draw(const Image *image)
     {
+        shader2d->disableCulling();
         glm::mat4 model(1.0f);
         model = glm::translate(model, glm::vec3(position, 0));
         model = glm::rotate(model, glm::radians(rotation.x), glm::vec3(1, 0, 0));

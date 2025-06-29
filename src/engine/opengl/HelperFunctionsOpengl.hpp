@@ -61,6 +61,9 @@ public:
     void setUniform(const std::string &location, const Image *x);
     void setUniform(const std::string &location, const bool &x);
 
+    void enableCulling();
+    void disableCulling();
+
     Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
 
     // deletes the thing

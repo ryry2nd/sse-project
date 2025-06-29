@@ -97,6 +97,9 @@ public:
     virtual void setUniform(const std::string &location, const Image *x) = 0;
     virtual void setUniform(const std::string &location, const bool &x) = 0;
     virtual Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
+
+    virtual void enableCulling() = 0;
+    virtual void disableCulling() = 0;
 };
 
 class Mesh
