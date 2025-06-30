@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+using namespace OpenGl;
+
 OpenGlMesh::~OpenGlMesh()
 {
     if (VAO != 0)

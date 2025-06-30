@@ -1,5 +1,7 @@
 #include "Objects.hpp"
 
+using namespace Objects;
+
 glm::mat4 Camera::getViewMatrix() const
 {
     return glm::inverse(getRotationMatrix()); // camera is at origin; only rotation matters

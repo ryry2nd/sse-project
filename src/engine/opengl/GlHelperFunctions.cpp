@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+using namespace OpenGl;
+
 HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
     : HelperFunctions(res, name, flags, aa, fullscreen, hideMouse)
 {

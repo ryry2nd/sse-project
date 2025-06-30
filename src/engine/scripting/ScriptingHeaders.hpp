@@ -9,6 +9,10 @@
 #include "../customMath/BigVec.hpp"
 #include "../HelperFunctions.hpp"
 
+using namespace Objects;
+using namespace Rendering;
+using namespace OpenGl;
+
 namespace LuaHeaders
 {
 
@@ -216,7 +220,7 @@ namespace LuaHeaders
                                                 "meshes", &LuaMeshChunks::meshes,
                                                 "cullPriority", &LuaMeshChunks::cullPriority,
                                                 "setupObject", &LuaMeshChunks::setupObject);
-            lua["objects"] = objects;
+            lua["Objects"] = objects;
         }
     };
 }

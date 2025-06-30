@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+using namespace OpenGl;
+
 ShaderOpenGl::ShaderOpenGl(const char *vertexPath, const char *fragmentPath)
 {
     std::string vertexCode, fragmentCode;

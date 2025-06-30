@@ -42,7 +42,7 @@ struct Bigint
         if (this != &other)
         {
             value = other.value;
-            numCopies++;
+            // numCopies++;
         }
         return *this;
     }
@@ -52,7 +52,7 @@ struct Bigint
         if (this != &other)
         {
             value = std::move(other.value);
-            numMoves++;
+            // numMoves++;
         }
         return *this;
     }
@@ -249,12 +249,7 @@ struct Bigint
         }
         std::string pos;
         pos.reserve(numZeros + 1);
-        pos.append("1");
-
-        for (size_t i = 0; i < numZeros; i++)
-        {
-            pos.append("0");
-        }
+        pos = "1" + std::string(numZeros, '0');
 
         return Bigint(pos);
     };

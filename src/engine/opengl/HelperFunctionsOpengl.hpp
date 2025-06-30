@@ -15,95 +15,101 @@
 
 #include "../HelperFunctions.hpp"
 
-class HelperFunctionsOpenGl : public HelperFunctions
+using namespace Rendering;
+
+namespace OpenGl
 {
-public:
-    HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-    void clearBackground();
-    void swapBuffer();
-    ~HelperFunctionsOpenGl();
+    class HelperFunctionsOpenGl : public HelperFunctions
+    {
+    public:
+        HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+        void clearBackground();
+        void swapBuffer();
+        ~HelperFunctionsOpenGl();
 
-private:
-    SDL_GLContext glContext;
-};
+    private:
+        SDL_GLContext glContext;
+    };
 
-class ImageOpenGl : public Image
-{
-public:
-    // it makes the image
-    ImageOpenGl() {}
-    ImageOpenGl(const std::string &filePath);
-    ImageOpenGl(SDL_Surface *surface);
-    // it unmakes the image
-    ~ImageOpenGl();
-    // it gets the id
-    GLuint getID() const;
+    class ImageOpenGl : public Image
+    {
+    public:
+        // it makes the image
+        ImageOpenGl() {}
+        ImageOpenGl(const std::string &filePath);
+        ImageOpenGl(SDL_Surface *surface);
+        // it unmakes the image
+        ~ImageOpenGl();
+        // it gets the id
+        GLuint getID() const;
 
-    Image *makeNewImage(const std::string &filePath) const;
+        Image *makeNewImage(const std::string &filePath) const;
+        Image *makeNewImage(SDL_Surface *surface) const;
 
-private:
-    void setupObject(SDL_Surface *surface);
-    GLuint textureID = 0;
-};
+    private:
+        void setupObject(SDL_Surface *surface);
+        GLuint textureID = 0;
+    };
 
-class ShaderOpenGl : public Shader
-{
-public:
-    ShaderOpenGl() {}
-    ShaderOpenGl(const char *vertexPath, const char *fragmentPath);
+    class ShaderOpenGl : public Shader
+    {
+    public:
+        ShaderOpenGl() {}
+        ShaderOpenGl(const char *vertexPath, const char *fragmentPath);
 
-    void createUniform(const std::string &location, const UniformTypes &type);
-    void includeShader();
-    void setUniform(const std::string &location, const float &x);
-    void setUniform(const std::string &location, const glm::vec3 &x);
-    void setUniform(const std::string &location, const int &x);
-    void setUniform(const std::string &location, const glm::mat4 &x);
-    void setUniform(const std::string &location, const Image *x);
-    void setUniform(const std::string &location, const bool &x);
+        void createUniform(const std::string &location, const UniformTypes &type);
+        void includeShader();
+        void setUniform(const std::string &location, const float &x);
+        void setUniform(const std::string &location, const glm::vec3 &x);
+        void setUniform(const std::string &location, const int &x);
+        void setUniform(const std::string &location, const glm::mat4 &x);
+        void setUniform(const std::string &location, const Image *x);
+        void setUniform(const std::string &location, const bool &x);
 
-    void enableCulling();
-    void disableCulling();
+        void enableCulling();
+        void disableCulling();
 
-    Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
+        Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
 
-    // deletes the thing
-    ~ShaderOpenGl();
+        // deletes the thing
+        ~ShaderOpenGl();
 
-protected:
-    GLuint id;
-};
+    protected:
+        GLuint id;
+    };
 
-class ComputeShaderOpenGl : public ShaderOpenGl
-{
-public:
-    ComputeShaderOpenGl(const char *computePath);
-    ~ComputeShaderOpenGl();
-    void setupSsbo(ulong size);
-    void dispatch(uint xGroups, uint yGroups, uint zGroups);
-    std::vector<char> joinShaderThread(ulong size);
+    class ComputeShaderOpenGl : public ShaderOpenGl
+    {
+    public:
+        ComputeShaderOpenGl(const char *computePath);
+        ~ComputeShaderOpenGl();
+        void setupSsbo(ulong size);
+        void dispatch(uint xGroups, uint yGroups, uint zGroups);
+        std::vector<char> joinShaderThread(ulong size);
 
-private:
-    GLuint ssbo;
-};
+    private:
+        GLuint ssbo;
+    };
 
-class OpenGlMesh : public Mesh
-{
-public:
-    OpenGlMesh() {}
-    OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
-    ~OpenGlMesh();
-    // updates the vertices (you dont need to run this unless you changed the vertices)
-    void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
-    void Draw();
-    Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
+    class OpenGlMesh : public Mesh
+    {
+    public:
+        OpenGlMesh() {}
+        OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+        ~OpenGlMesh();
+        // updates the vertices (you dont need to run this unless you changed the vertices)
+        void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+        void Draw();
+        Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
 
-    Mesh *makeCopy() const;
+        Mesh *makeCopy() const;
 
-    glm::vec3 meshSize;
+        glm::vec3 meshSize;
 
-private:
-    glm::vec3 calculateSizes();
-    GLuint VAO, VBO, EBO;
-    GLenum glMeshType;
-    GLsizei size;
-};
+    private:
+        glm::vec3 calculateSizes();
+        GLuint VAO, VBO, EBO;
+        GLenum glMeshType;
+        GLsizei size;
+    };
+}

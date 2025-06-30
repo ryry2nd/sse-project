@@ -26,10 +26,11 @@ int Bigint::numMoves = 0;
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
-    HelperFunctions *renderingEngine = new HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 
-    Shader *apiShader = new ShaderOpenGl();
-    Image *apiImage = new ImageOpenGl();
+    Rendering::Shader *apiShader = new OpenGl::ShaderOpenGl();
+    Rendering::Image *apiImage = new OpenGl::ImageOpenGl();
+    Rendering::Mesh *apiMesh = new OpenGl::OpenGlMesh();
 
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
@@ -37,27 +38,24 @@ int main(int argc, char *argv[])
     Bigint run_speed = Bigint("100");
 
     // this is the camera, cameras are neat
-    Camera *camera = new Camera(res, BigVec3(0.0f, 0.0f, -2.0f));
+    Objects::Camera *camera = new Objects::Camera(res, BigVec3(0.0f, 0.0f, -2.0f));
     camera->rotation.y = 180.0f;
 
     // this sets up the shader and texture
-    Shader *shader = apiShader->makeNewShader("shaders/vertex.glsl", "shaders/fragment.glsl");
-    Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
-    Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
+    Rendering::Shader *shader = apiShader->makeNewShader("shaders/vertex.glsl", "shaders/fragment.glsl");
+    Rendering::Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
+    Rendering::Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
 
-    Font defaultFont("assets/unifont-16.0.04.otf", 48);
-    Mesh *mesh2d = new OpenGlMesh(vertices, indices, {2, 2});
-    Shader *shader2d = new ShaderOpenGl("shaders/2dVertex.glsl", "shaders/2dFragment.glsl");
+    Rendering::Font defaultFont("assets/unifont-16.0.04.otf", 48);
+    Rendering::Mesh *mesh2d = apiMesh->makeNewMesh(vertices, indices, {2, 2});
+    Rendering::Shader *shader2d = apiShader->makeNewShader("shaders/2dVertex.glsl", "shaders/2dFragment.glsl");
 
-    RenderObject2d object2d(mesh2d, shader2d, camera);
+    Objects::RenderObject2d object2d(mesh2d, shader2d, camera);
     object2d.scale = glm::vec2(48.0f);
     object2d.position.x = 24;
     object2d.position.y = res.y - 24;
 
-    RenderObject::init(pointShader, new OpenGlMesh(), camera);
-
-    delete apiImage;
-    delete apiShader;
+    Objects::RenderObject::init(pointShader, apiMesh, camera);
 
     LuaHeaders::LuaScriptLib lua;
     lua.include(LuaHeaders::LuaLibEnum::glm);
@@ -78,10 +76,14 @@ int main(int argc, char *argv[])
     Uint64 currentCounter;
     SDL_Event event;
     float deltaTime;
+    double fps;
     const Bigint *speed;
 
     int accumulatedMouseX = 0;
     int accumulatedMouseY = 0;
+
+    bool shouldUpdate;
+    Uint64 prevFrameUpdate = SDL_GetPerformanceCounter();
 
     std::ostringstream ss;
     Image *text;
@@ -90,6 +92,7 @@ int main(int argc, char *argv[])
     {
         currentCounter = SDL_GetPerformanceCounter();
         deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
+        fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
         lastCounter = currentCounter;
 
         // gets events
@@ -166,13 +169,13 @@ int main(int argc, char *argv[])
             accumulatedMouseY = 0;
         }
 
-        RenderObject::updateTime();
+        Objects::RenderObject::updateTime();
 
-        RenderObject::UpdateAllObjects(deltaTime);
+        Objects::RenderObject::UpdateAllObjects(deltaTime);
 
         renderingEngine->clearBackground();
 
-        RenderObject::DrawAllObjects();
+        Objects::RenderObject::DrawAllObjects();
 
         // std::cout << "copies: " << Bigint::numCopies << std::endl;
         // Bigint::numCopies = 0;
@@ -181,8 +184,9 @@ int main(int argc, char *argv[])
 
         ss.str("");
         ss.clear();
-        ss << std::fixed << std::setprecision(0) << 1.0f / deltaTime;
-        text = new ImageOpenGl(defaultFont.renderText(ss.str(), {255, 255, 255, 255}));
+        ss << std::fixed << std::setprecision(0) << fps;
+
+        text = apiImage->makeNewImage(defaultFont.renderText(ss.str(), {255, 255, 255, 255}));
 
         object2d.Draw(text);
 
@@ -195,5 +199,7 @@ int main(int argc, char *argv[])
     delete image;
     delete renderingEngine;
     delete camera;
+    delete apiImage;
+    delete apiShader;
     return 0;
 }

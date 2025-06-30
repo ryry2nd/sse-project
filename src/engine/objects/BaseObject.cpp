@@ -1,5 +1,7 @@
 #include "Objects.hpp"
 
+using namespace Objects;
+
 BaseObject::~BaseObject()
 {
     removeParent();

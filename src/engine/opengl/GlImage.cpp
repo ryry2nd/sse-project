@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+using namespace OpenGl;
+
 ImageOpenGl::ImageOpenGl(const std::string &filePath)
 {
     SDL_Surface *surface = IMG_Load(filePath.c_str());
@@ -48,4 +50,9 @@ GLuint ImageOpenGl::getID() const
 Image *ImageOpenGl::makeNewImage(const std::string &filePath) const
 {
     return new ImageOpenGl(filePath);
+}
+
+Image *ImageOpenGl::makeNewImage(SDL_Surface *surface) const
+{
+    return new ImageOpenGl(surface);
 }

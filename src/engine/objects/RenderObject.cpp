@@ -1,5 +1,7 @@
 #include "Objects.hpp"
 
+using namespace Objects;
+
 static std::vector<float> vertices = {
     // Positions          // Tex Coords (U, flipped V) // Normals
     // Front face
