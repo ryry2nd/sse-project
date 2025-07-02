@@ -1,8 +1,9 @@
 #include "HelperFunctionsOpengl.hpp"
 
 using namespace OpenGl;
+using namespace Rendering;
 
-ImageOpenGl::ImageOpenGl(const std::string &filePath)
+ImageApi::ImageApi(const std::string &filePath)
 {
     SDL_Surface *surface = IMG_Load(filePath.c_str());
     if (!surface)
@@ -13,12 +14,12 @@ ImageOpenGl::ImageOpenGl(const std::string &filePath)
     setupObject(surface);
 }
 
-ImageOpenGl::ImageOpenGl(SDL_Surface *surface)
+ImageApi::ImageApi(SDL_Surface *surface)
 {
     setupObject(surface);
 }
 
-void ImageOpenGl::setupObject(SDL_Surface *surface)
+void ImageApi::setupObject(SDL_Surface *surface)
 {
 
     GLenum format = surface->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
@@ -33,26 +34,28 @@ void ImageOpenGl::setupObject(SDL_Surface *surface)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
 
+    imageSizes = glm::vec2(surface->w, surface->h);
+
     SDL_FreeSurface(surface);
 }
 
-ImageOpenGl::~ImageOpenGl()
+ImageApi::~ImageApi()
 {
     if (textureID)
         glDeleteTextures(1, &textureID);
 }
 
-GLuint ImageOpenGl::getID() const
+GLuint ImageApi::getID() const
 {
     return textureID;
 }
 
-Image *ImageOpenGl::makeNewImage(const std::string &filePath) const
+Image *ImageApi::makeNewImage(const std::string &filePath) const
 {
-    return new ImageOpenGl(filePath);
+    return new ImageApi(filePath);
 }
 
-Image *ImageOpenGl::makeNewImage(SDL_Surface *surface) const
+Image *ImageApi::makeNewImage(SDL_Surface *surface) const
 {
-    return new ImageOpenGl(surface);
+    return new ImageApi(surface);
 }

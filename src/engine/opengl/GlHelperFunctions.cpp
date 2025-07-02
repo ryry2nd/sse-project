@@ -1,8 +1,9 @@
 #include "HelperFunctionsOpengl.hpp"
 
 using namespace OpenGl;
+using namespace Rendering;
 
-HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
+HelperFunctionsApi::HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
     : HelperFunctions(res, name, flags, aa, fullscreen, hideMouse)
 {
     // this does what it says
@@ -45,18 +46,18 @@ HelperFunctionsOpenGl::HelperFunctionsOpenGl(glm::vec2 res, const char *name, Ui
     glDepthMask(GL_TRUE); // enable writing to depth buffer
 }
 
-void HelperFunctionsOpenGl::clearBackground()
+void HelperFunctionsApi::clearBackground()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void HelperFunctionsOpenGl::swapBuffer()
+void HelperFunctionsApi::swapBuffer()
 {
     SDL_GL_SwapWindow(window);
 }
 
-HelperFunctionsOpenGl::~HelperFunctionsOpenGl()
+HelperFunctionsApi::~HelperFunctionsApi()
 {
     SDL_GL_DeleteContext(glContext);
 }

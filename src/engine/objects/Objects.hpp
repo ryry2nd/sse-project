@@ -1,17 +1,13 @@
 #pragma once
-#include <glm/gtx/quaternion.hpp>
-#include <SDL2/SDL.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <cmath>
-#include <memory>
-#include <Jolt/Jolt.h>
-#include <Jolt/Physics/Collision/Shape/BoxShape.h>
 
 #include "../customMath/BigVec.hpp"
 #include "../HelperFunctions.hpp"
-#include "../opengl/HelperFunctionsOpengl.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <vector>
+#include <cmath>
+#include <memory>
 
 namespace Objects
 {
@@ -79,9 +75,9 @@ namespace Objects
     {
     public:
         // run before you setup any object
-        static void init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera, float gamma = 2.5f, bool disableBrightness = false);
+        static void init(Rendering::Shader *pointShader, Camera *camera, float gamma = 2.5f, bool disableBrightness = false);
         RenderObject() {}
-        RenderObject(Shader *shady, Image *im);
+        RenderObject(Rendering::Shader *shady, Rendering::Image *im);
         ~RenderObject();
 
         static void UpdateAllObjects(const float &deltaTime);
@@ -90,17 +86,16 @@ namespace Objects
 
     protected:
         // the list of meshes
-        std::vector<Mesh *> meshes;
+        std::vector<Rendering::Mesh *> meshes;
 
-        void setupObject(Shader *shady, Image *im);
+        void setupObject(Rendering::Shader *shady, Rendering::Image *im);
         virtual void appendUpdate(const float &deltaTime);
         virtual void appendCustomShaderValues();
         BigVec3 tempLocalPosition;
         CullPriority cullPriority = CullPriority::Medium;
 
-        static std::vector<float> cubeMesh;
+        static std::vector<float> cubeVertices;
         static std::vector<unsigned int> cubeIndices;
-        static Mesh *defaultMeshAPI;
 
         const static Bigint maxDistanceMediumSquared;
         const static Bigint maxDistanceLowSquared;
@@ -112,8 +107,8 @@ namespace Objects
         void Draw();
 
     private:
-        Shader *shader;
-        Image *image;
+        Rendering::Shader *shader;
+        Rendering::Image *image;
         Bigint calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const;
         Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
         Bigint distanceSquared;
@@ -134,10 +129,22 @@ namespace Objects
 
         static Uint64 now;
 
-        static Shader *pointShader;
+        static Rendering::Shader *pointShader;
         static Camera *camera;
-        static Mesh *pointMesh;
+        static Rendering::Mesh *pointMesh;
     };
+
+    static const std::vector<float> vertices = {
+        //  x,     y,    u,   v
+        -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+        0.5f, -0.5f, 1.0f, 1.0f,  // bottom-right
+        0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+        -0.5f, 0.5f, 0.0f, 0.0f   // top-left
+    };
+
+    static const std::vector<unsigned int> indices = {
+        0, 1, 2,
+        2, 3, 0};
 
     class RenderObject2d
     {
@@ -146,15 +153,18 @@ namespace Objects
         float rotation = 0.0f;
         glm::vec2 scale = glm::vec2(1.0f);
 
-        RenderObject2d(Mesh *mesh, Shader *shader, Camera *cam) : mesh2d(mesh), shader2d(shader), camera(cam) {}
+        RenderObject2d(Rendering::Shader *shader, Camera *cam) : shader2d(shader), camera(cam)
+        {
+            mesh2d = Rendering::defaultMeshAPI->makeNewMesh(vertices, indices, {2, 2});
+        }
 
-        void Draw(const Image *image)
+        void Draw(const Rendering::Image *image)
         {
             shader2d->disableCulling();
             glm::mat4 model(1.0f);
             model = glm::translate(model, glm::vec3(position, 0.0f));
             model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-            model = glm::scale(model, glm::vec3(scale, 1.0f));
+            model = glm::scale(model, glm::vec3(scale * image->imageSizes, 1.0f));
             shader2d->includeShader();
             shader2d->setUniform("texture1", image);
             shader2d->setUniform("uProjection", camera->getProjectionMatrix2d());
@@ -163,8 +173,8 @@ namespace Objects
         }
 
     private:
-        Mesh *mesh2d;
-        Shader *shader2d;
+        Rendering::Mesh *mesh2d;
+        Rendering::Shader *shader2d;
         Camera *camera;
     };
 
@@ -177,18 +187,18 @@ namespace Objects
     class MeshChunks : public RenderObject
     {
     public:
-        MeshChunks(Shader *shader, Image *image);
+        MeshChunks(Rendering::Shader *shader, Rendering::Image *image);
 
         void appendUpdate(const float &deltaTime) override;
 
     private:
-        std::vector<std::vector<Mesh *>> chunks;
+        std::vector<std::vector<Rendering::Mesh *>> chunks;
     };
 
     class PhysicsObject : public RenderObject
     {
     public:
-        PhysicsObject(Shader *shady, Image *im);
+        PhysicsObject(Rendering::Shader *shady, Rendering::Image *im);
         ~PhysicsObject();
     };
 }

@@ -1,8 +1,9 @@
 #include "HelperFunctionsOpengl.hpp"
 
 using namespace OpenGl;
+using namespace Rendering;
 
-OpenGlMesh::~OpenGlMesh()
+MeshApi::~MeshApi()
 {
     if (VAO != 0)
         glDeleteVertexArrays(1, &VAO);
@@ -12,7 +13,7 @@ OpenGlMesh::~OpenGlMesh()
         glDeleteBuffers(1, &EBO);
 }
 
-OpenGlMesh::OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
+MeshApi::MeshApi(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
 {
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
@@ -22,10 +23,10 @@ OpenGlMesh::OpenGlMesh(const std::vector<float> &vertices, const std::vector<uns
     updateVerts(vertices, indices, vertLogic, meshType);
 }
 
-void OpenGlMesh::updateVerts(const std::vector<float> &vertices,
-                             const std::vector<unsigned int> &indices,
-                             const std::vector<short> &vertLogic,
-                             const MeshTypes &meshType)
+void MeshApi::updateVerts(const std::vector<float> &vertices,
+                          const std::vector<unsigned int> &indices,
+                          const std::vector<short> &vertLogic,
+                          const MeshTypes &meshType)
 {
     glBindVertexArray(VAO); // Make sure the VAO is bound
 
@@ -71,14 +72,14 @@ void OpenGlMesh::updateVerts(const std::vector<float> &vertices,
     meshSize = calculateSizes();
 }
 
-void OpenGlMesh::Draw()
+void MeshApi::Draw()
 {
     glBindVertexArray(VAO); // ngl who knows what this crap means, according to the names it applies and binds stuff
     glDrawElements(glMeshType, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-glm::vec3 OpenGlMesh::calculateSizes()
+glm::vec3 MeshApi::calculateSizes()
 {
     glm::vec3 minCorner(FLT_MAX);
     glm::vec3 maxCorner(-FLT_MAX);
@@ -106,14 +107,14 @@ glm::vec3 OpenGlMesh::calculateSizes()
     return maxCorner - minCorner;
 }
 
-Mesh *OpenGlMesh::makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
+Mesh *MeshApi::makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
 {
-    return new OpenGlMesh(vertices, indices, vertLogic, meshType);
+    return new MeshApi(vertices, indices, vertLogic, meshType);
 }
 
-Mesh *OpenGlMesh::makeCopy() const
+Mesh *MeshApi::makeCopy() const
 {
-    OpenGlMesh *ret = new OpenGlMesh(vertices, indices, vertLogic, meshType);
+    MeshApi *ret = new MeshApi(vertices, indices, vertLogic, meshType);
     ret->sizeOffset = sizeOffset;
     ret->posOffset = posOffset;
     ret->rotOffset = rotOffset;

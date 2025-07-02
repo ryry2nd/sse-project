@@ -15,70 +15,68 @@
 
 #include "../HelperFunctions.hpp"
 
-using namespace Rendering;
-
 namespace OpenGl
 {
-    class HelperFunctionsOpenGl : public HelperFunctions
+    class HelperFunctionsApi : public Rendering::HelperFunctions
     {
     public:
-        HelperFunctionsOpenGl(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+        HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
         void clearBackground();
         void swapBuffer();
-        ~HelperFunctionsOpenGl();
+        ~HelperFunctionsApi();
 
     private:
         SDL_GLContext glContext;
     };
 
-    class ImageOpenGl : public Image
+    class ImageApi : public Rendering::Image
     {
     public:
         // it makes the image
-        ImageOpenGl() {}
-        ImageOpenGl(const std::string &filePath);
-        ImageOpenGl(SDL_Surface *surface);
+        ImageApi() {}
+        ImageApi(const std::string &filePath);
+        ImageApi(SDL_Surface *surface);
         // it unmakes the image
-        ~ImageOpenGl();
+        ~ImageApi();
         // it gets the id
         GLuint getID() const;
 
-        Image *makeNewImage(const std::string &filePath) const;
-        Image *makeNewImage(SDL_Surface *surface) const;
+        Rendering::Image *makeNewImage(const std::string &filePath) const;
+        Rendering::Image *makeNewImage(SDL_Surface *surface) const;
 
     private:
         void setupObject(SDL_Surface *surface);
         GLuint textureID = 0;
     };
 
-    class ShaderOpenGl : public Shader
+    class ShaderApi : public Rendering::Shader
     {
     public:
-        ShaderOpenGl() {}
-        ShaderOpenGl(const char *vertexPath, const char *fragmentPath);
+        ShaderApi() {}
+        ShaderApi(const char *vertexPath, const char *fragmentPath);
 
-        void createUniform(const std::string &location, const UniformTypes &type);
+        void createUniform(const std::string &location, const Rendering::UniformTypes &type);
         void includeShader();
         void setUniform(const std::string &location, const float &x);
         void setUniform(const std::string &location, const glm::vec3 &x);
         void setUniform(const std::string &location, const int &x);
         void setUniform(const std::string &location, const glm::mat4 &x);
-        void setUniform(const std::string &location, const Image *x);
+        void setUniform(const std::string &location, const Rendering::Image *x);
         void setUniform(const std::string &location, const bool &x);
 
         void enableCulling();
         void disableCulling();
 
-        Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
+        Rendering::Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
 
         // deletes the thing
-        ~ShaderOpenGl();
+        ~ShaderApi();
 
     protected:
         GLuint id;
     };
 
-    class ComputeShaderOpenGl : public ShaderOpenGl
+    class ComputeShaderOpenGl : public ShaderApi
     {
     public:
         ComputeShaderOpenGl(const char *computePath);
@@ -91,18 +89,18 @@ namespace OpenGl
         GLuint ssbo;
     };
 
-    class OpenGlMesh : public Mesh
+    class MeshApi : public Rendering::Mesh
     {
     public:
-        OpenGlMesh() {}
-        OpenGlMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
-        ~OpenGlMesh();
+        MeshApi() {}
+        MeshApi(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        ~MeshApi();
         // updates the vertices (you dont need to run this unless you changed the vertices)
-        void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles);
+        void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         void Draw();
-        Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const;
+        Rendering::Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
 
-        Mesh *makeCopy() const;
+        Rendering::Mesh *makeCopy() const;
 
         glm::vec3 meshSize;
 

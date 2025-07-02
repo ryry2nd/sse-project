@@ -83,13 +83,13 @@ namespace Rendering
         virtual ~Image() = default;
         virtual Image *makeNewImage(const std::string &filePath) const = 0;
         virtual Image *makeNewImage(SDL_Surface *surface) const = 0;
+        glm::vec2 imageSizes;
     };
 
     class Shader
     {
     public:
         // deletes the thing
-
         virtual ~Shader() = default;
         virtual void createUniform(const std::string &location, const UniformTypes &type) = 0;
         virtual void includeShader() = 0;
@@ -158,4 +158,15 @@ namespace Rendering
     private:
         TTF_Font *font;
     };
+
+    inline Mesh *defaultMeshAPI;
+    inline Shader *defaultShaderAPI;
+    inline Image *defaultImageAPI;
+
+    static void init(Mesh *meshApi, Shader *shaderApi, Image *imageApi)
+    {
+        defaultMeshAPI = meshApi;
+        defaultShaderAPI = shaderApi;
+        defaultImageAPI = imageApi;
+    }
 }

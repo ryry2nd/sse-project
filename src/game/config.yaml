@@ -1,0 +1,50 @@
+name: game
+id: com.ryan.game
+version: 0.0.1
+
+# requires:
+#   - id: com.ryan.game
+#     assets: true
+#     shaders: false
+#     scripts: false
+#     configs: false
+
+shaders:
+  - name: basic_shader
+    vertPath: shaders/vertex.glsl
+    fragPath: shaders/fragment.glsl
+  - name: point_shader
+    vertPath: shaders/pointVert.glsl
+    fragPath: shaders/pointFrag.glsl
+  - name: 2d_shader
+    vertPath: shaders/2dVertex.glsl
+    fragPath: shaders/2dFragment.glsl
+
+assets:
+  textures:
+    - name: Fish
+      path: assets/textures/FISH.png
+  fonts:
+    - name: default_font
+      path: assets/fonts/unifont-16.0.04.otf
+      size: 48
+  # models:
+  #   - name: testModel
+      
+# scripts:
+#   - path: main.lua
+
+# configs:
+#   - name: test
+#     path: config/test.yaml
+
+# permissions:
+#   # allow_modification: false
+#   # allow_shaders: true
+#   # allow_compute_shaders: false
+#   # allow_save_file_manipulation: false
+# 
+#   include_rendering: true
+#   include_bigvars: true
+#   include_objects: true
+#   include_glm: true

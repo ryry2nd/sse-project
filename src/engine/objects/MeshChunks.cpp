@@ -1,6 +1,7 @@
 #include "Objects.hpp"
 
 using namespace Objects;
+using namespace Rendering;
 
 MeshChunks::MeshChunks(Shader *shader, Image *image)
 {

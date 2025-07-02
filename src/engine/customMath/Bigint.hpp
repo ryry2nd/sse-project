@@ -10,7 +10,9 @@
 #include <sstream>
 #include <algorithm>
 #include <cctype>
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 struct Bigint
@@ -21,20 +23,15 @@ struct Bigint
     static constexpr unsigned long long DIGITS = 5;
     static constexpr unsigned long long SCALE = 100000;
 
-    static int numCopies;
-    static int numMoves;
-
     boost::multiprecision::cpp_int value;
 
     Bigint(const Bigint &other) noexcept
         : value(other.value)
     {
-        // numCopies++;
     }
 
     Bigint(Bigint &&other) noexcept : value(std::move(other.value))
     {
-        // numMoves++;
     }
 
     Bigint &operator=(const Bigint &other) noexcept
@@ -42,7 +39,6 @@ struct Bigint
         if (this != &other)
         {
             value = other.value;
-            // numCopies++;
         }
         return *this;
     }
@@ -52,7 +48,6 @@ struct Bigint
         if (this != &other)
         {
             value = std::move(other.value);
-            // numMoves++;
         }
         return *this;
     }
@@ -184,12 +179,24 @@ struct Bigint
 
     std::string toString() const
     {
-        boost::multiprecision::cpp_int intPart = value / SCALE;
-        boost::multiprecision::cpp_int fracPart = abs(value % SCALE);
+        using boost::multiprecision::cpp_int;
+
+        cpp_int intPart = value / SCALE;
+        cpp_int fracPart = abs(value % SCALE);
 
         std::ostringstream out;
         out << intPart << "." << std::setw(DIGITS) << std::setfill('0') << fracPart;
-        return out.str();
+        std::string result = out.str();
+
+        // Remove trailing zeros from the fractional part
+        while (!result.empty() && result.back() == '0')
+            result.pop_back();
+
+        // If decimal point is the last character, remove it too
+        if (!result.empty() && result.back() == '.')
+            result.pop_back();
+
+        return result;
     }
 
     inline Bigint getAbs() const noexcept

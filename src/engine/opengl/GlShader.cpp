@@ -1,8 +1,9 @@
 #include "HelperFunctionsOpengl.hpp"
 
 using namespace OpenGl;
+using namespace Rendering;
 
-ShaderOpenGl::ShaderOpenGl(const char *vertexPath, const char *fragmentPath)
+ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
 {
     std::string vertexCode, fragmentCode;
     std::ifstream vShaderFile, fShaderFile;
@@ -86,65 +87,65 @@ ShaderOpenGl::ShaderOpenGl(const char *vertexPath, const char *fragmentPath)
     glDeleteShader(fragment);
 }
 
-ShaderOpenGl::~ShaderOpenGl()
+ShaderApi::~ShaderApi()
 {
     glDeleteProgram(id);
 }
 
-void ShaderOpenGl::enableCulling()
+void ShaderApi::enableCulling()
 {
     glEnable(GL_CULL_FACE);
 }
 
-void ShaderOpenGl::disableCulling()
+void ShaderApi::disableCulling()
 {
     glDisable(GL_CULL_FACE);
 }
 
-void ShaderOpenGl::createUniform(const std::string &location, const UniformTypes &type)
+void ShaderApi::createUniform(const std::string &location, const UniformTypes &type)
 {
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const float &x)
+void ShaderApi::setUniform(const std::string &location, const float &x)
 {
     glUniform1f(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const glm::vec3 &x)
+void ShaderApi::setUniform(const std::string &location, const glm::vec3 &x)
 {
     glUniform3f(glGetUniformLocation(id, location.c_str()), x.x, x.y, x.z);
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const int &x)
+void ShaderApi::setUniform(const std::string &location, const int &x)
 {
     glUniform1i(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const bool &x)
+void ShaderApi::setUniform(const std::string &location, const bool &x)
 {
     glUniform1f(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const glm::mat4 &x)
+void ShaderApi::setUniform(const std::string &location, const glm::mat4 &x)
 {
     glUniformMatrix4fv(glGetUniformLocation(id, location.c_str()), 1, GL_FALSE, glm::value_ptr(x));
 }
 
-void ShaderOpenGl::setUniform(const std::string &location, const Image *image)
+void ShaderApi::setUniform(const std::string &location, const Image *image)
 {
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, static_cast<const ImageOpenGl *>(image)->getID());
+    glBindTexture(GL_TEXTURE_2D, static_cast<const ImageApi *>(image)->getID());
     glUniform1i(glGetUniformLocation(id, location.c_str()), 0);
 }
 
-void ShaderOpenGl::includeShader()
+void ShaderApi::includeShader()
 {
     glUseProgram(id);
 }
 
-Shader *ShaderOpenGl::makeNewShader(const char *vertexPath, const char *fragmentPath) const
+Shader *ShaderApi::makeNewShader(const char *vertexPath, const char *fragmentPath) const
 {
-    return new ShaderOpenGl(vertexPath, fragmentPath);
+    return new ShaderApi(vertexPath, fragmentPath);
 }
 
 ComputeShaderOpenGl::ComputeShaderOpenGl(const char *computePath)

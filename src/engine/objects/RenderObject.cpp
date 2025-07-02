@@ -1,8 +1,9 @@
 #include "Objects.hpp"
 
 using namespace Objects;
+using namespace Rendering;
 
-static std::vector<float> vertices = {
+std::vector<float> RenderObject::cubeVertices = {
     // Positions          // Tex Coords (U, flipped V) // Normals
     // Front face
     -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
@@ -40,7 +41,7 @@ static std::vector<float> vertices = {
     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
     0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
 
-static std::vector<unsigned int> indices = {
+std::vector<unsigned int> RenderObject::cubeIndices = {
     // Front face
     0, 1, 2,
     1, 3, 2,
@@ -65,8 +66,6 @@ static std::vector<unsigned int> indices = {
     20, 21, 22,
     21, 23, 22};
 
-std::vector<float> RenderObject::cubeMesh = vertices;
-std::vector<unsigned int> RenderObject::cubeIndices = indices;
 float RenderObject::gamma = 1.0f;
 bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
@@ -81,13 +80,10 @@ const Bigint RenderObject::maxDistanceMediumSquared = Bigint(100000l * 100000l);
 const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
 const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
 
-Mesh *RenderObject::defaultMeshAPI = nullptr;
-
-void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camera, float gamma, bool disableBrightness)
+void RenderObject::init(Shader *pointShader, Camera *camera, float gamma, bool disableBrightness)
 {
     RenderObject::pointShader = pointShader;
     RenderObject::camera = camera;
-    RenderObject::defaultMeshAPI = defaultMeshAPI;
     RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {0}, {3}, MeshTypes::Points);
     RenderObject::gamma = gamma;
     RenderObject::disableBrightness = disableBrightness;
@@ -96,14 +92,14 @@ void RenderObject::init(Shader *pointShader, Mesh *defaultMeshAPI, Camera *camer
 RenderObject::RenderObject(Shader *shady, Image *im)
 {
     setupObject(shady, im);
-    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeMesh, cubeIndices, {3, 2, 3}));
+    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeVertices, cubeIndices, {3, 2, 3}));
 }
 
 void RenderObject::setupObject(Shader *shady, Image *im)
 {
     shader = shady;
     image = im;
-    if (pointShader == nullptr || camera == nullptr || defaultMeshAPI == nullptr)
+    if (pointShader == nullptr || camera == nullptr)
     {
         throw std::runtime_error("You have to run RenderObject::init(pointShader, meshApi, camera) to setup objects");
     }
@@ -160,7 +156,7 @@ void RenderObject::updateTime()
 
 void RenderObject::renderAsPoint()
 {
-    shader->disableCulling();
+    pointShader->disableCulling();
     Bigint distance = distanceSquared.sqrt();
     glm::vec3 newPos = (tempLocalPosition / distance).toFloatVec3() * 10.0f;
 

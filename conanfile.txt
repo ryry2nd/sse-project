@@ -9,6 +9,9 @@ sdl_image/2.8.2
 sqlite3/3.49.1
 sol2/3.5.0
 sdl_ttf/2.24.0
+yaml-cpp/0.8.0
+assimp/5.4.3
+vulkan-headers/1.4.313.0
 
 [generators]
 CMakeDeps

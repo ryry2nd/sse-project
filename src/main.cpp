@@ -4,34 +4,17 @@
 #include "engine/objects/Objects.hpp"
 #include "engine/HelperFunctions.hpp"
 #include "engine/scripting/ScriptingHeaders.hpp"
+#include "engine/opengl/HelperFunctionsOpengl.hpp"
 #include <string>
 #include <memory>
 #include <iostream>
 
-std::vector<float> vertices = {
-    //  x,     y,    u,   v
-    -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
-    0.5f, -0.5f, 1.0f, 1.0f,  // bottom-right
-    0.5f, 0.5f, 1.0f, 0.0f,   // top-right
-    -0.5f, 0.5f, 0.0f, 0.0f   // top-left
-};
-
-std::vector<unsigned int> indices = {
-    0, 1, 2,
-    2, 3, 0};
-
-int Bigint::numCopies = 0;
-int Bigint::numMoves = 0;
-
 int main(int argc, char *argv[])
 {
     glm::vec2 res(900, 500);
-    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsOpenGl(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-
-    Rendering::Shader *apiShader = new OpenGl::ShaderOpenGl();
-    Rendering::Image *apiImage = new OpenGl::ImageOpenGl();
-    Rendering::Mesh *apiMesh = new OpenGl::OpenGlMesh();
-
+    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+    Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
+    GameLibrary gameLib("game");
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
     const Bigint WALK_SPEED = Bigint(10);
@@ -41,32 +24,28 @@ int main(int argc, char *argv[])
     Objects::Camera *camera = new Objects::Camera(res, BigVec3(0.0f, 0.0f, -2.0f));
     camera->rotation.y = 180.0f;
 
-    // this sets up the shader and texture
-    Rendering::Shader *shader = apiShader->makeNewShader("shaders/vertex.glsl", "shaders/fragment.glsl");
-    Rendering::Shader *pointShader = apiShader->makeNewShader("shaders/pointVert.glsl", "shaders/pointFrag.glsl");
-    Rendering::Image *image = apiImage->makeNewImage("assets/textures/FISH.png");
+    Objects::RenderObject::init(gameLib.shaders["point_shader"], camera);
 
-    Rendering::Font defaultFont("assets/unifont-16.0.04.otf", 48);
-    Rendering::Mesh *mesh2d = apiMesh->makeNewMesh(vertices, indices, {2, 2});
-    Rendering::Shader *shader2d = apiShader->makeNewShader("shaders/2dVertex.glsl", "shaders/2dFragment.glsl");
-
-    Objects::RenderObject2d object2d(mesh2d, shader2d, camera);
-    object2d.scale = glm::vec2(48.0f);
-    object2d.position.x = 24;
+    Objects::RenderObject2d object2d(gameLib.shaders["2d_shader"], camera);
+    object2d.scale = glm::vec2(0.5f);
+    object2d.position.x = 20;
     object2d.position.y = res.y - 24;
 
-    Objects::RenderObject::init(pointShader, apiMesh, camera);
+    Objects::RenderObject2d speed2d(gameLib.shaders["2d_shader"], camera);
+    speed2d.scale = glm::vec2(0.5f);
+    speed2d.position.x = 24;
+    speed2d.position.y = res.y - 72;
 
     LuaHeaders::LuaScriptLib lua;
     lua.include(LuaHeaders::LuaLibEnum::glm);
     lua.include(LuaHeaders::LuaLibEnum::bigvars);
     lua.include(LuaHeaders::LuaLibEnum::objects);
 
-    lua.includeInitialized("shader1", *shader);
-    lua.includeInitialized("image1", *image);
+    lua.includeInitialized("shader1", *gameLib.shaders["basic_shader"]);
+    lua.includeInitialized("image1", *gameLib.images["Fish"]);
     lua.includeInitialized("camera1", *camera);
 
-    lua.includeScripts("./scripts");
+    lua.includeScripts("./game/scripts");
 
     // lua.getFunction("test")();
 
@@ -86,7 +65,8 @@ int main(int argc, char *argv[])
     Uint64 prevFrameUpdate = SDL_GetPerformanceCounter();
 
     std::ostringstream ss;
-    Image *text;
+    Rendering::Image *text;
+    Rendering::Image *speedometer;
 
     while (running)
     {
@@ -177,29 +157,25 @@ int main(int argc, char *argv[])
 
         Objects::RenderObject::DrawAllObjects();
 
-        // std::cout << "copies: " << Bigint::numCopies << std::endl;
-        // Bigint::numCopies = 0;
-        // std::cout << "moves: " << Bigint::numMoves << std::endl;
-        // Bigint::numMoves = 0;
-
         ss.str("");
         ss.clear();
         ss << std::fixed << std::setprecision(0) << fps;
 
-        text = apiImage->makeNewImage(defaultFont.renderText(ss.str(), {255, 255, 255, 255}));
+        text = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts["default_font"]->renderText(ss.str(), {255, 255, 255, 255}));
+        speedometer = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts["default_font"]->renderText(run_speed.toString(), {255, 255, 255, 255}));
 
+        object2d.position.x = (text->imageSizes.x * object2d.scale.x) / 2;
         object2d.Draw(text);
+        speed2d.position.x = (speedometer->imageSizes.x * speed2d.scale.x) / 2;
+        speed2d.Draw(speedometer);
 
         renderingEngine->swapBuffer();
+
         delete text;
+        delete speedometer;
     }
     // delete everything
-    delete shader;
-    delete pointShader;
-    delete image;
     delete renderingEngine;
     delete camera;
-    delete apiImage;
-    delete apiShader;
     return 0;
 }
