@@ -1,31 +1,10 @@
 #include "ScriptingHeaders.hpp"
 
-using namespace LuaHeaders;
+using namespace ScriptingHeaders;
 
-void LuaScriptLib::includeScripts(std::string lua_dir)
-{
-    for (const auto &entry : std::filesystem::directory_iterator(lua_dir))
-    {
-        if (entry.is_regular_file())
-        {
-            auto path = entry.path();
-            if (path.extension() == ".lua")
-            {
-                std::cout << "Loading Lua script: " << path << std::endl;
-                try
-                {
-                    lua.script_file(path.string());
-                }
-                catch (const sol::error &e)
-                {
-                    std::cerr << "Error loading " << path << ": " << e.what() << std::endl;
-                }
-            }
-        }
-    }
-}
+std::unordered_map<std::string, GameLibrary *> GameLibrary::packages;
 
-void LuaScriptLib::includeGlm()
+void GameLibrary::includeGlm()
 {
     sol::table vecs = lua.create_table();
     // vecs.set_function("length", &glm::length);
@@ -51,7 +30,7 @@ void LuaScriptLib::includeGlm()
     lua["glm"] = vecs;
 }
 
-void LuaScriptLib::includeBigVars()
+void GameLibrary::includeBigVars()
 {
     sol::table bigvars = lua.create_table();
     bigvars.new_usertype<Bigint>("Bigint",
@@ -78,37 +57,56 @@ void LuaScriptLib::includeBigVars()
     lua["bigvars"] = bigvars;
 }
 
-void LuaScriptLib::includeObjects()
+void GameLibrary::includeRendering()
 {
     using namespace Rendering;
+    sol::table rendering = lua.create_table();
+
+    rendering.new_usertype<Shader>("Shader", sol::no_constructor); //, "createUniform", &Shader::createUniform, "includeShader", &Shader::includeShader, "setUniform", &Shader::setUniform, "enableCulling", &Shader::enableCulling, "disableCulling", &Shader::disableCulling);
+    rendering.new_usertype<Image>("Image", sol::no_constructor, "imageSizes", &Image::imageSizes);
+    rendering.new_usertype<Mesh>("Mesh", sol::no_constructor, "posOffset", &Mesh::posOffset, "rotOffset", &Mesh::rotOffset, "sizeOffset", &Mesh::sizeOffset);
+    lua["Rendering"] = rendering;
+}
+
+void GameLibrary::includeObjects()
+{
+
     using namespace Objects;
     sol::table objects = lua.create_table();
-    objects.new_usertype<Shader>("Shader");
-    objects.new_usertype<Image>("Image");
-    objects.new_usertype<Camera>("Camera", "position", &Camera::position, "rotation", &Camera::rotation, "fov", &Camera::fov);
-    objects.new_usertype<Mesh>("Mesh", "posOffset", &Mesh::posOffset, "rotOffset", &Mesh::rotOffset, "sizeOffset", &Mesh::sizeOffset);
+
     objects["CullPriority"] = lua.create_table_with(
         "Low", CullPriority::Low,
         "Medium", CullPriority::Medium,
         "High", CullPriority::High,
         "Max", CullPriority::Max);
+
+    objects.new_usertype<BaseObject>("BaseObject", sol::constructors<BaseObject(), BaseObject(const BigVec3 &, const glm::vec3 &)>(),
+                                     "position", &BaseObject::position, "rotation", &BaseObject::rotation,
+                                     "children", &BaseObject::children, "getTruePos", &BaseObject::getTruePos,
+                                     "makeParent", &BaseObject::makeParent, "parent", &BaseObject::parent, "removeParent", &BaseObject::removeParent);
+    objects.new_usertype<Camera>("Camera", sol::constructors<Camera(), Camera(BigVec3 &, glm::vec3 &)>(),
+                                 sol::base_classes, sol::bases<BaseObject>(),
+                                 "fov", &Camera::fov, "near", &Camera::near, "far", &Camera::far,
+                                 "convertToLocal", &Camera::convertToLocal, "getViewMatrix", &Camera::getViewMatrix,
+                                 "getProjectionMatrix", &Camera::getProjectionMatrix, "getViewMatrix2d", &Camera::getProjectionMatrix2d,
+                                 "getDownVector", &Camera::getDownVector, "getForwardVector", &Camera::getForwardVector, "getRightVector", &Camera::getRightVector);
     objects.new_usertype<LuaRenderObject>("RenderObject",
-                                          sol::constructors<LuaRenderObject(), LuaRenderObject(Shader *, Image *)>(),
-                                          sol::base_classes, sol::bases<RenderObject>(),
+                                          sol::constructors<LuaRenderObject(), LuaRenderObject(Rendering::Shader *, Rendering::Shader *, Rendering::Image *)>(),
+                                          sol::base_classes, sol::bases<BaseObject>(),
                                           "lua_instance", &LuaRenderObject::lua_instance,
-                                          "position", &LuaRenderObject::position,
-                                          "rotation", &LuaRenderObject::rotation,
                                           "meshes", &LuaRenderObject::meshes,
                                           "cullPriority", &LuaRenderObject::cullPriority,
                                           "appendUpdate", &LuaRenderObject::appendUpdate,
                                           "setupObject", &LuaRenderObject::setupObject);
-    objects.new_usertype<LuaMeshChunks>("MeshChunks",
-                                        sol::constructors<LuaMeshChunks(Shader *, Image *)>(),
-                                        sol::base_classes, sol::bases<MeshChunks, RenderObject>(),
-                                        "position", &LuaMeshChunks::position,
-                                        "rotation", &LuaMeshChunks::rotation,
-                                        "meshes", &LuaMeshChunks::meshes,
-                                        "cullPriority", &LuaMeshChunks::cullPriority,
-                                        "setupObject", &LuaMeshChunks::setupObject);
+    // objects.new_usertype<LuaMeshChunks>("MeshChunks",
+    //                                     sol::constructors<LuaMeshChunks(Rendering::Shader *, Rendering::Image *)>(),
+    //                                     sol::base_classes, sol::bases<MeshChunks, RenderObject>(),
+    //                                     "position", &LuaMeshChunks::position,
+    //                                     "rotation", &LuaMeshChunks::rotation,
+    //                                     "meshes", &LuaMeshChunks::meshes,
+    //                                     "cullPriority", &LuaMeshChunks::cullPriority,
+    //                                     "setupObject", &LuaMeshChunks::setupObject);
+
+    objects["globalCamera"] = &globalCamera;
     lua["Objects"] = objects;
 }

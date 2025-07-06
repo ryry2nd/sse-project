@@ -26,12 +26,24 @@ namespace Rendering
         Bool
     };
 
+    static glm::vec2 getRes()
+    {
+        SDL_DisplayMode displayMode;
+        if (SDL_GetDesktopDisplayMode(0, &displayMode) == 0)
+        {
+            return glm::vec2(displayMode.w, displayMode.h);
+        }
+        else
+        {
+            throw std::runtime_error("get res failed");
+        }
+    }
+
     class HelperFunctions
     {
     public:
         HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false)
         {
-            this->res = res;
             // it initialises sdl
             if (SDL_Init(SDL_INIT_VIDEO) != 0)
             {
@@ -49,7 +61,7 @@ namespace Rendering
                 SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
             }
 
-            window = SDL_CreateWindow(name, 100, 100, res.x, res.y, flags);
+            window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, res.x, res.y, flags);
             if (!window)
             {
                 std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
@@ -66,6 +78,8 @@ namespace Rendering
 
         virtual void swapBuffer() = 0;
 
+        virtual void updateScreenRes() = 0;
+
         ~HelperFunctions()
         {
             SDL_DestroyWindow(window);
@@ -74,7 +88,6 @@ namespace Rendering
 
     protected:
         SDL_Window *window;
-        glm::vec2 res;
     };
 
     class Image
@@ -120,6 +133,7 @@ namespace Rendering
         glm::vec3 sizeOffset = glm::vec3(1.0f);
         glm::vec3 rotOffset = glm::vec3(0.0f);
 
+    protected:
         std::vector<float> vertices;
         std::vector<unsigned int> indices;
         std::vector<short> vertLogic;

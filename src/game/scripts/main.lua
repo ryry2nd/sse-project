@@ -5,8 +5,8 @@ function Sun:appendUpdate(dt)
     self.cpp.rotation.y = self.cpp.rotation.y + dt / 10
 end
 
-function Sun:new(shader, image)
-    local cpp = Objects.RenderObject.new(shader, image)
+function Sun:new(shader, slimShader, image)
+    local cpp = Objects.RenderObject.new(shader, slimShader, image)
     local self = setmetatable({}, Sun)
     cpp.lua_instance = self
     self.cpp = cpp
@@ -26,8 +26,8 @@ function Earth:appendUpdate(dt)
     -- rotation.y += deltaTime / 10;
 end
 
-function Earth:new(shader, image)
-    local cpp = Objects.RenderObject.new(shader, image)
+function Earth:new(shader, slimShader, image)
+    local cpp = Objects.RenderObject.new(shader, slimShader, image)
     local self = setmetatable({}, Earth)
     cpp.lua_instance = self
     self.cpp = cpp
@@ -42,14 +42,15 @@ function Earth:new(shader, image)
 end
 
 local pos = bigvars.Bigint.getHoweverManyDigits(0)
+Objects.globalCamera.position.x = Objects.globalCamera.position.x + pos
+Objects.globalCamera.position.z = Objects.globalCamera.position.z - bigvars.Bigint:new(10)
+Objects.globalCamera.rotation.y = Objects.globalCamera.rotation.y + 180
 
-camera1.position.x = camera1.position.x + pos
-
-local sun = Sun:new(shader1, image1)
+local sun = Sun:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 sun.position.x = sun.position.x - bigvars.Bigint:new("150000000000")
 sun.position.x = sun.position.x + pos
 
-local earth = Earth:new(shader1, image1)
+local earth = Earth:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 earth.position.x = earth.position.x + pos
 earth.position.y = earth.position.y - bigvars.Bigint:new(10)
 
@@ -58,21 +59,21 @@ sceneObjects = {}
 
 -- makes the cubes
 
--- local chunks = objects.MeshChunks:new(shader1, image1)
+-- local chunks = objects.MeshChunks:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 -- --chunks.position.y = chunks.position.y + bigvars.Bigint:new(200)
 -- chunks.position.x = chunks.position.x + pos
 -- table.insert(sceneObjects, chunks)
 
-local cube = Objects.RenderObject:new(shader1, image1)
+local cube = Objects.RenderObject:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 cube.position.x = cube.position.x + pos
 table.insert(sceneObjects, cube)
 
-local cube2 = Objects.RenderObject:new(shader1, image1)
+local cube2 = Objects.RenderObject:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 cube2.position.x = cube2.position.x - bigvars.Bigint:new(10)
 cube2.position.x = cube2.position.x + pos
 table.insert(sceneObjects, cube2)
 
-local cube3 = Objects.RenderObject:new(shader1, image1)
+local cube3 = Objects.RenderObject:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 cube3.position.x = cube3.position.x + bigvars.Bigint:new(10)
 cube3.position.x = cube3.position.x + pos
 table.insert(sceneObjects, cube3)
@@ -81,7 +82,8 @@ NUM_TEMPS = 11;
 temp = {};
 
 for i = 1, NUM_TEMPS do
-    table.insert(temp, Objects.RenderObject:new(shader1, image1))
+    table.insert(temp,
+        Objects.RenderObject:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish")))
     temp[i].position.z = temp[i].position.z + bigvars.Bigint:new(10 * i)
     temp[i].position.x = temp[i].position.x + pos
 end

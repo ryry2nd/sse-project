@@ -71,8 +71,6 @@ bool RenderObject::disableBrightness = false;
 std::vector<RenderObject *> RenderObject::renderObjects;
 Uint64 RenderObject::now = SDL_GetTicks();
 Mesh *RenderObject::pointMesh = nullptr;
-Shader *RenderObject::pointShader = nullptr;
-Camera *RenderObject::camera = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
@@ -80,29 +78,24 @@ const Bigint RenderObject::maxDistanceMediumSquared = Bigint(100000l * 100000l);
 const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
 const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
 
-void RenderObject::init(Shader *pointShader, Camera *camera, float gamma, bool disableBrightness)
+void RenderObject::init(float gamma, bool disableBrightness)
 {
-    RenderObject::pointShader = pointShader;
-    RenderObject::camera = camera;
     RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {0}, {3}, MeshTypes::Points);
     RenderObject::gamma = gamma;
     RenderObject::disableBrightness = disableBrightness;
 }
 
-RenderObject::RenderObject(Shader *shady, Image *im)
+RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im)
 {
-    setupObject(shady, im);
+    setupObject(shady, slimShady, im);
     meshes.push_back(defaultMeshAPI->makeNewMesh(cubeVertices, cubeIndices, {3, 2, 3}));
 }
 
-void RenderObject::setupObject(Shader *shady, Image *im)
+void RenderObject::setupObject(Shader *shady, Shader *slimShady, Image *im)
 {
     shader = shady;
     image = im;
-    if (pointShader == nullptr || camera == nullptr)
-    {
-        throw std::runtime_error("You have to run RenderObject::init(pointShader, meshApi, camera) to setup objects");
-    }
+    pointShader = slimShady;
     renderObjects.push_back(this);
 }
 
@@ -169,8 +162,8 @@ void RenderObject::renderAsPoint()
     pointShader->includeShader();
     pointShader->setUniform("depth", mappedDepth);
     pointShader->setUniform("uModel", matrix);
-    pointShader->setUniform("uView", camera->getViewMatrix());
-    pointShader->setUniform("uProjection", camera->getProjectionMatrix());
+    pointShader->setUniform("uView", Objects::globalCamera.getViewMatrix());
+    pointShader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
     pointShader->setUniform("gamma", gamma);
     pointShader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
     pointShader->setUniform("pointSize", 10.0f);
@@ -183,8 +176,8 @@ void RenderObject::renderAsMesh()
     shader->includeShader();
     shader->setUniform("gamma", gamma);
     shader->setUniform("u_fullBright", disableBrightness);
-    shader->setUniform("uView", camera->getViewMatrix());
-    shader->setUniform("uProjection", camera->getProjectionMatrix());
+    shader->setUniform("uView", Objects::globalCamera.getViewMatrix());
+    shader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
     shader->setUniform("texture1", image);
 
     glm::vec3 newPos;
@@ -288,7 +281,7 @@ void RenderObject::Draw()
         return;
     }
 
-    tempLocalPosition = camera->convertToLocal(position);
+    tempLocalPosition = Objects::globalCamera.convertToLocal(position);
     distanceSquared = calculateDistanceSquared(tempLocalPosition);
 
     if (cullPriority == CullPriority::Medium && distanceSquared > maxDistanceMediumSquared)

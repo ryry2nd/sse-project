@@ -23,6 +23,7 @@ namespace OpenGl
         HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
         void clearBackground();
         void swapBuffer();
+        void updateScreenRes();
         ~HelperFunctionsApi();
 
     private:

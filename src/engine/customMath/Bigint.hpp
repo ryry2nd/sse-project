@@ -122,6 +122,13 @@ struct Bigint
         return result;
     }
 
+    inline Bigint operator<<(const size_t &other) const
+    {
+        Bigint result;
+        result.value = value << other;
+        return result;
+    }
+
     void operator+=(const Bigint &other) noexcept
     {
         *this = *this + other;
@@ -254,10 +261,7 @@ struct Bigint
         {
             return Bigint();
         }
-        std::string pos;
-        pos.reserve(numZeros + 1);
-        pos = "1" + std::string(numZeros, '0');
 
-        return Bigint(pos);
+        return Bigint(1) << numZeros;
     };
 };

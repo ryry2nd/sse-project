@@ -9,12 +9,14 @@ glm::mat4 Camera::getViewMatrix() const
 
 glm::mat4 Camera::getProjectionMatrix() const
 {
-    return glm::perspective(glm::radians(fov), RES.x / RES.y, near, far);
+    glm::vec2 res = Rendering::getRes();
+    return glm::perspective(glm::radians(fov), res.x / res.y, near, far);
 }
 
 glm::mat4 Camera::getProjectionMatrix2d() const
 {
-    return glm::ortho(0.0f, RES.x, 0.0f, RES.y);
+    glm::vec2 res = Rendering::getRes();
+    return glm::ortho(0.0f, res.x, 0.0f, res.y);
 }
 
 glm::vec3 Camera::getForwardVector() const

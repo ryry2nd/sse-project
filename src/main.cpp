@@ -11,41 +11,36 @@
 
 int main(int argc, char *argv[])
 {
-    glm::vec2 res(900, 500);
-    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi(res, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({1920, 1080}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, true, 0, true);
     Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
-    GameLibrary gameLib("game");
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
     const Bigint WALK_SPEED = Bigint(10);
     Bigint run_speed = Bigint("100");
 
-    // this is the camera, cameras are neat
-    Objects::Camera *camera = new Objects::Camera(res, BigVec3(0.0f, 0.0f, -2.0f));
-    camera->rotation.y = 180.0f;
+    Objects::RenderObject::init();
+    ScriptingHeaders::GameLibrary gameLib("game");
 
-    Objects::RenderObject::init(gameLib.shaders["point_shader"], camera);
+    //     Objects::RenderObject2d object2d(gameLib.shaders[2], camera);
+    //     object2d.scale = glm::vec2(0.5f);
+    //     object2d.position.x = 20;
+    //     object2d.position.y = res.y - 24;
+    //
+    //     Objects::RenderObject2d speed2d(gameLib.shaders[2], camera);
+    //     speed2d.scale = glm::vec2(0.5f);
+    //     speed2d.position.x = 24;
+    //     speed2d.position.y = res.y - 72;
 
-    Objects::RenderObject2d object2d(gameLib.shaders["2d_shader"], camera);
-    object2d.scale = glm::vec2(0.5f);
-    object2d.position.x = 20;
-    object2d.position.y = res.y - 24;
-
-    Objects::RenderObject2d speed2d(gameLib.shaders["2d_shader"], camera);
-    speed2d.scale = glm::vec2(0.5f);
-    speed2d.position.x = 24;
-    speed2d.position.y = res.y - 72;
-
-    LuaHeaders::LuaScriptLib lua;
-    lua.include(LuaHeaders::LuaLibEnum::glm);
-    lua.include(LuaHeaders::LuaLibEnum::bigvars);
-    lua.include(LuaHeaders::LuaLibEnum::objects);
-
-    lua.includeInitialized("shader1", *gameLib.shaders["basic_shader"]);
-    lua.includeInitialized("image1", *gameLib.images["Fish"]);
-    lua.includeInitialized("camera1", *camera);
-
-    lua.includeScripts("./game/scripts");
+    //     LuaHeaders::LuaScriptLib lua;
+    //     lua.include(LuaHeaders::LuaLibEnum::glm);
+    //     lua.include(LuaHeaders::LuaLibEnum::bigvars);
+    //     lua.include(LuaHeaders::LuaLibEnum::objects);
+    //
+    //     lua.includeInitialized("shader1", *gameLib.shaders["basic_shader"]);
+    //     lua.includeInitialized("image1", *gameLib.images["Fish"]);
+    //     lua.includeInitialized("camera1", *camera);
+    //
+    //     lua.includeScripts("./game/scripts");
 
     // lua.getFunction("test")();
 
@@ -58,15 +53,17 @@ int main(int argc, char *argv[])
     double fps;
     const Bigint *speed;
 
+    const Uint8 *keystates;
+
     int accumulatedMouseX = 0;
     int accumulatedMouseY = 0;
 
     bool shouldUpdate;
     Uint64 prevFrameUpdate = SDL_GetPerformanceCounter();
 
-    std::ostringstream ss;
-    Rendering::Image *text;
-    Rendering::Image *speedometer;
+    // std::ostringstream ss;
+    // Rendering::Image *text;
+    // Rendering::Image *speedometer;
 
     while (running)
     {
@@ -104,10 +101,14 @@ int main(int argc, char *argv[])
                     run_speed /= Bigint(10);
                 }
             }
+            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
+            {
+                renderingEngine->updateScreenRes();
+            }
         }
 
         // gets all keystates
-        const Uint8 *keystates = SDL_GetKeyboardState(NULL);
+        keystates = SDL_GetKeyboardState(NULL);
 
         // if your running, run, otherwise dont
         speed = keystates[SDL_SCANCODE_LSHIFT] ? &run_speed : &WALK_SPEED;
@@ -115,35 +116,35 @@ int main(int argc, char *argv[])
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            camera->position -= BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            camera->position += BigVec3(camera->getForwardVector() * deltaTime) * *speed;
+            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
-            camera->position -= BigVec3(camera->getRightVector() * deltaTime) * *speed;
+            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_A])
         {
-            camera->position += BigVec3(camera->getRightVector() * deltaTime) * *speed;
+            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
-            camera->position += BigVec3(camera->getDownVector() * deltaTime) * *speed;
+            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
-            camera->position -= BigVec3(camera->getDownVector() * deltaTime) * *speed;
+            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
 
         if (deltaTime > 0)
         {
-            camera->rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-            camera->rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+            Objects::globalCamera.rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
+            Objects::globalCamera.rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
 
             accumulatedMouseX = 0;
             accumulatedMouseY = 0;
@@ -157,25 +158,24 @@ int main(int argc, char *argv[])
 
         Objects::RenderObject::DrawAllObjects();
 
-        ss.str("");
-        ss.clear();
-        ss << std::fixed << std::setprecision(0) << fps;
-
-        text = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts["default_font"]->renderText(ss.str(), {255, 255, 255, 255}));
-        speedometer = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts["default_font"]->renderText(run_speed.toString(), {255, 255, 255, 255}));
-
-        object2d.position.x = (text->imageSizes.x * object2d.scale.x) / 2;
-        object2d.Draw(text);
-        speed2d.position.x = (speedometer->imageSizes.x * speed2d.scale.x) / 2;
-        speed2d.Draw(speedometer);
+        //         ss.str("");
+        //         ss.clear();
+        //         ss << std::fixed << std::setprecision(0) << fps;
+        //
+        //         text = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts[0]->renderText(ss.str(), {255, 255, 255, 255}));
+        //         speedometer = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts[0]->renderText(run_speed.toString(), {255, 255, 255, 255}));
+        //
+        //         object2d.position.x = (text->imageSizes.x * object2d.scale.x) / 2;
+        //         object2d.Draw(text);
+        //         speed2d.position.x = (speedometer->imageSizes.x * speed2d.scale.x) / 2;
+        //         speed2d.Draw(speedometer);
 
         renderingEngine->swapBuffer();
 
-        delete text;
-        delete speedometer;
+        // delete text;
+        // delete speedometer;
     }
     // delete everything
     delete renderingEngine;
-    delete camera;
     return 0;
 }

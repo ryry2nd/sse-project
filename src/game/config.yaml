@@ -4,10 +4,6 @@ version: 0.0.1
 
 # requires:
 #   - id: com.ryan.game
-#     assets: true
-#     shaders: false
-#     scripts: false
-#     configs: false
 
 shaders:
   - name: basic_shader
@@ -31,20 +27,20 @@ assets:
   # models:
   #   - name: testModel
       
-# scripts:
-#   - path: main.lua
+scripts:
+  - path: scripts/main.lua
 
 # configs:
 #   - name: test
 #     path: config/test.yaml
 
-# permissions:
+permissions:
 #   # allow_modification: false
 #   # allow_shaders: true
 #   # allow_compute_shaders: false
 #   # allow_save_file_manipulation: false
 # 
-#   include_rendering: true
-#   include_bigvars: true
-#   include_objects: true
-#   include_glm: true
+  include_rendering: true
+  include_bigvars: true
+  include_objects: true
+  include_glm: true

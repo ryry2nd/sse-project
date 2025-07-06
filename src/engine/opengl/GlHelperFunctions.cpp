@@ -57,6 +57,12 @@ void HelperFunctionsApi::swapBuffer()
     SDL_GL_SwapWindow(window);
 }
 
+void HelperFunctionsApi::updateScreenRes()
+{
+    glm::vec2 res = getRes();
+    glViewport(0, 0, res.x, res.y);
+}
+
 HelperFunctionsApi::~HelperFunctionsApi()
 {
     SDL_GL_DeleteContext(glContext);

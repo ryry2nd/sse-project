@@ -10,15 +10,15 @@
 #include "../customMath/BigVec.hpp"
 #include "../HelperFunctions.hpp"
 
-namespace LuaHeaders
+namespace ScriptingHeaders
 {
     struct LuaRenderObject : public Objects::RenderObject
     {
         sol::table lua_instance;
 
         LuaRenderObject() = default;
-        LuaRenderObject(Rendering::Shader *shader, Rendering::Image *image)
-            : Objects::RenderObject(shader, image) {}
+        LuaRenderObject(Rendering::Shader *shader, Rendering::Shader *slimShady, Rendering::Image *image)
+            : Objects::RenderObject(shader, slimShady, image) {}
 
         void appendUpdate(const float &deltaTime) override
         {
@@ -49,141 +49,136 @@ namespace LuaHeaders
         using Objects::RenderObject::setupObject;
     };
 
-    struct LuaMeshChunks : public Objects::MeshChunks
-    {
-        LuaMeshChunks(Rendering::Shader *shader, Rendering::Image *image)
-            : Objects::MeshChunks(shader, image) {}
-        using Objects::MeshChunks::cullPriority;
-        using Objects::MeshChunks::meshes;
-        using Objects::MeshChunks::setupObject;
-    };
+    // struct LuaMeshChunks : public Objects::MeshChunks
+    // {
+    //     LuaMeshChunks(Rendering::Shader *shader, Rendering::Image *image)
+    //         : Objects::MeshChunks(shader, image) {}
+    //     using Objects::MeshChunks::cullPriority;
+    //     using Objects::MeshChunks::meshes;
+    //     using Objects::MeshChunks::setupObject;
+    // };
 
-    enum class LuaLibEnum
+    struct GameLibrary
     {
-        glm,
-        bigvars,
-        objects
-    };
+        std::string name;
+        std::string id;
+        std::string version;
 
-    class LuaScriptLib
-    {
-    public:
-        LuaScriptLib()
+        sol::state lua;
+
+        std::unordered_map<std::string, Rendering::Shader *> shaders;
+        std::unordered_map<std::string, Rendering::Image *> images;
+        std::unordered_map<std::string, Rendering::Font *> fonts;
+
+        static std::unordered_map<std::string, GameLibrary *> packages;
+
+        GameLibrary(const std::string &path)
         {
-            lua.open_libraries(sol::lib::base);
-            lua.open_libraries(sol::lib::table);
-        }
-        void include(LuaLibEnum libName)
-        {
-            switch (libName)
+            YAML::Node config = YAML::LoadFile(path + "/config.yaml");
+
+            name = config["name"].as<std::string>();
+            id = config["id"].as<std::string>();
+            version = config["version"].as<std::string>();
+
+            if (config["permissions"])
             {
-            default:
-                throw std::runtime_error("Library not found");
-            case LuaLibEnum::glm:
-                includeGlm();
-                break;
-            case LuaLibEnum::bigvars:
-                includeBigVars();
-                break;
-            case LuaLibEnum::objects:
-                includeObjects();
-                break;
-            };
+                if (config["permissions"]["include_glm"] && config["permissions"]["include_glm"].as<bool>())
+                {
+                    includeGlm();
+                }
+                if (config["permissions"]["include_bigvars"] && config["permissions"]["include_bigvars"].as<bool>())
+                {
+                    includeBigVars();
+                }
+                if (config["permissions"]["include_rendering"] && config["permissions"]["include_rendering"].as<bool>())
+                {
+                    includeRendering();
+                }
+                if (config["permissions"]["include_objects"] && config["permissions"]["include_objects"].as<bool>())
+                {
+                    includeObjects();
+                }
+            }
+            if (config["assets"])
+            {
+                if (config["assets"]["fonts"])
+                {
+                    size_t size = config["assets"]["fonts"].size();
+                    fonts.reserve(size);
+                    for (size_t i = 0; i < size; i++)
+                    {
+                        fonts[config["assets"]["fonts"][i]["name"].as<std::string>()] = new Rendering::Font(path + "/" + config["assets"]["fonts"][i]["path"].as<std::string>(), config["assets"]["fonts"][i]["size"].as<int>());
+                    }
+                }
+                if (config["assets"]["textures"])
+                {
+                    size_t size = config["assets"]["textures"].size();
+                    images.reserve(size);
+
+                    for (size_t i = 0; i < size; i++)
+                    {
+                        images[config["assets"]["textures"][i]["name"].as<std::string>()] = Rendering::defaultImageAPI->makeNewImage(path + "/" + config["assets"]["textures"][i]["path"].as<std::string>());
+                    }
+                }
+            }
+
+            if (config["shaders"])
+            {
+                size_t size = config["shaders"].size();
+                shaders.reserve(size);
+
+                for (size_t i = 0; i < size; i++)
+                {
+                    shaders[config["shaders"][i]["name"].as<std::string>()] = Rendering::defaultShaderAPI->makeNewShader((path + "/" + config["shaders"][i]["vertPath"].as<std::string>()).c_str(), (path + "/" + config["shaders"][i]["fragPath"].as<std::string>()).c_str());
+                }
+            }
+
+            lua.open_libraries(sol::lib::base, sol::lib::table, sol::lib::utf8, sol::lib::string, sol::lib::math);
+
+            lua.set_function("get_package", [&](const std::string &package_name, const std::string &func_name) -> sol::function
+                             {
+                if (packages.find(package_name) == packages.end()) {
+                    throw std::runtime_error("Package not found: " + package_name);
+                }
+                sol::function func = packages[package_name]->lua[func_name];
+                if (!func.valid()) {
+                    throw std::runtime_error("Function not found in package: " + func_name);
+                }
+                return func; });
+
+            lua.set_function("get_shader", [&](const std::string &shaderName)
+                             { return shaders[shaderName]; });
+
+            lua.set_function("get_image", [&](const std::string &imageName)
+                             { return images[imageName]; });
+
+            lua.set_function("get_fonts", [&](const std::string &fontName)
+                             { return shaders[fontName]; });
+
+            if (config["scripts"])
+            {
+                for (size_t i = 0; i < config["scripts"].size(); i++)
+                {
+                    lua.script_file(path + "/" + config["scripts"][i]["path"].as<std::string>());
+                }
+            }
         }
-        template <typename Func>
-        void add_custom_function(const std::string &name, Func &&func)
+
+        ~GameLibrary()
         {
-            lua.set_function(name, std::forward<Func>(func));
-        }
-        template <typename Func>
-        void includeInitialized(const std::string &name, Func &&func)
-        {
-            lua[name] = &func;
-        }
-        void includeScripts(std::string lua_dir);
-        sol::function getFunction(std::string func)
-        {
-            return lua[func];
+            packages.erase(id);
+            for (auto &[name, ptr] : fonts)
+                delete ptr;
+            for (auto &[name, ptr] : shaders)
+                delete ptr;
+            for (auto &[name, ptr] : images)
+                delete ptr;
         }
 
     private:
-        sol::state lua;
         void includeGlm();
+        void includeRendering();
         void includeBigVars();
         void includeObjects();
     };
 }
-
-struct GameLibrary
-{
-    std::string name;
-    std::string id;
-    std::string version;
-
-    std::unordered_map<std::string, Rendering::Font *> fonts;
-    std::unordered_map<std::string, Rendering::Shader *> shaders;
-    std::unordered_map<std::string, Rendering::Image *> images;
-
-    GameLibrary(const std::string &path)
-    {
-        YAML::Node config = YAML::LoadFile(path + "/config.yaml");
-        name = config["name"].as<std::string>();
-        id = config["id"].as<std::string>();
-        version = config["version"].as<std::string>();
-
-        if (config["assets"])
-        {
-            if (config["assets"]["fonts"])
-            {
-                size_t size = config["assets"]["fonts"].size();
-                fonts.reserve(size);
-
-                for (size_t i = 0; i < size; i++)
-                {
-                    fonts[config["assets"]["fonts"][i]["name"].as<std::string>()] = new Rendering::Font(path + "/" + config["assets"]["fonts"][i]["path"].as<std::string>(), config["assets"]["fonts"][i]["size"].as<int>());
-                }
-            }
-            if (config["assets"]["textures"])
-            {
-                size_t size = config["assets"]["textures"].size();
-
-                images.reserve(size);
-
-                for (size_t i = 0; i < size; i++)
-                {
-                    images[config["assets"]["textures"][i]["name"].as<std::string>()] = Rendering::defaultImageAPI->makeNewImage(path + "/" + config["assets"]["textures"][i]["path"].as<std::string>());
-                }
-            }
-        }
-
-        if (config["shaders"])
-        {
-            size_t size = config["shaders"].size();
-            shaders.reserve(size);
-
-            for (size_t i = 0; i < size; i++)
-            {
-                shaders[config["shaders"][i]["name"].as<std::string>()] = Rendering::defaultShaderAPI->makeNewShader((path + "/" + config["shaders"][i]["vertPath"].as<std::string>()).c_str(), (path + "/" + config["shaders"][i]["fragPath"].as<std::string>()).c_str());
-            }
-        }
-    }
-
-    ~GameLibrary()
-    {
-        for (auto &[key, ptr] : fonts)
-        {
-            delete ptr;
-        }
-        fonts.clear();
-        for (auto &[key, ptr] : shaders)
-        {
-            delete ptr;
-        }
-        shaders.clear();
-        for (auto &[key, ptr] : images)
-        {
-            delete ptr;
-        }
-        images.clear();
-    }
-};
