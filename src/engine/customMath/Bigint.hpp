@@ -1,18 +1,10 @@
 #pragma once
 
-#include <vector>
-#include <iostream>
 #include <cmath>
-#include <cstdint>
 #include <iomanip>
 #include <stdexcept>
 #include <string>
 #include <sstream>
-#include <algorithm>
-#include <cctype>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 struct Bigint

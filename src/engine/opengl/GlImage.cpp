@@ -5,13 +5,7 @@ using namespace Rendering;
 
 ImageApi::ImageApi(const std::string &filePath)
 {
-    SDL_Surface *surface = IMG_Load(filePath.c_str());
-    if (!surface)
-    {
-        std::cerr << "Image load fail: " << IMG_GetError() << "\n";
-        return;
-    }
-    setupObject(surface);
+    setupObject(loadFile(filePath));
 }
 
 ImageApi::ImageApi(SDL_Surface *surface)

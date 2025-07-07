@@ -1,12 +1,12 @@
-#include <SDL2/SDL.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "engine/objects/Objects.hpp"
 #include "engine/HelperFunctions.hpp"
 #include "engine/scripting/ScriptingHeaders.hpp"
 #include "engine/opengl/HelperFunctionsOpengl.hpp"
+
+#include <SDL2/SDL.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <string>
-#include <memory>
 #include <iostream>
 
 int main(int argc, char *argv[])

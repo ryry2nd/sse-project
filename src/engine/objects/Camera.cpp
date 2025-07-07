@@ -1,5 +1,7 @@
 #include "Objects.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace Objects;
 
 glm::mat4 Camera::getViewMatrix() const
