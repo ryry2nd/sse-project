@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
     Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
     Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
     // this is the constants
-    const float MOUSE_SENSITIVITY = 0.1;
     const Bigint WALK_SPEED = Bigint(10);
     Bigint run_speed = Bigint("100");
 
@@ -23,31 +22,16 @@ int main(int argc, char *argv[])
 
     // starts running the game loop
     bool running = true;
-    Uint64 lastCounter = SDL_GetPerformanceCounter();
-    Uint64 currentCounter;
     SDL_Event event;
-    float deltaTime;
-    double fps;
     const Bigint *speed;
 
     const Uint8 *keystates;
 
-    int accumulatedMouseX = 0;
-    int accumulatedMouseY = 0;
-
-    bool shouldUpdate;
-    Uint64 prevFrameUpdate = SDL_GetPerformanceCounter();
-
-    // std::ostringstream ss;
-    // Rendering::Image *text;
-    // Rendering::Image *speedometer;
+    const float &deltaTime = Rendering::HelperFunctions::deltaTime;
 
     while (running)
     {
-        currentCounter = SDL_GetPerformanceCounter();
-        deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
-        fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
-        lastCounter = currentCounter;
+        Rendering::HelperFunctions::Update();
 
         // gets events
         while (SDL_PollEvent(&event))
@@ -58,8 +42,7 @@ int main(int argc, char *argv[])
             // rotates camera
             if (event.type == SDL_MOUSEMOTION)
             {
-                accumulatedMouseX += event.motion.xrel;
-                accumulatedMouseY += event.motion.yrel;
+                Objects::globalCamera.rotateCamera({event.motion.xrel, event.motion.yrel});
             }
 
             // when you press escape, leave
@@ -118,22 +101,11 @@ int main(int argc, char *argv[])
             Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
 
-        if (deltaTime > 0)
-        {
-            Objects::globalCamera.rotation.y -= (accumulatedMouseX / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-            Objects::globalCamera.rotation.x -= (accumulatedMouseY / deltaTime) * MOUSE_SENSITIVITY * deltaTime;
-
-            accumulatedMouseX = 0;
-            accumulatedMouseY = 0;
-        }
-
-        Objects::RenderObject::updateTime();
-
-        Objects::RenderObject::UpdateAllObjects(deltaTime);
+        Objects::Drawable::UpdateAllObjects();
 
         renderingEngine->clearBackground();
 
-        Objects::RenderObject::DrawAllObjects();
+        Objects::Drawable::DrawAllObjects();
 
         //         ss.str("");
         //         ss.clear();

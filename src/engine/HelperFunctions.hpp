@@ -49,10 +49,18 @@ namespace Rendering
         virtual void clearBackground() = 0;
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
+        static void Update();
         ~HelperFunctions();
+
+        static float deltaTime;
+        static double fps;
+        static Uint64 now;
 
     protected:
         SDL_Window *window;
+
+    private:
+        static Uint64 lastCounter;
     };
 
     class Image

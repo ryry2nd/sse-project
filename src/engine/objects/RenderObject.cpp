@@ -68,8 +68,6 @@ std::vector<unsigned int> RenderObject::cubeIndices = {
 
 float RenderObject::gamma = 1.0f;
 bool RenderObject::disableBrightness = false;
-std::vector<RenderObject *> RenderObject::renderObjects;
-Uint64 RenderObject::now = SDL_GetTicks();
 Mesh *RenderObject::pointMesh = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
@@ -93,15 +91,14 @@ RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im)
 
 void RenderObject::setupObject(Shader *shady, Shader *slimShady, Image *im)
 {
+    Drawable::setupObject();
     shader = shady;
     image = im;
     pointShader = slimShady;
-    renderObjects.push_back(this);
 }
 
 RenderObject::~RenderObject()
 {
-    renderObjects.erase(std::find(renderObjects.begin(), renderObjects.end(), this));
     for (Mesh *mesh : meshes)
     {
         delete mesh;
@@ -141,11 +138,6 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
 }
 
 void RenderObject::appendCustomShaderValues() {}
-
-void RenderObject::updateTime()
-{
-    now = SDL_GetTicks64();
-}
 
 void RenderObject::renderAsPoint()
 {
@@ -275,6 +267,7 @@ void RenderObject::renderAsMesh()
 
 void RenderObject::Draw()
 {
+    Uint64 &now = HelperFunctions::now;
     if (culled && (now - lastCullCheck) > 1)
     {
         lastCullCheck = now;
@@ -323,21 +316,5 @@ void RenderObject::Draw()
         culled = true;
         startTimeCulled = now;
         lastCullCheck = now;
-    }
-}
-
-void RenderObject::UpdateAllObjects(const float &deltaTime)
-{
-    for (size_t i = 0; i < renderObjects.size(); i++)
-    {
-        renderObjects[i]->Update(deltaTime);
-    }
-}
-
-void RenderObject::DrawAllObjects()
-{
-    for (size_t i = 0; i < renderObjects.size(); i++)
-    {
-        renderObjects[i]->Draw();
     }
 }

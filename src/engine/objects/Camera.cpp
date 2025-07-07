@@ -59,3 +59,14 @@ glm::mat4 Camera::getRotationMatrix() const
     glm::mat4 rollMat = glm::rotate(glm::mat4(1.0f), glm::radians(rotation.z), glm::vec3(0, 0, 1));
     return yawMat * pitchMat * rollMat;
 }
+
+void Camera::rotateCamera(glm::vec2 motion)
+{
+    const float &deltaTime = Rendering::HelperFunctions::deltaTime;
+    if (deltaTime == 0)
+    {
+        return;
+    }
+    rotation.y -= (motion.x / deltaTime) * mouse_sensitivity * deltaTime;
+    rotation.x -= (motion.y / deltaTime) * mouse_sensitivity * deltaTime;
+}

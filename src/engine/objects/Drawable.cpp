@@ -1,0 +1,32 @@
+#include "Objects.hpp"
+
+using namespace Objects;
+
+std::vector<Drawable *> Drawable::drawables;
+
+void Drawable::setupObject()
+{
+    drawables.push_back(this);
+}
+
+Drawable::~Drawable()
+{
+    drawables.erase(std::find(drawables.begin(), drawables.end(), this));
+}
+
+void Drawable::UpdateAllObjects()
+{
+    const float &deltaTime = Rendering::HelperFunctions::deltaTime;
+    for (size_t i = 0; i < drawables.size(); i++)
+    {
+        drawables[i]->Update(deltaTime);
+    }
+}
+
+void Drawable::DrawAllObjects()
+{
+    for (size_t i = 0; i < drawables.size(); i++)
+    {
+        drawables[i]->Draw();
+    }
+}

@@ -7,6 +7,20 @@
 
 using namespace Rendering;
 
+Uint64 HelperFunctions::lastCounter = SDL_GetPerformanceCounter();
+double HelperFunctions::fps = 0.0f;
+float HelperFunctions::deltaTime = 0.0f;
+Uint64 HelperFunctions::now = SDL_GetTicks64();
+
+void HelperFunctions::Update()
+{
+    now = SDL_GetTicks64();
+    Uint64 currentCounter = SDL_GetPerformanceCounter();
+    deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
+    fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
+    lastCounter = currentCounter;
+}
+
 HelperFunctions::HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
     // it initialises sdl

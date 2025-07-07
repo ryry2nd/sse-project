@@ -39,6 +39,7 @@ namespace Objects
     {
     public:
         float fov = 90.0f; // if this number isn't 90 then you got a small wiener (or your zooming in which is chill but only if your zooming in)
+        float mouse_sensitivity = 0.1f;
         Camera() : BaseObject() {}
         Camera(BigVec3 &pos, glm::vec3 &rot) : BaseObject(pos, rot) {}
         // takes the cameras rotation into account
@@ -55,6 +56,8 @@ namespace Objects
         glm::vec3 getDownVector() const;
         // converts the regular position into the local position relative to the camera
         BigVec3 convertToLocal(const BigVec3 &otherPosition) const;
+        // rotates the camera by the event motion
+        void rotateCamera(glm::vec2 motion);
         // the two clip distances
         float near = 0.00001f;
         float far = 100000.0f;
@@ -66,7 +69,22 @@ namespace Objects
 
     inline Camera globalCamera;
 
-    class RenderObject : public BaseObject
+    struct Drawable
+    {
+        void setupObject();
+        ~Drawable();
+        static void UpdateAllObjects();
+        static void DrawAllObjects();
+
+    protected:
+        virtual void Draw() = 0;
+        virtual void Update(const float &deltaTime) = 0;
+
+    private:
+        static std::vector<Drawable *> drawables;
+    };
+
+    class RenderObject : public Drawable, public BaseObject
     {
     public:
         // run before you setup any object
@@ -74,10 +92,6 @@ namespace Objects
         RenderObject() {}
         RenderObject(Rendering::Shader *shady, Rendering::Shader *slimShady, Rendering::Image *im);
         ~RenderObject();
-
-        static void UpdateAllObjects(const float &deltaTime);
-        static void DrawAllObjects();
-        static void updateTime();
 
     protected:
         // the list of meshes
@@ -112,18 +126,14 @@ namespace Objects
         void renderAsMesh();
 
         BigVec3 localSize;
-        static std::vector<RenderObject *> renderObjects;
 
         Uint64 startTimeCulled = -1;
         Uint64 lastCullCheck = -1;
 
         const static Bigint near;
         const static Bigint far;
-
         static float gamma;
         static bool disableBrightness;
-
-        static Uint64 now;
         static Rendering::Mesh *pointMesh;
     };
 
@@ -139,19 +149,36 @@ namespace Objects
         0, 1, 2,
         2, 3, 0};
 
-    class RenderObject2d
+    class RenderObject2d : public Drawable
     {
     public:
         glm::vec2 position = glm::vec2(0.0f);
         float rotation = 0.0f;
         glm::vec2 scale = glm::vec2(1.0f);
 
-        RenderObject2d(Rendering::Shader *shader) : shader2d(shader)
+        Rendering::Image *image;
+
+        RenderObject2d(Rendering::Shader *shader, Rendering::Image *im) : shader2d(shader), image(im)
         {
+            Drawable::setupObject();
             mesh2d = Rendering::defaultMeshAPI->makeNewMesh(vertices2d, indices2d, {2, 2});
         }
 
-        void Draw(const Rendering::Image *image)
+        void updateImage(Rendering::Image *im)
+        {
+            if (image != nullptr)
+            {
+                delete image;
+            }
+            image = im;
+        }
+
+    protected:
+        void Update(const float &deltaTime)
+        {
+        }
+
+        void Draw()
         {
             shader2d->disableCulling();
             glm::mat4 model(1.0f);
