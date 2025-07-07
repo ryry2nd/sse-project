@@ -281,7 +281,7 @@ void RenderObject::Draw()
         return;
     }
 
-    tempLocalPosition = Objects::globalCamera.convertToLocal(position);
+    tempLocalPosition = Objects::globalCamera.convertToLocal(getTruePos());
     distanceSquared = calculateDistanceSquared(tempLocalPosition);
 
     if (cullPriority == CullPriority::Medium && distanceSquared > maxDistanceMediumSquared)

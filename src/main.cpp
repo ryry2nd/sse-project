@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[])
 {
-    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({1920, 1080}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, true, 0, true);
+    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
     Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
     // this is the constants
     const float MOUSE_SENSITIVITY = 0.1;
@@ -20,29 +20,6 @@ int main(int argc, char *argv[])
 
     Objects::RenderObject::init();
     ScriptingHeaders::GameLibrary gameLib("game");
-
-    //     Objects::RenderObject2d object2d(gameLib.shaders[2], camera);
-    //     object2d.scale = glm::vec2(0.5f);
-    //     object2d.position.x = 20;
-    //     object2d.position.y = res.y - 24;
-    //
-    //     Objects::RenderObject2d speed2d(gameLib.shaders[2], camera);
-    //     speed2d.scale = glm::vec2(0.5f);
-    //     speed2d.position.x = 24;
-    //     speed2d.position.y = res.y - 72;
-
-    //     LuaHeaders::LuaScriptLib lua;
-    //     lua.include(LuaHeaders::LuaLibEnum::glm);
-    //     lua.include(LuaHeaders::LuaLibEnum::bigvars);
-    //     lua.include(LuaHeaders::LuaLibEnum::objects);
-    //
-    //     lua.includeInitialized("shader1", *gameLib.shaders["basic_shader"]);
-    //     lua.includeInitialized("image1", *gameLib.images["Fish"]);
-    //     lua.includeInitialized("camera1", *camera);
-    //
-    //     lua.includeScripts("./game/scripts");
-
-    // lua.getFunction("test")();
 
     // starts running the game loop
     bool running = true;

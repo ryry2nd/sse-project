@@ -41,10 +41,19 @@ function Earth:new(shader, slimShader, image)
     return cpp
 end
 
+-- put all non overridden render objects in here so they wont get garbage collected, this thing isn't special and you can really put it in any table
+sceneObjects = {}
+
 local pos = bigvars.Bigint.getHoweverManyDigits(0)
+
 Objects.globalCamera.position.x = Objects.globalCamera.position.x + pos
 Objects.globalCamera.position.z = Objects.globalCamera.position.z - bigvars.Bigint:new(10)
 Objects.globalCamera.rotation.y = Objects.globalCamera.rotation.y + 180
+
+-- local playerCube = Objects.RenderObject:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
+-- playerCube:makeParent(Objects.globalCamera)
+-- playerCube.position = bigvars.BigVec3:new(glm.vec3:new(0, -1, 0))
+-- table.insert(sceneObjects, playerCube)
 
 local sun = Sun:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 sun.position.x = sun.position.x - bigvars.Bigint:new("150000000000")
@@ -53,9 +62,6 @@ sun.position.x = sun.position.x + pos
 local earth = Earth:new(get_shader("basic_shader"), get_shader("point_shader"), get_image("Fish"))
 earth.position.x = earth.position.x + pos
 earth.position.y = earth.position.y - bigvars.Bigint:new(10)
-
--- put all non overridden render objects in here so they wont get garbage collected, this thing isn't special and you can really put it in any table
-sceneObjects = {}
 
 -- makes the cubes
 

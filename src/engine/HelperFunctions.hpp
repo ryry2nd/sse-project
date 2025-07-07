@@ -72,7 +72,7 @@ namespace Rendering
             if (hideMouse)
                 SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
             if (fullscreen)
-                SDL_MaximizeWindow(window);
+                SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
         }
         virtual void clearBackground() = 0;
 
