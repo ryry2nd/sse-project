@@ -200,7 +200,7 @@ ComputeShaderOpenGl::ComputeShaderOpenGl(const char *computePath)
     glDeleteShader(compute);
 }
 
-void ComputeShaderOpenGl::setupSsbo(ulong size)
+void ComputeShaderOpenGl::setupSsbo(uint64_t size)
 {
     glGenBuffers(1, &ssbo);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
@@ -208,12 +208,12 @@ void ComputeShaderOpenGl::setupSsbo(ulong size)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo); // Binding point 0
 }
 
-void ComputeShaderOpenGl::dispatch(uint xGroups, uint yGroups, uint zGroups)
+void ComputeShaderOpenGl::dispatch(uint32_t xGroups, uint32_t yGroups, uint32_t zGroups)
 {
     glDispatchCompute(xGroups, yGroups, zGroups);
 }
 
-std::vector<char> ComputeShaderOpenGl::joinShaderThread(ulong size)
+std::vector<char> ComputeShaderOpenGl::joinShaderThread(uint64_t size)
 {
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);

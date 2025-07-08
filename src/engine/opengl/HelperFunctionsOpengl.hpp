@@ -77,9 +77,9 @@ namespace OpenGl
     public:
         ComputeShaderOpenGl(const char *computePath);
         ~ComputeShaderOpenGl();
-        void setupSsbo(ulong size);
-        void dispatch(uint xGroups, uint yGroups, uint zGroups);
-        std::vector<char> joinShaderThread(ulong size);
+        void setupSsbo(uint64_t size);
+        void dispatch(uint32_t xGroups, uint32_t yGroups, uint32_t zGroups);
+        std::vector<char> joinShaderThread(uint64_t size);
 
     private:
         GLuint ssbo;

@@ -72,6 +72,11 @@ struct Bigint
         value = boost::multiprecision::cpp_int(l) * SCALE;
     }
 
+    Bigint(long long l)
+    {
+        value = boost::multiprecision::cpp_int(l) * SCALE;
+    }
+
     Bigint(const std::string &s)
     {
         size_t dot = s.find('.');

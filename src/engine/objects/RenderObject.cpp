@@ -72,7 +72,7 @@ Mesh *RenderObject::pointMesh = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
-const Bigint RenderObject::maxDistanceMediumSquared = Bigint(100000l * 100000l);
+const Bigint RenderObject::maxDistanceMediumSquared = Bigint("10000000000");
 const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
 const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
 

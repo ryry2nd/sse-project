@@ -8,7 +8,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Packages
 find_package(SDL2 REQUIRED)
-find_package(SDL2_IMAGE REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Jolt REQUIRED)
@@ -23,6 +22,9 @@ find_package(VulkanHeaders REQUIRED)
 
 if (NOT WIN32)
     find_package(PkgConfig REQUIRED)
+    find_package(SDL2_IMAGE REQUIRED)
+else()
+    find_package(SDL2_image REQUIRED)
 endif()
 
 
@@ -48,6 +50,8 @@ if (WIN32)
         SDL2::SDL2main        # SDL2 main on Windows
         opengl32              # Windows OpenGL lib
     )
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -Wl,--entry=mainCRTStartup -static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
+
 else()
     target_link_libraries(common_libs INTERFACE
         OpenGL::GL            # Unix-like OpenGL
