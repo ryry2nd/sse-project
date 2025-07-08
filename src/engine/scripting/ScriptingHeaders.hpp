@@ -12,52 +12,6 @@
 
 namespace ScriptingHeaders
 {
-    struct LuaRenderObject : public Objects::RenderObject
-    {
-        sol::table lua_instance;
-
-        LuaRenderObject() = default;
-        LuaRenderObject(Rendering::Shader *shader, Rendering::Shader *slimShady, Rendering::Image *image)
-            : Objects::RenderObject(shader, slimShady, image) {}
-
-        void appendUpdate(const float &deltaTime) override
-        {
-            if (!lua_instance.valid())
-            {
-                Objects::RenderObject::appendUpdate(deltaTime);
-                return;
-            }
-
-            sol::function override = lua_instance["appendUpdate"];
-            if (override.valid())
-            {
-                sol::protected_function_result result = override(lua_instance, deltaTime);
-                if (!result.valid())
-                {
-                    sol::error err = result;
-                    std::cerr << "[C++] Lua error in appendUpdate: " << err.what() << "\n";
-                }
-            }
-            else
-            {
-                Objects::RenderObject::appendUpdate(deltaTime);
-            }
-        }
-
-        using Objects::RenderObject::cullPriority;
-        using Objects::RenderObject::meshes;
-        using Objects::RenderObject::setupObject;
-    };
-
-    // struct LuaMeshChunks : public Objects::MeshChunks
-    // {
-    //     LuaMeshChunks(Rendering::Shader *shader, Rendering::Image *image)
-    //         : Objects::MeshChunks(shader, image) {}
-    //     using Objects::MeshChunks::cullPriority;
-    //     using Objects::MeshChunks::meshes;
-    //     using Objects::MeshChunks::setupObject;
-    // };
-
     struct GameLibrary
     {
         std::string name;

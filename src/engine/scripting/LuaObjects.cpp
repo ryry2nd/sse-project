@@ -2,6 +2,83 @@
 
 using namespace ScriptingHeaders;
 
+struct LuaRenderObject : public Objects::RenderObject
+{
+    sol::table lua_instance;
+
+    LuaRenderObject() = default;
+    LuaRenderObject(Rendering::Shader *shader, Rendering::Shader *slimShady, Rendering::Image *image)
+        : Objects::RenderObject(shader, slimShady, image) {}
+
+    void appendUpdate(const float &deltaTime) override
+    {
+        if (!lua_instance.valid())
+        {
+            Objects::RenderObject::appendUpdate(deltaTime);
+            return;
+        }
+
+        sol::function override = lua_instance["appendUpdate"];
+        if (override.valid())
+        {
+            sol::protected_function_result result = override(lua_instance, deltaTime);
+            if (!result.valid())
+            {
+                sol::error err = result;
+                std::cerr << "[C++] Lua error in appendUpdate: " << err.what() << "\n";
+            }
+        }
+        else
+        {
+            Objects::RenderObject::appendUpdate(deltaTime);
+        }
+    }
+
+    using Objects::RenderObject::cullPriority;
+    using Objects::RenderObject::meshes;
+    using Objects::RenderObject::setupObject;
+};
+
+struct LuaRenderObject2d : public Objects::RenderObject2d
+{
+    sol::table lua_instance;
+    LuaRenderObject2d(Rendering::Shader *shader, Rendering::Image *im)
+        : Objects::RenderObject2d(shader, im) {}
+
+    void Update(const float &deltaTime) override
+    {
+        if (!lua_instance.valid())
+        {
+            Objects::RenderObject2d::Update(deltaTime);
+            return;
+        }
+
+        sol::function override = lua_instance["Update"];
+        if (override.valid())
+        {
+            sol::protected_function_result result = override(lua_instance, deltaTime);
+            if (!result.valid())
+            {
+                sol::error err = result;
+                std::cerr << "[C++] Lua error in Update: " << err.what() << "\n";
+            }
+        }
+        else
+        {
+            Objects::RenderObject2d::Update(deltaTime);
+        }
+    }
+};
+
+// struct LuaMeshChunks : public Objects::MeshChunks
+// {
+//     LuaMeshChunks(Rendering::Shader *shader, Rendering::Image *image)
+//         : Objects::MeshChunks(shader, image) {}
+//     using Objects::MeshChunks::cullPriority;
+//     using Objects::MeshChunks::meshes;
+//     using Objects::MeshChunks::setupObject;
+// };
+
 std::unordered_map<std::string, GameLibrary *> GameLibrary::packages;
 
 void GameLibrary::includeGlm()
@@ -62,6 +139,11 @@ void GameLibrary::includeRendering()
     using namespace Rendering;
     sol::table rendering = lua.create_table();
 
+    rendering.new_usertype<HelperFunctions>("HelperFunctions", sol::no_constructor,
+                                            "deltaTime", sol::property([]()
+                                                                       { return Rendering::HelperFunctions::deltaTime; }),
+                                            "fps", sol::property([]()
+                                                                 { return Rendering::HelperFunctions::fps; }));
     rendering.new_usertype<Shader>("Shader", sol::no_constructor); //, "createUniform", &Shader::createUniform, "includeShader", &Shader::includeShader, "setUniform", &Shader::setUniform, "enableCulling", &Shader::enableCulling, "disableCulling", &Shader::disableCulling);
     rendering.new_usertype<Image>("Image", sol::no_constructor, "imageSizes", &Image::imageSizes);
     rendering.new_usertype<Mesh>("Mesh", sol::no_constructor, "posOffset", &Mesh::posOffset, "rotOffset", &Mesh::rotOffset, "sizeOffset", &Mesh::sizeOffset);
@@ -98,6 +180,9 @@ void GameLibrary::includeObjects()
                                           "cullPriority", &LuaRenderObject::cullPriority,
                                           "appendUpdate", &LuaRenderObject::appendUpdate,
                                           "setupObject", &LuaRenderObject::setupObject);
+    objects.new_usertype<LuaRenderObject2d>("RenderObject2d", sol::constructors<LuaRenderObject2d(Rendering::Shader *, Rendering::Image *)>(),
+                                            "position", &LuaRenderObject2d::position, "rotation", &LuaRenderObject2d::rotation, "scale", &LuaRenderObject2d::scale,
+                                            "Update", &LuaRenderObject2d::Update, "lua_instance", &LuaRenderObject2d::lua_instance);
     // objects.new_usertype<LuaMeshChunks>("MeshChunks",
     //                                     sol::constructors<LuaMeshChunks(Rendering::Shader *, Rendering::Image *)>(),
     //                                     sol::base_classes, sol::bases<MeshChunks, RenderObject>(),
