@@ -22,7 +22,7 @@ namespace Objects
         BigVec3 position;
         glm::vec3 rotation;
 
-        BaseObject() : position(BigVec3()), rotation(glm::vec3()) {}
+        BaseObject() : position(BigVec3()), rotation(glm::vec3(0.0f)) {}
         BaseObject(const BigVec3 &pos, const glm::vec3 &rot) : position(pos), rotation(rot) {}
         ~BaseObject();
 

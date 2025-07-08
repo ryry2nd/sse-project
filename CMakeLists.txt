@@ -1,13 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Packages
 find_package(SDL2 REQUIRED)
-find_package(OpenGL REQUIRED)
 find_package(Boost REQUIRED)
 find_package(Jolt REQUIRED)
 find_package(glm REQUIRED)
@@ -21,9 +20,11 @@ find_package(assimp REQUIRED)
 if (UNIX)
     find_package(PkgConfig REQUIRED)
     find_package(SDL2_IMAGE REQUIRED)
+    find_package(OpenGL REQUIRED)
     find_package(VulkanHeaders REQUIRED)
 elseif (WIN32)
     find_package(SDL2_image REQUIRED)
+    find_package(OpenGL REQUIRED)
     find_package(VulkanHeaders REQUIRED)
 endif()
 
