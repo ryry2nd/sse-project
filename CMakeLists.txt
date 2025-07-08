@@ -3,7 +3,6 @@ project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Packages
@@ -18,13 +17,14 @@ find_package(sol2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(assimp REQUIRED)
-find_package(VulkanHeaders REQUIRED)
 
-if (NOT WIN32)
+if (UNIX)
     find_package(PkgConfig REQUIRED)
     find_package(SDL2_IMAGE REQUIRED)
-else()
+    find_package(VulkanHeaders REQUIRED)
+elseif (WIN32)
     find_package(SDL2_image REQUIRED)
+    find_package(VulkanHeaders REQUIRED)
 endif()
 
 
@@ -41,7 +41,6 @@ target_link_libraries(common_libs INTERFACE
     sdl_ttf::sdl_ttf                # sdl ttf linking
     yaml-cpp::yaml-cpp              # yaml linking
     assimp::assimp                  # assimp linking
-    vulkan-headers::vulkan-headers  # vulkan headers linking
 )
 
 
@@ -49,12 +48,14 @@ if (WIN32)
     target_link_libraries(common_libs INTERFACE
         SDL2::SDL2main        # SDL2 main on Windows
         opengl32              # Windows OpenGL lib
+        vulkan-headers::vulkan-headers  # vulkan headers linking
     )
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows -Wl,--entry=mainCRTStartup -static -static-libgcc -static-libstdc++ -Wl,--subsystem,windows")
 
-else()
+elseif (UNIX)
     target_link_libraries(common_libs INTERFACE
         OpenGL::GL            # Unix-like OpenGL
+        vulkan-headers::vulkan-headers  # vulkan headers linking
     )
 endif()
 

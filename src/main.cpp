@@ -9,10 +9,6 @@
 #include <string>
 #include <iostream>
 
-#ifdef _WIN32
-#include <windows.h> // EVIL EVIL EVIL, KILL ME
-#endif
-
 int main(int argc, char *argv[])
 {
     Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
@@ -133,8 +129,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-// I HATE WINDOWS, THIS IS THE OS FOR THE DEVIL, ONLY THE DEVIL MAKES THEIR OPERATING SYSTEM THIS BAD
-#ifdef _WIN32
+#ifdef _WIN32 // I HATE WINDOWS, THIS IS THE OS FOR THE DEVIL, ONLY THE DEVIL MAKES THEIR OPERATING SYSTEM THIS BAD
+
+#include <windows.h> // EVIL EVIL EVIL, KILL ME
+
 extern "C" int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
     return main(__argc, __argv);
