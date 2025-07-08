@@ -66,7 +66,6 @@ std::vector<unsigned int> RenderObject::cubeIndices = {
     20, 21, 22,
     21, 23, 22};
 
-float RenderObject::gamma = 1.0f;
 bool RenderObject::disableBrightness = false;
 Mesh *RenderObject::pointMesh = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
@@ -76,10 +75,9 @@ const Bigint RenderObject::maxDistanceMediumSquared = Bigint("10000000000");
 const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
 const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
 
-void RenderObject::init(float gamma, bool disableBrightness)
+void RenderObject::init(bool disableBrightness)
 {
     RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {0}, {3}, MeshTypes::Points);
-    RenderObject::gamma = gamma;
     RenderObject::disableBrightness = disableBrightness;
 }
 
@@ -156,7 +154,6 @@ void RenderObject::renderAsPoint()
     pointShader->setUniform("uModel", matrix);
     pointShader->setUniform("uView", Objects::globalCamera.getViewMatrix());
     pointShader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
-    pointShader->setUniform("gamma", gamma);
     pointShader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
     pointShader->setUniform("pointSize", 10.0f);
     pointMesh->Draw();
@@ -166,7 +163,6 @@ void RenderObject::renderAsMesh()
 {
     shader->enableCulling();
     shader->includeShader();
-    shader->setUniform("gamma", gamma);
     shader->setUniform("u_fullBright", disableBrightness);
     shader->setUniform("uView", Objects::globalCamera.getViewMatrix());
     shader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());

@@ -88,7 +88,7 @@ namespace Objects
     {
     public:
         // run before you setup any object
-        static void init(float gamma = 2.5f, bool disableBrightness = false);
+        static void init(bool disableBrightness = false);
         RenderObject() {}
         RenderObject(Rendering::Shader *shady, Rendering::Shader *slimShady, Rendering::Image *im);
         ~RenderObject();
@@ -132,7 +132,6 @@ namespace Objects
 
         const static Bigint near;
         const static Bigint far;
-        static float gamma;
         static bool disableBrightness;
         static Rendering::Mesh *pointMesh;
     };

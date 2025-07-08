@@ -1,7 +1,6 @@
 #version 330 core
 out vec4 FragColor;
 uniform vec3 color;
-uniform float gamma;
 uniform float depth;
 
 void main() {
@@ -12,9 +11,7 @@ void main() {
 
     float alpha = smoothstep(1.0, 0.6, dist);
 
-    vec3 correctedColor = pow(color, vec3(1.0 / gamma));
-
-    FragColor = vec4(correctedColor, alpha); // white, soft-edged
+    FragColor = vec4(color, alpha); // white, soft-edged
 
     gl_FragDepth = depth;
 }

@@ -8,14 +8,13 @@ out vec4 FragColor;
 
 uniform sampler2D texture1;
 
-uniform float gamma;
 uniform bool u_fullBright;
 uniform float depth;
 
 void main()
 {
-    vec3 texColor = texture(texture1, TexCoord).rgb;
-    vec3 finalColor = vec3(0.0);
+    vec4 texColor = texture(texture1, TexCoord);
+    vec4 finalColor = vec4(0.0);
     // float ambientStrength = 0.1;
     // float specularStrength = 0.5;
 
@@ -52,7 +51,7 @@ void main()
 //         }
 //         finalColor = lighting * texColor + emissionColor;
 //     }
-    FragColor = vec4(pow(finalColor, vec3(1.0 / gamma)), 1.0);
+    FragColor = finalColor;
 
     gl_FragDepth = depth;
 }
