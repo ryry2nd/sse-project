@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 3.15)
 project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
 
+
+message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Processor: ${CMAKE_SYSTEM_PROCESSOR}")
+if(WIN32)
+  message(STATUS "Building for Windows")
+elseif(ANDROID)
+  message(STATUS "Building for Android")
+elseif(EMSCRIPTEN)
+  message(STATUS "Building for WebAssembly")
+elseif(UNIX AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    set(PLATFORM "Building for Raspberry pi")
+elseif(UNIX)
+  message(STATUS "Building for Unix/Linux OS")
+else()
+  message(STATUS "Unknown OS")
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -16,6 +33,11 @@ find_package(sol2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(assimp REQUIRED)
+find_package(miniaudio REQUIRED)
+find_package(Angelscript REQUIRED)
+find_package(enet REQUIRED)
+find_package(glslang REQUIRED)
+find_package(gettext REQUIRED)
 
 if (UNIX)
     find_package(PkgConfig REQUIRED)
@@ -42,6 +64,11 @@ target_link_libraries(common_libs INTERFACE
     sdl_ttf::sdl_ttf                # sdl ttf linking
     yaml-cpp::yaml-cpp              # yaml linking
     assimp::assimp                  # assimp linking
+    Angelscript::angelscript        # angelscript linking
+    miniaudio::miniaudio            # miniaudio linking
+    enet::enet                      # enet linking
+    glslang::_glslang-do-not-use    # glslang linking
+    gettext::gettext                # gettext linking
 )
 
 
