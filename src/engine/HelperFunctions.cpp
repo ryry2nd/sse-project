@@ -1,6 +1,6 @@
 #include "HelperFunctions.hpp"
 
-#include <SDL2/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -10,11 +10,16 @@ using namespace Rendering;
 Uint64 HelperFunctions::lastCounter = SDL_GetPerformanceCounter();
 double HelperFunctions::fps = 0.0f;
 float HelperFunctions::deltaTime = 0.0f;
-Uint64 HelperFunctions::now = SDL_GetTicks64();
+Uint64 HelperFunctions::now = SDL_GetTicks();
+glm::vec2 HelperFunctions::res;
+SDL_Window *HelperFunctions::window = nullptr;
 
 void HelperFunctions::Update()
 {
-    now = SDL_GetTicks64();
+    int width, height;
+    SDL_GetWindowSize(window, &width, &height);
+    res = glm::vec2(width, height);
+    now = SDL_GetTicks();
     Uint64 currentCounter = SDL_GetPerformanceCounter();
     deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
     fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
@@ -24,23 +29,23 @@ void HelperFunctions::Update()
 HelperFunctions::HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
     // it initialises sdl
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO) == 0)
     {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
         throw std::runtime_error("Sdl cant initialise");
     }
-    if (TTF_Init() == -1)
+    if (TTF_Init() == 0)
     {
-        SDL_Log("TTF_Init error: %s", TTF_GetError());
+        SDL_Log("TTF_Init error: %s", SDL_GetError());
     }
 
-    if (aa >= 0)
+    if (aa > 0)
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
     }
 
-    window = SDL_CreateWindow(name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, res.x, res.y, flags);
+    window = SDL_CreateWindow(name, res.x, res.y, flags);
     if (!window)
     {
         std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
@@ -49,9 +54,13 @@ HelperFunctions::HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, 
     }
 
     if (hideMouse)
-        SDL_SetRelativeMouseMode(SDL_TRUE); // hides the mouse
-    if (fullscreen)
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+        // hides the mouse
+        SDL_SetWindowRelativeMouseMode(window, true);
+    if (fullscreen) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+        SDL_SetWindowResizable(window, true);
+        SDL_SetWindowBordered(window, false);
+    }
 }
 
 HelperFunctions::~HelperFunctions()
@@ -64,7 +73,7 @@ Font::Font(const std::string &fontPath, int size)
 {
     font = TTF_OpenFont(fontPath.c_str(), size);
     if (!font)
-        throw std::runtime_error("Failed to load font \"" + fontPath + "\": " + TTF_GetError());
+        throw std::runtime_error("Failed to load font \"" + fontPath + "\": " + SDL_GetError());
 }
 
 Font::~Font()
@@ -77,12 +86,12 @@ SDL_Surface *Font::renderText(const std::string &message, SDL_Color color)
     if (!font)
         throw std::runtime_error("no font defined");
 
-    SDL_Surface *surf = TTF_RenderUTF8_Blended(font, message.c_str(), color);
+    SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), message.length(), color);
     if (!surf)
         throw std::runtime_error("surface failed to initialise");
 
-    SDL_Surface *formattedSurf = SDL_ConvertSurfaceFormat(surf, SDL_PIXELFORMAT_ABGR8888, 0);
-    SDL_FreeSurface(surf);
+    SDL_Surface *formattedSurf = SDL_ConvertSurface(surf, SDL_PIXELFORMAT_ABGR8888);
+    SDL_DestroySurface(surf);
     return formattedSurf;
 }
 
@@ -91,7 +100,7 @@ SDL_Surface *Image::loadFile(const std::string &filePath)
     SDL_Surface *surface = IMG_Load(filePath.c_str());
     if (!surface)
     {
-        std::cerr << "Image load fail: " << IMG_GetError() << "\n";
+        std::cerr << "Image load fail: " << SDL_GetError() << "\n";
         throw std::runtime_error("image broke");
     }
     return surface;

@@ -1,15 +1,11 @@
 [requires]
-sdl/2.28.3
 miniaudio/0.11.21
-glm/1.0.1
 glew/2.2.0
 opengl/system
 boost/1.88.0
 joltphysics/5.2.0
-sdl_image/2.8.2
 sqlite3/3.49.1
 sol2/3.5.0
-sdl_ttf/2.24.0
 yaml-cpp/0.8.0
 assimp/5.4.3
 angelscript/2.37.0

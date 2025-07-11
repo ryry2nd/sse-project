@@ -3,7 +3,7 @@
 #include "engine/scripting/ScriptingHeaders.hpp"
 #include "engine/opengl/HelperFunctionsOpengl.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
@@ -25,50 +25,53 @@ int main(int argc, char *argv[])
     SDL_Event event;
     const Bigint *speed;
 
-    const Uint8 *keystates;
+    const bool *keystates;
+    int numKeys;
 
     const float &deltaTime = Rendering::HelperFunctions::deltaTime;
 
     while (running)
     {
+        SDL_PumpEvents();
         Rendering::HelperFunctions::Update();
 
         // gets events
         while (SDL_PollEvent(&event))
         {
-            if (event.type == SDL_QUIT)
+            if (event.type == SDL_EVENT_QUIT)
                 running = false;
 
             // rotates camera
-            if (event.type == SDL_MOUSEMOTION)
+            if (event.type == SDL_EVENT_MOUSE_MOTION)
             {
                 Objects::globalCamera.rotateCamera({event.motion.xrel, event.motion.yrel});
             }
 
             // when you press escape, leave
-            if (event.type == SDL_KEYDOWN)
+            if (event.type == SDL_EVENT_KEY_DOWN)
             {
-                if (event.key.keysym.sym == SDLK_ESCAPE)
+                SDL_Keycode key = event.key.key;
+                if (key == SDLK_ESCAPE)
                 {
                     running = false;
                 }
-                if (event.key.keysym.sym == SDLK_z)
+                if (key == SDLK_Z)
                 {
                     run_speed *= Bigint(10);
                 }
-                if (event.key.keysym.sym == SDLK_x)
+                if (key == SDLK_X)
                 {
                     run_speed /= Bigint(10);
                 }
             }
-            if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_RESIZED)
+            if (event.type == SDL_EVENT_WINDOW_RESIZED)
             {
                 renderingEngine->updateScreenRes();
             }
         }
 
         // gets all keystates
-        keystates = SDL_GetKeyboardState(NULL);
+        keystates = SDL_GetKeyboardState(&numKeys);
 
         // if your running, run, otherwise dont
         speed = keystates[SDL_SCANCODE_LSHIFT] ? &run_speed : &WALK_SPEED;

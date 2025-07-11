@@ -1,0 +1,9 @@
+set(SDLTTF_VENDORED TRUE)
+
+add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_ttf" SDL_ttf_BUILD)
+
+if(TARGET SDL3_ttf)
+    add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf)
+elseif(TARGET SDL3_ttf-static)
+    add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf-static)
+endif()

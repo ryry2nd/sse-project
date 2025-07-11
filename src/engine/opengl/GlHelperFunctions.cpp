@@ -25,7 +25,7 @@ HelperFunctionsApi::HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 f
     if (glewInit() != GLEW_OK)
     {
         std::cerr << "Failed to initialize GLEW\n";
-        SDL_GL_DeleteContext(glContext);
+        SDL_GL_DestroyContext(glContext);
         SDL_DestroyWindow(window);
         SDL_Quit();
         throw std::runtime_error("Failed to initialize GLEW\n");
@@ -59,11 +59,10 @@ void HelperFunctionsApi::swapBuffer()
 
 void HelperFunctionsApi::updateScreenRes()
 {
-    glm::vec2 res = getRes();
     glViewport(0, 0, res.x, res.y);
 }
 
 HelperFunctionsApi::~HelperFunctionsApi()
 {
-    SDL_GL_DeleteContext(glContext);
+    SDL_GL_DestroyContext(glContext);
 }

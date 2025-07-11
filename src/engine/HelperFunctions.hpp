@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3_ttf/SDL_ttf.h>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -29,19 +29,6 @@ namespace Rendering
         Bool
     };
 
-    static glm::vec2 getRes()
-    {
-        SDL_DisplayMode displayMode;
-        if (SDL_GetDesktopDisplayMode(0, &displayMode) == 0)
-        {
-            return glm::vec2(displayMode.w, displayMode.h);
-        }
-        else
-        {
-            throw std::runtime_error("get res failed");
-        }
-    }
-
     class HelperFunctions
     {
     public:
@@ -50,14 +37,16 @@ namespace Rendering
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
         static void Update();
+        
         ~HelperFunctions();
 
         static float deltaTime;
         static double fps;
         static Uint64 now;
+        static glm::vec2 res;
 
     protected:
-        SDL_Window *window;
+        static SDL_Window *window;
 
     private:
         static Uint64 lastCounter;

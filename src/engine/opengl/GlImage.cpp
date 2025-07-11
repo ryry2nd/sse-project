@@ -16,7 +16,8 @@ ImageApi::ImageApi(SDL_Surface *surface)
 void ImageApi::setupObject(SDL_Surface *surface)
 {
 
-    GLenum format = surface->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;
+    int bytesPerPixel = SDL_BYTESPERPIXEL(surface->format);
+    GLenum format = (bytesPerPixel == 4) ? GL_RGBA : GL_RGB;
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -30,7 +31,7 @@ void ImageApi::setupObject(SDL_Surface *surface)
 
     imageSizes = glm::vec2(surface->w, surface->h);
 
-    SDL_FreeSurface(surface);
+    SDL_DestroySurface(surface);
 }
 
 ImageApi::~ImageApi()
