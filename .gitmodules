@@ -1,7 +1,4 @@
 
-# [submodule "libs/glad2"]
-# 	path = libs/glad2
-# 	url = https://github.com/Dav1dde/glad.git
 # [submodule "libs/sqlite"]
 # 	path = libs/sqlite
 # 	url = https://github.com/sqlite/sqlite.git

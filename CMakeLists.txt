@@ -15,9 +15,9 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(sol2 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(glad REQUIRED)
 
 #conan
-find_package(glew REQUIRED)
 # find_package(Jolt REQUIRED)
 # find_package(SQLite3 REQUIRED)
 # find_package(sol2 REQUIRED)
@@ -38,9 +38,9 @@ target_link_libraries(common_libs INTERFACE
     Boost::multiprecision
     sol2::sol2
     yaml-cpp::yaml-cpp
+    glad::glad
 
 # conan
-    GLEW::GLEW
     # Jolt::Jolt
     # SQLite::SQLite
     # assimp::assimp

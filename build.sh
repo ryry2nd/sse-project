@@ -21,21 +21,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# PROFILE_PATH=${1:-"conan/profiles/linux_x86_64_gcc"}
+BUILD_DIR="./build/$OS-$BUILD_TYPE"
+TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
 
-conan install . --build=missing -c tools.system.package_manager:sudo=True -c tools.system.package_manager:mode=install -s build_type="$BUILD_TYPE" --profile conan/profiles/linux_x86_64_gcc -g CMakeToolchain -g CMakeDeps
-
-if ["$BUILD_TYPE" == "Release"]; then
-    cmake --preset conan-release &&
-    cmake --build --preset conan-release
-else
-    cmake --preset conan-debug &&
-    cmake --build --preset conan-debug
-fi
-
-# BUILD_DIR="./build/$OS-$BUILD_TYPE"
-# TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
-
-# mkdir -p "$BUILD_DIR"
-# cmake -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
-# cmake --build "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cmake -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
+cmake --build "$BUILD_DIR"

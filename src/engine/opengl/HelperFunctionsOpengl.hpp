@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <GL/glew.h>
+#include <glad/gl.h>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>

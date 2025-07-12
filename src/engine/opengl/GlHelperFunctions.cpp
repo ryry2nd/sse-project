@@ -21,14 +21,13 @@ HelperFunctionsApi::HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 f
         throw std::runtime_error("Had issues making the opengl context");
     }
 
-    glewExperimental = GL_TRUE;
-    if (glewInit() != GLEW_OK)
+    if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress))
     {
-        std::cerr << "Failed to initialize GLEW\n";
+        std::cerr << "Failed to initialize GLAD\n";
         SDL_GL_DestroyContext(glContext);
         SDL_DestroyWindow(window);
         SDL_Quit();
-        throw std::runtime_error("Failed to initialize GLEW\n");
+        throw std::runtime_error("Failed to initialize GLAD");
     }
 
     glViewport(0, 0, res.x, res.y);
