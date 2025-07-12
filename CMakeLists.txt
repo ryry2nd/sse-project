@@ -30,9 +30,10 @@ find_package(sdl REQUIRED)
 find_package(sdl_image REQUIRED)
 find_package(sdl_ttf REQUIRED)
 find_package(glm REQUIRED)
+find_package(boost_multiprecision REQUIRED)
 
 #conan
-find_package(Boost REQUIRED)
+# find_package(Boost REQUIRED)
 # find_package(Jolt REQUIRED)
 find_package(glew REQUIRED)
 # find_package(SQLite3 REQUIRED)
@@ -63,10 +64,11 @@ target_link_libraries(common_libs INTERFACE
     SDL3_ttf::SDL3_ttf
     SDL3_image::SDL3_image
     glm::glm
+    Boost::multiprecision
 
 # conan
     GLEW::GLEW
-    boost::boost
+    # boost::boost
     # Jolt::Jolt
     # SQLite::SQLite
     sol2::sol2

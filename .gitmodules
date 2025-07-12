@@ -1,20 +1,4 @@
-[submodule "libs/sdl"]
-	path = libs/sdl
-	url = https://github.com/libsdl-org/SDL.git
-[submodule "libs/sdl_ttf"]
-	path = libs/sdl_ttf
-	url = https://github.com/libsdl-org/SDL_ttf.git
-[submodule "libs/sdl_image"]
-	path = libs/sdl_image
-	url = https://github.com/libsdl-org/SDL_image
-[submodule "libs/glm"]
-	path = libs/glm
-	url = https://github.com/g-truc/glm.git
 
-
-# [submodule "libs/boost/multiprecision"]
-# 	path = libs/boost/multiprecision
-# 	url = https://github.com/boostorg/multiprecision.git
 # [submodule "libs/glad2"]
 # 	path = libs/glad2
 # 	url = https://github.com/Dav1dde/glad.git
@@ -39,3 +23,21 @@
 # [submodule "libs/glslang"]
 # 	path = libs/glslang
 # 	url = https://github.com/KhronosGroup/glslang.git
+[submodule "libs/sdl"]
+	path = libs/sdl
+	url = https://github.com/libsdl-org/SDL.git
+[submodule "libs/sdl_ttf"]
+	path = libs/sdl_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
+[submodule "libs/sdl_image"]
+	path = libs/sdl_image
+	url = https://github.com/libsdl-org/SDL_image
+[submodule "libs/glm"]
+	path = libs/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "libs/multiprecision"]
+	path = libs/multiprecision
+	url = https://github.com/boostorg/multiprecision.git
+[submodule "libs/boost_config"]
+	path = libs/boost_config
+	url = https://github.com/boostorg/config.git
