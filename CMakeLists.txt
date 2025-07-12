@@ -31,13 +31,14 @@ find_package(sdl_image REQUIRED)
 find_package(sdl_ttf REQUIRED)
 find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
+find_package(sol2 REQUIRED)
 
 #conan
 # find_package(Boost REQUIRED)
 # find_package(Jolt REQUIRED)
 find_package(glew REQUIRED)
 # find_package(SQLite3 REQUIRED)
-find_package(sol2 REQUIRED)
+# find_package(sol2 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 # find_package(assimp REQUIRED)
 # find_package(miniaudio REQUIRED)
@@ -65,13 +66,12 @@ target_link_libraries(common_libs INTERFACE
     SDL3_image::SDL3_image
     glm::glm
     Boost::multiprecision
+    sol2::sol2
 
 # conan
     GLEW::GLEW
-    # boost::boost
     # Jolt::Jolt
     # SQLite::SQLite
-    sol2::sol2
     yaml-cpp::yaml-cpp
     # assimp::assimp
     # Angelscript::angelscript

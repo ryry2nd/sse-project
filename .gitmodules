@@ -41,3 +41,6 @@
 [submodule "libs/boost_config"]
 	path = libs/boost_config
 	url = https://github.com/boostorg/config.git
+[submodule "libs/sol2"]
+	path = libs/sol2
+	url = https://github.com/ThePhD/sol2.git
