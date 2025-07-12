@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES CXX)
+project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES C CXX)
 
 
 message(STATUS "System Name: ${CMAKE_SYSTEM_NAME}")
@@ -32,31 +32,19 @@ find_package(sdl_ttf REQUIRED)
 find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(sol2 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 #conan
-# find_package(Boost REQUIRED)
-# find_package(Jolt REQUIRED)
 find_package(glew REQUIRED)
+# find_package(Jolt REQUIRED)
 # find_package(SQLite3 REQUIRED)
 # find_package(sol2 REQUIRED)
-find_package(yaml-cpp REQUIRED)
 # find_package(assimp REQUIRED)
 # find_package(miniaudio REQUIRED)
 # find_package(Angelscript REQUIRED)
 # find_package(enet REQUIRED)
 # find_package(glslang REQUIRED)
 # find_package(gettext REQUIRED)
-
-# if (UNIX)
-#     find_package(PkgConfig REQUIRED)
-#     # find_package(SDL2_IMAGE REQUIRED)
-#     find_package(OpenGL REQUIRED)
-#     find_package(VulkanHeaders REQUIRED)
-# elseif (WIN32)
-#     # find_package(SDL2_image REQUIRED)
-#     find_package(OpenGL REQUIRED)
-#     find_package(VulkanHeaders REQUIRED)
-# endif()
 
 
 add_library(common_libs INTERFACE)
@@ -67,12 +55,12 @@ target_link_libraries(common_libs INTERFACE
     glm::glm
     Boost::multiprecision
     sol2::sol2
+    yaml-cpp::yaml-cpp
 
 # conan
     GLEW::GLEW
     # Jolt::Jolt
     # SQLite::SQLite
-    yaml-cpp::yaml-cpp
     # assimp::assimp
     # Angelscript::angelscript
     # miniaudio::miniaudio

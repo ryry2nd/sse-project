@@ -1,7 +1,6 @@
 [requires]
 glew/2.2.0
 opengl/system
-yaml-cpp/0.8.0
 
 [generators]
 CMakeDeps

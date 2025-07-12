@@ -5,12 +5,6 @@
 # [submodule "libs/sqlite"]
 # 	path = libs/sqlite
 # 	url = https://github.com/sqlite/sqlite.git
-# [submodule "libs/sol2"]
-# 	path = libs/sol2
-# 	url = https://github.com/ThePhD/sol2.git
-# [submodule "libs/yaml-cpp"]
-# 	path = libs/yaml-cpp
-# 	url = https://github.com/jbeder/yaml-cpp.git
 # [submodule "libs/assimp"]
 # 	path = libs/assimp
 # 	url = https://github.com/assimp/assimp.git
@@ -44,3 +38,9 @@
 [submodule "libs/sol2"]
 	path = libs/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "libs/yaml-cpp"]
+	path = libs/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "libs/lua"]
+	path = libs/lua
+	url = https://github.com/lua/lua.git
