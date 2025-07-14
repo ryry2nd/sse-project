@@ -1,2 +1,5 @@
+option(YAML_CPP_BUILD_TOOLS OFF)
+set(BUILD_SHARED_LIBS ON)
+set(BUILD_STATIC_LIBS OFF)
 add_subdirectory("${CMAKE_SOURCE_DIR}/libs/yaml-cpp" YAML_build)
 add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)

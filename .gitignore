@@ -36,4 +36,3 @@
 .vscode
 build
 .venv
-CMakeUserPresets.json

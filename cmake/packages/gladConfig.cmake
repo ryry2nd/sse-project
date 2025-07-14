@@ -33,11 +33,11 @@ execute_process(
 )
 
 file(GLOB GLAD_SOURCES "${GLAD_OUT}/src/*.c")
-add_library(glad_static STATIC ${GLAD_SOURCES})
-target_include_directories(glad_static PUBLIC ${GLAD_OUT}/include)
+add_library(glad_shared SHARED ${GLAD_SOURCES})
+target_include_directories(glad_shared PUBLIC ${GLAD_OUT}/include)
 add_library(glad INTERFACE)
 add_library(glad::glad ALIAS glad)
-target_link_libraries(glad INTERFACE glad_static)
+target_link_libraries(glad INTERFACE glad_shared)
 
 if (USE_VULKAN)
   add_library(vulk_headers INTERFACE)

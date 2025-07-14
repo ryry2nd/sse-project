@@ -12,6 +12,9 @@ set(DEFAULT_API "OpenGL" CACHE STRING "Default graphics API")
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/cmake/packages")
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
+
 # Packages
 find_package(sdl REQUIRED)
 find_package(sdl_image REQUIRED)
@@ -100,6 +103,6 @@ target_link_libraries(API PRIVATE engine)
 add_custom_target(copy_directory ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/src/game
-            ${CMAKE_CURRENT_BINARY_DIR}/game
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/game
     COMMENT "---- Copying game to output directory ----"
 )

@@ -13,8 +13,5 @@ set(USE_GLES OFF CACHE BOOL "Enable OpenGL ES support")
 # options are OpenGL, Vulkan, GLES, or Software (or technically anything really because its an else)
 set(DEFAULT_API "OpenGL" CACHE STRING "Default graphics API")
 
-# dll's are evil
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static -static-libgcc -static-libstdc++")
-
 # disable security warnings
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)

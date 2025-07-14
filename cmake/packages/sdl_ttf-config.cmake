@@ -1,5 +1,6 @@
 set(SDLTTF_VENDORED TRUE)
-
+set(BUILD_SHARED_LIBS ON)
+set(BUILD_STATIC_LIBS OFF)
 add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_ttf" SDL_ttf_BUILD)
 
 if(TARGET SDL3_ttf)

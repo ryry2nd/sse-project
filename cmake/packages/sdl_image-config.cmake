@@ -17,6 +17,9 @@ set(SDLIMAGE_TGA OFF CACHE BOOL "Disable TGA support" FORCE)
 set(SDLIMAGE_MOD OFF CACHE BOOL "Disable MOD support" FORCE)
 set(SDLIMAGE_OPUS OFF CACHE BOOL "Disable OPUS support" FORCE)
 
+set(BUILD_SHARED_LIBS ON)
+set(BUILD_STATIC_LIBS OFF)
+
 add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_image" SDL_image_BUILD)
 
 if(TARGET SDL3_image)
