@@ -1,18 +1,29 @@
 #include "engine/objects/Objects.hpp"
 #include "engine/HelperFunctions.hpp"
 #include "engine/scripting/ScriptingHeaders.hpp"
-#include "engine/opengl/HelperFunctionsOpengl.hpp"
-
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <string>
 #include <iostream>
 
+#ifdef USE_OPENGL
+#include "API/opengl/HelperFunctionsOpengl.hpp"
+#endif
+
 int main(int argc, char *argv[])
 {
-    Rendering::HelperFunctions *renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-    Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
+    Rendering::HelperFunctions *renderingEngine;
+    #if DEFAULT_API == 1
+        renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+        Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
+    #elif DEFAULT_API == 2
+        throw std::runtime_error("vulkan not supported yet");
+    #elif DEFAULT_API == 3
+        throw std::runtime_error("opengl es not supported yet");
+    #else
+        throw std::runtime_error("idk what you did but this thing compleatly broke");
+    #endif
     // this is the constants
     const Bigint WALK_SPEED = Bigint(10);
     Bigint run_speed = Bigint("100");

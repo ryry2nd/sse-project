@@ -41,3 +41,9 @@
 [submodule "libs/lua"]
 	path = libs/lua
 	url = https://github.com/lua/lua.git
+[submodule "libs/glad"]
+	path = libs/glad
+	url = https://github.com/Dav1dde/glad.git
+[submodule "libs/vulkan-headers"]
+	path = libs/vulkan-headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git

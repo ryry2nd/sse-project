@@ -8,7 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <unordered_map>
 
-#include "../HelperFunctions.hpp"
+#include "../engine/HelperFunctions.hpp"
 
 namespace OpenGl
 {
