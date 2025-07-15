@@ -1,5 +1,5 @@
 #include "engine/objects/Objects.hpp"
-#include "engine/HelperFunctions.hpp"
+#include "engine/rendering/base/HelperFunctions.hpp"
 #include "engine/scripting/ScriptingHeaders.hpp"
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
@@ -8,7 +8,7 @@
 #include <iostream>
 
 #ifdef USE_OPENGL
-#include "API/opengl/HelperFunctionsOpengl.hpp"
+#include "engine/rendering/opengl/HelperFunctionsOpengl.hpp"
 #endif
 
 int main(int argc, char *argv[])

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../customMath/BigVec.hpp"
-#include "../HelperFunctions.hpp"
+#include "../../rendering/base/HelperFunctions.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <vector>

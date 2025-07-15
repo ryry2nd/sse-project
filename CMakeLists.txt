@@ -30,19 +30,7 @@ find_package(boost_multiprecision REQUIRED)
 find_package(sol2 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-
-#conan
-# find_package(Jolt REQUIRED)
-# find_package(SQLite3 REQUIRED)
-# find_package(assimp REQUIRED)
-# find_package(miniaudio REQUIRED)
-# find_package(Angelscript REQUIRED)
-# find_package(enet REQUIRED)
-# find_package(glslang REQUIRED)
-# find_package(gettext REQUIRED)
-# java
-# wasm
-
+# to be added, jolt, sqlite3, assimp, miniaudio, angelscript, enet, glslang, gettext, java, wasm
 
 add_library(common_libs INTERFACE)
 target_link_libraries(common_libs INTERFACE
@@ -54,21 +42,10 @@ target_link_libraries(common_libs INTERFACE
     sol2::sol2
     yaml-cpp::yaml-cpp
     glad::glad
-
-# conan
-    # Jolt::Jolt
-    # SQLite::SQLite
-    # assimp::assimp
-    # Angelscript::angelscript
-    # miniaudio::miniaudio
-    # enet::enet
-    # glslang::_glslang-do-not-use
-    # gettext::gettext
 )
 
 #Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
-add_subdirectory(src/API)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
 if(USE_VULKAN)
@@ -97,13 +74,16 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC DEFAULT_API=${DEFAULT_API_INT}
 
 target_link_libraries(${PROJECT_NAME}
     common_libs
-    engine
-    API
+    customMath
+    rendering
+    scripting
+    objects
 )
 
-target_link_libraries(engine PRIVATE common_libs)
-target_link_libraries(API PRIVATE common_libs)
-target_link_libraries(API PRIVATE engine)
+target_link_libraries(rendering PRIVATE common_libs)
+target_link_libraries(scripting PRIVATE common_libs)
+target_link_libraries(customMath INTERFACE common_libs)
+target_link_libraries(objects PRIVATE common_libs)
 
 # Post-build asset copy
 add_custom_target(copy_directory ALL

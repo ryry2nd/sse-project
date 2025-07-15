@@ -3,7 +3,7 @@
 #include <sol/sol.hpp>
 #include <string>
 
-#include "../HelperFunctions.hpp"
+#include "../rendering/base/HelperFunctions.hpp"
 
 namespace ScriptingHeaders
 {
