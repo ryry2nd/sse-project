@@ -41,6 +41,18 @@ function Earth:new(shader, slimShader, image)
     return cpp
 end
 
+-- Fps_counter = {}
+-- Fps_counter.__index = Fps_counter
+
+-- function Fps_counter:new(shader, image)
+--     local cpp = Objects.RenderObject2d.new(shader)
+--     local self = setmetatable({} Fps_counter)
+--     cpp.lua_instance = self
+--     self.cpp = cpp
+--     _G.keep_alive = _G.keep_alive or {}
+--     table.insert(_G.keep_alive, self)
+-- end
+
 -- put all non overridden render objects in here so they wont get garbage collected, this thing isn't special and you can really put it in any table
 sceneObjects = {}
 

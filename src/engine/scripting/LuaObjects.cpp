@@ -1,5 +1,9 @@
 #include "ScriptingHeaders.hpp"
 
+#include "../objects/Objects.hpp"
+#include "../customMath/Bigint.hpp"
+#include "../customMath/BigVec.hpp"
+
 using namespace ScriptingHeaders;
 
 struct LuaRenderObject : public Objects::RenderObject
@@ -144,6 +148,7 @@ void GameLibrary::includeRendering()
                                                                        { return Rendering::HelperFunctions::deltaTime; }),
                                             "fps", sol::property([]()
                                                                  { return Rendering::HelperFunctions::fps; }));
+    rendering.new_usertype<Font>("Font", sol::no_constructor);
     rendering.new_usertype<Shader>("Shader", sol::no_constructor); //, "createUniform", &Shader::createUniform, "includeShader", &Shader::includeShader, "setUniform", &Shader::setUniform, "enableCulling", &Shader::enableCulling, "disableCulling", &Shader::disableCulling);
     rendering.new_usertype<Image>("Image", sol::no_constructor, "imageSizes", &Image::imageSizes);
     rendering.new_usertype<Mesh>("Mesh", sol::no_constructor, "posOffset", &Mesh::posOffset, "rotOffset", &Mesh::rotOffset, "sizeOffset", &Mesh::sizeOffset);
@@ -183,14 +188,12 @@ void GameLibrary::includeObjects()
     objects.new_usertype<LuaRenderObject2d>("RenderObject2d", sol::constructors<LuaRenderObject2d(Rendering::Shader *, Rendering::Image *)>(),
                                             "position", &LuaRenderObject2d::position, "rotation", &LuaRenderObject2d::rotation, "scale", &LuaRenderObject2d::scale,
                                             "Update", &LuaRenderObject2d::Update, "lua_instance", &LuaRenderObject2d::lua_instance);
-    // objects.new_usertype<LuaMeshChunks>("MeshChunks",
-    //                                     sol::constructors<LuaMeshChunks(Rendering::Shader *, Rendering::Image *)>(),
-    //                                     sol::base_classes, sol::bases<MeshChunks, RenderObject>(),
-    //                                     "position", &LuaMeshChunks::position,
-    //                                     "rotation", &LuaMeshChunks::rotation,
-    //                                     "meshes", &LuaMeshChunks::meshes,
-    //                                     "cullPriority", &LuaMeshChunks::cullPriority,
-    //                                     "setupObject", &LuaMeshChunks::setupObject);
+    // objects.new_usertype<TextRenderObject>("TextRenderObject", sol::constructors<TextRenderObject(Rendering::Shader *, Rendering::Font *, const std::string &, const glm::vec4 &)>(),
+    //             sol::base_classes, sol::bases<LuaRenderObject2d>(),
+    //             "message", &TextRenderObject::message,
+    //             "font_color", &TextRenderObject::font_color,
+    //             "changeText", &TextRenderObject::changeText
+    //             );
 
     objects["globalCamera"] = &globalCamera;
     lua["Objects"] = objects;

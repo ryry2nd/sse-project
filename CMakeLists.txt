@@ -10,6 +10,12 @@ option(USE_OPENGL "Enable OpenGL support" OFF)
 option(USE_GLES "Enable OpenGL ES support" OFF)
 set(DEFAULT_API "OpenGL" CACHE STRING "Default graphics API")
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Configuring Release build: stripping debug info")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -g0")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-s")
+endif()
+
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/cmake/packages")
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin)
@@ -28,14 +34,14 @@ find_package(glad REQUIRED)
 #conan
 # find_package(Jolt REQUIRED)
 # find_package(SQLite3 REQUIRED)
-# find_package(sol2 REQUIRED)
 # find_package(assimp REQUIRED)
 # find_package(miniaudio REQUIRED)
 # find_package(Angelscript REQUIRED)
 # find_package(enet REQUIRED)
 # find_package(glslang REQUIRED)
 # find_package(gettext REQUIRED)
-# find_package(Mesa REQUIRED)
+# java
+# wasm
 
 
 add_library(common_libs INTERFACE)

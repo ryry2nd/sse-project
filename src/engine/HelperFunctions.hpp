@@ -108,7 +108,7 @@ namespace Rendering
     public:
         Font(const std::string &fontPath, int size);
         ~Font();
-        SDL_Surface *renderText(const std::string &message, SDL_Color color);
+        SDL_Surface *renderText(const std::string &message, const glm::vec4 &color);
 
     private:
         TTF_Font *font;

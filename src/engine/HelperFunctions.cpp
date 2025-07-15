@@ -14,6 +14,16 @@ Uint64 HelperFunctions::now = SDL_GetTicks();
 glm::vec2 HelperFunctions::res;
 SDL_Window *HelperFunctions::window = nullptr;
 
+
+SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
+    return SDL_Color{
+        static_cast<Uint8>(color.r),
+        static_cast<Uint8>(color.g),
+        static_cast<Uint8>(color.b),
+        static_cast<Uint8>(color.a)
+    };
+}
+
 void HelperFunctions::Update()
 {
     int width, height;
@@ -81,12 +91,12 @@ Font::~Font()
     TTF_CloseFont(font);
 }
 
-SDL_Surface *Font::renderText(const std::string &message, SDL_Color color)
+SDL_Surface *Font::renderText(const std::string &message, const glm::vec4 &color)
 {
     if (!font)
         throw std::runtime_error("no font defined");
 
-    SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), message.length(), color);
+    SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), message.length(), Vec4ToSDLColor(color));
     if (!surf)
         throw std::runtime_error("surface failed to initialise");
 

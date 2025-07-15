@@ -113,7 +113,7 @@ namespace Objects
 
         bool culled = false;
 
-        void Update(const float &deltaTime);
+        void Update(const float &deltaTime) override;
         void Draw();
 
     private:
@@ -158,65 +158,29 @@ namespace Objects
 
         Rendering::Image *image;
 
-        RenderObject2d(Rendering::Shader *shader, Rendering::Image *im) : shader2d(shader), image(im)
-        {
-            Drawable::setupObject();
-            mesh2d = Rendering::defaultMeshAPI->makeNewMesh(vertices2d, indices2d, {2, 2});
-        }
+        RenderObject2d(Rendering::Shader *shader, Rendering::Image *im);
 
-        void updateImage(Rendering::Image *im)
-        {
-            if (image != nullptr)
-            {
-                delete image;
-            }
-            image = im;
-        }
+        void Update(const float& deltaTime) override {}
+
+        ~RenderObject2d();
+
+        void updateImage(Rendering::Image *im);
 
     protected:
-        void Update(const float &deltaTime)
-        {
-        }
-
-        void Draw()
-        {
-            shader2d->disableCulling();
-            glm::mat4 model(1.0f);
-            model = glm::translate(model, glm::vec3(position, 0.0f));
-            model = glm::rotate(model, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-            model = glm::scale(model, glm::vec3(scale * image->imageSizes, 1.0f));
-            shader2d->includeShader();
-            shader2d->setUniform("texture1", image);
-            shader2d->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix2d());
-            shader2d->setUniform("uModel", model);
-            mesh2d->Draw();
-        }
+        void Draw();
 
     private:
         Rendering::Mesh *mesh2d;
         Rendering::Shader *shader2d;
     };
 
-    // enum class BlockType
-    // {
-    //     BlockOfFish,
-    //     Air
-    // };
-    //     class MeshChunks : public RenderObject
-    //     {
-    //     public:
-    //         MeshChunks(Rendering::Shader *shader, Rendering::Image *image);
-    //
-    //         void appendUpdate(const float &deltaTime) override;
-    //
-    //     private:
-    //         std::vector<std::vector<Rendering::Mesh *>> chunks;
-    //     };
-    //
-    //     class PhysicsObject : public RenderObject
-    //     {
-    //     public:
-    //         PhysicsObject(Rendering::Shader *shady, Rendering::Image *im);
-    //         ~PhysicsObject();
-    //     };
+    class TextRenderObject : public RenderObject2d {
+    public:
+        std::string message;
+        glm::vec4 font_color;
+        TextRenderObject(Rendering::Shader *shader, Rendering::Font *font, const std::string &text, const glm::vec4 &color) : RenderObject2d(shader, Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color))), message(text), font_color(color) {}
+        void changeText(Rendering::Font *font, const std::string &text, const glm::vec4 &color) {
+            updateImage(Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color)));
+        }
+    };
 }

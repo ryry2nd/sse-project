@@ -5,7 +5,7 @@ version: 0.0.1
 # requires:
 #   - id: com.ryan.game
 
-shaders:
+opengl_shaders:
   - name: basic_shader
     vertPath: shaders/vertex.glsl
     fragPath: shaders/fragment.glsl
@@ -27,19 +27,14 @@ assets:
   # models:
   #   - name: testModel
       
-scripts:
+lua_scripts:
   - path: scripts/main.lua
 
 # configs:
 #   - name: test
 #     path: config/test.yaml
 
-permissions:
-#   # allow_modification: false
-#   # allow_shaders: true
-#   # allow_compute_shaders: false
-#   # allow_save_file_manipulation: false
-# 
+permissions: 
   include_rendering: true
   include_bigvars: true
   include_objects: true
