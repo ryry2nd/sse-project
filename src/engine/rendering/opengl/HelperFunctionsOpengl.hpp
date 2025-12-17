@@ -1,12 +1,13 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "HelperFunctions.hpp"
+
+typedef struct SDL_GLContextState *SDL_GLContext;
 
 namespace OpenGl
 {

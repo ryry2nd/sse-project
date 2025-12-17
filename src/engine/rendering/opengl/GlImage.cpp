@@ -1,5 +1,6 @@
 #include "HelperFunctionsOpengl.hpp"
 #include <glad/gl.h>
+#include <SDL3/SDL.h>
 
 using namespace OpenGl;
 using namespace Rendering;

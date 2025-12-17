@@ -1,5 +1,6 @@
 #include "HelperFunctionsOpengl.hpp"
 
+#include <SDL3/SDL.h>
 #include <iostream>
 #include <glad/gl.h>
 

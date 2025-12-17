@@ -12,20 +12,18 @@ target_include_directories(objects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/objects)
 
 
 file(GLOB_RECURSE base_SOURCES "rendering/base/HelperFunctions.cpp")
+add_library(renderingBase SHARED ${base_SOURCES})
+target_include_directories(renderingBase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/base)
 
 if(USE_OPENGL)
     file(GLOB_RECURSE GL_SOURCES "rendering/opengl/*.cpp")
 endif()
 
-set(Rendering_SOURCES "")
-list(APPEND Rendering_SOURCES ${base_SOURCES} ${GL_SOURCES})# ${VK_SOURCES} ${GLES_SOURCES})
-
-add_library(rendering SHARED ${Rendering_SOURCES})
-
-target_include_directories(rendering PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/base)
+list(APPEND Rendering_SOURCES ${GL_SOURCES})# ${VK_SOURCES}
+add_library(renderingAPI SHARED ${Rendering_SOURCES})
 
 if(USE_OPENGL)
-    target_include_directories(rendering PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/opengl)
+    target_include_directories(renderingAPI PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/opengl)
 endif()
 
 
@@ -37,8 +35,7 @@ endif()
 
 
 
-target_link_libraries(objects PRIVATE rendering)
-target_link_libraries(objects INTERFACE customMath)
-target_link_libraries(rendering INTERFACE customMath)
+target_link_libraries(objects PRIVATE renderingBase customMath)
+target_link_libraries(renderingAPI PRIVATE renderingBase)
 # target_link_libraries(scripting PRIVATE rendering objects)
 # target_link_libraries(scripting INTERFACE customMath)

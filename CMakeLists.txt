@@ -27,18 +27,7 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-# to be added, jolt, sqlite3, assimp, miniaudio, angelscript, enet, glslang, gettext, java, wasm
-
-add_library(common_libs INTERFACE)
-target_link_libraries(common_libs INTERFACE
-    SDL3::SDL3
-    SDL3_ttf::SDL3_ttf
-    SDL3_image::SDL3_image
-    glm::glm
-    Boost::multiprecision
-    yaml-cpp::yaml-cpp
-    glad::glad
-)
+# to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext, wasm
 
 #Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
@@ -63,17 +52,20 @@ endif()
 target_compile_definitions(${PROJECT_NAME} PUBLIC DEFAULT_API=${DEFAULT_API_INT})
 
 target_link_libraries(${PROJECT_NAME}
-    common_libs
+    SDL3::SDL3
     customMath
-    rendering
-    # scripting
+    renderingBase
+    renderingAPI
     objects
+    # scripting
 )
 
-target_link_libraries(rendering PRIVATE common_libs)
+target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)
+target_link_libraries(renderingAPI PRIVATE SDL3::SDL3 glm::glm glad::glad)
+target_link_libraries(objects INTERFACE glm::glm)
+target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
+
 # target_link_libraries(scripting PRIVATE common_libs)
-target_link_libraries(customMath INTERFACE common_libs)
-target_link_libraries(objects PRIVATE common_libs)
 
 # Post-build asset copy
 add_custom_target(copy_directory ALL

@@ -1,11 +1,16 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+struct TTF_Font;
+struct SDL_Surface;
+struct SDL_Window;
+
+typedef uint32_t Uint32;
+typedef uint64_t Uint64;
 
 namespace Rendering
 {
