@@ -1,98 +1,84 @@
 #include "Objects.hpp"
 
+// const std::vector<float> Objects::cubeVertices = {
+//     // Positions          // Tex Coords (U, flipped V) // Normals
+//     // Front face
+//     -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
+//     0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0, 0, 1,
+//     -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0, 0, 1,
+//     0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0, 0, 1,
+
+//     // Back face
+//     0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, 0, -1,
+//     -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, 0, -1,
+//     0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 0, -1,
+//     -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 0, -1,
+
+//     // Left face
+//     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1, 0, 0,
+//     -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1, 0, 0,
+//     -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1, 0, 0,
+//     -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1, 0, 0,
+
+//     // Right face
+//     0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1, 0, 0,
+//     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1, 0, 0,
+//     0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1, 0, 0,
+//     0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1, 0, 0,
+
+//     // Top face
+//     -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0, 1, 0,
+//     0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0, 1, 0,
+//     -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 1, 0,
+//     0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 1, 0,
+
+//     // Bottom face
+//     -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, -1, 0,
+//     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, -1, 0,
+//     -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
+//     0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
+
+// const std::vector<unsigned int> Objects::cubeIndices = {
+//     // Front face
+//     0, 1, 2,
+//     1, 3, 2,
+
+//     // Back face
+//     4, 5, 6,
+//     5, 7, 6,
+
+//     // Left face
+//     8, 9, 10,
+//     9, 11, 10,
+
+//     // Right face
+//     12, 13, 14,
+//     13, 15, 14,
+
+//     // Top face
+//     16, 17, 18,
+//     17, 19, 18,
+
+//     // Bottom face
+//     20, 21, 22,
+//     21, 23, 22};
+
 using namespace Objects;
 using namespace Rendering;
 
-std::vector<float> RenderObject::cubeVertices = {
-    // Positions          // Tex Coords (U, flipped V) // Normals
-    // Front face
-    -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
-    0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0, 0, 1,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0, 0, 1,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0, 0, 1,
-
-    // Back face
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, 0, -1,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, 0, -1,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 0, -1,
-    -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 0, -1,
-
-    // Left face
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1, 0, 0,
-    -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1, 0, 0,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1, 0, 0,
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1, 0, 0,
-
-    // Right face
-    0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1, 0, 0,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1, 0, 0,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1, 0, 0,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1, 0, 0,
-
-    // Top face
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0, 1, 0,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0, 1, 0,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 1, 0,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 1, 0,
-
-    // Bottom face
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, -1, 0,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, -1, 0,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
-
-std::vector<unsigned int> RenderObject::cubeIndices = {
-    // Front face
-    0, 1, 2,
-    1, 3, 2,
-
-    // Back face
-    4, 5, 6,
-    5, 7, 6,
-
-    // Left face
-    8, 9, 10,
-    9, 11, 10,
-
-    // Right face
-    12, 13, 14,
-    13, 15, 14,
-
-    // Top face
-    16, 17, 18,
-    17, 19, 18,
-
-    // Bottom face
-    20, 21, 22,
-    21, 23, 22};
-
 bool RenderObject::disableBrightness = false;
-Mesh *RenderObject::pointMesh = nullptr;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
-const Bigint RenderObject::maxDistanceMediumSquared = Bigint("10000000000");
-const Bigint RenderObject::maxDistanceLowSquared = Bigint(300l * 300l);
-const Bigint RenderObject::maxDistanceHighSquared = Bigint("10000000000000000000000000");
-
 void RenderObject::init(bool disableBrightness)
 {
-    RenderObject::pointMesh = defaultMeshAPI->makeNewMesh({0, 0, 0}, {0}, {3}, MeshTypes::Points);
     RenderObject::disableBrightness = disableBrightness;
 }
 
-RenderObject::RenderObject(Shader *shady, Shader *slimShady, Image *im)
+RenderObject::RenderObject(Mesh *mesh)
 {
-    setupObject(shady, slimShady, im);
-    meshes.push_back(defaultMeshAPI->makeNewMesh(cubeVertices, cubeIndices, {3, 2, 3}));
-}
-
-void RenderObject::setupObject(Shader *shady, Shader *slimShady, Image *im)
-{
-    Drawable::setupObject();
-    shader = shady;
-    image = im;
-    pointShader = slimShady;
+    setupObject();
+    meshes.push_back(mesh);
 }
 
 RenderObject::~RenderObject()
@@ -113,19 +99,7 @@ void RenderObject::appendUpdate(const float &deltaTime)
 // I just made the default update to rotate all around
 void RenderObject::Update(const float &deltaTime)
 {
-    if (culled)
-    {
-        return;
-    }
-
     appendUpdate(deltaTime);
-}
-
-Bigint RenderObject::calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const
-{
-    if (subtractedPos.x == 0 && subtractedPos.y == 0 && subtractedPos.z == 0)
-        return Bigint(1);
-    return intensity / calculateDistanceSquared(subtractedPos);
 }
 
 Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) const
@@ -135,38 +109,8 @@ Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) cons
            subtractedPos.z * subtractedPos.z;
 }
 
-void RenderObject::appendCustomShaderValues() {}
-
-void RenderObject::renderAsPoint()
+void RenderObject::renderMesh()
 {
-    pointShader->disableCulling();
-    Bigint distance = distanceSquared.sqrt();
-    glm::vec3 newPos = (tempLocalPosition / distance).toFloatVec3() * 10.0f;
-
-    glm::mat4 matrix = glm::mat4(1.0f);
-
-    float mappedDepth = glm::clamp(((distance - near) / (Bigint(100000) - near)).toFloat(), 0.0f, 0.9f);
-
-    matrix = glm::translate(matrix, newPos);
-
-    pointShader->includeShader();
-    pointShader->setUniform("depth", mappedDepth);
-    pointShader->setUniform("uModel", matrix);
-    pointShader->setUniform("uView", Objects::globalCamera.getViewMatrix());
-    pointShader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
-    pointShader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
-    pointShader->setUniform("pointSize", 10.0f);
-    pointMesh->Draw();
-}
-
-void RenderObject::renderAsMesh()
-{
-    shader->enableCulling();
-    shader->includeShader();
-    shader->setUniform("u_fullBright", disableBrightness);
-    shader->setUniform("uView", Objects::globalCamera.getViewMatrix());
-    shader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
-    shader->setUniform("texture1", image);
 
     glm::vec3 newPos;
 
@@ -234,6 +178,7 @@ void RenderObject::renderAsMesh()
     float floatPassedNear = passedNear.toFloat();
     float floatPassedFar = passedFar.toFloat();
 
+    Shader *shader;
     for (Mesh *mesh : meshes)
     {
         if (check)
@@ -254,63 +199,21 @@ void RenderObject::renderAsMesh()
         {
             mappedDepth = glm::clamp(((glm::length(glm::vec3(uModel[3])) * floatTransform - floatPassedNear) / (floatPassedFar - floatPassedNear)) * (clampedFar - clampedNear) + clampedNear, clampedNear, clampedFar);
         }
+        shader = mesh->shader;
+        
+        shader->SetShader();
+        shader->setUniform("u_fullBright", disableBrightness);
+        shader->setUniform("uView", Objects::globalCamera.getViewMatrix());
+        shader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
         shader->setUniform("uModel", uModel);
         shader->setUniform("depth", mappedDepth);
-        appendCustomShaderValues();
         mesh->Draw();
     }
 }
 
 void RenderObject::Draw()
 {
-    Uint64 &now = HelperFunctions::now;
-    if (culled && (now - lastCullCheck) > 1)
-    {
-        lastCullCheck = now;
-        return;
-    }
-
     tempLocalPosition = Objects::globalCamera.convertToLocal(getTruePos());
     distanceSquared = calculateDistanceSquared(tempLocalPosition);
-
-    if (cullPriority == CullPriority::Medium && distanceSquared > maxDistanceMediumSquared)
-    {
-        culled = true;
-        startTimeCulled = now;
-        lastCullCheck = now;
-        return;
-    }
-
-    if (cullPriority == CullPriority::Low && distanceSquared > maxDistanceLowSquared)
-    {
-        culled = true;
-        startTimeCulled = now;
-        lastCullCheck = now;
-        return;
-    }
-
-    if (cullPriority == CullPriority::High && distanceSquared > maxDistanceHighSquared)
-    {
-        culled = true;
-        startTimeCulled = now;
-        lastCullCheck = now;
-        return;
-    }
-
-    if (distanceSquared < Bigint("100000000000000000000000"))
-    {
-        culled = false;
-        renderAsMesh();
-    }
-    else if (cullPriority == CullPriority::High)
-    {
-        culled = false;
-        renderAsPoint();
-    }
-    else
-    {
-        culled = true;
-        startTimeCulled = now;
-        lastCullCheck = now;
-    }
+    renderMesh();
 }

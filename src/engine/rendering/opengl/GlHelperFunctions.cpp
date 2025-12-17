@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+#include <iostream>
+
 using namespace OpenGl;
 using namespace Rendering;
 

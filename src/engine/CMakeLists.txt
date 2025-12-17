@@ -30,15 +30,15 @@ endif()
 
 
 
-file(GLOB_RECURSE scripting_SOURCES "scripting/*.cpp")
+# file(GLOB_RECURSE scripting_SOURCES "scripting/*.cpp")
 
-add_library(scripting SHARED ${scripting_SOURCES})
-target_include_directories(scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/scripting)
+# add_library(scripting SHARED ${scripting_SOURCES})
+# target_include_directories(scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/scripting)
 
 
 
 target_link_libraries(objects PRIVATE rendering)
 target_link_libraries(objects INTERFACE customMath)
 target_link_libraries(rendering INTERFACE customMath)
-target_link_libraries(scripting PRIVATE rendering objects)
-target_link_libraries(scripting INTERFACE customMath)
+# target_link_libraries(scripting PRIVATE rendering objects)
+# target_link_libraries(scripting INTERFACE customMath)

@@ -5,6 +5,7 @@ using namespace Rendering;
 
 MeshApi::~MeshApi()
 {
+    delete shader;
     if (VAO != 0)
         glDeleteVertexArrays(1, &VAO);
     if (VBO != 0)
@@ -13,8 +14,9 @@ MeshApi::~MeshApi()
         glDeleteBuffers(1, &EBO);
 }
 
-MeshApi::MeshApi(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
+MeshApi::MeshApi(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
 {
+    shader = shady;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
@@ -74,6 +76,7 @@ void MeshApi::updateVerts(const std::vector<float> &vertices,
 
 void MeshApi::Draw()
 {
+    shader->setImages(images);
     glBindVertexArray(VAO); // ngl who knows what this crap means, according to the names it applies and binds stuff
     glDrawElements(glMeshType, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
@@ -107,16 +110,7 @@ glm::vec3 MeshApi::calculateSizes()
     return maxCorner - minCorner;
 }
 
-Mesh *MeshApi::makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
+Mesh *MeshApi::makeNewMesh(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
 {
-    return new MeshApi(vertices, indices, vertLogic, meshType);
-}
-
-Mesh *MeshApi::makeCopy() const
-{
-    MeshApi *ret = new MeshApi(vertices, indices, vertLogic, meshType);
-    ret->sizeOffset = sizeOffset;
-    ret->posOffset = posOffset;
-    ret->rotOffset = rotOffset;
-    return ret;
+    return new MeshApi(shady, vertices, indices, vertLogic, meshType);
 }

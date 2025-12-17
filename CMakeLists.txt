@@ -76,12 +76,12 @@ target_link_libraries(${PROJECT_NAME}
     common_libs
     customMath
     rendering
-    scripting
+    # scripting
     objects
 )
 
 target_link_libraries(rendering PRIVATE common_libs)
-target_link_libraries(scripting PRIVATE common_libs)
+# target_link_libraries(scripting PRIVATE common_libs)
 target_link_libraries(customMath INTERFACE common_libs)
 target_link_libraries(objects PRIVATE common_libs)
 

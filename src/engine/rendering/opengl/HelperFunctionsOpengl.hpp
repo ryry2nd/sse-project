@@ -50,54 +50,34 @@ namespace OpenGl
     public:
         ShaderApi() {}
         ShaderApi(const char *vertexPath, const char *fragmentPath);
+        ~ShaderApi();
 
-        void createUniform(const std::string &location, const Rendering::UniformTypes &type);
-        void includeShader();
         void setUniform(const std::string &location, const float &x);
         void setUniform(const std::string &location, const glm::vec3 &x);
         void setUniform(const std::string &location, const int &x);
         void setUniform(const std::string &location, const glm::mat4 &x);
-        void setUniform(const std::string &location, const Rendering::Image *x);
         void setUniform(const std::string &location, const bool &x);
 
-        void enableCulling();
-        void disableCulling();
+        void setImages(std::vector<Rendering::Image*> &textures);
+        void SetShader();
 
-        Rendering::Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;
-
-        // deletes the thing
-        ~ShaderApi();
+        Rendering::Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;        
 
     protected:
         GLuint id;
-    };
-
-    class ComputeShaderOpenGl : public ShaderApi
-    {
-    public:
-        ComputeShaderOpenGl(const char *computePath);
-        ~ComputeShaderOpenGl();
-        void setupSsbo(uint64_t size);
-        void dispatch(uint32_t xGroups, uint32_t yGroups, uint32_t zGroups);
-        std::vector<char> joinShaderThread(uint64_t size);
-
-    private:
-        GLuint ssbo;
+        GLuint UBO;
     };
 
     class MeshApi : public Rendering::Mesh
     {
     public:
         MeshApi() {}
-        MeshApi(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        MeshApi(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         ~MeshApi();
         // updates the vertices (you dont need to run this unless you changed the vertices)
         void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         void Draw();
-        Rendering::Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
-
-        Rendering::Mesh *makeCopy() const;
-
+        Rendering::Mesh *makeNewMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
         glm::vec3 meshSize;
 
     private:

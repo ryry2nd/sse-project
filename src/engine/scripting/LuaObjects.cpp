@@ -11,8 +11,8 @@ struct LuaRenderObject : public Objects::RenderObject
     sol::table lua_instance;
 
     LuaRenderObject() = default;
-    LuaRenderObject(Rendering::Shader *shader, Rendering::Shader *slimShady, Rendering::Image *image)
-        : Objects::RenderObject(shader, slimShady, image) {}
+    LuaRenderObject(Rendering::Shader *shader, Rendering::Image *image)
+        : Objects::RenderObject(shader) {}
 
     void appendUpdate(const float &deltaTime) override
     {
@@ -38,7 +38,6 @@ struct LuaRenderObject : public Objects::RenderObject
         }
     }
 
-    using Objects::RenderObject::cullPriority;
     using Objects::RenderObject::meshes;
     using Objects::RenderObject::setupObject;
 };
@@ -78,7 +77,6 @@ struct LuaRenderObject2d : public Objects::RenderObject2d
 // {
 //     LuaMeshChunks(Rendering::Shader *shader, Rendering::Image *image)
 //         : Objects::MeshChunks(shader, image) {}
-//     using Objects::MeshChunks::cullPriority;
 //     using Objects::MeshChunks::meshes;
 //     using Objects::MeshChunks::setupObject;
 // };
@@ -161,12 +159,6 @@ void GameLibrary::includeObjects()
     using namespace Objects;
     sol::table objects = lua.create_table();
 
-    objects["CullPriority"] = lua.create_table_with(
-        "Low", CullPriority::Low,
-        "Medium", CullPriority::Medium,
-        "High", CullPriority::High,
-        "Max", CullPriority::Max);
-
     objects.new_usertype<BaseObject>("BaseObject", sol::constructors<BaseObject(), BaseObject(const BigVec3 &, const glm::vec3 &)>(),
                                      "position", &BaseObject::position, "rotation", &BaseObject::rotation,
                                      "children", &BaseObject::children, "getTruePos", &BaseObject::getTruePos,
@@ -182,7 +174,6 @@ void GameLibrary::includeObjects()
                                           sol::base_classes, sol::bases<BaseObject>(),
                                           "lua_instance", &LuaRenderObject::lua_instance,
                                           "meshes", &LuaRenderObject::meshes,
-                                          "cullPriority", &LuaRenderObject::cullPriority,
                                           "appendUpdate", &LuaRenderObject::appendUpdate,
                                           "setupObject", &LuaRenderObject::setupObject);
     objects.new_usertype<LuaRenderObject2d>("RenderObject2d", sol::constructors<LuaRenderObject2d(Rendering::Shader *, Rendering::Image *)>(),

@@ -91,51 +91,123 @@ namespace Objects
         // run before you setup any object
         static void init(bool disableBrightness = false);
         RenderObject() {}
-        RenderObject(Rendering::Shader *shady, Rendering::Shader *slimShady, Rendering::Image *im);
+        RenderObject(Rendering::Mesh *mesh);
         ~RenderObject();
 
     protected:
         // the list of meshes
         std::vector<Rendering::Mesh *> meshes;
 
-        void setupObject(Rendering::Shader *shady, Rendering::Shader *slimShady, Rendering::Image *im);
         virtual void appendUpdate(const float &deltaTime);
-        virtual void appendCustomShaderValues();
         BigVec3 tempLocalPosition;
-        CullPriority cullPriority = CullPriority::Medium;
-
-        static std::vector<float> cubeVertices;
-        static std::vector<unsigned int> cubeIndices;
-
-        const static Bigint maxDistanceMediumSquared;
-        const static Bigint maxDistanceLowSquared;
-        const static Bigint maxDistanceHighSquared;
-
-        bool culled = false;
 
         void Update(const float &deltaTime) override;
         void Draw();
 
     private:
-        Rendering::Shader *shader;
-        Rendering::Image *image;
-        Rendering::Shader *pointShader;
         Bigint calculateInverseSquareLaw(const BigVec3 &subtractedPos, const Bigint &intensity) const;
         Bigint calculateDistanceSquared(const BigVec3 &subtractedPos) const;
         Bigint distanceSquared;
-        void renderAsPoint();
-        void renderAsMesh();
+        void renderMesh();
 
         BigVec3 localSize;
-
-        Uint64 startTimeCulled = -1;
-        Uint64 lastCullCheck = -1;
 
         const static Bigint near;
         const static Bigint far;
         static bool disableBrightness;
-        static Rendering::Mesh *pointMesh;
     };
+
+    class RenderObject2d : public Drawable
+    {
+    public:
+        glm::vec2 position = glm::vec2(0.0f);
+        float rotation = 0.0f;
+        glm::vec2 scale = glm::vec2(1.0f);
+
+        RenderObject2d(Rendering::Shader *shader, Rendering::Image *im);
+
+        void Update(const float& deltaTime) override {}
+
+        ~RenderObject2d();
+
+        Rendering::Mesh *mesh2d;
+
+    protected:
+        void Draw();
+    };
+
+    class TextRenderObject : public RenderObject2d {
+    public:
+        std::string message;
+        glm::vec4 font_color;
+        TextRenderObject(Rendering::Shader *shader, Rendering::Font *font, const std::string &text, const glm::vec4 &color) : RenderObject2d(shader, Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color))), message(text), font_color(color) {}
+        void changeText(Rendering::Font *font, const std::string &text, const glm::vec4 &color) {
+            mesh2d->images[0] = Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color));
+        }
+    };
+
+    static const std::vector<float> cubeVertices  = {
+    // Positions          // Tex Coords (U, flipped V) // Normals
+    // Front face
+    -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
+    0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0, 0, 1,
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0, 0, 1,
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0, 0, 1,
+
+    // Back face
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, 0, -1,
+    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, 0, -1,
+    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 0, -1,
+    -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 0, -1,
+
+    // Left face
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1, 0, 0,
+    -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1, 0, 0,
+    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1, 0, 0,
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1, 0, 0,
+
+    // Right face
+    0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1, 0, 0,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1, 0, 0,
+    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1, 0, 0,
+    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1, 0, 0,
+
+    // Top face
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0, 1, 0,
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0, 1, 0,
+    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 1, 0,
+    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 1, 0,
+
+    // Bottom face
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, -1, 0,
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, -1, 0,
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
+    
+    static const std::vector<unsigned int> cubeIndices = {
+    // Front face
+    0, 1, 2,
+    1, 3, 2,
+
+    // Back face
+    4, 5, 6,
+    5, 7, 6,
+
+    // Left face
+    8, 9, 10,
+    9, 11, 10,
+
+    // Right face
+    12, 13, 14,
+    13, 15, 14,
+
+    // Top face
+    16, 17, 18,
+    17, 19, 18,
+
+    // Bottom face
+    20, 21, 22,
+    21, 23, 22};
 
     static const std::vector<float> vertices2d = {
         //  x,     y,    u,   v
@@ -148,39 +220,4 @@ namespace Objects
     static const std::vector<unsigned int> indices2d = {
         0, 1, 2,
         2, 3, 0};
-
-    class RenderObject2d : public Drawable
-    {
-    public:
-        glm::vec2 position = glm::vec2(0.0f);
-        float rotation = 0.0f;
-        glm::vec2 scale = glm::vec2(1.0f);
-
-        Rendering::Image *image;
-
-        RenderObject2d(Rendering::Shader *shader, Rendering::Image *im);
-
-        void Update(const float& deltaTime) override {}
-
-        ~RenderObject2d();
-
-        void updateImage(Rendering::Image *im);
-
-    protected:
-        void Draw();
-
-    private:
-        Rendering::Mesh *mesh2d;
-        Rendering::Shader *shader2d;
-    };
-
-    class TextRenderObject : public RenderObject2d {
-    public:
-        std::string message;
-        glm::vec4 font_color;
-        TextRenderObject(Rendering::Shader *shader, Rendering::Font *font, const std::string &text, const glm::vec4 &color) : RenderObject2d(shader, Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color))), message(text), font_color(color) {}
-        void changeText(Rendering::Font *font, const std::string &text, const glm::vec4 &color) {
-            updateImage(Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color)));
-        }
-    };
 }

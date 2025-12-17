@@ -8,7 +8,6 @@ set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
 
 set(USE_VULKAN OFF CACHE BOOL "Enable Vulkan support")
 set(USE_OPENGL ON CACHE BOOL "Enable OpenGL support")
-set(USE_GLES OFF CACHE BOOL "Enable OpenGL ES support")
 
 # options are OpenGL, Vulkan, GLES, or Software (or technically anything really because its an else)
 set(DEFAULT_API "OpenGL" CACHE STRING "Default graphics API")

@@ -1,5 +1,7 @@
 #include "HelperFunctionsOpengl.hpp"
 
+#include <iostream>
+
 using namespace OpenGl;
 using namespace Rendering;
 
@@ -89,21 +91,8 @@ ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
 
 ShaderApi::~ShaderApi()
 {
+    glDeleteBuffers(1, &UBO);
     glDeleteProgram(id);
-}
-
-void ShaderApi::enableCulling()
-{
-    glEnable(GL_CULL_FACE);
-}
-
-void ShaderApi::disableCulling()
-{
-    glDisable(GL_CULL_FACE);
-}
-
-void ShaderApi::createUniform(const std::string &location, const UniformTypes &type)
-{
 }
 
 void ShaderApi::setUniform(const std::string &location, const float &x)
@@ -131,108 +120,36 @@ void ShaderApi::setUniform(const std::string &location, const glm::mat4 &x)
     glUniformMatrix4fv(glGetUniformLocation(id, location.c_str()), 1, GL_FALSE, glm::value_ptr(x));
 }
 
-void ShaderApi::setUniform(const std::string &location, const Image *image)
-{
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, static_cast<const ImageApi *>(image)->getID());
-    glUniform1i(glGetUniformLocation(id, location.c_str()), 0);
+void ShaderApi::setImages(std::vector<Image*> &textures) {
+    for (int i = 0; i < textures.size(); i++) {
+        GLuint id = static_cast<ImageApi*>(textures[i])->getID();
+        glActiveTexture(GL_TEXTURE0 + i + 1);
+        glBindTexture(GL_TEXTURE_2D, id);
+
+        char uniformName[16];
+        snprintf(uniformName, sizeof(uniformName), "texture%d", (i + 1) % 1000);
+
+        GLint loc = glGetUniformLocation(id, uniformName);
+        if (loc != -1) {
+            glUniform1i(loc, i + 1);
+        }
+    }
 }
 
-void ShaderApi::includeShader()
-{
+void ShaderApi::SetShader() {
     glUseProgram(id);
+
+    if (cullingEnabled) {
+        glEnable(GL_CULL_FACE);
+    }
+    else {
+        glDisable(GL_CULL_FACE);
+    }
+
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO);
 }
 
 Shader *ShaderApi::makeNewShader(const char *vertexPath, const char *fragmentPath) const
 {
     return new ShaderApi(vertexPath, fragmentPath);
-}
-
-ComputeShaderOpenGl::ComputeShaderOpenGl(const char *computePath)
-{
-    std::string computeCode;
-    std::ifstream cShaderFile;
-
-    cShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-    try
-    {
-        cShaderFile.open(computePath);
-        std::stringstream cShaderStream;
-        cShaderStream << cShaderFile.rdbuf();
-        cShaderFile.close();
-        computeCode = cShaderStream.str();
-    }
-    catch (std::ifstream::failure &e)
-    {
-        std::cerr << "ERROR::SHADER::COMPUTE::FILE_NOT_SUCCESFULLY_READ\n";
-    }
-
-    const char *cShaderCode = computeCode.c_str();
-
-    GLuint compute;
-    int success;
-    char infoLog[512];
-
-    compute = glCreateShader(GL_COMPUTE_SHADER);
-    glShaderSource(compute, 1, &cShaderCode, nullptr);
-    glCompileShader(compute);
-    glGetShaderiv(compute, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(compute, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n"
-                  << infoLog << '\n';
-    }
-
-    id = glCreateProgram();
-    glAttachShader(id, compute);
-    glLinkProgram(id);
-
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(id, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << '\n';
-    }
-
-    glDeleteShader(compute);
-}
-
-void ComputeShaderOpenGl::setupSsbo(uint64_t size)
-{
-    glGenBuffers(1, &ssbo);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, size, nullptr, GL_DYNAMIC_COPY);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ssbo); // Binding point 0
-}
-
-void ComputeShaderOpenGl::dispatch(uint32_t xGroups, uint32_t yGroups, uint32_t zGroups)
-{
-    glDispatchCompute(xGroups, yGroups, zGroups);
-}
-
-std::vector<char> ComputeShaderOpenGl::joinShaderThread(uint64_t size)
-{
-    glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, ssbo);
-    void *ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-    if (!ptr)
-    {
-        std::cerr << "Failed to map buffer.\n";
-        return {};
-    }
-
-    std::vector<char> dataCopy(size);
-    memcpy(dataCopy.data(), ptr, size);
-
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-    return dataCopy;
-}
-
-ComputeShaderOpenGl::~ComputeShaderOpenGl()
-{
-    glDeleteBuffers(1, &ssbo);
 }

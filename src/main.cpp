@@ -1,6 +1,6 @@
 #include "engine/objects/Objects.hpp"
 #include "engine/rendering/base/HelperFunctions.hpp"
-#include "engine/scripting/ScriptingHeaders.hpp"
+// #include "engine/scripting/ScriptingHeaders.hpp"
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,17 +19,15 @@ int main(int argc, char *argv[])
         Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
     #elif DEFAULT_API == 2
         throw std::runtime_error("vulkan not supported yet");
-    #elif DEFAULT_API == 3
-        throw std::runtime_error("opengl es not supported yet");
     #else
-        throw std::runtime_error("idk what you did but this thing compleatly broke");
+        throw std::runtime_error("unkown rendering backend");
     #endif
     // this is the constants
     const Bigint WALK_SPEED = Bigint(10);
     Bigint run_speed = Bigint("100");
 
     Objects::RenderObject::init();
-    ScriptingHeaders::GameLibrary gameLib("game");
+    // ScriptingHeaders::GameLibrary gameLib("game");
 
     // starts running the game loop
     bool running = true;
@@ -40,6 +38,12 @@ int main(int argc, char *argv[])
     int numKeys;
 
     const float &deltaTime = Rendering::HelperFunctions::deltaTime;
+
+    Rendering::Shader *shader = Rendering::defaultShaderAPI->makeNewShader("game/shaders/vertex.glsl", "game/shaders/fragment.glsl");
+    Rendering::Image *image = Rendering::defaultImageAPI->makeNewImage("game/assets/textures/FISH.png");
+    Rendering::Mesh *mesh = Rendering::defaultMeshAPI->makeNewMesh(shader, Objects::cubeVertices, Objects::cubeIndices, {3,2,3});
+    
+    Objects::RenderObject renderObject(mesh);
 
     while (running)
     {

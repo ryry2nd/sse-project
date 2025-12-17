@@ -3,13 +3,13 @@
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <variant>
 
 namespace Rendering
 {
@@ -18,15 +18,6 @@ namespace Rendering
         Points,
         Lines,
         Triangles
-    };
-
-    enum class UniformTypes
-    {
-        Float,
-        Mat4,
-        Vec3,
-        Int,
-        Bool
     };
 
     class HelperFunctions
@@ -67,18 +58,20 @@ namespace Rendering
     public:
         // deletes the thing
         virtual ~Shader() = default;
-        virtual void createUniform(const std::string &location, const UniformTypes &type) = 0;
-        virtual void includeShader() = 0;
+
         virtual void setUniform(const std::string &location, const float &x) = 0;
         virtual void setUniform(const std::string &location, const glm::vec3 &x) = 0;
         virtual void setUniform(const std::string &location, const int &x) = 0;
         virtual void setUniform(const std::string &location, const glm::mat4 &x) = 0;
-        virtual void setUniform(const std::string &location, const Image *x) = 0;
         virtual void setUniform(const std::string &location, const bool &x) = 0;
+        
+        virtual void setImages(std::vector<Image *> &textures) = 0;
+        virtual void SetShader() = 0;
+
         virtual Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
 
-        virtual void enableCulling() = 0;
-        virtual void disableCulling() = 0;
+        // enables or disables culling of back face, disable if object is 2d
+        bool cullingEnabled = true;
     };
 
     class Mesh
@@ -88,13 +81,16 @@ namespace Rendering
 
         virtual void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
         virtual void Draw() = 0;
-        virtual Mesh *makeNewMesh(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
-
-        virtual Mesh *makeCopy() const = 0;
+        
+        virtual Mesh *makeNewMesh(Shader *shader, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
 
         glm::vec3 posOffset = glm::vec3(0.0f);
         glm::vec3 sizeOffset = glm::vec3(1.0f);
         glm::vec3 rotOffset = glm::vec3(0.0f);
+
+        Shader *shader;
+
+        std::vector<Image *> images;
 
     protected:
         std::vector<float> vertices;
