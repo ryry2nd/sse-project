@@ -1,17 +1,19 @@
 #pragma once
 
 #include <SDL3/SDL.h>
-#include <glad/gl.h>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <unordered_map>
 
 #include "HelperFunctions.hpp"
 
 namespace OpenGl
 {
+    using GLuint = unsigned int;
+    using GLenum = unsigned int;
+    using GLsizei = int;
+
     class HelperFunctionsApi : public Rendering::HelperFunctions
     {
     public:

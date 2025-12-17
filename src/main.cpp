@@ -42,8 +42,38 @@ int main(int argc, char *argv[])
     Rendering::Shader *shader = Rendering::defaultShaderAPI->makeNewShader("game/shaders/vertex.glsl", "game/shaders/fragment.glsl");
     Rendering::Image *image = Rendering::defaultImageAPI->makeNewImage("game/assets/textures/FISH.png");
     Rendering::Mesh *mesh = Rendering::defaultMeshAPI->makeNewMesh(shader, Objects::cubeVertices, Objects::cubeIndices, {3,2,3});
+    Rendering::Mesh *earthMesh = Rendering::defaultMeshAPI->makeNewMesh(shader, Objects::cubeVertices, Objects::cubeIndices, {3,2,3});
+    earthMesh->sizeOffset *= 12756000;
+    Rendering::Mesh *sunMesh = Rendering::defaultMeshAPI->makeNewMesh(shader, Objects::cubeVertices, Objects::cubeIndices, {3,2,3});
+    sunMesh->sizeOffset *= 1392000000;
     
+    Bigint pos = Bigint::getHoweverManyDigits(0);
+    Objects::globalCamera.position.x = Objects::globalCamera.position.x + pos;
+    Objects::globalCamera.position.z = Objects::globalCamera.position.z - Bigint(10);
+    Objects::globalCamera.rotation.y = Objects::globalCamera.rotation.y + 180;
+
     Objects::RenderObject renderObject(mesh);
+    Objects::RenderObject renderObject2(mesh);
+    renderObject2.position.x -= Bigint(10);
+    renderObject2.position.x += pos;
+    Objects::RenderObject renderObject3(mesh);
+    renderObject3.position.x += Bigint(10);
+    renderObject3.position.x += pos;
+
+    Objects::RenderObject sunObject(sunMesh);
+    sunObject.position.x -= Bigint("150000000000");
+    sunObject.position.x += pos;
+    Objects::RenderObject earthObject(earthMesh);
+    earthObject.position.y -= Bigint("6378000");
+    earthObject.position.x += pos;
+
+    int size = 11;
+    std::vector<Objects::RenderObject *> objects(size);
+    for (int i = 0; i < size; i++) {
+        objects[i] = new Objects::RenderObject(mesh);
+        objects[i]->position.z = objects[i]->position.z + Bigint(10 * (i+1));
+        objects[i]->position.x = objects[i]->position.x + pos;
+    }
 
     while (running)
     {

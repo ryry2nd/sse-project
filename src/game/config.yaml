@@ -26,9 +26,6 @@ assets:
       size: 48
   # models:
   #   - name: testModel
-      
-lua_scripts:
-  - path: scripts/main.lua
 
 # configs:
 #   - name: test
