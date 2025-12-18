@@ -41,3 +41,6 @@
 [submodule "libs/vulkan-headers"]
 	path = libs/vulkan-headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "libs/wasm"]
+	path = libs/wasm
+	url = https://github.com/bytecodealliance/wasm-micro-runtime.git

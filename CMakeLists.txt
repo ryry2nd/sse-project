@@ -27,9 +27,10 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
+find_package(wasm REQUIRED)
 # to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext, wasm
 
-#Add subdirectories for your engine and game logic
+# Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
 add_executable(${PROJECT_NAME} src/main.cpp)
 
@@ -53,6 +54,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC DEFAULT_API=${DEFAULT_API_INT}
 
 target_link_libraries(${PROJECT_NAME}
     SDL3::SDL3
+    wamr::wamr
     customMath
     renderingBase
     renderingAPI
@@ -70,7 +72,7 @@ target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
 # Post-build asset copy
 add_custom_target(copy_directory ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/game
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/game
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/scenes
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/scenes
     COMMENT "---- Copying game to output directory ----"
 )

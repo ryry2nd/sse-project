@@ -11,8 +11,73 @@
 #include "engine/rendering/opengl/HelperFunctionsOpengl.hpp"
 #endif
 
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <cstring>
+#include "wasm_export.h"
+
 int main(int argc, char *argv[])
 {
+//     // Hardcoded WASM file path
+//     const char* wasm_file = "game/scripts/hello.wasm"; // change this to your file
+
+//     // Initialize WAMR runtime
+//     RuntimeInitArgs init_args;
+//     memset(&init_args, 0, sizeof(RuntimeInitArgs));
+//     init_args.mem_alloc_type = Alloc_With_System_Allocator;
+
+//     if(!wasm_runtime_full_init(&init_args)) {
+//         std::cerr << "Failed to init WAMR runtime\n";
+//         return -1;
+//     }
+
+//     // Load WASM file into memory
+//     std::ifstream f(wasm_file, std::ios::binary | std::ios::ate);
+//     if(!f.is_open()) {
+//         std::cerr << "Failed to open WASM file: " << wasm_file << "\n";
+//         return -1;
+//     }
+//     std::streamsize size = f.tellg();
+//     f.seekg(0, std::ios::beg);
+//     std::vector<uint8_t> wasm_bytes(size);
+//     if(!f.read((char*)wasm_bytes.data(), size)) {
+//         std::cerr << "Failed to read WASM file\n";
+//         return -1;
+//     }
+
+//     // Load module
+//     wasm_module_t module = wasm_runtime_load(wasm_bytes.data(), (uint32_t)size, nullptr, 0);
+//     if(!module) {
+//         std::cerr << "Failed to load WASM module\n";
+//         return -1;
+//     }
+
+//     // Instantiate module
+//     wasm_module_inst_t module_inst = wasm_runtime_instantiate(
+//         module,
+//         64 * 1024,  // stack size
+//         64 * 1024,  // heap size
+//         nullptr,    // error buffer
+//         0           // error buffer size
+//     );
+
+//     if(!module_inst) {
+//         std::cerr << "Failed to instantiate WASM module\n";
+//         wasm_runtime_unload(module);
+//         return -1;
+//     }
+
+//     // Execute _start or main function
+//     if(!wasm_application_execute_main(module_inst, 0, nullptr)) {
+//         std::cerr << "WASM execution failed\n";
+//     }
+
+//     // Cleanup
+//     wasm_runtime_deinstantiate(module_inst);
+//     wasm_runtime_unload(module);
+//     wasm_runtime_destroy();
+// }
     Rendering::HelperFunctions *renderingEngine;
     #if DEFAULT_API == 1
         renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
@@ -53,6 +118,7 @@ int main(int argc, char *argv[])
     Objects::globalCamera.rotation.y = Objects::globalCamera.rotation.y + 180;
 
     Objects::RenderObject renderObject(mesh);
+    renderObject.position.x += pos;
     Objects::RenderObject renderObject2(mesh);
     renderObject2.position.x -= Bigint(10);
     renderObject2.position.x += pos;
