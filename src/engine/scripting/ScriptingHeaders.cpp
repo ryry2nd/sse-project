@@ -1,16 +1,73 @@
 #include "ScriptingHeaders.hpp"
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
+#include "wasm_export.h"
 
 using namespace ScriptingHeaders;
 
-GameLibrary::GameLibrary(const std::string &path)
+void Package::init() {
+    // Initialize WAMR runtime
+    memset(&init_args, 0, sizeof(RuntimeInitArgs));
+    init_args.mem_alloc_type = Alloc_With_System_Allocator;
+
+    if(!wasm_runtime_full_init(&init_args)) {
+        std::cerr << "Failed to init WAMR runtime\n";
+    }
+}
+
+void Package::deinit() {
+    wasm_runtime_destroy();
+}
+
+Package::Package(const std::string &path)
 {
+    if(!wasm_runtime_full_init(&init_args)) {
+        std::cerr << "You need to Initialise first. Run Package::init()\n";
+    }
+    packages.push_back(this);
     YAML::Node config = YAML::LoadFile(path + "/config.yaml");
 
     name = config["name"].as<std::string>();
     id = config["id"].as<std::string>();
     version = config["version"].as<std::string>();
+
+    // Load WASM file into memory
+    std::ifstream f(config["script_path"].as<std::string>(), std::ios::binary | std::ios::ate);
+    if(!f.is_open()) {
+        std::cerr << "Failed to open WASM file: " << wasm_file << "\n";
+        return -1;
+    }
+    std::streamsize size = f.tellg();
+    f.seekg(0, std::ios::beg);
+    std::vector<uint8_t> wasm_bytes(size);
+    if(!f.read((char*)wasm_bytes.data(), size)) {
+        std::cerr << "Failed to read WASM file\n";
+        return -1;
+    }
+
+    // Load module
+    wasm_module_t module = wasm_runtime_load(wasm_bytes.data(), (uint32_t)size, nullptr, 0);
+    if(!module) {
+        std::cerr << "Failed to load WASM module\n";
+        return -1;
+    }
+
+    // Instantiate module
+    module_inst = wasm_runtime_instantiate(
+        module,
+        64 * 1024,  // stack size
+        64 * 1024,  // heap size
+        nullptr,    // error buffer
+        0           // error buffer size
+    );
+
+    if(!module_inst) {
+        std::cerr << "Failed to instantiate WASM module\n";
+        return;
+    }
+
+    // Cleanup
+    wasm_runtime_unload(module);
 
     if (config["permissions"])
     {
@@ -31,78 +88,17 @@ GameLibrary::GameLibrary(const std::string &path)
             includeObjects();
         }
     }
-    if (config["assets"])
-    {
-        if (config["assets"]["fonts"])
-        {
-            size_t size = config["assets"]["fonts"].size();
-            fonts.reserve(size);
-            for (size_t i = 0; i < size; i++)
-            {
-                fonts[config["assets"]["fonts"][i]["name"].as<std::string>()] = new Rendering::Font(path + "/" + config["assets"]["fonts"][i]["path"].as<std::string>(), config["assets"]["fonts"][i]["size"].as<int>());
-            }
-        }
-        if (config["assets"]["textures"])
-        {
-            size_t size = config["assets"]["textures"].size();
-            images.reserve(size);
 
-            for (size_t i = 0; i < size; i++)
-            {
-                images[config["assets"]["textures"][i]["name"].as<std::string>()] = Rendering::defaultImageAPI->makeNewImage(path + "/" + config["assets"]["textures"][i]["path"].as<std::string>());
-            }
-        }
-    }
-
-    if (config["opengl_shaders"])
-    {
-        size_t size = config["opengl_shaders"].size();
-        shaders.reserve(size);
-
-        for (size_t i = 0; i < size; i++)
-        {
-            shaders[config["opengl_shaders"][i]["name"].as<std::string>()] = Rendering::defaultShaderAPI->makeNewShader((path + "/" + config["opengl_shaders"][i]["vertPath"].as<std::string>()).c_str(), (path + "/" + config["opengl_shaders"][i]["fragPath"].as<std::string>()).c_str());
-        }
-    }
-
-    lua.open_libraries(sol::lib::base, sol::lib::table, sol::lib::utf8, sol::lib::string, sol::lib::math);
-
-    lua.set_function("get_package", [&](const std::string &package_name, const std::string &func_name) -> sol::function
-                        {
-        if (packages.find(package_name) == packages.end()) {
-            throw std::runtime_error("Package not found: " + package_name);
-        }
-        sol::function func = packages[package_name]->lua[func_name];
-        if (!func.valid()) {
-            throw std::runtime_error("Function not found in package: " + func_name);
-        }
-        return func; });
-
-    lua.set_function("get_shader", [&](const std::string &shaderName)
-                        { return shaders[shaderName]; });
-
-    lua.set_function("get_image", [&](const std::string &imageName)
-                        { return images[imageName]; });
-
-    lua.set_function("get_fonts", [&](const std::string &fontName)
-                        { return shaders[fontName]; });
-
-    if (config["lua_scripts"])
-    {
-        for (size_t i = 0; i < config["lua_scripts"].size(); i++)
-        {
-            lua.script_file(path + "/" + config["lua_scripts"][i]["path"].as<std::string>());
-        }
+    // Execute _start or main function
+    if(!wasm_application_execute_main(module_inst, 0, nullptr)) {
+        std::cerr << "WASM execution failed\n";
     }
 }
 
-GameLibrary::~GameLibrary()
+Package::~Package()
 {
-    packages.erase(id);
-    for (auto &[name, ptr] : fonts)
-        delete ptr;
-    for (auto &[name, ptr] : shaders)
-        delete ptr;
-    for (auto &[name, ptr] : images)
-        delete ptr;
+    auto it = std::find(packages.begin(), packages.end(), this);
+    if (it != packages.end())
+        packages.erase(it);
+    wasm_runtime_deinstantiate(module_inst);
 }

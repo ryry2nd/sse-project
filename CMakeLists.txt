@@ -54,7 +54,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC DEFAULT_API=${DEFAULT_API_INT}
 
 target_link_libraries(${PROJECT_NAME}
     SDL3::SDL3
-    wamr::wamr
     customMath
     renderingBase
     renderingAPI
@@ -66,13 +65,12 @@ target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_i
 target_link_libraries(renderingAPI PRIVATE SDL3::SDL3 glm::glm glad::glad)
 target_link_libraries(objects INTERFACE glm::glm)
 target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
-
-# target_link_libraries(scripting PRIVATE common_libs)
+# target_link_libraries(scripting PRIVATE wamr::wamr glm::glm)
 
 # Post-build asset copy
 add_custom_target(copy_directory ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/scenes
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/scenes
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/packages
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/packages
     COMMENT "---- Copying game to output directory ----"
 )

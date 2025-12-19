@@ -5,14 +5,13 @@ version: 0.0.1
 # requires:
 #   - id: com.ryan.game
 
+script_path: scripts/hello.wasm
+
 folder_passthrough:
   - path: assets
     type: ro #ro/rw - read only vs read write
   # - name: saves
   #   type: rw
-
-scripts:
-  - path: scripts/hello.wasm
 
 permissions: 
   include_rendering: true
