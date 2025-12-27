@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(A_completely_normal_fishing_game VERSION 0.0.1 LANGUAGES C CXX)
+project(ryans-engine VERSION 0.0.1 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -27,7 +27,6 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-find_package(wasm REQUIRED)
 # to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext, wasm
 
 # Add subdirectories for your engine and game logic
@@ -65,7 +64,7 @@ target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_i
 target_link_libraries(renderingAPI PRIVATE SDL3::SDL3 glm::glm glad::glad)
 target_link_libraries(objects INTERFACE glm::glm)
 target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
-# target_link_libraries(scripting PRIVATE wamr::wamr glm::glm)
+# target_link_libraries(scripting PRIVATE glm::glm)
 
 # Post-build asset copy
 add_custom_target(copy_directory ALL
