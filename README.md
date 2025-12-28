@@ -19,11 +19,5 @@ For my testing I used MinGW but it has been a while sense I tested it so you mig
 Install a VM, thats your best bet right now and for the foreseeable future. Apple is the worst. Opengl 4 isn't allowed on MacOS, they only do metal. There is a plugin for Vulkan so it converts the protocols to metal so I'll look into it when I get to it but I don't have a mac device to test on so I'll have to figure something out. None of this is a promise.
 
 ## Loading Custom Programs
-### WASM
-This program allows you to run load and run custom scripts loaded in wasm. It is currently using a fast runtime compiler but I might change it to a better one in the future. Compile wasm using emscripten, didn't include the compiler to save space. Just run
-``` bash
-sudo apt install emscripten
-```
-Good luck if your a windows user, I'm not sure how you can get it working for Windows but I'm sure there is a way to do it.
 ### Yaml
 A lot of the programming configuration is going to be surrounded by the config.yaml file in the base of your program. A lot of what I have down now for the example might not be even close to what is going to be on the final product.

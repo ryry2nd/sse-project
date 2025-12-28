@@ -1,9 +1,9 @@
 #include "ScriptingHeaders.hpp"
 
-#include "../objects/Objects.hpp"
-#include "../customMath/Bigint.hpp"
-#include "../customMath/BigVec.hpp"
-#include "../rendering/base/HelperFunctions.hpp"
+// #include "../objects/Objects.hpp"
+// #include "../customMath/Bigint.hpp"
+// #include "../customMath/BigVec.hpp"
+// #include "../rendering/base/HelperFunctions.hpp"
 
 using namespace ScriptingHeaders;
 
@@ -81,7 +81,7 @@ using namespace ScriptingHeaders;
 //     using Objects::MeshChunks::setupObject;
 // };
 
-void GameLibrary::includeGlm()
+void Package::includeGlm()
 {
     // sol::table vecs = lua.create_table();
     // // vecs.set_function("length", &glm::length);
@@ -107,7 +107,7 @@ void GameLibrary::includeGlm()
     // lua["glm"] = vecs;
 }
 
-void GameLibrary::includeBigVars()
+void Package::includeBigVars()
 {
     // sol::table bigvars = lua.create_table();
     // bigvars.new_usertype<Bigint>("Bigint",
@@ -134,7 +134,7 @@ void GameLibrary::includeBigVars()
     // lua["bigvars"] = bigvars;
 }
 
-void GameLibrary::includeRendering()
+void Package::includeRendering()
 {
     // using namespace Rendering;
     // sol::table rendering = lua.create_table();
@@ -151,7 +151,7 @@ void GameLibrary::includeRendering()
     // lua["Rendering"] = rendering;
 }
 
-void GameLibrary::includeObjects()
+void Package::includeObjects()
 {
     // using namespace Objects;
     // sol::table objects = lua.create_table();

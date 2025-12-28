@@ -1,13 +1,12 @@
 #pragma once
 #include <string>
-
-struct RuntimeInitArgs;
-struct wasm_module_inst_t;
+#include <vector>
 
 namespace ScriptingHeaders
 {
-    struct Package
+    class Package
     {
+    public:
         std::string name;
         std::string id;
         std::string version;
@@ -20,8 +19,8 @@ namespace ScriptingHeaders
         static void deinit();
 
     private:
-        static RuntimeInitArgs init_args;
-        wasm_module_inst_t module_inst;
+        // static RuntimeInitArgs init_args;
+        // wasm_module_inst_t module_inst;
         
         void includeGlm();
         void includeRendering();

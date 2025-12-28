@@ -8,40 +8,34 @@ file(MAKE_DIRECTORY ${GLAD_OUT})
 file(MAKE_DIRECTORY ${VENV_DIR})
 
 
-set(GLAD_API "")
+set(GLAD_COMMAND "
+    ${Python3_EXECUTABLE} -m venv ${VENV_DIR} && \
+    ${VENV_DIR}/bin/pip install --upgrade pip && \
+    ${VENV_DIR}/bin/pip install -r requirements.txt")
 
 if(USE_OPENGL)
-  string(APPEND GLAD_API "--api gl:core=4.6 ")
-endif()
-
-if(USE_GLES)
-  string(APPEND GLAD_API "--api gles2=3.2 ")
+  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api gl:core=4.6 --out-path ${GLAD_OUT}/OpenGL")
 endif()
 
 if(USE_VULKAN)
-  string(APPEND GLAD_API "--api vulkan=1.4 ")
+  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api vulkan=1.4 --out-path ${GLAD_OUT}/vulkan")
 endif()
 
 execute_process(
-    COMMAND bash -c "
-    ${Python3_EXECUTABLE} -m venv ${VENV_DIR} && \
-    ${VENV_DIR}/bin/pip install --upgrade pip && \
-    ${VENV_DIR}/bin/pip install -r requirements.txt && \
-    ${VENV_DIR}/bin/python -m glad ${GLAD_API} --out-path ${GLAD_OUT}
-            "
-    WORKING_DIRECTORY ${GLAD_DIR}
+  COMMAND bash -c "${GLAD_COMMAND}"
+  WORKING_DIRECTORY ${GLAD_DIR}
 )
 
-file(GLOB GLAD_SOURCES "${GLAD_OUT}/src/*.c")
-add_library(glad_shared SHARED ${GLAD_SOURCES})
-target_include_directories(glad_shared PUBLIC ${GLAD_OUT}/include)
-add_library(glad INTERFACE)
-add_library(glad::glad ALIAS glad)
-target_link_libraries(glad INTERFACE glad_shared)
+if(USE_OPENGL)
+  file(GLOB gl_sources "${GLAD_OUT}/OpenGL/src/*.c")
+  add_library(gl_library STATIC ${gl_sources})
+  target_include_directories(gl_library PUBLIC ${GLAD_OUT}/OpenGL/include)
+  add_library(OPENGL::OPENGL ALIAS gl_library)
+endif()
 
-if (USE_VULKAN)
-  add_library(vulk_headers INTERFACE)
-  add_library(vulk_headers::vulk_headers ALIAS vulk_headers)
-  target_include_directories(vulk_headers INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/libs/vulkan-headers/include")
-  target_link_libraries(glad INTERFACE vulk_headers)
+if(USE_VULKAN)
+  file(GLOB vulkan_sources "${GLAD_OUT}/vulkan/src/*.c")
+  add_library(vulkan_library STATIC ${vulkan_sources})
+  target_include_directories(vulkan_library PUBLIC ${GLAD_OUT}/vulkan/include)
+  add_library(VULKAN::VULKAN ALIAS vulkan_library)
 endif()

@@ -1,5 +1,6 @@
 # set(SDLIMAGE_PNG OFF CACHE BOOL "Disable PNG support" FORCE)
 # set(SDLIMAGE_JPG OFF CACHE BOOL "Disable JPG support" FORCE)
+# do I look like I know what a jpeg is, I'm just trying to print out a picture of a god dang hot dog.
 set(SDLIMAGE_TIF OFF CACHE BOOL "Disable TIFF support" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WebP support" FORCE)
 set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF support" FORCE)
@@ -17,8 +18,8 @@ set(SDLIMAGE_TGA OFF CACHE BOOL "Disable TGA support" FORCE)
 set(SDLIMAGE_MOD OFF CACHE BOOL "Disable MOD support" FORCE)
 set(SDLIMAGE_OPUS OFF CACHE BOOL "Disable OPUS support" FORCE)
 
-set(BUILD_SHARED_LIBS ON)
-set(BUILD_STATIC_LIBS OFF)
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_STATIC_LIBS ON)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_image" SDL_image_BUILD)
 

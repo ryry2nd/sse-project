@@ -30,7 +30,7 @@ BUILD_DIR="./build/$OS-$BUILD_TYPE"
 TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
 
 mkdir -p "$BUILD_DIR"
-cmake -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
+cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
 
 # Determine number of cores to use
 if [[ "$CORES" -eq 0 ]]; then
