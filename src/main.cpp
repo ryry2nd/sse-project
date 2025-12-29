@@ -1,6 +1,6 @@
 #include "engine/objects/Objects.hpp"
 #include "engine/rendering/base/HelperFunctions.hpp"
-// #include "engine/scripting/ScriptingHeaders.hpp"
+#include "engine/scripting/ScriptingHeaders.hpp"
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
     Bigint run_speed = Bigint("100");
 
     Objects::RenderObject::init();
-    // ScriptingHeaders::GameLibrary gameLib("game");
+    
+    ScriptingHeaders::Package example_package("packages/example");
 
     // starts running the game loop
     bool running = true;
@@ -154,6 +155,8 @@ int main(int argc, char *argv[])
         {
             Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
+
+        ScriptingHeaders::Package::LoopFunctions();
 
         Objects::Drawable::UpdateAllObjects();
 

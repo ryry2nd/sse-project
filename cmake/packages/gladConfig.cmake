@@ -4,27 +4,31 @@ set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/glad)
 set(GLAD_OUT ${CMAKE_CURRENT_BINARY_DIR}/GLAD_BUILD)
 set(VENV_DIR ${CMAKE_CURRENT_BINARY_DIR}/.buildenv)
 
+set(OPENGL_PATH ${GLAD_OUT}/OpenGL)
+set(VULKAN_PATH ${GLAD_OUT}/vulkan)
+
 file(MAKE_DIRECTORY ${GLAD_OUT})
 file(MAKE_DIRECTORY ${VENV_DIR})
-
 
 set(GLAD_COMMAND "
     ${Python3_EXECUTABLE} -m venv ${VENV_DIR} && \
     ${VENV_DIR}/bin/pip install --upgrade pip && \
     ${VENV_DIR}/bin/pip install -r requirements.txt")
 
-if(USE_OPENGL)
-  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api gl:core=4.6 --out-path ${GLAD_OUT}/OpenGL")
+if(USE_OPENGL AND NOT EXISTS ${OPENGL_PATH})
+  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api gl:core=4.6 --out-path ${OPENGL_PATH}")
 endif()
 
-if(USE_VULKAN)
-  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api vulkan=1.4 --out-path ${GLAD_OUT}/vulkan")
+if(USE_VULKAN AND NOT EXISTS ${VULKAN_PATH})
+  string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/bin/python -m glad --api vulkan=1.4 --out-path ${VULKAN_PATH}")
 endif()
 
-execute_process(
-  COMMAND bash -c "${GLAD_COMMAND}"
-  WORKING_DIRECTORY ${GLAD_DIR}
-)
+if (NOT EXISTS ${VULKAN_PATH} AND NOT EXISTS ${OPENGL_PATH})
+  execute_process(
+    COMMAND bash -c "${GLAD_COMMAND}"
+    WORKING_DIRECTORY ${GLAD_DIR}
+  )
+endif()
 
 if(USE_OPENGL)
   file(GLOB gl_sources "${GLAD_OUT}/OpenGL/src/*.c")

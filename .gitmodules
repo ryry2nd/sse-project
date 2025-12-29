@@ -41,6 +41,3 @@
 [submodule "libs/vulkan-headers"]
 	path = libs/vulkan-headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
-[submodule "libs/llvm"]
-	path = libs/llvm
-	url = https://github.com/llvm/llvm-project.git

@@ -29,7 +29,6 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-# find_package(llvm REQUIRED)
 # to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext
 
 # Add subdirectories for your engine and game logic
@@ -59,7 +58,7 @@ target_link_libraries(main
     customMath
     renderingBase
     objects
-    # scripting
+    scripting
 )
 
 target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)
@@ -71,12 +70,58 @@ endif()
 
 target_link_libraries(objects INTERFACE glm::glm)
 target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
-# target_link_libraries(scripting PRIVATE glm::glm ${LLVM_LIBS} yaml-cpp::yaml-cpp)#LLVM::LLVM)
+target_link_libraries(scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3)
+
+add_custom_target(delete_cache ALL
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/cache"
+    COMMENT "---- Deleting folder recursively ----"
+)
 
 # Post-build asset copy
-add_custom_target(copy_directory ALL
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/src/packages
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/packages
-    COMMENT "---- Copying game to output directory ----"
+    COMMENT "---- Copying assets ----"
 )
+
+# copy headers
+file(GLOB_RECURSE MATH_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/customMath/*.hpp
+)
+file(GLOB_RECURSE OBJECT_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/objects/*.hpp
+)
+file(GLOB_RECURSE RENDERING_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/rendering/base/*.hpp
+)
+
+add_custom_target(copy_headers ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/customMath
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${MATH_HEADERS}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/customMath
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${OBJECT_HEADERS}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${RENDERING_HEADERS}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering
+    COMMENT "---- Copying headers ----"
+)
+# copy compiler
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/compilers AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/compilers/clang AND NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/clang)
+  add_custom_target(copy_compiler ALL
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+              ${CMAKE_CURRENT_SOURCE_DIR}/compilers/clang
+              ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/clang
+      COMMENT "---- Copying compiler ----"
+  )
+endif()

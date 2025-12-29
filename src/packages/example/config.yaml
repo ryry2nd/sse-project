@@ -1,20 +1,14 @@
-name: game
-id: com.ryan.game
+name: example
+id: com.ryan.example
 version: 0.0.1
 
+# incompatible_modules: # if two mods are incompatible list the ids below
+#   - id: com.ryan.example
 # requires:
-#   - id: com.ryan.game
+#   - id: com.ryan.example
+#     compatible_range: 0.0.0-0.0.1 #inclusive
 
-script_path: scripts/hello.wasm
-
-folder_passthrough:
-  - path: assets
-    type: ro #ro/rw - read only vs read write
-  # - name: saves
-  #   type: rw
-
-permissions: 
-  include_rendering: true
-  include_bigvars: true
-  include_objects: true
-  include_glm: true
+includes:
+  rendering: false
+  objects: false
+  customMath: false

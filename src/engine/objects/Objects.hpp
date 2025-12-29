@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../customMath/BigVec.hpp"
+#include "../customMath/CustomMath.hpp"
 #include "../../rendering/base/HelperFunctions.hpp"
 #include <glm/glm.hpp>
 #include <vector>

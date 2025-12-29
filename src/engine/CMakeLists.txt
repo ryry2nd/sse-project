@@ -20,6 +20,6 @@ target_include_directories(objects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/objects)
 target_link_libraries(objects PRIVATE renderingBase customMath)
 
 
-# file(GLOB_RECURSE scripting_SOURCES "scripting/*.cpp")
-# add_library(scripting SHARED ${scripting_SOURCES})
-# target_include_directories(scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/scripting)
+file(GLOB_RECURSE scripting_SOURCES "scripting/*.cpp")
+add_library(scripting SHARED ${scripting_SOURCES})
+target_include_directories(scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/scripting)

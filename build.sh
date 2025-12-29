@@ -16,8 +16,8 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --cores)
-      CORES="$3"
-      shift 3
+      CORES="$2"
+      shift 2
       ;;
     *)
       echo "Unknown option $1"
