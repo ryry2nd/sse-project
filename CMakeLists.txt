@@ -96,7 +96,7 @@ file(GLOB_RECURSE RENDERING_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/rendering/base/*.hpp
 )
 
-add_custom_target(copy_headers ALL
+add_custom_target(copy_src_headers ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
     COMMAND ${CMAKE_COMMAND} -E make_directory
@@ -105,6 +105,8 @@ add_custom_target(copy_headers ALL
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
     COMMAND ${CMAKE_COMMAND} -E make_directory
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering/base
     COMMAND ${CMAKE_COMMAND} -E copy
             ${MATH_HEADERS}
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/customMath
@@ -113,7 +115,7 @@ add_custom_target(copy_headers ALL
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
     COMMAND ${CMAKE_COMMAND} -E copy
             ${RENDERING_HEADERS}
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering/base
     COMMENT "---- Copying headers ----"
 )
 # copy compiler
@@ -125,3 +127,25 @@ if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/compilers AND EXISTS ${CMAKE_CURRENT_SOUR
       COMMENT "---- Copying compiler ----"
   )
 endif()
+
+add_custom_target(copy_lib_headers ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/copying.txt
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/include/boost
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/LICENSE
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/include/boost
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/build.jam
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+    COMMENT "---- Copying Library headers ----"
+)

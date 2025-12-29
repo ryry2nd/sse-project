@@ -6,7 +6,6 @@ using namespace Rendering;
 
 MeshApi::~MeshApi()
 {
-    delete shader;
     if (VAO != 0)
         glDeleteVertexArrays(1, &VAO);
     if (VBO != 0)

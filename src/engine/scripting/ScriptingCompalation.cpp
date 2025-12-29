@@ -14,9 +14,7 @@ using namespace ScriptingHeaders;
 #define LIBRARY_PATH "libs"
 #define CPP_VERSION "20"
 
-#define CUSTOM_MATH_PATH "include/customMath"
-#define RENDERING_PATH "include/rendering"
-#define OBJECT_PATH "include/objects"
+#define INCLUDE_PATH "include"
 
 #ifdef _WIN32
 #define POPEN _popen
@@ -67,32 +65,27 @@ Package::Package(const std::string &path)
     if (!std::filesystem::exists(path+"/src")) return;
 
     if (!std::filesystem::exists(std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX))) {
-        std::string headerPaths = "";
         std::string libInclude = "";
 
         if (config["include"])
         {
-            if (config["include"]["customMath"] && config["include"]["customMath"].as<bool>())
-            {
-                headerPaths += " -I" + std::string(CUSTOM_MATH_PATH);
-            }
             if (config["include"]["rendering"] && config["include"]["rendering"].as<bool>())
             {
-                headerPaths += " -I" + std::string(RENDERING_PATH);
                 libInclude += " -lrenderingBase";
             }
             if (config["include"]["objects"] && config["include"]["objects"].as<bool>())
             {
-                headerPaths += " -I" + std::string(OBJECT_PATH);
                 libInclude += " -lobjects";
             }
         }
 
-        compileCode("-shared -std=c++" + std::string(CPP_VERSION) + \
+        std::string command = "-w -shared -std=c++" + std::string(CPP_VERSION) + \
             " -o " + std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX) + \
             + " " + path + "/src/*.cpp -L" + \
-            std::string(LIBRARY_PATH) + headerPaths + libInclude + \
-            " -DMODULE_PATH=\\\"" + path + "\\\"");
+            std::string(LIBRARY_PATH) + libInclude + " -I" + std::string(INCLUDE_PATH) + \
+            " -DMODULE_PATH=\\\"" + path + "\\\" -fPIC";
+            
+        compileCode(command);
 
     }
     
@@ -110,14 +103,17 @@ Package::Package(const std::string &path)
     }
 
     loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
-
     func();
 }
 
 void Package::runLoopFunction() {
-    if (loopFunc) {
-        loopFunc();
+    try {
+        if (loopFunc) {loopFunc();}
     }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
+    
 }
 
 Package::~Package()
@@ -125,5 +121,9 @@ Package::~Package()
     auto it = std::find(packages.begin(), packages.end(), this);
     if (it != packages.end())
         packages.erase(it);
+
+    FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, "shutdown");
+    shutDownFunc();
+
     SDL_UnloadObject(lib);
 }
