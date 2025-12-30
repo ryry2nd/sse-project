@@ -110,7 +110,7 @@ glm::vec3 MeshApi::calculateSizes()
     return maxCorner - minCorner;
 }
 
-Mesh *MeshApi::makeNewMesh(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
+std::unique_ptr<Mesh> MeshApi::makeNewMesh(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
 {
-    return new MeshApi(shady, vertices, indices, vertLogic, meshType);
+    return std::make_unique<MeshApi>(shady, vertices, indices, vertLogic, meshType);
 }

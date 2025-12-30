@@ -22,8 +22,8 @@ namespace ScriptingHeaders
         ~Package();
 
     private:
-        SDL_SharedObject* lib;
-        FuncType loopFunc;
+        SDL_SharedObject* lib = nullptr;
+        FuncType loopFunc = nullptr;
 
         void runLoopFunction();
     };

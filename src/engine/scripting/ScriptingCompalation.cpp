@@ -33,12 +33,14 @@ using namespace ScriptingHeaders;
 std::vector<Package *> Package::packages;
 
 // scarry code, watch out, can execute random commands. DO NOT GIVE THIS TO THE HEADER
-void compileCode(const std::string& arguments) {
+int compileCode(const std::string& arguments) {
     std::string command = std::string(BIN_PREFIX) + COMPILER_PATH + EXE_EXT + " " + arguments;
     std::unique_ptr<FILE, decltype(&PCLOSE)> pipe(POPEN(command.c_str(), "r"), PCLOSE);
     if (!pipe) {
-        throw std::runtime_error("Failed to run command");
+        std::cerr << "Failed to run command";
+        return 1;
     }
+    return 0;
 }
 
 void Package::LoopFunctions() {
@@ -62,7 +64,17 @@ Package::Package(const std::string &path)
     this->path = path;
     std::string module_filename = std::filesystem::path(path).filename().string();
 
-    if (!std::filesystem::exists(path+"/src")) return;
+    bool hasCppFiles = false;
+    if (std::filesystem::exists(path + "/src")) {
+        for (const auto &entry : std::filesystem::directory_iterator(path + "/src")) {
+            if (entry.path().extension() == ".cpp") {
+                hasCppFiles = true;
+                break;
+            }
+        }
+    }
+
+    if (!hasCppFiles) return;
 
     if (!std::filesystem::exists(std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX))) {
         std::string libInclude = "";
@@ -79,16 +91,16 @@ Package::Package(const std::string &path)
             }
         }
 
-        std::string command = "-w -shared -std=c++" + std::string(CPP_VERSION) + \
-            " -o " + std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX) + \
-            + " " + path + "/src/*.cpp -L" + \
-            std::string(LIBRARY_PATH) + libInclude + " -I" + std::string(INCLUDE_PATH) + \
-            " -DMODULE_PATH=\\\"" + path + "\\\" -fPIC";
-            
-        compileCode(command);
+        std::string command = "-w -fPIC -shared -std=c++" + std::string(CPP_VERSION) + \
+            " -o " + std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX) +
+            " " + path + "/src/*.cpp -L" +
+            std::string(LIBRARY_PATH) + libInclude + " -I" + std::string(INCLUDE_PATH) +
+            " -DMODULE_PATH=\\\"" + path + "\\\"";
+        
+        if (compileCode(command)) {return;}
 
     }
-    
+
     lib = SDL_LoadObject((std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX)).c_str());
     if (!lib) {
         std::cerr << "Failed to load library: " << SDL_GetError() << "\n";
@@ -96,14 +108,14 @@ Package::Package(const std::string &path)
     }
 
     FuncType func = (FuncType)SDL_LoadFunction(lib, "setup");
-    if (!func) {
-        std::cerr << "Failed to load function: " << SDL_GetError() << "\n";
-        SDL_UnloadObject(lib);
-        return;
+    try {
+        if (func) func();
     }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }   
 
-    loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
-    func();
+    loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");    
 }
 
 void Package::runLoopFunction() {
@@ -122,8 +134,9 @@ Package::~Package()
     if (it != packages.end())
         packages.erase(it);
 
-    FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, "shutdown");
-    shutDownFunc();
-
-    SDL_UnloadObject(lib);
+    if (lib) {
+        FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, "shutdown");
+        if (shutDownFunc) shutDownFunc();
+        SDL_UnloadObject(lib);
+    }
 }

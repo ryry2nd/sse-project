@@ -40,8 +40,8 @@ namespace OpenGl
         // it gets the id
         GLuint getID() const;
 
-        Rendering::Image *makeNewImage(const std::string &filePath) const;
-        Rendering::Image *makeNewImage(SDL_Surface *surface) const;
+        std::unique_ptr<Rendering::Image> makeNewImage(const std::string &filePath) const;
+        std::unique_ptr<Rendering::Image> makeNewImage(SDL_Surface *surface) const;
 
     private:
         void setupObject(SDL_Surface *surface);
@@ -64,7 +64,7 @@ namespace OpenGl
         void setImages(std::vector<Rendering::Image*> &textures);
         void SetShader();
 
-        Rendering::Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const;        
+        std::unique_ptr<Rendering::Shader> makeNewShader(const char *vertexPath, const char *fragmentPath) const;        
 
     protected:
         GLuint id;
@@ -80,7 +80,7 @@ namespace OpenGl
         // updates the vertices (you dont need to run this unless you changed the vertices)
         void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         void Draw();
-        Rendering::Mesh *makeNewMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
+        std::unique_ptr<Rendering::Mesh> makeNewMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
         glm::vec3 meshSize;
 
     private:

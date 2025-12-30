@@ -1,12 +1,19 @@
 #include "HelperFunctionsOpengl.hpp"
 #include <glad/gl.h>
 #include <SDL3/SDL.h>
+#include <filesystem>
+#include <iostream>
+#include <memory>
 
 using namespace OpenGl;
 using namespace Rendering;
 
 ImageApi::ImageApi(const std::string &filePath)
 {
+    if (!std::filesystem::exists(filePath)) {
+        std::cerr << "Image path: " << filePath << " does not exist\n";
+        return;
+    }
     setupObject(loadFile(filePath));
 }
 
@@ -47,12 +54,12 @@ GLuint ImageApi::getID() const
     return textureID;
 }
 
-Image *ImageApi::makeNewImage(const std::string &filePath) const
+std::unique_ptr<Image> ImageApi::makeNewImage(const std::string &filePath) const
 {
-    return new ImageApi(filePath);
+    return std::make_unique<ImageApi>(filePath);
 }
 
-Image *ImageApi::makeNewImage(SDL_Surface *surface) const
+std::unique_ptr<Image> ImageApi::makeNewImage(SDL_Surface *surface) const
 {
-    return new ImageApi(surface);
+    return std::make_unique<ImageApi>(surface);
 }

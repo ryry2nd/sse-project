@@ -9,6 +9,7 @@
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include <memory>
 
 #ifdef USE_OPENGL
 #include "engine/rendering/opengl/HelperFunctionsOpengl.hpp"
@@ -19,7 +20,7 @@ int main(int argc, char *argv[])
     Rendering::HelperFunctions *renderingEngine;
     #if DEFAULT_API == 1
         renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-        Rendering::init(new OpenGl::MeshApi(), new OpenGl::ShaderApi(), new OpenGl::ImageApi());
+        Rendering::init(std::make_unique<OpenGl::MeshApi>(), std::make_unique<OpenGl::ShaderApi>(), std::make_unique<OpenGl::ImageApi>());
     #elif DEFAULT_API == 2
         throw std::runtime_error("vulkan not supported yet");
     #else

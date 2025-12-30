@@ -4,12 +4,23 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <memory>
 
 using namespace OpenGl;
 using namespace Rendering;
 
 ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
 {
+    if (!std::filesystem::exists(vertexPath)) {
+        std::cerr << "Shader path: " << vertexPath << " does not exist\n";
+        return;
+    }
+    if (!std::filesystem::exists(fragmentPath)) {
+        std::cerr << "Shader path: " << fragmentPath << " does not exist\n";
+        return;
+    }
+
     std::string vertexCode, fragmentCode;
     std::ifstream vShaderFile, fShaderFile;
 
@@ -123,7 +134,7 @@ void ShaderApi::setUniform(const std::string &location, const glm::mat4 &x)
     glUniformMatrix4fv(glGetUniformLocation(id, location.c_str()), 1, GL_FALSE, glm::value_ptr(x));
 }
 
-void ShaderApi::setImages(std::vector<Image*> &textures) {
+void ShaderApi::setImages(std::vector<Image *> &textures) {
     for (int i = 0; i < textures.size(); i++) {
         GLuint id = static_cast<ImageApi*>(textures[i])->getID();
         glActiveTexture(GL_TEXTURE0 + i + 1);
@@ -152,7 +163,7 @@ void ShaderApi::SetShader() {
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO);
 }
 
-Shader *ShaderApi::makeNewShader(const char *vertexPath, const char *fragmentPath) const
+std::unique_ptr<Shader> ShaderApi::makeNewShader(const char *vertexPath, const char *fragmentPath) const
 {
-    return new ShaderApi(vertexPath, fragmentPath);
+    return std::make_unique<ShaderApi>(vertexPath, fragmentPath);
 }

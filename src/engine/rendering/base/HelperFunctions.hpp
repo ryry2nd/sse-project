@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <memory>
 
 struct TTF_Font;
 struct SDL_Surface;
@@ -48,8 +49,8 @@ namespace Rendering
     {
     public:
         virtual ~Image() = default;
-        virtual Image *makeNewImage(const std::string &filePath) const = 0;
-        virtual Image *makeNewImage(SDL_Surface *surface) const = 0;
+        virtual std::unique_ptr<Image> makeNewImage(const std::string &filePath) const = 0;
+        virtual std::unique_ptr<Image> makeNewImage(SDL_Surface *surface) const = 0;
         static SDL_Surface *loadFile(const std::string &filePath);
         glm::vec2 imageSizes;
     };
@@ -69,7 +70,7 @@ namespace Rendering
         virtual void setImages(std::vector<Image *> &textures) = 0;
         virtual void SetShader() = 0;
 
-        virtual Shader *makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
+        virtual std::unique_ptr<Shader> makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
 
         // enables or disables culling of back face, disable if object is 2d
         bool cullingEnabled = true;
@@ -83,7 +84,7 @@ namespace Rendering
         virtual void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
         virtual void Draw() = 0;
         
-        virtual Mesh *makeNewMesh(Shader *shader, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
+        virtual std::unique_ptr<Mesh> makeNewMesh(Shader *shader, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
 
         glm::vec3 posOffset = glm::vec3(0.0f);
         glm::vec3 sizeOffset = glm::vec3(1.0f);
@@ -111,14 +112,14 @@ namespace Rendering
         TTF_Font *font;
     };
 
-    inline Mesh *defaultMeshAPI;
-    inline Shader *defaultShaderAPI;
-    inline Image *defaultImageAPI;
+    inline std::unique_ptr<Mesh> defaultMeshAPI;
+    inline std::unique_ptr<Shader> defaultShaderAPI;
+    inline std::unique_ptr<Image> defaultImageAPI;
 
-    static void init(Mesh *meshApi, Shader *shaderApi, Image *imageApi)
+    static void init(std::unique_ptr<Mesh> meshApi, std::unique_ptr<Shader> shaderApi, std::unique_ptr<Image> imageApi)
     {
-        defaultMeshAPI = meshApi;
-        defaultShaderAPI = shaderApi;
-        defaultImageAPI = imageApi;
+        defaultMeshAPI = std::move(meshApi);
+        defaultShaderAPI = std::move(shaderApi);
+        defaultImageAPI = std::move(imageApi);
     }
 }
