@@ -15,45 +15,40 @@ namespace OpenGl
     using GLenum = unsigned int;
     using GLsizei = int;
 
-    class HelperFunctionsApi : public Rendering::HelperFunctions
+    class GlWindow : public Rendering::Window
     {
     public:
-        HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+        GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
         void clearBackground();
         void swapBuffer();
         void updateScreenRes();
-        ~HelperFunctionsApi();
+        ~GlWindow();
 
     private:
         SDL_GLContext glContext;
     };
 
-    class ImageApi : public Rendering::Image
+    class GlImage : public Rendering::Image
     {
     public:
         // it makes the image
-        ImageApi() {textureID = 0;}
-        ImageApi(const std::string &filePath);
-        ImageApi(SDL_Surface *surface);
+        GlImage(const std::string &filePath);
+        GlImage(SDL_Surface *surface);
         // it unmakes the image
-        ~ImageApi();
+        ~GlImage();
         // it gets the id
         GLuint getID() const;
-
-        std::unique_ptr<Rendering::Image> makeNewImage(const std::string &filePath) const;
-        std::unique_ptr<Rendering::Image> makeNewImage(SDL_Surface *surface) const;
 
     private:
         void setupObject(SDL_Surface *surface);
         GLuint textureID = 0;
     };
 
-    class ShaderApi : public Rendering::Shader
+    class GlShader : public Rendering::Shader
     {
     public:
-        ShaderApi() {id = 0; UBO = 0;}
-        ShaderApi(const char *vertexPath, const char *fragmentPath);
-        ~ShaderApi();
+        GlShader(const char *vertexPath, const char *fragmentPath);
+        ~GlShader();
 
         void setUniform(const std::string &location, const float &x);
         void setUniform(const std::string &location, const glm::vec3 &x);
@@ -62,25 +57,21 @@ namespace OpenGl
         void setUniform(const std::string &location, const bool &x);
 
         void setImages(std::vector<Rendering::Image*> &textures);
-        void SetShader();
-
-        std::unique_ptr<Rendering::Shader> makeNewShader(const char *vertexPath, const char *fragmentPath) const;        
+        void SetShader();  
 
     protected:
         GLuint id;
         GLuint UBO;
     };
 
-    class MeshApi : public Rendering::Mesh
+    class GlMesh : public Rendering::Mesh
     {
     public:
-        MeshApi() {VAO = 0; VBO = 0; EBO = 0; glMeshType = 0; size = 0;}
-        MeshApi(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
-        ~MeshApi();
+        GlMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        ~GlMesh();
         // updates the vertices (you dont need to run this unless you changed the vertices)
         void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         void Draw();
-        std::unique_ptr<Rendering::Mesh> makeNewMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) const;
         glm::vec3 meshSize;
 
     private:

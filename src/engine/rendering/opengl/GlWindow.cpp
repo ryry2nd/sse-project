@@ -7,8 +7,8 @@
 using namespace OpenGl;
 using namespace Rendering;
 
-HelperFunctionsApi::HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
-    : HelperFunctions(res, name, flags, aa, fullscreen, hideMouse)
+GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
+    : Window(res, name, flags, aa, fullscreen, hideMouse)
 {
     // this does what it says
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
@@ -49,23 +49,23 @@ HelperFunctionsApi::HelperFunctionsApi(glm::vec2 res, const char *name, Uint32 f
     glDepthMask(GL_TRUE); // enable writing to depth buffer
 }
 
-void HelperFunctionsApi::clearBackground()
+void GlWindow::clearBackground()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void HelperFunctionsApi::swapBuffer()
+void GlWindow::swapBuffer()
 {
     SDL_GL_SwapWindow(window);
 }
 
-void HelperFunctionsApi::updateScreenRes()
+void GlWindow::updateScreenRes()
 {
     glViewport(0, 0, res.x, res.y);
 }
 
-HelperFunctionsApi::~HelperFunctionsApi()
+GlWindow::~GlWindow()
 {
     SDL_GL_DestroyContext(glContext);
 }

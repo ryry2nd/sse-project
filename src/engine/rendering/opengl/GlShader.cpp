@@ -10,7 +10,7 @@
 using namespace OpenGl;
 using namespace Rendering;
 
-ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
+GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
 {
     if (!std::filesystem::exists(vertexPath)) {
         std::cerr << "Shader path: " << vertexPath << " does not exist\n";
@@ -103,7 +103,7 @@ ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
     glDeleteShader(fragment);
 }
 
-ShaderApi::~ShaderApi()
+GlShader::~GlShader()
 {
     if (UBO != 0)
         glDeleteBuffers(1, &UBO);
@@ -111,34 +111,34 @@ ShaderApi::~ShaderApi()
         glDeleteProgram(id);
 }
 
-void ShaderApi::setUniform(const std::string &location, const float &x)
+void GlShader::setUniform(const std::string &location, const float &x)
 {
     glUniform1f(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderApi::setUniform(const std::string &location, const glm::vec3 &x)
+void GlShader::setUniform(const std::string &location, const glm::vec3 &x)
 {
     glUniform3f(glGetUniformLocation(id, location.c_str()), x.x, x.y, x.z);
 }
 
-void ShaderApi::setUniform(const std::string &location, const int &x)
+void GlShader::setUniform(const std::string &location, const int &x)
 {
     glUniform1i(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderApi::setUniform(const std::string &location, const bool &x)
+void GlShader::setUniform(const std::string &location, const bool &x)
 {
     glUniform1f(glGetUniformLocation(id, location.c_str()), x);
 }
 
-void ShaderApi::setUniform(const std::string &location, const glm::mat4 &x)
+void GlShader::setUniform(const std::string &location, const glm::mat4 &x)
 {
     glUniformMatrix4fv(glGetUniformLocation(id, location.c_str()), 1, GL_FALSE, glm::value_ptr(x));
 }
 
-void ShaderApi::setImages(std::vector<Image *> &textures) {
+void GlShader::setImages(std::vector<Image *> &textures) {
     for (int i = 0; i < textures.size(); i++) {
-        GLuint id = static_cast<ImageApi*>(textures[i])->getID();
+        GLuint id = static_cast<GlImage*>(textures[i])->getID();
         glActiveTexture(GL_TEXTURE0 + i + 1);
         glBindTexture(GL_TEXTURE_2D, id);
 
@@ -152,7 +152,7 @@ void ShaderApi::setImages(std::vector<Image *> &textures) {
     }
 }
 
-void ShaderApi::SetShader() {
+void GlShader::SetShader() {
     glUseProgram(id);
 
     if (cullingEnabled) {
@@ -163,9 +163,4 @@ void ShaderApi::SetShader() {
     }
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO);
-}
-
-std::unique_ptr<Shader> ShaderApi::makeNewShader(const char *vertexPath, const char *fragmentPath) const
-{
-    return std::make_unique<ShaderApi>(vertexPath, fragmentPath);
 }

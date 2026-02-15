@@ -35,14 +35,6 @@ find_package(glad REQUIRED)
 add_subdirectory(src/engine)
 add_executable(main src/main.cpp)
 
-if(USE_VULKAN)
-  target_compile_definitions(main PUBLIC USE_VULKAN)
-endif()
-
-if(USE_OPENGL)
-  target_compile_definitions(main PUBLIC USE_OPENGL)
-endif()
-
 if(DEFAULT_API STREQUAL "OpenGL")
   set(DEFAULT_API_INT 1)
 elseif(DEFAULT_API STREQUAL "Vulkan")
@@ -64,8 +56,7 @@ target_link_libraries(main
 target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)
 
 if(USE_OPENGL)
-  target_link_libraries(main renderingOpenGL)
-  target_link_libraries(renderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
+    target_link_libraries(renderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
 endif()
 
 target_link_libraries(objects INTERFACE glm::glm)

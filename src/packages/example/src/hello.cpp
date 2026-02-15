@@ -14,12 +14,12 @@ std::vector<std::unique_ptr<Objects::RenderObject>> objects;
 extern "C" {
     void setup() {
         std::cout << "example module online\n";
-        shaders.push_back(Rendering::defaultShaderAPI->makeNewShader((std::string(MODULE_PATH) + "/assets/shaders/vertex.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/fragment.glsl").c_str()));
-        images.push_back(Rendering::defaultImageAPI->makeNewImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));
-        meshes.push_back(Rendering::defaultMeshAPI->makeNewMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
-        meshes.push_back(Rendering::defaultMeshAPI->makeNewMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
+        shaders.push_back(Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/vertex.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/fragment.glsl").c_str()));
+        images.push_back(Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
         meshes[meshes.size()-1]->sizeOffset *= 12756000;
-        meshes.push_back(Rendering::defaultMeshAPI->makeNewMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
         meshes[meshes.size()-1]->sizeOffset *= 1392000000;
 
         meshes[0]->images.push_back(images[0].get());
@@ -60,6 +60,6 @@ extern "C" {
         objects.clear();
         meshes.clear();
         shaders.clear();
-        images.clear();        
+        images.clear();
     }
 }

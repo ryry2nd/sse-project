@@ -4,7 +4,7 @@
 using namespace OpenGl;
 using namespace Rendering;
 
-MeshApi::~MeshApi()
+GlMesh::~GlMesh()
 {
     if (VAO != 0)
         glDeleteVertexArrays(1, &VAO);
@@ -14,7 +14,7 @@ MeshApi::~MeshApi()
         glDeleteBuffers(1, &EBO);
 }
 
-MeshApi::MeshApi(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
+GlMesh::GlMesh(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) : VAO(0), VBO(0), EBO(0)
 {
     shader = shady;
     glGenVertexArrays(1, &VAO);
@@ -25,7 +25,7 @@ MeshApi::MeshApi(Shader *shady, const std::vector<float> &vertices, const std::v
     updateVerts(vertices, indices, vertLogic, meshType);
 }
 
-void MeshApi::updateVerts(const std::vector<float> &vertices,
+void GlMesh::updateVerts(const std::vector<float> &vertices,
                           const std::vector<unsigned int> &indices,
                           const std::vector<short> &vertLogic,
                           const MeshTypes &meshType)
@@ -74,7 +74,7 @@ void MeshApi::updateVerts(const std::vector<float> &vertices,
     meshSize = calculateSizes();
 }
 
-void MeshApi::Draw()
+void GlMesh::Draw()
 {
     shader->setImages(images);
     glBindVertexArray(VAO); // ngl who knows what this crap means, according to the names it applies and binds stuff
@@ -82,7 +82,7 @@ void MeshApi::Draw()
     glBindVertexArray(0);
 }
 
-glm::vec3 MeshApi::calculateSizes()
+glm::vec3 GlMesh::calculateSizes()
 {
     glm::vec3 minCorner(FLT_MAX);
     glm::vec3 maxCorner(-FLT_MAX);
@@ -108,9 +108,4 @@ glm::vec3 MeshApi::calculateSizes()
     }
 
     return maxCorner - minCorner;
-}
-
-std::unique_ptr<Mesh> MeshApi::makeNewMesh(Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType) const
-{
-    return std::make_unique<MeshApi>(shady, vertices, indices, vertLogic, meshType);
 }

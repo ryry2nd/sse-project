@@ -11,18 +11,12 @@
 #include <cstring>
 #include <memory>
 
-#ifdef USE_OPENGL
-#include "engine/rendering/opengl/HelperFunctionsOpengl.hpp"
-#endif
-
 int main(int argc, char *argv[])
 {
-    Rendering::HelperFunctions *renderingEngine;
+    std::unique_ptr<Rendering::Window> renderingEngine;
     #if DEFAULT_API == 1
-        renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-        Rendering::defaultMeshAPI = std::make_unique<OpenGl::MeshApi>();
-        Rendering::defaultShaderAPI = std::make_unique<OpenGl::ShaderApi>();
-        Rendering::defaultImageAPI = std::make_unique<OpenGl::ImageApi>();
+        Rendering::detail::initAPI("librenderingOpenGL");
+        renderingEngine = Rendering::CreationFunctions::createWindow({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
     #elif DEFAULT_API == 2
         throw std::runtime_error("vulkan not supported yet");
     #else
@@ -44,12 +38,12 @@ int main(int argc, char *argv[])
     const bool *keystates;
     int numKeys;
 
-    const float &deltaTime = Rendering::HelperFunctions::deltaTime;
+    const float &deltaTime = Rendering::Window::deltaTime;
 
     while (running)
     {
         SDL_PumpEvents();
-        Rendering::HelperFunctions::Update();
+        Rendering::Window::Update();
 
         // gets events
         while (SDL_PollEvent(&event))
@@ -128,26 +122,10 @@ int main(int argc, char *argv[])
 
         Objects::Drawable::DrawAllObjects();
 
-        //         ss.str("");
-        //         ss.clear();
-        //         ss << std::fixed << std::setprecision(0) << fps;
-        //
-        //         text = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts[0]->renderText(ss.str(), {255, 255, 255, 255}));
-        //         speedometer = Rendering::defaultImageAPI->makeNewImage(gameLib.fonts[0]->renderText(run_speed.toString(), {255, 255, 255, 255}));
-        //
-        //         object2d.position.x = (text->imageSizes.x * object2d.scale.x) / 2;
-        //         object2d.Draw(text);
-        //         speed2d.position.x = (speedometer->imageSizes.x * speed2d.scale.x) / 2;
-        //         speed2d.Draw(speedometer);
-
         renderingEngine->swapBuffer();
-
-        // delete text;
-        // delete speedometer;
     }
     // delete everything
     delete example_package;
-    delete renderingEngine;
     return 0;
 }
 

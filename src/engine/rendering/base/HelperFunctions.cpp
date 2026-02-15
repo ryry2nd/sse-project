@@ -9,12 +9,12 @@
 
 using namespace Rendering;
 
-Uint64 HelperFunctions::lastCounter = SDL_GetPerformanceCounter();
-double HelperFunctions::fps = 0.0f;
-float HelperFunctions::deltaTime = 0.0f;
-Uint64 HelperFunctions::now = SDL_GetTicks();
-glm::vec2 HelperFunctions::res;
-SDL_Window *HelperFunctions::window = nullptr;
+Uint64 Window::lastCounter = SDL_GetPerformanceCounter();
+double Window::fps = 0.0f;
+float Window::deltaTime = 0.0f;
+Uint64 Window::now = SDL_GetTicks();
+glm::vec2 Window::res;
+SDL_Window *Window::window = nullptr;
 
 
 SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
@@ -26,7 +26,7 @@ SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
     };
 }
 
-void HelperFunctions::Update()
+void Window::Update()
 {
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
@@ -38,7 +38,7 @@ void HelperFunctions::Update()
     lastCounter = currentCounter;
 }
 
-HelperFunctions::HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
+Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
     // it initialises sdl
     if (SDL_Init(SDL_INIT_VIDEO) == 0)
@@ -75,7 +75,7 @@ HelperFunctions::HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, 
     }
 }
 
-HelperFunctions::~HelperFunctions()
+Window::~Window()
 {
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -116,4 +116,101 @@ SDL_Surface *Image::loadFile(const std::string &filePath)
         throw std::runtime_error("image broke");
     }
     return surface;
+}
+
+#define COMPILED_OUT_PATH "libs/rendering"
+
+#ifdef _WIN32
+#define POPEN _popen
+#define PCLOSE _pclose
+#define EXE_EXT ".exe"
+#define BIN_PREFIX ""
+#define LIBRARY_SUFFIX ".dll"
+#else
+#define POPEN popen
+#define PCLOSE pclose
+#define EXE_EXT ""
+#define BIN_PREFIX "./"
+#define LIBRARY_SUFFIX ".so"
+#endif
+
+using CreateShaderFn =
+    std::unique_ptr<Shader>(*)(const char*, const char*);
+
+using CreateMeshFn =
+    std::unique_ptr<Mesh>(*)(
+        Rendering::Shader*,
+        const std::vector<float>&,
+        const std::vector<unsigned int>&,
+        const std::vector<short>&,
+        const Rendering::MeshTypes&
+    );
+
+using CreateImageFromFileFn =
+    std::unique_ptr<Image>(*)(const std::string&);
+
+using CreateImageFromSurfaceFn =
+    std::unique_ptr<Image>(*)(SDL_Surface*);
+
+using CreateWindowFn =
+    std::unique_ptr<Window>(*)(
+        glm::vec2,
+        const char*,
+        Uint32,
+        Uint32,
+        bool,
+        int,
+        bool
+    );
+
+SDL_SharedObject* lib = nullptr;
+CreateShaderFn createShaderFunc = nullptr;
+CreateMeshFn createMeshFunc = nullptr;
+CreateImageFromFileFn createImageFromFileFunc = nullptr;
+CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
+CreateWindowFn createWindowFunc = nullptr;
+
+void detail::initAPI(const std::string &apiName) {
+    lib = SDL_LoadObject((std::string(COMPILED_OUT_PATH) + "/" + apiName + std::string(LIBRARY_SUFFIX)).c_str());
+    if (!lib) {
+        std::cerr << "Failed to load library: " << SDL_GetError() << "\n";
+        return;
+    }
+
+    createShaderFunc = (CreateShaderFn)SDL_LoadFunction(lib, "createShader");
+    createMeshFunc = (CreateMeshFn)SDL_LoadFunction(lib, "createMesh");
+    createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
+    createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
+    createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
+}
+
+std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, const char* fragment) {
+    if (!createShaderFunc)
+    throw std::runtime_error("createShader not loaded");
+
+    return createShaderFunc(vertex, fragment);
+}
+std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType) {
+    if (!createMeshFunc)
+    throw std::runtime_error("createShader not loaded");
+
+    return createMeshFunc(shady, vertices, indices, vertLogic, meshType);
+}
+std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
+    if (!createImageFromFileFunc)
+    throw std::runtime_error("createShader not loaded");
+
+    return createImageFromFileFunc(filePath);
+}
+std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
+    if (!createImageFromSurfaceFunc)
+    throw std::runtime_error("createShader not loaded");
+
+    return createImageFromSurfaceFunc(surface);
+}
+std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
+    if (!createWindowFunc)
+    throw std::runtime_error("createShader not loaded");
+
+    return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }

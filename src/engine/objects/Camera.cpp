@@ -11,13 +11,13 @@ glm::mat4 Camera::getViewMatrix() const
 
 glm::mat4 Camera::getProjectionMatrix() const
 {
-    const glm::vec2 &res = Rendering::HelperFunctions::res;
+    const glm::vec2 &res = Rendering::Window::res;
     return glm::perspective(glm::radians(fov), res.x / res.y, near, far);
 }
 
 glm::mat4 Camera::getProjectionMatrix2d() const
 {
-    const glm::vec2 &res = Rendering::HelperFunctions::res;
+    const glm::vec2 &res = Rendering::Window::res;
     return glm::ortho(0.0f, res.x, 0.0f, res.y);
 }
 
@@ -62,7 +62,7 @@ glm::mat4 Camera::getRotationMatrix() const
 
 void Camera::rotateCamera(glm::vec2 motion)
 {
-    const float &deltaTime = Rendering::HelperFunctions::deltaTime;
+    const float &deltaTime = Rendering::Window::deltaTime;
     if (deltaTime == 0)
     {
         return;

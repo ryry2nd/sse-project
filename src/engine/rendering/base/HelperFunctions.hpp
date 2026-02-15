@@ -22,16 +22,16 @@ namespace Rendering
         Triangles
     };
 
-    class HelperFunctions
+    class Window
     {
     public:
-        HelperFunctions(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
+        Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
         virtual void clearBackground() = 0;
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
         static void Update();
         
-        ~HelperFunctions();
+        ~Window();
 
         static float deltaTime;
         static double fps;
@@ -49,8 +49,6 @@ namespace Rendering
     {
     public:
         virtual ~Image() = default;
-        virtual std::unique_ptr<Image> makeNewImage(const std::string &filePath) const = 0;
-        virtual std::unique_ptr<Image> makeNewImage(SDL_Surface *surface) const = 0;
         static SDL_Surface *loadFile(const std::string &filePath);
         glm::vec2 imageSizes;
     };
@@ -70,8 +68,6 @@ namespace Rendering
         virtual void setImages(std::vector<Image *> &textures) = 0;
         virtual void SetShader() = 0;
 
-        virtual std::unique_ptr<Shader> makeNewShader(const char *vertexPath, const char *fragmentPath) const = 0;
-
         // enables or disables culling of back face, disable if object is 2d
         bool cullingEnabled = true;
     };
@@ -83,8 +79,6 @@ namespace Rendering
 
         virtual void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
         virtual void Draw() = 0;
-        
-        virtual std::unique_ptr<Mesh> makeNewMesh(Shader *shader, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) const = 0;
 
         glm::vec3 posOffset = glm::vec3(0.0f);
         glm::vec3 sizeOffset = glm::vec3(1.0f);
@@ -112,7 +106,15 @@ namespace Rendering
         TTF_Font *font;
     };
 
-    inline std::unique_ptr<Mesh> defaultMeshAPI;
-    inline std::unique_ptr<Shader> defaultShaderAPI;
-    inline std::unique_ptr<Image> defaultImageAPI;
+    namespace detail {
+        void initAPI(const std::string &apiName);
+    }
+
+    namespace CreationFunctions {
+        std::unique_ptr<Shader> createShader(const char* vertex, const char* fragment);
+        std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        std::unique_ptr<Image> createImage(const std::string &filePath);
+        std::unique_ptr<Image> createImage(SDL_Surface *surface);
+        std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+    }
 }

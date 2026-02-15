@@ -139,7 +139,14 @@ Package::~Package()
 
     if (lib) {
         FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, "shutdown");
-        if (shutDownFunc) shutDownFunc();
+        
+        try {
+            if (shutDownFunc) shutDownFunc();
+        }
+        catch (const std::exception& e) {
+            std::cerr << e.what() << '\n';
+        }
+
         SDL_UnloadObject(lib);
     }
 }

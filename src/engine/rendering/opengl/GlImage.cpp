@@ -8,7 +8,7 @@
 using namespace OpenGl;
 using namespace Rendering;
 
-ImageApi::ImageApi(const std::string &filePath)
+GlImage::GlImage(const std::string &filePath)
 {
     if (!std::filesystem::exists(filePath)) {
         std::cerr << "Image path: " << filePath << " does not exist\n";
@@ -17,12 +17,12 @@ ImageApi::ImageApi(const std::string &filePath)
     setupObject(loadFile(filePath));
 }
 
-ImageApi::ImageApi(SDL_Surface *surface)
+GlImage::GlImage(SDL_Surface *surface)
 {
     setupObject(surface);
 }
 
-void ImageApi::setupObject(SDL_Surface *surface)
+void GlImage::setupObject(SDL_Surface *surface)
 {
 
     int bytesPerPixel = SDL_BYTESPERPIXEL(surface->format);
@@ -43,23 +43,13 @@ void ImageApi::setupObject(SDL_Surface *surface)
     SDL_DestroySurface(surface);
 }
 
-ImageApi::~ImageApi()
+GlImage::~GlImage()
 {
     if (textureID != 0)
         glDeleteTextures(1, &textureID);
 }
 
-GLuint ImageApi::getID() const
+GLuint GlImage::getID() const
 {
     return textureID;
-}
-
-std::unique_ptr<Image> ImageApi::makeNewImage(const std::string &filePath) const
-{
-    return std::make_unique<ImageApi>(filePath);
-}
-
-std::unique_ptr<Image> ImageApi::makeNewImage(SDL_Surface *surface) const
-{
-    return std::make_unique<ImageApi>(surface);
 }
