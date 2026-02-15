@@ -105,8 +105,10 @@ ShaderApi::ShaderApi(const char *vertexPath, const char *fragmentPath)
 
 ShaderApi::~ShaderApi()
 {
-    glDeleteBuffers(1, &UBO);
-    glDeleteProgram(id);
+    if (UBO != 0)
+        glDeleteBuffers(1, &UBO);
+    if (id != 0)
+        glDeleteProgram(id);
 }
 
 void ShaderApi::setUniform(const std::string &location, const float &x)

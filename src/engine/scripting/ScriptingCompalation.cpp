@@ -35,7 +35,10 @@ std::vector<Package *> Package::packages;
 // scarry code, watch out, can execute random commands. DO NOT GIVE THIS TO THE HEADER
 int compileCode(const std::string& arguments) {
     std::string command = std::string(BIN_PREFIX) + COMPILER_PATH + EXE_EXT + " " + arguments;
-    std::unique_ptr<FILE, decltype(&PCLOSE)> pipe(POPEN(command.c_str(), "r"), PCLOSE);
+    std::unique_ptr<FILE, int(*)(FILE*)> pipe(
+        POPEN(command.c_str(), "r"), 
+        static_cast<int(*)(FILE*)>(PCLOSE)
+    );
     if (!pipe) {
         std::cerr << "Failed to run command";
         return 1;
@@ -115,7 +118,7 @@ Package::Package(const std::string &path)
         std::cerr << e.what() << '\n';
     }   
 
-    loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");    
+    loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
 }
 
 void Package::runLoopFunction() {

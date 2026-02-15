@@ -20,7 +20,9 @@ int main(int argc, char *argv[])
     Rendering::HelperFunctions *renderingEngine;
     #if DEFAULT_API == 1
         renderingEngine = new OpenGl::HelperFunctionsApi({900, 500}, "Game", SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-        Rendering::init(std::make_unique<OpenGl::MeshApi>(), std::make_unique<OpenGl::ShaderApi>(), std::make_unique<OpenGl::ImageApi>());
+        Rendering::defaultMeshAPI = std::make_unique<OpenGl::MeshApi>();
+        Rendering::defaultShaderAPI = std::make_unique<OpenGl::ShaderApi>();
+        Rendering::defaultImageAPI = std::make_unique<OpenGl::ImageApi>();
     #elif DEFAULT_API == 2
         throw std::runtime_error("vulkan not supported yet");
     #else
@@ -32,7 +34,7 @@ int main(int argc, char *argv[])
 
     Objects::RenderObject::init();
     
-    ScriptingHeaders::Package example_package("packages/example");
+    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("packages/example");
 
     // starts running the game loop
     bool running = true;
@@ -144,6 +146,7 @@ int main(int argc, char *argv[])
         // delete speedometer;
     }
     // delete everything
+    delete example_package;
     delete renderingEngine;
     return 0;
 }

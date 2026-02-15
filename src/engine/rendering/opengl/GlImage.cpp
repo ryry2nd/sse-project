@@ -45,7 +45,7 @@ void ImageApi::setupObject(SDL_Surface *surface)
 
 ImageApi::~ImageApi()
 {
-    if (textureID)
+    if (textureID != 0)
         glDeleteTextures(1, &textureID);
 }
 

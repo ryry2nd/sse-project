@@ -32,7 +32,7 @@ namespace OpenGl
     {
     public:
         // it makes the image
-        ImageApi() {}
+        ImageApi() {textureID = 0;}
         ImageApi(const std::string &filePath);
         ImageApi(SDL_Surface *surface);
         // it unmakes the image
@@ -51,7 +51,7 @@ namespace OpenGl
     class ShaderApi : public Rendering::Shader
     {
     public:
-        ShaderApi() {}
+        ShaderApi() {id = 0; UBO = 0;}
         ShaderApi(const char *vertexPath, const char *fragmentPath);
         ~ShaderApi();
 
@@ -74,7 +74,7 @@ namespace OpenGl
     class MeshApi : public Rendering::Mesh
     {
     public:
-        MeshApi() {}
+        MeshApi() {VAO = 0; VBO = 0; EBO = 0; glMeshType = 0; size = 0;}
         MeshApi(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         ~MeshApi();
         // updates the vertices (you dont need to run this unless you changed the vertices)

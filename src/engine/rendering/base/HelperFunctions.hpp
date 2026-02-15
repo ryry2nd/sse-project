@@ -115,11 +115,4 @@ namespace Rendering
     inline std::unique_ptr<Mesh> defaultMeshAPI;
     inline std::unique_ptr<Shader> defaultShaderAPI;
     inline std::unique_ptr<Image> defaultImageAPI;
-
-    static void init(std::unique_ptr<Mesh> meshApi, std::unique_ptr<Shader> shaderApi, std::unique_ptr<Image> imageApi)
-    {
-        defaultMeshAPI = std::move(meshApi);
-        defaultShaderAPI = std::move(shaderApi);
-        defaultImageAPI = std::move(imageApi);
-    }
 }

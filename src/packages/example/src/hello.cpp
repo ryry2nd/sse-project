@@ -1,7 +1,7 @@
-#include <iostream>
 #include <objects/Objects.hpp>
 #include <customMath/CustomMath.hpp>
 #include <rendering/base/HelperFunctions.hpp>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <memory>
@@ -57,9 +57,9 @@ extern "C" {
     }
 
     void shutdown() {
-        shaders.clear();
-        images.clear();
-        meshes.clear();
         objects.clear();
+        meshes.clear();
+        shaders.clear();
+        images.clear();        
     }
 }
