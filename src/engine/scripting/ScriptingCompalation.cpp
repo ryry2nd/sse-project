@@ -1,11 +1,13 @@
 #include "ScriptingHeaders.hpp"
 #include <yaml-cpp/yaml.h>
-#include <SDL3/SDL.h>
 #include <filesystem>
 #include <iostream>
 #include <string>
-#include <array>
 #include <memory>
+
+#include <SDL3/SDL_events.h>
+#include <SDL3/SDL_loadso.h>
+#include <SDL3/SDL_error.h>
 
 using namespace ScriptingHeaders;
 

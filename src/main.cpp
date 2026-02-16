@@ -1,5 +1,5 @@
 #include "engine/objects/Objects.hpp"
-#include "engine/rendering/base/HelperFunctions.hpp"
+#include "engine/rendering/base/Rendering.hpp"
 #include "engine/scripting/ScriptingHeaders.hpp"
 
 int main(int argc, char *argv[])

@@ -1,4 +1,4 @@
-#include "HelperFunctionsOpengl.hpp"
+#include "GlRendering.hpp"
 #include <glad/gl.h>
 
 using namespace OpenGl;

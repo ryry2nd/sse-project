@@ -1,9 +1,10 @@
-#include "HelperFunctionsOpengl.hpp"
+#include "GlRendering.hpp"
 #include <glad/gl.h>
-#include <SDL3/SDL.h>
 #include <filesystem>
 #include <iostream>
-#include <memory>
+
+#include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_pixels.h>
 
 using namespace OpenGl;
 using namespace Rendering;

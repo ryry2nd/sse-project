@@ -1,6 +1,6 @@
 #include <objects/Objects.hpp>
 #include <customMath/CustomMath.hpp>
-#include <rendering/base/HelperFunctions.hpp>
+#include <rendering/base/Rendering.hpp>
 #include <iostream>
 #include <vector>
 #include <string>

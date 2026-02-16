@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "HelperFunctions.hpp"
+#include "Rendering.hpp"
 
 typedef struct SDL_GLContextState *SDL_GLContext;
 

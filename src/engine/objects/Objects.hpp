@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../customMath/CustomMath.hpp"
-#include "../rendering/base/HelperFunctions.hpp"
+#include "../rendering/base/Rendering.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 #include <algorithm>
