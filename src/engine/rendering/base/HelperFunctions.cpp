@@ -6,6 +6,9 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include <filesystem>
+#include <unordered_map>
 
 using namespace Rendering;
 
@@ -28,6 +31,7 @@ SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
 
 void Window::Update()
 {
+    SDL_PumpEvents();
     int width, height;
     SDL_GetWindowSize(window, &width, &height);
     res = glm::vec2(width, height);
@@ -36,6 +40,10 @@ void Window::Update()
     deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
     fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
     lastCounter = currentCounter;
+}
+
+const bool *Window::getKeystates(int &numKeys) {
+    return SDL_GetKeyboardState(&numKeys);
 }
 
 Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
@@ -163,19 +171,44 @@ using CreateWindowFn =
         bool
     );
 
-SDL_SharedObject* lib = nullptr;
+typedef std::string (*GetNameFn)();
+
 CreateShaderFn createShaderFunc = nullptr;
 CreateMeshFn createMeshFunc = nullptr;
 CreateImageFromFileFn createImageFromFileFunc = nullptr;
 CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
 CreateWindowFn createWindowFunc = nullptr;
 
-void detail::initAPI(const std::string &apiName) {
-    lib = SDL_LoadObject((std::string(COMPILED_OUT_PATH) + "/" + apiName + std::string(LIBRARY_SUFFIX)).c_str());
-    if (!lib) {
-        std::cerr << "Failed to load library: " << SDL_GetError() << "\n";
-        return;
+auto sdlDeleter = [](SDL_SharedObject* obj) {
+    if (obj) SDL_UnloadObject(obj);
+};
+
+using SDLSharedPtr = std::unique_ptr<SDL_SharedObject, decltype(sdlDeleter)>;
+
+std::unordered_map<std::string, SDLSharedPtr> libs;
+
+void createLibs() {
+    namespace fs = std::filesystem;
+
+    for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
+        if (entry.path().extension() == LIBRARY_SUFFIX) {
+            SDLSharedPtr lib(SDL_LoadObject(entry.path().c_str()), sdlDeleter);
+
+            auto getName = reinterpret_cast<GetNameFn>(SDL_LoadFunction(lib.get(), "getName"));
+            if (!getName) continue;
+
+            libs[getName()] = std::move(lib);
+        }
     }
+}
+
+void CreationFunctions::initAPI(const std::string &apiName) {
+    if (libs.empty()) createLibs();
+
+    auto it = libs.find(apiName);
+    if (it == libs.end()) throw std::runtime_error("Library not found: " + apiName);
+
+    SDL_SharedObject *lib = it->second.get();
 
     createShaderFunc = (CreateShaderFn)SDL_LoadFunction(lib, "createShader");
     createMeshFunc = (CreateMeshFn)SDL_LoadFunction(lib, "createMesh");

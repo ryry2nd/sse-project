@@ -52,6 +52,15 @@ void Package::LoopFunctions() {
     }
 }
 
+void Package::EventFunctions(bool *running) {
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        for (Package * pkg : packages) {
+            pkg->runEventFunction(&event, running);
+        }
+    }
+}
+
 Package::Package(const std::string &path)
 {
     if (!std::filesystem::exists(path)) throw std::runtime_error("Path does not exist");
@@ -92,6 +101,9 @@ Package::Package(const std::string &path)
             {
                 libInclude += " -lobjects";
             }
+            if (config["include"]["SDL3"] && config["include"]["SDL3"].as<bool>()) {
+                libInclude += " -lSDL3";
+            }
         }
 
         std::string command = "-w -fPIC -shared -std=c++" + std::string(CPP_VERSION) + \
@@ -119,6 +131,7 @@ Package::Package(const std::string &path)
     }   
 
     loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
+    eventFunc = (EventType)SDL_LoadFunction(lib, "event");
 }
 
 void Package::runLoopFunction() {
@@ -128,7 +141,15 @@ void Package::runLoopFunction() {
     catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
     }
-    
+}
+
+void Package::runEventFunction(SDL_Event *event, bool *running) {
+    try {
+        if (eventFunc) {eventFunc(event, running);}
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+    }
 }
 
 Package::~Package()

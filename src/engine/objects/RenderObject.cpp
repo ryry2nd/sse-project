@@ -7,11 +7,6 @@ bool RenderObject::disableBrightness = false;
 const Bigint RenderObject::near = Bigint(0.1);
 const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
 
-void RenderObject::init(bool disableBrightness)
-{
-    RenderObject::disableBrightness = disableBrightness;
-}
-
 RenderObject::RenderObject(Mesh *mesh)
 {
     setupObject();

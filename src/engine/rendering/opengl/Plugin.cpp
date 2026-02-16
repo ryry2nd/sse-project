@@ -21,3 +21,5 @@ extern "C" std::unique_ptr<Rendering::Image> createImageFromSurface(SDL_Surface 
 extern "C" std::unique_ptr<Rendering::Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {
     return std::make_unique<GlWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
+
+extern "C" std::string getName() {return "OpenGl4.6";};

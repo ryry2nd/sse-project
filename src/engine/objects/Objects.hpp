@@ -87,7 +87,6 @@ namespace Objects
     {
     public:
         // run before you setup any object
-        static void init(bool disableBrightness = false);
         RenderObject() {}
         RenderObject(Rendering::Mesh *mesh);
         ~RenderObject();

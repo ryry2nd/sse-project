@@ -30,6 +30,7 @@ namespace Rendering
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
         static void Update();
+        static const bool *getKeystates(int &numKeys);
         
         ~Window();
 
@@ -106,11 +107,10 @@ namespace Rendering
         TTF_Font *font;
     };
 
-    namespace detail {
-        void initAPI(const std::string &apiName);
-    }
+    inline std::vector<std::unique_ptr<Window>> sdlWindows;
 
     namespace CreationFunctions {
+        void initAPI(const std::string &apiName);
         std::unique_ptr<Shader> createShader(const char* vertex, const char* fragment);
         std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         std::unique_ptr<Image> createImage(const std::string &filePath);

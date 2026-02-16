@@ -9,7 +9,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(USE_VULKAN "Enable Vulkan support" OFF)
 option(USE_OPENGL "Enable OpenGL support" OFF)
-set(DEFAULT_API "OpenGL" CACHE STRING "Default graphics API")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Configuring Release build: stripping debug info")
@@ -18,8 +17,9 @@ endif()
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/cmake/packages")
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/libs)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin)
+set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/libs)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/bin)
 
 # Packages
 find_package(sdl REQUIRED)
@@ -34,16 +34,6 @@ find_package(glad REQUIRED)
 # Add subdirectories for your engine and game logic
 add_subdirectory(src/engine)
 add_executable(main src/main.cpp)
-
-if(DEFAULT_API STREQUAL "OpenGL")
-  set(DEFAULT_API_INT 1)
-elseif(DEFAULT_API STREQUAL "Vulkan")
-  set(DEFAULT_API_INT 2)
-else()
-  set(DEFAULT_API_INT 0)
-endif()
-
-target_compile_definitions(main PUBLIC DEFAULT_API=${DEFAULT_API_INT})
 
 target_link_libraries(main
     SDL3::SDL3
@@ -138,5 +128,8 @@ add_custom_target(copy_lib_headers ALL
     COMMAND ${CMAKE_COMMAND} -E copy
             ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/build.jam
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl/include
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/
     COMMENT "---- Copying Library headers ----"
 )
