@@ -11,9 +11,6 @@
 # [submodule "libs/enet"]
 # 	path = libs/enet
 # 	url = https://github.com/lsalzman/enet.git
-# [submodule "libs/glslang"]
-# 	path = libs/glslang
-# 	url = https://github.com/KhronosGroup/glslang.git
 [submodule "libs/sdl"]
 	path = libs/sdl
 	url = https://github.com/libsdl-org/SDL.git
@@ -49,4 +46,8 @@
 [submodule "libs/vulkan-headers"]
 	path = libs/vulkan-headers
 	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+	shallow = true
+[submodule "libs/slang"]
+	path = libs/slang
+	url = https://github.com/shader-slang/slang.git
 	shallow = true

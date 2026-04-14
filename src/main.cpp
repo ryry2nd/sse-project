@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {    
-    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("packages/example");
+    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("modules/example");
 
     // starts running the game loop
     bool running = true;

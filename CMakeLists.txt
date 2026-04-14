@@ -29,6 +29,7 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
+# find_package(slang REQUIRED)
 # to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext
 
 # Add subdirectories for your engine and game logic
@@ -43,7 +44,7 @@ target_link_libraries(main
     scripting
 )
 
-target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)
+target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)# SLANG::SLANG)
 
 if(USE_OPENGL)
     target_link_libraries(renderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
@@ -61,8 +62,8 @@ add_custom_target(delete_cache ALL
 # Post-build asset copy
 add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/packages
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/packages
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/modules
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules
     COMMENT "---- Copying assets ----"
 )
 
