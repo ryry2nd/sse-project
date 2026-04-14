@@ -12,7 +12,7 @@
 std::vector<std::unique_ptr<Rendering::Shader>> shaders;
 std::vector<std::unique_ptr<Rendering::Image>> images;
 std::vector<std::unique_ptr<Rendering::Mesh>> meshes;
-std::vector<std::unique_ptr<Objects::RenderObject>> objects;
+std::vector<std::unique_ptr<Objects::Singularity>> objects;
 
 const Bigint *speed;
 const Bigint WALK_SPEED = Bigint(10);
@@ -42,25 +42,25 @@ extern "C" {
         Objects::globalCamera.position.z = Objects::globalCamera.position.z - Bigint(10);
         Objects::globalCamera.rotation.y = Objects::globalCamera.rotation.y + 180;
 
-        objects.push_back(std::make_unique<Objects::RenderObject>(meshes[0].get()));
+        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
         objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::RenderObject>(meshes[0].get()));
+        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
         objects[objects.size()-1]->position.x -= Bigint(10);
         objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::RenderObject>(meshes[0].get()));
+        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
         objects[objects.size()-1]->position.x += Bigint(10);
         objects[objects.size()-1]->position.x += pos;
 
-        objects.push_back(std::make_unique<Objects::RenderObject>(meshes[2].get()));
+        objects.push_back(std::make_unique<Objects::Singularity>(meshes[2].get()));
         objects[objects.size()-1]->position.x -= Bigint("150000000000");
         objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::RenderObject>(meshes[1].get()));
+        objects.push_back(std::make_unique<Objects::Singularity>(meshes[1].get()));
         objects[objects.size()-1]->position.y -= Bigint("6378000");
         objects[objects.size()-1]->position.x += pos;
 
         int size = 11;
         for (int i = 0; i < size; i++) {
-            std::unique_ptr<Objects::RenderObject> lineObject = std::make_unique<Objects::RenderObject>(meshes[0].get());
+            std::unique_ptr<Objects::Singularity> lineObject = std::make_unique<Objects::Singularity>(meshes[0].get());
             lineObject->position.z = lineObject->position.z + Bigint(10 * (i+1));
             lineObject->position.x = lineObject->position.x + pos;
             objects.push_back(std::move(lineObject));

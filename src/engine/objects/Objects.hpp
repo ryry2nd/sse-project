@@ -8,14 +8,6 @@
 
 namespace Objects
 {
-    enum class CullPriority
-    {
-        Max,
-        High,
-        Medium,
-        Low
-    };
-
     struct BaseObject
     {
         BigVec3 position;
@@ -83,13 +75,13 @@ namespace Objects
         static std::vector<Drawable *> drawables;
     };
 
-    class RenderObject : public Drawable, public BaseObject
+    class Singularity : public Drawable, public BaseObject
     {
     public:
         // run before you setup any object
-        RenderObject() {}
-        RenderObject(Rendering::Mesh *mesh);
-        ~RenderObject();
+        Singularity() {}
+        Singularity(Rendering::Mesh *mesh);
+        ~Singularity();
 
     protected:
         // the list of meshes
@@ -113,33 +105,6 @@ namespace Objects
         const static Bigint far;
         static bool disableBrightness;
     };
-
-    // class RenderObject2d : public Drawable
-    // {
-    // public:
-    //     glm::vec2 position = glm::vec2(0.0f);
-    //     float rotation = 0.0f;
-    //     glm::vec2 scale = glm::vec2(1.0f);
-
-    //     RenderObject2d(std::unique_ptr<Rendering::Shader> shader, std::unique_ptr<Rendering::Image> im);
-
-    //     void Update(const float& deltaTime) override {}
-
-    //     std::unique_ptr<Rendering::Mesh> mesh2d;
-
-    // protected:
-    //     void Draw();
-    // };
-
-    // class TextRenderObject : public RenderObject2d {
-    // public:
-    //     std::string message;
-    //     glm::vec4 font_color;
-    //     TextRenderObject(std::unique_ptr<Rendering::Shader> shader, std::unique_ptr<Rendering::Font> font, const std::string &text, const glm::vec4 &color) : RenderObject2d(shader, Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color))), message(text), font_color(color) {}
-    //     void changeText(std::unique_ptr<Rendering::Font> font, const std::string &text, const glm::vec4 &color) {
-    //         mesh2d->images[0] = Rendering::defaultImageAPI->makeNewImage(font->renderText(text, color)).get();
-    //     }
-    // };
 
     static const std::vector<float> cubeVertices  = {
     // Positions          // Tex Coords (U, flipped V) // Normals

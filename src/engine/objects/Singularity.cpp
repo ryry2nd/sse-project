@@ -3,38 +3,38 @@
 using namespace Objects;
 using namespace Rendering;
 
-bool RenderObject::disableBrightness = false;
-const Bigint RenderObject::near = Bigint(0.1);
-const Bigint RenderObject::far = Bigint("1000000000000000000000000000");
+bool Singularity::disableBrightness = false;
+const Bigint Singularity::near = Bigint(0.1);
+const Bigint Singularity::far = Bigint("1000000000000000000000000000");
 
-RenderObject::RenderObject(Mesh *mesh)
+Singularity::Singularity(Mesh *mesh)
 {
     setupObject();
     meshes.push_back(mesh);
 }
 
-RenderObject::~RenderObject()
+Singularity::~Singularity()
 {
 }
 
-void RenderObject::appendUpdate(const float &deltaTime)
+void Singularity::appendUpdate(const float &deltaTime)
 {
 }
 
 // I just made the default update to rotate all around
-void RenderObject::Update(const float &deltaTime)
+void Singularity::Update(const float &deltaTime)
 {
     appendUpdate(deltaTime);
 }
 
-Bigint RenderObject::calculateDistanceSquared(const BigVec3 &subtractedPos) const
+Bigint Singularity::calculateDistanceSquared(const BigVec3 &subtractedPos) const
 {
     return subtractedPos.x * subtractedPos.x +
            subtractedPos.y * subtractedPos.y +
            subtractedPos.z * subtractedPos.z;
 }
 
-void RenderObject::renderMesh()
+void Singularity::renderMesh()
 {
 
     glm::vec3 newPos;
@@ -136,7 +136,7 @@ void RenderObject::renderMesh()
     }
 }
 
-void RenderObject::Draw()
+void Singularity::Draw()
 {
     tempLocalPosition = Objects::globalCamera.convertToLocal(getTruePos());
     distanceSquared = calculateDistanceSquared(tempLocalPosition);
