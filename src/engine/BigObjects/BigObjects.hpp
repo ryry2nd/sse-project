@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../customMath/CustomMath.hpp"
-#include "../rendering/base/Rendering.hpp"
+#include "../CustomMath/CustomMath.hpp"
+#include "../Rendering/base/Rendering.hpp"
 #include <glm/glm.hpp>
 #include <vector>
 #include <algorithm>
 
-namespace Objects
+namespace BigObjects
 {
     struct BaseObject
     {

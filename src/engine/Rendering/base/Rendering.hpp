@@ -1,17 +1,24 @@
 #pragma once
 
+#include <algorithm>
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
 
+#define CAMERA_PREALLOC 5
+#define OBJECT_PREALLOC 100
+
 struct TTF_Font;
 struct SDL_Surface;
 struct SDL_Window;
+struct SDL_Color;
 
 typedef uint32_t Uint32;
 typedef uint64_t Uint64;
+typedef uint8_t Uint8;
 
 namespace Rendering
 {
@@ -21,6 +28,10 @@ namespace Rendering
         Lines,
         Triangles
     };
+
+    SDL_Color Vec4ToSDLColor(const glm::vec4& color);
+
+    
 
     class Window
     {
@@ -99,6 +110,8 @@ namespace Rendering
     class Font
     {
     public:
+        static void init();
+        static void deinit();
         Font(const std::string &fontPath, int size);
         ~Font();
         SDL_Surface *renderText(const std::string &message, const glm::vec4 &color);
@@ -117,4 +130,56 @@ namespace Rendering
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
         std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
     }
+
+    class Buff {
+        // ToDo write gpu buffer code
+    };
+
+    class StorageBuff : public Buff {};
+
+    class FrameBuff : public Buff {};
+}
+
+namespace Objects {
+    typedef size_t ObjectID;
+
+    class Object {
+    public:
+        virtual ~Object() = default;
+    };
+
+    class Drawable : public Object {
+    public:
+        std::vector<Rendering::StorageBuff *> buffs;
+        virtual void Draw() = 0;
+    };
+
+    class Camera : public Object {
+    public:
+        std::vector<Drawable *> allDraws;
+        Rendering::FrameBuff *frameBuffer;
+
+        virtual void Render() = 0;
+    };
+
+    inline std::vector<std::unique_ptr<Object>> allObjects = []() {
+        std::vector<std::unique_ptr<Object>> v;
+        v.reserve(OBJECT_PREALLOC);
+        return v;
+    }();
+
+    inline std::vector<Camera*> allCams = []() {
+        std::vector<Camera*> v;
+        v.reserve(CAMERA_PREALLOC);
+        return v;
+    }();
+
+    template<typename T>
+    void addParticle(std::unique_ptr<T> obj);
+    void removeParticle(ObjectID id);
+
+    class FloatParticle : public Object {
+    public:
+        glm::vec3 position;
+    };
 }

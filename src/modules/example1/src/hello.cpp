@@ -1,6 +1,6 @@
-#include <objects/Objects.hpp>
-#include <customMath/CustomMath.hpp>
-#include <rendering/base/Rendering.hpp>
+#include <BigObjects/BigObjects.hpp>
+#include <CustomMath/CustomMath.hpp>
+#include <Rendering/base/Rendering.hpp>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -12,7 +12,7 @@
 std::vector<std::unique_ptr<Rendering::Shader>> shaders;
 std::vector<std::unique_ptr<Rendering::Image>> images;
 std::vector<std::unique_ptr<Rendering::Mesh>> meshes;
-std::vector<std::unique_ptr<Objects::Singularity>> objects;
+std::vector<std::unique_ptr<BigObjects::Singularity>> bigObjects;
 
 const Bigint *speed;
 const Bigint WALK_SPEED = Bigint(10);
@@ -27,10 +27,10 @@ extern "C" {
 
         shaders.push_back(Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/vertex.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/fragment.glsl").c_str()));
         images.push_back(Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
         meshes[meshes.size()-1]->sizeOffset *= 12756000;
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), Objects::cubeVertices, Objects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
         meshes[meshes.size()-1]->sizeOffset *= 1392000000;
 
         meshes[0]->images.push_back(images[0].get());
@@ -38,32 +38,32 @@ extern "C" {
         meshes[2]->images.push_back(images[0].get());
         
         Bigint pos = Bigint::getHoweverManyDigits(0);
-        Objects::globalCamera.position.x = Objects::globalCamera.position.x + pos;
-        Objects::globalCamera.position.z = Objects::globalCamera.position.z - Bigint(10);
-        Objects::globalCamera.rotation.y = Objects::globalCamera.rotation.y + 180;
+        BigObjects::globalCamera.position.x = BigObjects::globalCamera.position.x + pos;
+        BigObjects::globalCamera.position.z = BigObjects::globalCamera.position.z - Bigint(10);
+        BigObjects::globalCamera.rotation.y = BigObjects::globalCamera.rotation.y + 180;
 
-        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
-        objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
-        objects[objects.size()-1]->position.x -= Bigint(10);
-        objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::Singularity>(meshes[0].get()));
-        objects[objects.size()-1]->position.x += Bigint(10);
-        objects[objects.size()-1]->position.x += pos;
+        bigObjects.push_back(std::make_unique<BigObjects::Singularity>(meshes[0].get()));
+        bigObjects[bigObjects.size()-1]->position.x += pos;
+        bigObjects.push_back(std::make_unique<BigObjects::Singularity>(meshes[0].get()));
+        bigObjects[bigObjects.size()-1]->position.x -= Bigint(10);
+        bigObjects[bigObjects.size()-1]->position.x += pos;
+        bigObjects.push_back(std::make_unique<BigObjects::Singularity>(meshes[0].get()));
+        bigObjects[bigObjects.size()-1]->position.x += Bigint(10);
+        bigObjects[bigObjects.size()-1]->position.x += pos;
 
-        objects.push_back(std::make_unique<Objects::Singularity>(meshes[2].get()));
-        objects[objects.size()-1]->position.x -= Bigint("150000000000");
-        objects[objects.size()-1]->position.x += pos;
-        objects.push_back(std::make_unique<Objects::Singularity>(meshes[1].get()));
-        objects[objects.size()-1]->position.y -= Bigint("6378000");
-        objects[objects.size()-1]->position.x += pos;
+        bigObjects.push_back(std::make_unique<BigObjects::Singularity>(meshes[2].get()));
+        bigObjects[bigObjects.size()-1]->position.x -= Bigint("150000000000");
+        bigObjects[bigObjects.size()-1]->position.x += pos;
+        bigObjects.push_back(std::make_unique<BigObjects::Singularity>(meshes[1].get()));
+        bigObjects[bigObjects.size()-1]->position.y -= Bigint("6378000");
+        bigObjects[bigObjects.size()-1]->position.x += pos;
 
         int size = 11;
         for (int i = 0; i < size; i++) {
-            std::unique_ptr<Objects::Singularity> lineObject = std::make_unique<Objects::Singularity>(meshes[0].get());
+            std::unique_ptr<BigObjects::Singularity> lineObject = std::make_unique<BigObjects::Singularity>(meshes[0].get());
             lineObject->position.z = lineObject->position.z + Bigint(10 * (i+1));
             lineObject->position.x = lineObject->position.x + pos;
-            objects.push_back(std::move(lineObject));
+            bigObjects.push_back(std::move(lineObject));
         }
     }
 
@@ -79,29 +79,29 @@ extern "C" {
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getForwardVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getForwardVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
-            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getRightVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_A])
         {
-            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getRightVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
-            Objects::globalCamera.position += BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
-            Objects::globalCamera.position -= BigVec3(Objects::globalCamera.getDownVector() * deltaTime) * *speed;
+            BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
     }
 
@@ -112,7 +112,7 @@ extern "C" {
         // rotates camera
         if (event->type == SDL_EVENT_MOUSE_MOTION)
         {
-            Objects::globalCamera.rotateCamera({event->motion.xrel, event->motion.yrel});
+            BigObjects::globalCamera.rotateCamera({event->motion.xrel, event->motion.yrel});
         }
 
         if (event->type == SDL_EVENT_KEY_DOWN)
@@ -138,7 +138,7 @@ extern "C" {
     }
 
     void shutdown() {
-        objects.clear();
+        bigObjects.clear();
         meshes.clear();
         shaders.clear();
         images.clear();

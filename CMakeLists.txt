@@ -29,7 +29,7 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-# find_package(slang REQUIRED)
+find_package(slang REQUIRED)
 # to be added, jolt, sqlite3, assimp, miniaudio, enet, glslang, gettext
 
 # Add subdirectories for your engine and game logic
@@ -38,21 +38,21 @@ add_executable(main src/main.cpp)
 
 target_link_libraries(main
     SDL3::SDL3
-    customMath
-    renderingBase
-    objects
-    scripting
+    CustomMath
+    RenderingBase
+    BigObjects
+    Scripting
 )
 
-target_link_libraries(renderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)# SLANG::SLANG)
+target_link_libraries(RenderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)# SLANG::SLANG)
 
 if(USE_OPENGL)
-    target_link_libraries(renderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
+    target_link_libraries(RenderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
 endif()
 
-target_link_libraries(objects INTERFACE glm::glm)
-target_link_libraries(customMath INTERFACE glm::glm Boost::multiprecision)
-target_link_libraries(scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3)
+target_link_libraries(BigObjects INTERFACE glm::glm)
+target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision)
+target_link_libraries(Scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3)
 
 add_custom_target(delete_cache ALL
     COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/cache"
@@ -69,35 +69,35 @@ add_custom_target(copy_assets ALL
 
 # copy headers
 file(GLOB_RECURSE MATH_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/customMath/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/CustomMath/*.hpp
 )
-file(GLOB_RECURSE OBJECT_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/objects/*.hpp
+file(GLOB_RECURSE BIG_OBJECT_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/BigObjects/*.hpp
 )
 file(GLOB_RECURSE RENDERING_HEADERS
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/rendering/base/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Rendering/base/*.hpp
 )
 
 add_custom_target(copy_src_headers ALL
     COMMAND ${CMAKE_COMMAND} -E make_directory
             ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
     COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/customMath
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/CustomMath
     COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/BigObjects
     COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering
     COMMAND ${CMAKE_COMMAND} -E make_directory
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering/base
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering/base
     COMMAND ${CMAKE_COMMAND} -E copy
             ${MATH_HEADERS}
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/customMath
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/CustomMath
     COMMAND ${CMAKE_COMMAND} -E copy
-            ${OBJECT_HEADERS}
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/objects
+            ${BIG_OBJECT_HEADERS}
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/BigObjects
     COMMAND ${CMAKE_COMMAND} -E copy
             ${RENDERING_HEADERS}
-            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/rendering/base
+            ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering/base
     COMMENT "---- Copying headers ----"
 )
 # copy compiler

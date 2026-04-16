@@ -6,7 +6,7 @@
 
 #include <SDL3/SDL_loadso.h>
 
-#define COMPILED_OUT_PATH "libs/rendering"
+#define COMPILED_OUT_PATH "libs/Rendering"
 
 #ifdef _WIN32
 #define POPEN _popen

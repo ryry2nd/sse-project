@@ -1,6 +1,6 @@
-#include "Objects.hpp"
+#include "BigObjects.hpp"
 
-using namespace Objects;
+using namespace BigObjects;
 using namespace Rendering;
 
 bool Singularity::disableBrightness = false;
@@ -128,8 +128,8 @@ void Singularity::renderMesh()
         
         shader->SetShader();
         shader->setUniform("u_fullBright", disableBrightness);
-        shader->setUniform("uView", Objects::globalCamera.getViewMatrix());
-        shader->setUniform("uProjection", Objects::globalCamera.getProjectionMatrix());
+        shader->setUniform("uView", BigObjects::globalCamera.getViewMatrix());
+        shader->setUniform("uProjection", BigObjects::globalCamera.getProjectionMatrix());
         shader->setUniform("uModel", uModel);
         shader->setUniform("depth", mappedDepth);
         mesh->Draw();
@@ -138,7 +138,7 @@ void Singularity::renderMesh()
 
 void Singularity::Draw()
 {
-    tempLocalPosition = Objects::globalCamera.convertToLocal(getTruePos());
+    tempLocalPosition = BigObjects::globalCamera.convertToLocal(getTruePos());
     distanceSquared = calculateDistanceSquared(tempLocalPosition);
     renderMesh();
 }

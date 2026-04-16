@@ -1,14 +1,14 @@
-name: example
-id: com.ryan.example
+name: example1
+id: com.ryan.example1
 version: 0.0.1
 
 # incompatible_modules: # if two mods are incompatible list the ids below
-#   - id: com.ryan.example
+#   - id: com.ryan.example1
 # requires:
-#   - id: com.ryan.example
+#   - id: com.ryan.example1
 #     compatible_range: 0.0.0-0.0.1 #inclusive
 
 include:
-  objects: true
-  rendering: true
+  BigObjects: true
+  Rendering: true
   SDL3: false

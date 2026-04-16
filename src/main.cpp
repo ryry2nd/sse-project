@@ -1,10 +1,10 @@
-#include "engine/objects/Objects.hpp"
-#include "engine/rendering/base/Rendering.hpp"
-#include "engine/scripting/ScriptingHeaders.hpp"
+#include "engine/BigObjects/BigObjects.hpp"
+#include "engine/Rendering/base/Rendering.hpp"
+#include "engine/Scripting/ScriptingHeaders.hpp"
 
 int main(int argc, char *argv[])
 {    
-    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("modules/example");
+    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("modules/example1");
 
     // starts running the game loop
     bool running = true;
@@ -16,13 +16,13 @@ int main(int argc, char *argv[])
         ScriptingHeaders::Package::EventFunctions(&running);
         ScriptingHeaders::Package::LoopFunctions();
 
-        Objects::Drawable::UpdateAllObjects();
+        BigObjects::Drawable::UpdateAllObjects();
 
         for (auto &win : Rendering::sdlWindows) {
             win->clearBackground();
         }
 
-        Objects::Drawable::DrawAllObjects();
+        BigObjects::Drawable::DrawAllObjects();
 
         for (auto &win : Rendering::sdlWindows) {
             win->swapBuffer();

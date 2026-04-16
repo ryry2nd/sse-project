@@ -1,26 +1,26 @@
-add_library(customMath INTERFACE)
-target_include_directories(customMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/customMath)
+add_library(CustomMath INTERFACE)
+target_include_directories(CustomMath INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/CustomMath)
 
 
-file(GLOB_RECURSE base_SOURCES "rendering/base/*.cpp")
-add_library(renderingBase SHARED ${base_SOURCES})
-target_include_directories(renderingBase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/base)
+file(GLOB_RECURSE base_SOURCES "Rendering/base/*.cpp")
+add_library(RenderingBase SHARED ${base_SOURCES})
+target_include_directories(RenderingBase PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Rendering/base)
 
 if(USE_OPENGL)
-    file(GLOB_RECURSE GL_SOURCES "rendering/opengl/*.cpp")
-    add_library(renderingOpenGL SHARED ${GL_SOURCES})
-    set_target_properties(renderingOpenGL PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/rendering)
-    target_include_directories(renderingOpenGL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/rendering/opengl)
-    target_link_libraries(renderingOpenGL PRIVATE renderingBase)
+    file(GLOB_RECURSE GL_SOURCES "Rendering/opengl/*.cpp")
+    add_library(RenderingOpenGL SHARED ${GL_SOURCES})
+    set_target_properties(RenderingOpenGL PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Rendering)
+    target_include_directories(RenderingOpenGL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Rendering/opengl)
+    target_link_libraries(RenderingOpenGL PRIVATE RenderingBase)
 endif()
 
 
-file(GLOB_RECURSE object_SOURCES "objects/*.cpp")
-add_library(objects SHARED ${object_SOURCES})
-target_include_directories(objects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/objects)
-target_link_libraries(objects PRIVATE renderingBase customMath)
+file(GLOB_RECURSE object_SOURCES "BigObjects/*.cpp")
+add_library(BigObjects SHARED ${object_SOURCES})
+target_include_directories(BigObjects PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/BigObjects)
+target_link_libraries(BigObjects PRIVATE RenderingBase CustomMath)
 
 
-file(GLOB_RECURSE scripting_SOURCES "scripting/*.cpp")
-add_library(scripting SHARED ${scripting_SOURCES})
-target_include_directories(scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/scripting)
+file(GLOB_RECURSE scripting_SOURCES "Scripting/*.cpp")
+add_library(Scripting SHARED ${scripting_SOURCES})
+target_include_directories(Scripting PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Scripting)

@@ -1,30 +1,14 @@
 #include "Rendering.hpp"
 
 #include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_events.h>
 #include <SDL3/SDL_video.h>
-#include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_init.h>
-#include <SDL3/SDL_error.h>
 #include <SDL3/SDL_log.h>
-#include <SDL3/SDL_mouse.h>
-#include <SDL3/SDL_surface.h>
+#include <SDL3/SDL_pixels.h>
 
-#include <SDL3_ttf/SDL_ttf.h>
-#include <SDL3_image/SDL_image.h>
 #include <iostream>
 
-using namespace Rendering;
-
-Uint64 Window::lastCounter = SDL_GetPerformanceCounter();
-double Window::fps = 0.0f;
-float Window::deltaTime = 0.0f;
-Uint64 Window::now = SDL_GetTicks();
-glm::vec2 Window::res;
-SDL_Window *Window::window = nullptr;
-
-
-SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
+SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
     return SDL_Color{
         static_cast<Uint8>(color.r),
         static_cast<Uint8>(color.g),
@@ -32,6 +16,16 @@ SDL_Color Vec4ToSDLColor(const glm::vec4& color) {
         static_cast<Uint8>(color.a)
     };
 }
+
+using namespace Rendering;
+
+
+Uint64 Window::lastCounter = SDL_GetPerformanceCounter();
+double Window::fps = 0.0f;
+float Window::deltaTime = 0.0f;
+Uint64 Window::now = SDL_GetTicks();
+glm::vec2 Window::res;
+SDL_Window *Window::window = nullptr;
 
 void Window::Update()
 {
@@ -53,14 +47,10 @@ const bool *Window::getKeystates(int &numKeys) {
 Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
     // it initialises sdl
-    if (SDL_Init(SDL_INIT_VIDEO) == 0)
+    if (!SDL_Init(SDL_INIT_VIDEO))
     {
         std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
         throw std::runtime_error("Sdl cant initialise");
-    }
-    if (TTF_Init() == 0)
-    {
-        SDL_Log("TTF_Init error: %s", SDL_GetError());
     }
 
     if (aa > 0)
@@ -91,41 +81,4 @@ Window::~Window()
 {
     SDL_DestroyWindow(window);
     SDL_Quit();
-}
-
-Font::Font(const std::string &fontPath, int size)
-{
-    font = TTF_OpenFont(fontPath.c_str(), size);
-    if (!font)
-        throw std::runtime_error("Failed to load font \"" + fontPath + "\": " + SDL_GetError());
-}
-
-Font::~Font()
-{
-    TTF_CloseFont(font);
-}
-
-SDL_Surface *Font::renderText(const std::string &message, const glm::vec4 &color)
-{
-    if (!font)
-        throw std::runtime_error("no font defined");
-
-    SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), message.length(), Vec4ToSDLColor(color));
-    if (!surf)
-        throw std::runtime_error("surface failed to initialise");
-
-    SDL_Surface *formattedSurf = SDL_ConvertSurface(surf, SDL_PIXELFORMAT_ABGR8888);
-    SDL_DestroySurface(surf);
-    return formattedSurf;
-}
-
-SDL_Surface *Image::loadFile(const std::string &filePath)
-{
-    SDL_Surface *surface = IMG_Load(filePath.c_str());
-    if (!surface)
-    {
-        std::cerr << "Image load fail: " << SDL_GetError() << "\n";
-        throw std::runtime_error("image broke");
-    }
-    return surface;
 }

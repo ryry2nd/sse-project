@@ -23,14 +23,14 @@ using namespace ScriptingHeaders;
 #define PCLOSE _pclose
 #define EXE_EXT ".exe"
 #define BIN_PREFIX ""
-#define LIBRARY_SUFFIX ".dll"
 #else
 #define POPEN popen
 #define PCLOSE pclose
 #define EXE_EXT ""
 #define BIN_PREFIX "./"
-#define LIBRARY_SUFFIX ".so"
 #endif
+
+#define LIBRARY_SUFFIX ".bin"
 
 std::vector<Package *> Package::packages;
 
@@ -95,13 +95,13 @@ Package::Package(const std::string &path)
 
         if (config["include"])
         {
-            if (config["include"]["rendering"] && config["include"]["rendering"].as<bool>())
+            if (config["include"]["Rendering"] && config["include"]["Rendering"].as<bool>())
             {
-                libInclude += " -lrenderingBase";
+                libInclude += " -lRenderingBase";
             }
-            if (config["include"]["objects"] && config["include"]["objects"].as<bool>())
+            if (config["include"]["BigObjects"] && config["include"]["BigObjects"].as<bool>())
             {
-                libInclude += " -lobjects";
+                libInclude += " -lBigObjects";
             }
             if (config["include"]["SDL3"] && config["include"]["SDL3"].as<bool>()) {
                 libInclude += " -lSDL3";

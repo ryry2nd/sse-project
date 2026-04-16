@@ -1,8 +1,8 @@
-#include "Objects.hpp"
+#include "BigObjects.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 
-using namespace Objects;
+using namespace BigObjects;
 
 glm::mat4 Camera::getViewMatrix() const
 {

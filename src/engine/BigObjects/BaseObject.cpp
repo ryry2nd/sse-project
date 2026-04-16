@@ -1,6 +1,6 @@
-#include "Objects.hpp"
+#include "BigObjects.hpp"
 
-using namespace Objects;
+using namespace BigObjects;
 
 BaseObject::~BaseObject()
 {
