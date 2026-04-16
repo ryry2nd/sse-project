@@ -8,6 +8,9 @@ I am also currently using glsl 330 core but I definitely plan to update it to a 
 My coding schedule is a little bit inconsistent right now because of school so be aware of that when you look at the massive gaps in my push history
 
 
+## Disclaimer
+The engine architecture is in its early stages so the README could be completely wrong in some parts
+
 ## Building
 Sadly your kind of on your own for compilation libraries, what I did was just build from the llvm project and just used clang (took about two hours). I might try to automate it and ship with it but for now you will have to deal with it and compile it yourself.
 

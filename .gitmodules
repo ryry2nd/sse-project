@@ -51,3 +51,7 @@
 	path = libs/slang
 	url = https://github.com/shader-slang/slang.git
 	shallow = true
+[submodule "libs/llvm-project"]
+	path = libs/llvm-project
+	url = https://github.com/llvm/llvm-project.git
+	shallow = true
