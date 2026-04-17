@@ -27,6 +27,19 @@ Uint64 Window::now = SDL_GetTicks();
 glm::vec2 Window::res;
 SDL_Window *Window::window = nullptr;
 
+void Window::shutdown() {
+    Rendering::sdlWindows.clear();
+    SDL_Quit();
+}
+
+void Window::init() {
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
+        throw std::runtime_error("Sdl cant initialise");
+    }
+}
+
 void Window::Update()
 {
     SDL_PumpEvents();
@@ -46,13 +59,6 @@ const bool *Window::getKeystates(int &numKeys) {
 
 Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
-    // it initialises sdl
-    if (!SDL_Init(SDL_INIT_VIDEO))
-    {
-        std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
-        throw std::runtime_error("Sdl cant initialise");
-    }
-
     if (aa > 0)
     {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -79,6 +85,8 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
 
 Window::~Window()
 {
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    if (window != nullptr) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }
 }

@@ -6,6 +6,8 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_ttf" SDL_ttf_BUILD)
 
 if(TARGET SDL3_ttf)
     add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf)
+    target_compile_options(SDL3_ttf INTERFACE -w)
 elseif(TARGET SDL3_ttf-static)
     add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf-static)
+    target_compile_options(SDL3_ttf-static INTERFACE -w)
 endif()

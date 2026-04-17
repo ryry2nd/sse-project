@@ -4,7 +4,7 @@ ToDo List
 
 PHASE 1 - CORE ENGINE
 
-trim down Slang and Clang
+trim down Slang and Clang and add them to the engine
 make normal float objects
 move all bigint code to a module
 make it so bigint objects are just particles you make normal objects a parent to
@@ -50,7 +50,6 @@ make a base helper module to have stuff like a character creator and a rigid bod
 remove fish penis texture
 make example module more interesting
 add reload function to modules (may or may not be a good idea)
-add documentation manual
 update readme after critical engine architecture has been built
 get module versioning and library modules working
 make it so modules have there own stack memory using stack switching (use boost?)
@@ -89,11 +88,17 @@ make it work for all platforms
 
 
 
-FINAL STEP
+PHASE 6 - CLEANUP
 
+make sure all packages are on stable versions
+documentation
 do a full git rebase (suck in the belly fat and don't remove history)
 
 
+
+PHASE 7 - FUN
+
+get working on as many platforms as possible
 
 
 
@@ -113,8 +118,7 @@ engine segments
             ect
     scripting (compiles modules)
         core compilation (ran as subprocess)
-        scripting runner (just puts the bins into program memory)
-        standard libraries (yaml)
+        scripting runner (just puts the libs into program memory)
 
 module segments
     bigint math

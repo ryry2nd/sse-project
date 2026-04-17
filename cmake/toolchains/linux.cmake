@@ -1,6 +1,6 @@
 set(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_C_COMPILER gcc)
-set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_C_COMPILER ccache clang)
+set(CMAKE_CXX_COMPILER ccache clang++)
 
 # if your a crackhead and want to do something stupid like change the supported api's then go ahead, but remember it may or may not work
 # keep in mind if you change these after you already build it, you gotta delete your build folder and spend 30 minutes compiling again. btw good luck

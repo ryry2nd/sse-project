@@ -11,26 +11,39 @@
 
 using namespace ScriptingHeaders;
 
-#define COMPILER_PATH "clang/bin/clang++"
-#define COMPILED_OUT_PATH "cache/compiled_modules"
+
 #define LIBRARY_PATH "libs"
 #define CPP_VERSION "20"
 
 #define INCLUDE_PATH "include"
+
+#if USECMDCLANG
+#define COMPILER_PATH "clang++"
+#else
+#define COMPILER_PATH "clang/bin/clang++"
+#endif
+
+#define COMPILED_OUT_PATH "cache/compiled_modules"
+
 
 #ifdef _WIN32
 #define POPEN _popen
 #define PCLOSE _pclose
 #define EXE_EXT ".exe"
 #define BIN_PREFIX ""
+#define LIBRARY_SUFFIX ".dll"
 #else
 #define POPEN popen
 #define PCLOSE pclose
 #define EXE_EXT ""
+#define LIBRARY_SUFFIX ".so"
+#if USECMDCLANG
+#define BIN_PREFIX ""
+#else
 #define BIN_PREFIX "./"
 #endif
+#endif
 
-#define LIBRARY_SUFFIX ".bin"
 
 std::vector<Package *> Package::packages;
 

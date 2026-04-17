@@ -43,12 +43,15 @@ namespace Rendering
         static void Update();
         static const bool *getKeystates(int &numKeys);
         
-        ~Window();
+        virtual ~Window() = 0;
 
         static float deltaTime;
         static double fps;
         static Uint64 now;
         static glm::vec2 res;
+
+        static void init();
+        static void shutdown();
 
     protected:
         static SDL_Window *window;

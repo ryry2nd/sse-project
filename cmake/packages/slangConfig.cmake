@@ -1,7 +1,7 @@
 include(ExternalProject)
 
 set(slangBuild "${CMAKE_BINARY_DIR}/slang-build")
-set(OUT_BIN ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin)
+set(OUT_BIN ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin-tools)
 set(OUT_LIB ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/lib)
 
 ExternalProject_Add(slang
@@ -28,10 +28,16 @@ ExternalProject_Add(slang
         -DSLANG_USE_SYSTEM_LZ4=OFF
         -DSLANG_USE_SYSTEM_GLSLANG=OFF
         -DSLANG_ENABLE_SLANG_RHI=OFF
-        -Wunused-variable
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        -DCMAKE_C_FLAGS=-w
+        -DCMAKE_CXX_FLAGS=-w
 
     INSTALL_COMMAND ""
+    LOG_BUILD ON
+    LOG_CONFIGURE ON
+    LOG_OUTPUT_ON_FAILURE ON
+    USES_TERMINAL_BUILD TRUE
+    USES_TERMINAL_CONFIGURE TRUE
 )
 
 add_custom_target(copy_slang ALL

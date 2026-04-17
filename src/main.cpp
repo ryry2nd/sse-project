@@ -4,6 +4,7 @@
 
 int main(int argc, char *argv[])
 {    
+    Rendering::Window::init();
     ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("modules/example1");
 
     // starts running the game loop
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
     }
     
     delete example_package;
+    Rendering::Window::shutdown();
     return 0;
 }
 

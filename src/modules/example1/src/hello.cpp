@@ -23,7 +23,7 @@ extern "C" {
         std::cout << "example module online\n";
 
         Rendering::CreationFunctions::initAPI("OpenGl4.6");
-        Rendering::sdlWindows.push_back(Rendering::CreationFunctions::createWindow({900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true));
+        Rendering::sdlWindows.push_back(std::move(Rendering::CreationFunctions::createWindow({900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true)));
 
         shaders.push_back(Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/vertex.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/fragment.glsl").c_str()));
         images.push_back(Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));

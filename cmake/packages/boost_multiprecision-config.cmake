@@ -1,4 +1,5 @@
 add_library(boost_multiprecision INTERFACE)
+target_compile_options(boost_multiprecision INTERFACE -w)
 add_library(Boost::multiprecision ALIAS boost_multiprecision)
 
 target_include_directories(boost_multiprecision INTERFACE

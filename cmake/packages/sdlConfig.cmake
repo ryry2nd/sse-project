@@ -7,6 +7,8 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl" SDL_BUILD)
 
 if(TARGET SDL3)
     add_library(SDL3::SDL3 ALIAS SDL3)
+    target_compile_options(SDL3 INTERFACE -w)
 elseif(TARGET SDL3-static)
     add_library(SDL3::SDL3 ALIAS SDL3-static)
+    target_compile_options(SDL3 INTERFACE -w)
 endif()

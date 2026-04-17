@@ -4,11 +4,17 @@ export PATH="$HOME/.local/bin:$PATH"
 BUILD_TYPE="Release"
 OS="linux"
 CORES=$(nproc)
+useCMDClang="OFF"
+NOCONFIG=false
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     --debug)
       BUILD_TYPE="Debug"
+      shift
+      ;;
+    --no-config)
+      NOCONFIG=true
       shift
       ;;
     --os)
@@ -17,6 +23,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --cores)
       CORES="$2"
+      shift 2
+      ;;
+    --useCMDClang)
+      useCMDClang="$2"
       shift 2
       ;;
     *)
@@ -30,5 +40,9 @@ BUILD_DIR="./build/$OS-$BUILD_TYPE"
 TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
 
 mkdir -p "$BUILD_DIR"
-cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
+
+if [ !NOCONFIG ]; then
+  cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DUSECMDCLANG=$useCMDClang
+fi
+
 cmake --build "$BUILD_DIR" -- -j"$CORES"
