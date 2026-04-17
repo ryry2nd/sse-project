@@ -1,20 +1,19 @@
 #pragma once
 
 #include <cmath>
-#include <iomanip>
-#include <stdexcept>
 #include <string>
 #include <sstream>
 #include <glm/glm.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
+#include "spdlog/spdlog.h"
+
+#define DIGITS 5
+#define SCALE 100000
 
 struct Bigint
 {
     static inline const boost::multiprecision::cpp_int MAX_DOUBLE = boost::multiprecision::cpp_int(std::numeric_limits<double>::max());
     static inline const boost::multiprecision::cpp_int MAX_FLOAT = boost::multiprecision::cpp_int(std::numeric_limits<float>::max());
-
-    static constexpr unsigned long long DIGITS = 5;
-    static constexpr unsigned long long SCALE = 100000;
 
     boost::multiprecision::cpp_int value;
 
@@ -115,6 +114,7 @@ struct Bigint
 
     inline Bigint operator/(const Bigint &other) const
     {
+        if (other == 0) {spdlog::error("divide by zero error"); return Bigint();};
         Bigint result;
         result.value = (value * SCALE) / other.value;
         return result;
@@ -142,8 +142,10 @@ struct Bigint
         *this = *this * other;
     }
 
-    void operator/=(const Bigint &other)
+    void operator/=(const Bigint &other) noexcept
     {
+        if (other == 0) {spdlog::error("divide by zero error"); return;};
+        
         *this = *this / other;
     }
 
@@ -227,8 +229,10 @@ struct Bigint
 
     Bigint sqrt() const
     {
-        if (value < 0)
-            throw std::domain_error("Square root of negative number");
+        if (value < 0) {
+            spdlog::error("Square root of negative number");
+            return Bigint(0);
+        }
 
         if (value == 0)
             return Bigint(0);

@@ -2,9 +2,9 @@
 #include <CustomMath/CustomMath.hpp>
 #include <Rendering/base/Rendering.hpp>
 #include <iostream>
-#include <vector>
-#include <string>
-#include <memory>
+// #include <vector>
+// #include <string>
+// #include <memory>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_events.h>

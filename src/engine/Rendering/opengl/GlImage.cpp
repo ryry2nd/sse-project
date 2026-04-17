@@ -1,7 +1,7 @@
 #include "GlRendering.hpp"
+#include "spdlog/spdlog.h"
 #include <glad/gl.h>
 #include <filesystem>
-#include <iostream>
 
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
@@ -12,7 +12,7 @@ using namespace Rendering;
 GlImage::GlImage(const std::string &filePath)
 {
     if (!std::filesystem::exists(filePath)) {
-        std::cerr << "Image path: " << filePath << " does not exist\n";
+        spdlog::error("Image path: {} does not exist", filePath);
         return;
     }
     setupObject(loadFile(filePath));

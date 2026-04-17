@@ -5,7 +5,7 @@ BUILD_TYPE="Release"
 OS="linux"
 CORES=$(nproc)
 useCMDClang="OFF"
-NOCONFIG=false
+NOCONFIG=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -14,7 +14,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     --no-config)
-      NOCONFIG=true
+      NOCONFIG=1
       shift
       ;;
     --os)
@@ -41,7 +41,7 @@ TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
 
 mkdir -p "$BUILD_DIR"
 
-if [ !NOCONFIG ]; then
+if [ "$NOCONFIG" -eq 0 ]; then
   cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DUSECMDCLANG=$useCMDClang
 fi
 

@@ -1,4 +1,5 @@
 #include "Rendering.hpp"
+#include "spdlog/spdlog.h"
 #include <SDL3_ttf/SDL_ttf.h>
 
 
@@ -19,7 +20,7 @@ Font::Font(const std::string &fontPath, int size)
 {
     font = TTF_OpenFont(fontPath.c_str(), size);
     if (!font)
-        throw std::runtime_error("Failed to load font \"" + fontPath + "\": " + SDL_GetError());
+        spdlog::error("Failed to load font: {}: {}", fontPath, SDL_GetError());
 }
 
 Font::~Font()
@@ -29,12 +30,16 @@ Font::~Font()
 
 SDL_Surface *Font::renderText(const std::string &message, const glm::vec4 &color)
 {
-    if (!font)
-        throw std::runtime_error("no font defined");
+    if (!font) {
+        spdlog::error("No Font Defined");
+        return nullptr;
+    }
 
     SDL_Surface *surf = TTF_RenderText_Blended(font, message.c_str(), message.length(), Vec4ToSDLColor(color));
-    if (!surf)
-        throw std::runtime_error("surface failed to initialise");
+    if (!surf) {
+        spdlog::error("surface failed to initialise");
+        return nullptr;
+    }
 
     SDL_Surface *formattedSurf = SDL_ConvertSurface(surf, SDL_PIXELFORMAT_ABGR8888);
     SDL_DestroySurface(surf);

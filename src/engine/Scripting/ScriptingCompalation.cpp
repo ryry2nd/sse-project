@@ -1,7 +1,7 @@
 #include "ScriptingHeaders.hpp"
+#include "spdlog/spdlog.h"
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
-#include <iostream>
 #include <string>
 #include <memory>
 
@@ -55,7 +55,7 @@ int compileCode(const std::string& arguments) {
         static_cast<int(*)(FILE*)>(PCLOSE)
     );
     if (!pipe) {
-        std::cerr << "Failed to run command";
+        spdlog::error("Failed to run command");
         return 1;
     }
     return 0;
@@ -78,7 +78,10 @@ void Package::EventFunctions(bool *running) {
 
 Package::Package(const std::string &path)
 {
-    if (!std::filesystem::exists(path)) throw std::runtime_error("Path does not exist");
+    if (!std::filesystem::exists(path)) {
+        spdlog::error("Path does not exist");
+        return;
+    }
 
     std::filesystem::create_directories(std::string(BIN_PREFIX) + std::string(COMPILED_OUT_PATH));
 
@@ -133,7 +136,7 @@ Package::Package(const std::string &path)
 
     lib = SDL_LoadObject((std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX)).c_str());
     if (!lib) {
-        std::cerr << "Failed to load library: " << SDL_GetError() << "\n";
+        spdlog::error("Failed to load library: {}", SDL_GetError());
         return;
     }
 
@@ -142,7 +145,7 @@ Package::Package(const std::string &path)
         if (func) func();
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        spdlog::error(e.what());
     }   
 
     loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
@@ -154,7 +157,7 @@ void Package::runLoopFunction() {
         if (loopFunc) {loopFunc();}
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        spdlog::error(e.what());
     }
 }
 
@@ -163,7 +166,7 @@ void Package::runEventFunction(SDL_Event *event, bool *running) {
         if (eventFunc) {eventFunc(event, running);}
     }
     catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        spdlog::error(e.what());
     }
 }
 
@@ -180,7 +183,7 @@ Package::~Package()
             if (shutDownFunc) shutDownFunc();
         }
         catch (const std::exception& e) {
-            std::cerr << e.what() << '\n';
+            spdlog::error(e.what());
         }
 
         SDL_UnloadObject(lib);

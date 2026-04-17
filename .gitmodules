@@ -55,3 +55,6 @@
 	path = libs/llvm-project
 	url = https://github.com/llvm/llvm-project.git
 	shallow = true
+[submodule "libs/spdlog"]
+	path = libs/spdlog
+	url = https://github.com/gabime/spdlog.git

@@ -38,6 +38,7 @@ find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
 find_package(slang REQUIRED)
+find_package(spdlog REQUIRED)
 
 if (USECMDCLANG STREQUAL "OFF")
         find_package(clang REQUIRED)
@@ -53,17 +54,18 @@ target_link_libraries(main PRIVATE
         RenderingBase
         BigObjects
         Scripting
+        spdlog::spdlog
 )
 
-target_link_libraries(RenderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm)
+target_link_libraries(RenderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm spdlog::spdlog)
 
 if(USE_OPENGL)
-        target_link_libraries(RenderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL)
+        target_link_libraries(RenderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL spdlog::spdlog)
 endif()
 
-target_link_libraries(BigObjects INTERFACE glm::glm)
-target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision)
-target_link_libraries(Scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3)
+target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
+target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision spdlog::spdlog)
+target_link_libraries(Scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3 spdlog::spdlog)
 
 # if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 #         add_library(dev_flags INTERFACE)
@@ -154,6 +156,12 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm)
                 COMMAND ${CMAKE_COMMAND} -E copy_directory
                         ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl/include
                         ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/include/spdlog
+                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/LICENSE
+                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
                 COMMENT "---- Copying Library headers ----"
         )
 endif()

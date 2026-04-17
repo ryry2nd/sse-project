@@ -1,5 +1,5 @@
 #include "GlRendering.hpp"
-#include <iostream>
+#include "spdlog/spdlog.h"
 #include <glad/gl.h>
 
 #include <SDL3/SDL_video.h>
@@ -21,7 +21,7 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
     glContext = SDL_GL_CreateContext(window);
     if (!glContext)
     {
-        std::cerr << "SDL_GL_CreateContext Error: " << SDL_GetError() << "\n";
+        spdlog::error("SDL_GL_CreateContext Error: {}", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
         throw std::runtime_error("Had issues making the opengl context");
@@ -29,7 +29,7 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 
     if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress))
     {
-        std::cerr << "Failed to initialize GLAD\n";
+        spdlog::error("Failed to initialize GLAD");
         SDL_GL_DestroyContext(glContext);
         SDL_DestroyWindow(window);
         SDL_Quit();

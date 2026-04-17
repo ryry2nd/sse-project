@@ -4,7 +4,6 @@
 #include "../Rendering/base/Rendering.hpp"
 #include <glm/glm.hpp>
 #include <vector>
-#include <algorithm>
 
 namespace BigObjects
 {

@@ -1,0 +1,5 @@
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_STATIC_LIBS ON)
+add_subdirectory("${CMAKE_SOURCE_DIR}/libs/spdlog" spdlog_build)
+target_compile_options(spdlog INTERFACE -w)
+add_library(spdlog::spdlog ALIAS spdlog)

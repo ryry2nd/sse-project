@@ -1,7 +1,7 @@
 #include "GlRendering.hpp"
+#include "spdlog/spdlog.h"
 #include <glad/gl.h>
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -12,11 +12,11 @@ using namespace Rendering;
 GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
 {
     if (!std::filesystem::exists(vertexPath)) {
-        std::cerr << "Shader path: " << vertexPath << " does not exist\n";
+        spdlog::error("Shader path: {} does not exist", vertexPath);
         return;
     }
     if (!std::filesystem::exists(fragmentPath)) {
-        std::cerr << "Shader path: " << fragmentPath << " does not exist\n";
+        spdlog::error("Shader path: {} does not exist", fragmentPath);
         return;
     }
 
@@ -48,7 +48,7 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     }
     catch (std::ifstream::failure &e)
     {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ\n";
+        spdlog::error("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ");
     }
 
     const char *vShaderCode = vertexCode.c_str();
@@ -67,8 +67,7 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     if (!success)
     {
         glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-                  << infoLog << '\n';
+        spdlog::error("ERROR::SHADER::VERTEX::COMPILATION_FAILED: {}", infoLog);
     }
 
     // Fragment Shader
@@ -79,8 +78,7 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     if (!success)
     {
         glGetShaderInfoLog(fragment, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-                  << infoLog << '\n';
+        spdlog::error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: {}", infoLog);
     }
 
     // Shader Program
@@ -93,8 +91,7 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     if (!success)
     {
         glGetProgramInfoLog(id, 512, nullptr, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-                  << infoLog << '\n';
+        spdlog::error("ERROR::SHADER::PROGRAM::LINKING_FAILED: {}", infoLog);
     }
 
     // Delete shaders; linked into program now and no longer needed

@@ -2,10 +2,12 @@
 #include "engine/Rendering/base/Rendering.hpp"
 #include "engine/Scripting/ScriptingHeaders.hpp"
 
+#define DEFAULT_MODULE "modules/example1"
+
 int main(int argc, char *argv[])
 {    
     Rendering::Window::init();
-    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package("modules/example1");
+    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package(std::string(DEFAULT_MODULE));
 
     // starts running the game loop
     bool running = true;

@@ -1,4 +1,5 @@
 #include "Rendering.hpp"
+#include <algorithm>
 
 template<typename T>
 void Objects::addParticle(std::unique_ptr<T> obj)

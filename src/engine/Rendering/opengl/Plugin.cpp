@@ -1,5 +1,7 @@
 #include "GlRendering.hpp"
 
+#define NAME "OpenGl4.6"
+
 using namespace OpenGl;
 
 extern "C" std::unique_ptr<Rendering::Shader> createShader(const char* vertex, const char* fragment) {
@@ -22,4 +24,4 @@ extern "C" std::unique_ptr<Rendering::Window> createWindow(glm::vec2 res, const 
     return std::make_unique<GlWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
-extern "C" std::string getName() {return "OpenGl4.6";};
+extern "C" std::string getName() {return NAME;}

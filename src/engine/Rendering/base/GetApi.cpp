@@ -1,4 +1,5 @@
 #include "Rendering.hpp"
+#include "spdlog/spdlog.h"
 
 #include <vector>
 #include <filesystem>
@@ -88,7 +89,7 @@ void CreationFunctions::initAPI(const std::string &apiName) {
     if (libs.empty()) createLibs();
 
     auto it = libs.find(apiName);
-    if (it == libs.end()) throw std::runtime_error("Library not found: " + apiName);
+    if (it == libs.end()) {spdlog::error("Library not found: {}", apiName);return;}
 
     SDL_SharedObject *lib = it->second.get();
 
@@ -100,32 +101,42 @@ void CreationFunctions::initAPI(const std::string &apiName) {
 }
 
 std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, const char* fragment) {
-    if (!createShaderFunc)
-    throw std::runtime_error("createShader not loaded");
+    if (!createShaderFunc) {
+        spdlog::error("createShader not loaded");
+        return nullptr;
+    }
 
     return createShaderFunc(vertex, fragment);
 }
 std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType) {
-    if (!createMeshFunc)
-    throw std::runtime_error("createShader not loaded");
+    if (!createMeshFunc) {
+        spdlog::error("createShader not loaded");
+        return nullptr;
+    }
 
     return createMeshFunc(shady, vertices, indices, vertLogic, meshType);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
-    if (!createImageFromFileFunc)
-    throw std::runtime_error("createShader not loaded");
+    if (!createImageFromFileFunc) {
+        spdlog::error("createImage not loaded");
+        return nullptr;
+    }
 
     return createImageFromFileFunc(filePath);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
-    if (!createImageFromSurfaceFunc)
-    throw std::runtime_error("createShader not loaded");
+    if (!createImageFromSurfaceFunc) {
+        spdlog::error("createImage not loaded");
+        return nullptr;
+    }
 
     return createImageFromSurfaceFunc(surface);
 }
 std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
-    if (!createWindowFunc)
-    throw std::runtime_error("createShader not loaded");
+    if (!createWindowFunc) {
+        spdlog::error("createWindow not loaded");
+        return nullptr;
+    }
 
     return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }

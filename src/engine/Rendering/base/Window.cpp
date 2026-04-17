@@ -6,7 +6,7 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_pixels.h>
 
-#include <iostream>
+#include "spdlog/spdlog.h"
 
 SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
     return SDL_Color{
@@ -35,8 +35,7 @@ void Window::shutdown() {
 void Window::init() {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
-        std::cerr << "SDL_Init Error: " << SDL_GetError() << "\n";
-        throw std::runtime_error("Sdl cant initialise");
+        spdlog::error("SDL_Init Error: {}", SDL_GetError());
     }
 }
 
@@ -68,9 +67,9 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
     window = SDL_CreateWindow(name, res.x, res.y, flags);
     if (!window)
     {
-        std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
+        spdlog::error("SDL_CreateWindow Error: {}", SDL_GetError());
         SDL_Quit();
-        throw std::runtime_error("cant create sdl window");
+        return;
     }
 
     if (hideMouse)
