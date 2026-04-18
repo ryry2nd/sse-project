@@ -91,7 +91,7 @@ namespace Rendering
     public:
         virtual ~Mesh() = default;
 
-        virtual void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
+        virtual void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) = 0;
         virtual void Draw() = 0;
 
         glm::vec3 posOffset = glm::vec3(0.0f);
@@ -103,9 +103,6 @@ namespace Rendering
         std::vector<Image *> images;
 
     protected:
-        std::vector<float> vertices;
-        std::vector<unsigned int> indices;
-        std::vector<short> vertLogic;
         MeshTypes meshType;
     };
 
@@ -127,7 +124,7 @@ namespace Rendering
     namespace CreationFunctions {
         void initAPI(const std::string &apiName);
         std::unique_ptr<Shader> createShader(const char* vertex, const char* fragment);
-        std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         std::unique_ptr<Image> createImage(const std::string &filePath);
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
         std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);

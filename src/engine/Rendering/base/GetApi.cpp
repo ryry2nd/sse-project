@@ -1,7 +1,6 @@
 #include "Rendering.hpp"
 #include "spdlog/spdlog.h"
 
-#include <vector>
 #include <filesystem>
 #include <unordered_map>
 
@@ -31,9 +30,12 @@ using CreateShaderFn =
 using CreateMeshFn =
     std::unique_ptr<Mesh>(*)(
         Rendering::Shader*,
-        const std::vector<float>&,
-        const std::vector<unsigned int>&,
-        const std::vector<short>&,
+        const float*,
+        const size_t,
+        const unsigned int*,
+        const size_t,
+        const short*,
+        const size_t,
         const Rendering::MeshTypes&
     );
 
@@ -108,13 +110,13 @@ std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, cons
 
     return createShaderFunc(vertex, fragment);
 }
-std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType) {
+std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType) {
     if (!createMeshFunc) {
         spdlog::error("createShader not loaded");
         return nullptr;
     }
 
-    return createMeshFunc(shady, vertices, indices, vertLogic, meshType);
+    return createMeshFunc(shady, vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
     if (!createImageFromFileFunc) {

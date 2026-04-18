@@ -4,6 +4,12 @@ set(slangBuild "${CMAKE_BINARY_DIR}/slang-build")
 set(OUT_BIN ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin-tools)
 set(OUT_LIB ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/lib)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(SIZE_FLAGS "-w -Os -flto -fdata-sections -ffunction-sections -fno-omit-frame-pointer")
+else()
+    set(SIZE_FLAGS "-w -O1 -g -fno-omit-frame-pointer")
+endif()
+
 ExternalProject_Add(slang
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/libs/slang
     BINARY_DIR ${slangBuild}
@@ -29,8 +35,9 @@ ExternalProject_Add(slang
         -DSLANG_USE_SYSTEM_GLSLANG=OFF
         -DSLANG_ENABLE_SLANG_RHI=OFF
         -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        -DCMAKE_C_FLAGS=-w
-        -DCMAKE_CXX_FLAGS=-w
+        -DCMAKE_C_FLAGS=${SIZE_FLAGS}
+        -DCMAKE_CXX_FLAGS=${SIZE_FLAGS}
+        
 
     INSTALL_COMMAND ""
     LOG_BUILD ON
@@ -51,7 +58,7 @@ add_custom_target(copy_slang ALL
 
     # copy only slang compiler libs
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/libslang-compiler*
+        ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/libslang-compiler.so.0.2026.2.2
         ${OUT_LIB}/
 )
 add_dependencies(copy_slang slang)

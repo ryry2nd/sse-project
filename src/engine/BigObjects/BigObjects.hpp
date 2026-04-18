@@ -25,11 +25,16 @@ namespace BigObjects
         void removeParent();
     };
 
+    #define CAMERA_FOV 90.0f
+    #define MOUSE_SENSITIVITY 0.1f
+    #define NEAR 0.00001f
+    #define FAR 100000.0f
+
     class Camera : public BaseObject
     {
     public:
-        float fov = 90.0f; // if this number isn't 90 then you got a small wiener (or your zooming in which is chill but only if your zooming in)
-        float mouse_sensitivity = 0.1f;
+        float fov = CAMERA_FOV; // if this number isn't 90 then you got a small wiener (or your zooming in which is chill but only if your zooming in)
+        float mouse_sensitivity = MOUSE_SENSITIVITY;
         Camera() : BaseObject() {}
         Camera(BigVec3 &pos, glm::vec3 &rot) : BaseObject(pos, rot) {}
         // takes the cameras rotation into account
@@ -49,8 +54,8 @@ namespace BigObjects
         // rotates the camera by the event motion
         void rotateCamera(glm::vec2 motion);
         // the two clip distances
-        float near = 0.00001f;
-        float far = 100000.0f;
+        float near = NEAR;
+        float far = FAR;
 
     private:
         // it gets all them rotation craziness
@@ -105,78 +110,13 @@ namespace BigObjects
         static bool disableBrightness;
     };
 
-    static const std::vector<float> cubeVertices  = {
-    // Positions          // Tex Coords (U, flipped V) // Normals
-    // Front face
-    -0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0, 0, 1,
-    0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0, 0, 1,
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 0, 0, 1,
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0, 0, 1,
+    extern const float cubeVertices[];
+    extern const unsigned int cubeIndices[];
+    extern const float vertices2d[];
+    extern const unsigned int indices2d[];
 
-    // Back face
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, 0, -1,
-    -0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, 0, -1,
-    0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 0, -1,
-    -0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 0, -1,
-
-    // Left face
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -1, 0, 0,
-    -0.5f, -0.5f, 0.5f, 1.0f, 1.0f, -1, 0, 0,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1, 0, 0,
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f, -1, 0, 0,
-
-    // Right face
-    0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 1, 0, 0,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 1, 0, 0,
-    0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1, 0, 0,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 1, 0, 0,
-
-    // Top face
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0, 1, 0,
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f, 0, 1, 0,
-    -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, 0, 1, 0,
-    0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0, 1, 0,
-
-    // Bottom face
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0, -1, 0,
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0, -1, 0,
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 0, -1, 0,
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0, -1, 0};
-    
-    static const std::vector<unsigned int> cubeIndices = {
-    // Front face
-    0, 1, 2,
-    1, 3, 2,
-
-    // Back face
-    4, 5, 6,
-    5, 7, 6,
-
-    // Left face
-    8, 9, 10,
-    9, 11, 10,
-
-    // Right face
-    12, 13, 14,
-    13, 15, 14,
-
-    // Top face
-    16, 17, 18,
-    17, 19, 18,
-
-    // Bottom face
-    20, 21, 22,
-    21, 23, 22};
-
-    static const std::vector<float> vertices2d = {
-        //  x,     y,    u,   v
-        -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
-        0.5f, -0.5f, 1.0f, 1.0f,  // bottom-right
-        0.5f, 0.5f, 1.0f, 0.0f,   // top-right
-        -0.5f, 0.5f, 0.0f, 0.0f   // top-left
-    };
-
-    static const std::vector<unsigned int> indices2d = {
-        0, 1, 2,
-        2, 3, 0};
+    extern const size_t vertCount;
+    extern const size_t indexCount;
+    extern const size_t vert2dCount;
+    extern const size_t ind2dCount;
 }

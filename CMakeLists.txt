@@ -20,7 +20,29 @@ add_compile_options(
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
         message(STATUS "Configuring Release build: stripping debug info")
-        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -g0")
+        add_compile_options(
+                -O2
+                -flto
+                -fdata-sections
+                -ffunction-sections
+                -fno-omit-frame-pointer
+        )
+
+        add_link_options(
+                -flto
+                -Wl,--gc-sections
+        )
+else()
+        message(STATUS "Configuring Debug build: fast compile")
+        add_compile_options(
+                -O1
+                -g
+                -fno-omit-frame-pointer
+        )
+
+        add_link_options(
+                # keep linking simple/fast
+        )
 endif()
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/cmake/packages")
@@ -66,21 +88,6 @@ endif()
 target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
 target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision spdlog::spdlog)
 target_link_libraries(Scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3 spdlog::spdlog)
-
-# if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-#         add_library(dev_flags INTERFACE)
-#         target_compile_options(dev_flags INTERFACE -fsanitize=address -fno-omit-frame-pointer)
-#         target_link_options(dev_flags INTERFACE -fsanitize=address)
-
-#         target_link_libraries(main INTERFACE dev_flags)
-#         target_link_libraries(RenderingBase INTERFACE dev_flags)
-#         target_link_libraries(CustomMath INTERFACE dev_flags)
-#         target_link_libraries(Scripting INTERFACE dev_flags)
-
-#         if(USE_OPENGL)
-#                 target_link_libraries(RenderingOpenGL PRIVATE dev_flags)
-#         endif()
-# endif()
 
 target_compile_definitions(Scripting PRIVATE
     USECMDCLANG=$<BOOL:${USECMDCLANG}>

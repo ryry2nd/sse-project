@@ -1,7 +1,7 @@
 #include <BigObjects/BigObjects.hpp>
 #include <CustomMath/CustomMath.hpp>
 #include <Rendering/base/Rendering.hpp>
-#include <iostream>
+// #include <iostream>
 // #include <vector>
 // #include <string>
 // #include <memory>
@@ -20,17 +20,15 @@ Bigint run_speed = Bigint("100");
 
 extern "C" {
     void setup() {
-        std::cout << "example module online\n";
-
         Rendering::CreationFunctions::initAPI("OpenGl4.6");
         Rendering::sdlWindows.push_back(std::move(Rendering::CreationFunctions::createWindow({900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true)));
 
         shaders.push_back(Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/vertex.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/fragment.glsl").c_str()));
         images.push_back(Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::vertCount, BigObjects::cubeIndices, BigObjects::indexCount, (short[]){3,2,3}, 3));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::vertCount, BigObjects::cubeIndices, BigObjects::indexCount, (short[]){3,2,3}, 3));
         meshes[meshes.size()-1]->sizeOffset *= 12756000;
-        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::cubeIndices, {3,2,3}));
+        meshes.push_back(Rendering::CreationFunctions::createMesh(shaders[0].get(), BigObjects::cubeVertices, BigObjects::vertCount, BigObjects::cubeIndices, BigObjects::indexCount, (short[]){3,2,3}, 3));
         meshes[meshes.size()-1]->sizeOffset *= 1392000000;
 
         meshes[0]->images.push_back(images[0].get());

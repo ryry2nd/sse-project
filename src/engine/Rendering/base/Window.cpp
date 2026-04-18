@@ -30,13 +30,18 @@ SDL_Window *Window::window = nullptr;
 void Window::shutdown() {
     Rendering::sdlWindows.clear();
     SDL_Quit();
+    spdlog::info("Quit out of sdl");
+    spdlog::warn("Note that you should only run this once per program and not per window");
 }
 
 void Window::init() {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         spdlog::error("SDL_Init Error: {}", SDL_GetError());
+        return;
     }
+    spdlog::info("Initalized sdl");
+    spdlog::warn("Note that you should only run this once per program and not per window");
 }
 
 void Window::Update()
@@ -80,6 +85,8 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
         SDL_SetWindowResizable(window, true);
         SDL_SetWindowBordered(window, false);
     }
+
+    spdlog::info("Successfully opened window with name: {}", name);
 }
 
 Window::~Window()

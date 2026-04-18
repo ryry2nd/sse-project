@@ -26,8 +26,8 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --useCMDClang)
-      useCMDClang="$2"
-      shift 2
+      useCMDClang="ON"
+      shift
       ;;
     *)
       echo "Unknown option $1"

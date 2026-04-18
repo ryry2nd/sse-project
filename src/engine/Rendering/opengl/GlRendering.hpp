@@ -67,15 +67,15 @@ namespace OpenGl
     class GlMesh : public Rendering::Mesh
     {
     public:
-        GlMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        GlMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         ~GlMesh();
         // updates the vertices (you dont need to run this unless you changed the vertices)
-        void updateVerts(const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
         void Draw();
         glm::vec3 meshSize;
 
     private:
-        glm::vec3 calculateSizes();
+        size_t ind_size;
         GLuint VAO, VBO, EBO;
         GLenum glMeshType;
         GLsizei size;

@@ -8,8 +8,8 @@ extern "C" std::unique_ptr<Rendering::Shader> createShader(const char* vertex, c
     return std::make_unique<GlShader>(vertex, fragment);
 }
 
-extern "C" std::unique_ptr<Rendering::Mesh> createMesh(Rendering::Shader *shady, const std::vector<float> &vertices, const std::vector<unsigned int> &indices, const std::vector<short> &vertLogic, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) {
-    return std::make_unique<GlMesh>(shady, vertices, indices, vertLogic, meshType);
+extern "C" std::unique_ptr<Rendering::Mesh> createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) {
+    return std::make_unique<GlMesh>(shady, vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 
 extern "C" std::unique_ptr<Rendering::Image> createImageFromFile(const std::string &filePath) {

@@ -44,21 +44,36 @@ using namespace ScriptingHeaders;
 #endif
 #endif
 
+#define START_NAME "setup"
+#define LOOP_NAME "loop"
+#define STOP_NAME "shutdown"
+#define EVENT_NAME "event"
+
+#define CONFIG_NAME "/config.yaml"
+
 
 std::vector<Package *> Package::packages;
 
 // scarry code, watch out, can execute random commands. DO NOT GIVE THIS TO THE HEADER
-int compileCode(const std::string& arguments) {
-    std::string command = std::string(BIN_PREFIX) + COMPILER_PATH + EXE_EXT + " " + arguments;
+std::string compileCode(const std::string& arguments) {
+    std::string command = std::string(BIN_PREFIX) + COMPILER_PATH + EXE_EXT + " " + arguments + " 2>&1";
+
     std::unique_ptr<FILE, int(*)(FILE*)> pipe(
-        POPEN(command.c_str(), "r"), 
+        POPEN(command.c_str(), "r"),
         static_cast<int(*)(FILE*)>(PCLOSE)
     );
+
     if (!pipe) {
-        spdlog::error("Failed to run command");
-        return 1;
+        return "Failed to run command";
     }
-    return 0;
+
+    std::string output;
+    char buffer[256];
+
+    while (fgets(buffer, sizeof(buffer), pipe.get()) != nullptr) {
+        output += buffer;
+    }
+    return output;
 }
 
 void Package::LoopFunctions() {
@@ -86,7 +101,7 @@ Package::Package(const std::string &path)
     std::filesystem::create_directories(std::string(BIN_PREFIX) + std::string(COMPILED_OUT_PATH));
 
     packages.push_back(this);
-    YAML::Node config = YAML::LoadFile(path + "/config.yaml");
+    YAML::Node config = YAML::LoadFile(path + CONFIG_NAME);
 
     name = config["name"].as<std::string>();
     id = config["id"].as<std::string>();
@@ -130,7 +145,12 @@ Package::Package(const std::string &path)
             std::string(LIBRARY_PATH) + libInclude + " -I" + std::string(INCLUDE_PATH) +
             " -DMODULE_PATH=\\\"" + path + "\\\"";
         
-        if (compileCode(command)) {return;}
+        std::string out = compileCode(command);
+        if (out.size()) {
+            spdlog::error("Program: {} failed to compile and gave the error:\n{}", id, out);
+            return;
+        }
+        spdlog::info("Successfully compiled {}", id);
 
     }
 
@@ -140,7 +160,7 @@ Package::Package(const std::string &path)
         return;
     }
 
-    FuncType func = (FuncType)SDL_LoadFunction(lib, "setup");
+    FuncType func = (FuncType)SDL_LoadFunction(lib, START_NAME);
     try {
         if (func) func();
     }
@@ -148,8 +168,10 @@ Package::Package(const std::string &path)
         spdlog::error(e.what());
     }   
 
-    loopFunc = (FuncType)SDL_LoadFunction(lib, "loop");
-    eventFunc = (EventType)SDL_LoadFunction(lib, "event");
+    loopFunc = (FuncType)SDL_LoadFunction(lib, LOOP_NAME);
+    eventFunc = (EventType)SDL_LoadFunction(lib, EVENT_NAME);
+
+    spdlog::info("Successfully started {}", id);
 }
 
 void Package::runLoopFunction() {
@@ -177,7 +199,7 @@ Package::~Package()
         packages.erase(it);
 
     if (lib) {
-        FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, "shutdown");
+        FuncType shutDownFunc = (FuncType)SDL_LoadFunction(lib, STOP_NAME);
         
         try {
             if (shutDownFunc) shutDownFunc();
