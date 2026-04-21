@@ -32,4 +32,6 @@ namespace ScriptingHeaders
         void runLoopFunction();
         void runEventFunction(SDL_Event *event, bool *running);
     };
+
+    void loginit();
 }

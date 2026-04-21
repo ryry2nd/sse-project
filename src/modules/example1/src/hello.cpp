@@ -1,6 +1,6 @@
-#include <BigObjects/BigObjects.hpp>
-#include <CustomMath/CustomMath.hpp>
-#include <Rendering/base/Rendering.hpp>
+#include <engine/BigObjects/BigObjects.hpp>
+#include <engine/CustomMath/CustomMath.hpp>
+#include <engine/Rendering/Rendering.hpp>
 // #include <iostream>
 // #include <vector>
 // #include <string>

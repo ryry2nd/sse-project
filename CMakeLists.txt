@@ -59,14 +59,14 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-find_package(slang REQUIRED)
+# find_package(slang REQUIRED)
 find_package(spdlog REQUIRED)
 
 if (USECMDCLANG STREQUAL "OFF")
         find_package(clang REQUIRED)
 endif()
 
-# Add subdirectories for your engine and game logic
+# Add subdirectories
 add_subdirectory(src/engine)
 add_executable(main src/main.cpp)
 
@@ -79,23 +79,53 @@ target_link_libraries(main PRIVATE
         spdlog::spdlog
 )
 
-target_link_libraries(RenderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm spdlog::spdlog)
-
-if(USE_OPENGL)
-        target_link_libraries(RenderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL spdlog::spdlog)
-endif()
-
-target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
-target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision spdlog::spdlog)
-target_link_libraries(Scripting PRIVATE glm::glm yaml-cpp::yaml-cpp SDL3::SDL3 spdlog::spdlog)
-
-target_compile_definitions(Scripting PRIVATE
-    USECMDCLANG=$<BOOL:${USECMDCLANG}>
-)
-
 add_custom_target(delete_cache ALL
         COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/cache"
         COMMENT "---- Deleting folder recursively ----"
+)
+
+# copy headers
+file(GLOB_RECURSE MATH_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/CustomMath/*.hpp
+)
+file(GLOB_RECURSE BIG_OBJECT_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/BigObjects/*.hpp
+)
+file(GLOB_RECURSE SCRIPTING_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Scripting/*.hpp
+)
+file(GLOB_RECURSE RENDERING_HEADERS
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Rendering/*.hpp
+)
+list(FILTER RENDERING_HEADERS INCLUDE REGEX ".*/Rendering/[^/]+$")
+
+add_custom_target(copy_headers ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/CustomMath
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/BigObjects
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Rendering
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Scripting
+        
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${MATH_HEADERS}
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/CustomMath
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${BIG_OBJECT_HEADERS}
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/BigObjects
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${RENDERING_HEADERS}
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Rendering
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${SCRIPTING_HEADERS}
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Scripting
+        COMMENT "---- Copying headers ----"
 )
 
 # Post-build asset copy
@@ -106,69 +136,33 @@ add_custom_target(copy_assets ALL
         COMMENT "---- Copying assets ----"
 )
 
-# copy headers
-file(GLOB_RECURSE MATH_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/CustomMath/*.hpp
-)
-file(GLOB_RECURSE BIG_OBJECT_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/BigObjects/*.hpp
-)
-file(GLOB_RECURSE RENDERING_HEADERS
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Rendering/base/*.hpp
-)
-
-add_custom_target(copy_src_headers ALL
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/CustomMath
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/BigObjects
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering/base
+add_custom_target(copy_lib_headers ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${MATH_HEADERS}
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/CustomMath
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/copying.txt
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/include/boost
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${BIG_OBJECT_HEADERS}
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/BigObjects
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/LICENSE
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/include/boost
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${RENDERING_HEADERS}
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/Rendering/base
-        COMMENT "---- Copying headers ----"
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/build.jam
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl/include
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/include/spdlog
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/LICENSE
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
+        COMMENT "---- Copying Library headers ----"
 )
-
-if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm)
-        add_custom_target(copy_lib_headers ALL
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/copying.txt
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/include/boost
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/LICENSE
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/include/boost
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/build.jam
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl/include
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/
-                COMMAND ${CMAKE_COMMAND} -E copy_directory
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/include/spdlog
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/LICENSE
-                        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
-                COMMENT "---- Copying Library headers ----"
-        )
-endif()

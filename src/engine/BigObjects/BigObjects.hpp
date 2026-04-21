@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../CustomMath/CustomMath.hpp"
-#include "../Rendering/base/Rendering.hpp"
+#include <engine/CustomMath/CustomMath.hpp>
+#include <engine/Rendering/Rendering.hpp>
 #include <glm/glm.hpp>
 #include <vector>
 

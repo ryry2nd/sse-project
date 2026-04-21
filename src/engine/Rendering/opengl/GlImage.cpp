@@ -1,8 +1,8 @@
 #include "GlRendering.hpp"
-#include "spdlog/spdlog.h"
+
+#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 #include <filesystem>
-
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
 

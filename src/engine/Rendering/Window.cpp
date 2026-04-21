@@ -6,7 +6,7 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_pixels.h>
 
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
     return SDL_Color{

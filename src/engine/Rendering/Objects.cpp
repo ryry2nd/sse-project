@@ -1,9 +1,8 @@
-#include "Rendering.hpp"
+#include "Objects.hpp"
 #include <algorithm>
 
 template<typename T>
-void Objects::addParticle(std::unique_ptr<T> obj)
-{
+void Objects::addParticle(std::unique_ptr<T> obj) {
     static_assert(std::is_base_of_v<Object, T>, "T must inherit from Particle");
     
     ObjectID index = allObjects.size();

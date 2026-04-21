@@ -1,7 +1,7 @@
 #include "GlRendering.hpp"
-#include "spdlog/spdlog.h"
-#include <glad/gl.h>
 
+#include <spdlog/spdlog.h>
+#include <glad/gl.h>
 #include <fstream>
 #include <sstream>
 #include <filesystem>

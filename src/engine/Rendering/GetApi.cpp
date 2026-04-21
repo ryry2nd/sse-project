@@ -1,9 +1,8 @@
 #include "Rendering.hpp"
-#include "spdlog/spdlog.h"
 
+#include <spdlog/spdlog.h>
 #include <filesystem>
 #include <unordered_map>
-
 #include <SDL3/SDL_loadso.h>
 
 #define COMPILED_OUT_PATH "libs/Rendering"
@@ -100,6 +99,8 @@ void CreationFunctions::initAPI(const std::string &apiName) {
     createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
     createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
     createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
+
+    spdlog::info("Successfully set API to {}", apiName);
 }
 
 std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, const char* fragment) {
@@ -108,6 +109,7 @@ std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, cons
         return nullptr;
     }
 
+    spdlog::debug("created shader with paths: \n{}\n{}", vertex, fragment);
     return createShaderFunc(vertex, fragment);
 }
 std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType) {
@@ -116,6 +118,7 @@ std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, co
         return nullptr;
     }
 
+    spdlog::debug("created mesh with {} vertices, and {} indicies.", vert_size, ind_size);
     return createMeshFunc(shady, vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
@@ -124,6 +127,7 @@ std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePat
         return nullptr;
     }
 
+    spdlog::debug("created image at path {}", filePath);
     return createImageFromFileFunc(filePath);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
@@ -132,6 +136,7 @@ std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
         return nullptr;
     }
 
+    spdlog::debug("created image with surf memory id of {}", (void*)surface);
     return createImageFromSurfaceFunc(surface);
 }
 std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
@@ -140,5 +145,6 @@ std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const cha
         return nullptr;
     }
 
+    spdlog::debug("created window with resolution: {} by {}", res.x, res.y);
     return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }

@@ -1,5 +1,5 @@
 #include "ScriptingHeaders.hpp"
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <string>
@@ -210,4 +210,6 @@ Package::~Package()
 
         SDL_UnloadObject(lib);
     }
+
+    spdlog::info("Successfully shut down module: {}", id);
 }

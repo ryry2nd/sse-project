@@ -5,7 +5,7 @@
 #include <sstream>
 #include <glm/glm.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include "spdlog/spdlog.h"
+#include <spdlog/spdlog.h>
 
 #define DIGITS 5
 #define SCALE 100000
