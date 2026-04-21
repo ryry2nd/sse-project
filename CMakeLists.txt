@@ -59,8 +59,9 @@ find_package(glm REQUIRED)
 find_package(boost_multiprecision REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(glad REQUIRED)
-# find_package(slang REQUIRED)
 find_package(spdlog REQUIRED)
+
+find_package(slang REQUIRED)
 
 if (USECMDCLANG STREQUAL "OFF")
         find_package(clang REQUIRED)
