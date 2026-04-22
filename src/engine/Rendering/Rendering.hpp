@@ -143,9 +143,11 @@ namespace Rendering
         Buff& operator=(Buff&&) noexcept = default;
         
         virtual void write(const std::size_t offset, const std::size_t size, const void* data) = 0;
-        virtual void read(const std::size_t offset, const std::size_t size, void* outData) = 0;
+        virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
 
-    private:
+    protected:
+        static bool canRead(Type t);
+        static bool canWrite(Type t);
         Type buffType;
         Frequency freq;
         std::size_t allocSize;
@@ -158,6 +160,6 @@ namespace Rendering
         std::unique_ptr<Image> createImage(const std::string &filePath);
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
         std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-        std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size);
+        std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, void* data = nullptr);
     }
 }

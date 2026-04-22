@@ -1,3 +1,4 @@
+#include "engine/Rendering/Rendering.hpp"
 #include <engine/BigObjects/BigObjects.hpp>
 #include <engine/CustomMath/CustomMath.hpp>
 #include <engine/Rendering/RenderObjects.hpp>
@@ -8,6 +9,7 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_events.h>
+#include <memory>
 
 std::vector<std::unique_ptr<Rendering::Shader>> shaders;
 std::vector<std::unique_ptr<Rendering::Image>> images;

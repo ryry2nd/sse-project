@@ -83,9 +83,16 @@ namespace OpenGl
 
     class GlBuff : public Rendering::Buff {
     public:
-        GlBuff(Type type, Frequency freq, std::size_t size);
+        GlBuff(Type type, Frequency freq, std::size_t size, void* data = nullptr);
         ~GlBuff();
         void write(const std::size_t offset, const std::size_t size, const void* data);
-        void read(const std::size_t offset, const std::size_t size, void* outData);
+        void read(const std::size_t offset, const std::size_t size, void* data);
+    private:
+        GLuint id;
+        GLenum target;
+        GLenum usage;
+
+        GLenum toGLTarget(Type type);
+        GLenum toGLUsage(Frequency freq);
     };
 }

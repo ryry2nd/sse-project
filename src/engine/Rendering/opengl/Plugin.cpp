@@ -25,8 +25,8 @@ extern "C" std::unique_ptr<Rendering::Window> createWindow(glm::vec2 res, const 
     return std::make_unique<GlWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
-extern "C" std::unique_ptr<Rendering::Buff> createBuff(Rendering::Buff::Type type, Rendering::Buff::Frequency freq, std::size_t size) {
-    return std::make_unique<GlBuff>(type, freq, size);
+extern "C" std::unique_ptr<Rendering::Buff> createBuff(Rendering::Buff::Type type, Rendering::Buff::Frequency freq, std::size_t size, void* data = nullptr) {
+    return std::make_unique<GlBuff>(type, freq, size, data);
 }
 
 extern "C" std::string getName() {return NAME;}

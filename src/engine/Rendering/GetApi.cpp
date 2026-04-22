@@ -59,7 +59,8 @@ using CreateBuffFn =
     std::unique_ptr<Buff>(*)(
         Buff::Type,
         Buff::Frequency,
-        std::size_t
+        std::size_t,
+        void*
     );
 
 typedef std::string (*GetNameFn)();
@@ -158,12 +159,12 @@ std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const cha
     return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
-std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size) {
+std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, void* data) {
     if (!createBuffFunc) {
         spdlog::error("createBuff not loaded");
         return nullptr;
     }
 
     spdlog::debug("created buffer with size: {}", size);
-    return createBuffFunc(type, freq, size);
+    return createBuffFunc(type, freq, size, data);
 }
