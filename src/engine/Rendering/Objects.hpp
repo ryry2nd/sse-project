@@ -16,14 +16,14 @@ namespace Objects {
 
     class Drawable : public Object {
     public:
-        std::vector<Rendering::StorageBuff *> buffs;
+        std::vector<Rendering::Buff *> buffs;
         virtual void Draw() = 0;
     };
 
     class Camera : public Object {
     public:
         std::vector<Drawable *> allDraws;
-        Rendering::FrameBuff *frameBuffer;
+        Rendering::Buff *frameBuffer;
 
         virtual void Render() = 0;
     };

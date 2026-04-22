@@ -21,28 +21,20 @@ typedef uint8_t Uint8;
 
 namespace Rendering
 {
-    enum class MeshTypes
-    {
-        Points,
-        Lines,
-        Triangles
-    };
-
     SDL_Color Vec4ToSDLColor(const glm::vec4& color);
-
-    
 
     class Window
     {
     public:
         Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
+        virtual ~Window() = 0;
+
+
         virtual void clearBackground() = 0;
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
         static void Update();
         static const bool *getKeystates(int &numKeys);
-        
-        virtual ~Window() = 0;
 
         static float deltaTime;
         static double fps;
@@ -58,6 +50,8 @@ namespace Rendering
     private:
         static Uint64 lastCounter;
     };
+
+    inline std::vector<std::unique_ptr<Window>> sdlWindows;
 
     class Image
     {
@@ -89,9 +83,15 @@ namespace Rendering
     class Mesh
     {
     public:
+        enum class MeshTypes
+        {
+            Points,
+            Lines,
+            Triangles
+        };
         virtual ~Mesh() = default;
 
-        virtual void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles) = 0;
+        virtual void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const MeshTypes &meshType = MeshTypes::Triangles) = 0;
         virtual void Draw() = 0;
 
         glm::vec3 posOffset = glm::vec3(0.0f);
@@ -118,23 +118,46 @@ namespace Rendering
     private:
         TTF_Font *font;
     };
+    
+    class Buff {
+    public:
+        enum class Type {
+            Array,
+            Element,
+            Uniform,
+            Storage,
+            PixelPack,
+            PixelUnpack
+        };
+        enum class Frequency {
+            Static,
+            Dynamic,
+            Stream
+        };
 
-    inline std::vector<std::unique_ptr<Window>> sdlWindows;
+        Buff(Type type, Frequency freq, std::size_t size);
+        virtual ~Buff() = default;
+        Buff(const Buff&) = delete;
+        Buff& operator=(const Buff&) = delete;
+        Buff(Buff&&) noexcept = default;
+        Buff& operator=(Buff&&) noexcept = default;
+        
+        virtual void write(const std::size_t offset, const std::size_t size, const void* data) = 0;
+        virtual void read(const std::size_t offset, const std::size_t size, void* outData) = 0;
+
+    private:
+        Type buffType;
+        Frequency freq;
+        std::size_t allocSize;
+    };
 
     namespace CreationFunctions {
         void initAPI(const std::string &apiName);
         std::unique_ptr<Shader> createShader(const char* vertex, const char* fragment);
-        std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType = Rendering::MeshTypes::Triangles);
+        std::unique_ptr<Mesh> createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::Mesh::MeshTypes &meshType = Rendering::Mesh::MeshTypes::Triangles);
         std::unique_ptr<Image> createImage(const std::string &filePath);
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
         std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+        std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size);
     }
-
-    class Buff {
-        // ToDo write gpu buffer code
-    };
-
-    class StorageBuff : public Buff {};
-
-    class FrameBuff : public Buff {};
 }

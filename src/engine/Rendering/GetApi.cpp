@@ -35,7 +35,7 @@ using CreateMeshFn =
         const size_t,
         const short*,
         const size_t,
-        const Rendering::MeshTypes&
+        const Rendering::Mesh::MeshTypes&
     );
 
 using CreateImageFromFileFn =
@@ -55,6 +55,13 @@ using CreateWindowFn =
         bool
     );
 
+using CreateBuffFn =
+    std::unique_ptr<Buff>(*)(
+        Buff::Type,
+        Buff::Frequency,
+        std::size_t
+    );
+
 typedef std::string (*GetNameFn)();
 
 CreateShaderFn createShaderFunc = nullptr;
@@ -62,6 +69,7 @@ CreateMeshFn createMeshFunc = nullptr;
 CreateImageFromFileFn createImageFromFileFunc = nullptr;
 CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
 CreateWindowFn createWindowFunc = nullptr;
+CreateBuffFn createBuffFunc = nullptr;
 
 auto sdlDeleter = [](SDL_SharedObject* obj) {
     if (obj) SDL_UnloadObject(obj);
@@ -99,6 +107,7 @@ void CreationFunctions::initAPI(const std::string &apiName) {
     createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
     createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
     createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
+    createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
 
     spdlog::info("Successfully set API to {}", apiName);
 }
@@ -112,7 +121,7 @@ std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, cons
     spdlog::debug("created shader with paths: \n{}\n{}", vertex, fragment);
     return createShaderFunc(vertex, fragment);
 }
-std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::MeshTypes &meshType) {
+std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::Mesh::MeshTypes &meshType) {
     if (!createMeshFunc) {
         spdlog::error("createShader not loaded");
         return nullptr;
@@ -147,4 +156,14 @@ std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const cha
 
     spdlog::debug("created window with resolution: {} by {}", res.x, res.y);
     return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
+}
+
+std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size) {
+    if (!createBuffFunc) {
+        spdlog::error("createBuff not loaded");
+        return nullptr;
+    }
+
+    spdlog::debug("created buffer with size: {}", size);
+    return createBuffFunc(type, freq, size);
 }
