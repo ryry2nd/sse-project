@@ -109,14 +109,4 @@ namespace BigObjects
         const static Bigint far;
         static bool disableBrightness;
     };
-
-    extern const float cubeVertices[];
-    extern const unsigned int cubeIndices[];
-    extern const float vertices2d[];
-    extern const unsigned int indices2d[];
-
-    extern const size_t vertCount;
-    extern const size_t indexCount;
-    extern const size_t vert2dCount;
-    extern const size_t ind2dCount;
 }

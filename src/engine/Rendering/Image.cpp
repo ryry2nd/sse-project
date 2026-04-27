@@ -16,3 +16,7 @@ SDL_Surface *Image::loadFile(const std::string &filePath)
     }
     return surface;
 }
+
+glm::vec2 Image::getSizes() {
+    return imageSizes;
+}

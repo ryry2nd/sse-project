@@ -35,6 +35,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 else()
         message(STATUS "Configuring Debug build: fast compile")
         add_compile_options(
+                -DDEBUG
                 -O1
                 -g
                 -fno-omit-frame-pointer
@@ -75,7 +76,7 @@ target_link_libraries(main PRIVATE
         SDL3::SDL3
         CustomMath
         RenderingBase
-        BigObjects
+        # BigObjects
         Scripting
         spdlog::spdlog
 )

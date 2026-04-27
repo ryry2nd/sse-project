@@ -92,18 +92,18 @@ endif()
 
 
 
-#BigObjects Section
+# #BigObjects Section
 
-file(GLOB_RECURSE object_SOURCES "BigObjects/*.cpp")
+# file(GLOB_RECURSE object_SOURCES "BigObjects/*.cpp")
 
-add_library(BigObjects SHARED ${object_SOURCES})
-add_dependencies(BigObjects copy_src_headers)
-target_include_directories(BigObjects PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/include/BigObjects
-)
-target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
+# add_library(BigObjects SHARED ${object_SOURCES})
+# add_dependencies(BigObjects copy_src_headers)
+# target_include_directories(BigObjects PUBLIC
+#     ${CMAKE_CURRENT_BINARY_DIR}/include/BigObjects
+# )
+# target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
 
-target_link_libraries(BigObjects PRIVATE RenderingBase CustomMath)
+# target_link_libraries(BigObjects PRIVATE RenderingBase CustomMath)
 
 
 

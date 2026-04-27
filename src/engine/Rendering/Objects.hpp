@@ -1,51 +1,73 @@
 #pragma once
 
 #include "Rendering.hpp"
+
+#include <unordered_set>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
 
 namespace Objects {
-    typedef size_t ObjectID;
+    enum RenderLayer : uint32_t {
+        World      = 1 << 0,
+        UI         = 1 << 1,
+        Debug      = 1 << 2,
+        Invisible  = 1 << 3
+    };
 
-    class Object {
+    class Particle {
     public:
+        virtual ~Particle() = default;
+    };
+
+    class Camera : public Particle {
+    public:
+        struct CameraStruct {
+            glm::mat4 view;
+            glm::mat4 proj;
+        };
+        
+        std::unordered_map<std::string, std::unique_ptr<Rendering::Buff>> buffs;
+        uint32_t viewMask = RenderLayer::World;
+    };
+
+    class Object : public Particle {
+    public:
+        struct RenderPair {
+            Rendering::Mesh* mesh;
+            Rendering::Material *mat;
+        };
+
         virtual ~Object() = default;
+
+        virtual void updateBuffs() = 0;
+
+        std::unordered_map<std::string, std::unique_ptr<Rendering::Buff>> buffs;
+        std::vector<RenderPair> renderPairs;
+        RenderLayer layer = RenderLayer::World;
+        std::unordered_set<const Camera*> hiddenFromCameras;
     };
 
-    class Drawable : public Object {
-    public:
-        std::vector<Rendering::Buff *> buffs;
-        virtual void Draw() = 0;
+    struct Scene {
+        std::vector<std::unique_ptr<Camera>> cams;
+        std::vector<std::unique_ptr<Object>> draws;
+        std::vector<std::unique_ptr<Rendering::Mesh>> meshes;
+        std::vector<std::unique_ptr<Rendering::Shader>> shaders;
+        std::vector<std::unique_ptr<Rendering::Buff>> buffs;
+        std::vector<std::unique_ptr<Rendering::Image>> images;
+        std::vector<std::unique_ptr<Rendering::Material>> mats;
+        std::vector<std::unique_ptr<Rendering::DrawParams>> dps;
+        void drawScene();
     };
 
-    class Camera : public Object {
-    public:
-        std::vector<Drawable *> allDraws;
-        Rendering::Buff *frameBuffer;
+    extern const float cubeVertices[];
+    extern const unsigned int cubeIndices[];
+    extern const float vertices2d[];
+    extern const unsigned int indices2d[];
 
-        virtual void Render() = 0;
-    };
-
-    inline std::vector<std::unique_ptr<Object>> allObjects = []() {
-        std::vector<std::unique_ptr<Object>> v;
-        v.reserve(OBJECT_PREALLOC);
-        return v;
-    }();
-
-    inline std::vector<Camera*> allCams = []() {
-        std::vector<Camera*> v;
-        v.reserve(CAMERA_PREALLOC);
-        return v;
-    }();
-
-    template<typename T>
-    void addParticle(std::unique_ptr<T> obj);
-    void removeParticle(ObjectID id);
-
-    class FloatParticle : public Object {
-    public:
-        glm::vec3 position;
-    };
+    extern const size_t vertCount;
+    extern const size_t indexCount;
+    extern const size_t vert2dCount;
+    extern const size_t ind2dCount;
 }

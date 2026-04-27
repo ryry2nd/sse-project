@@ -1,7 +1,7 @@
-#include "BigObjects.hpp"
+#include "Objects.hpp"
 
 
-namespace BigObjects {
+namespace Objects {
     const float cubeVertices[] = {
     // Positions          // Tex Coords (U, flipped V) // Normals
     // Front face

@@ -9,6 +9,6 @@ version: 0.0.1
 #     compatible_range: 0.0.0-0.0.1 #inclusive
 
 include:
-  BigObjects: true
+  BigObjects: false
   Rendering: true
   SDL3: false

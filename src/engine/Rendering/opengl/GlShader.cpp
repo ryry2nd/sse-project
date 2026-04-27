@@ -97,66 +97,30 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     // Delete shaders; linked into program now and no longer needed
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+    
+    GLint blockCount = 0;
+    glGetProgramiv(id, GL_ACTIVE_UNIFORM_BLOCKS, &blockCount);
+
+    for (GLuint i = 0; i < (GLuint)blockCount; i++)
+    {
+        char name[128];
+
+        glGetActiveUniformBlockName(id, i, sizeof(name), nullptr, name);
+
+        GLuint binding = i;
+
+        glUniformBlockBinding(id, i, binding);
+
+        bindingMap[name] = binding;
+    }
 }
 
 GlShader::~GlShader()
 {
-    if (UBO != 0)
-        glDeleteBuffers(1, &UBO);
     if (id != 0)
         glDeleteProgram(id);
 }
 
-void GlShader::setUniform(const std::string &location, const float &x)
-{
-    glUniform1f(glGetUniformLocation(id, location.c_str()), x);
-}
-
-void GlShader::setUniform(const std::string &location, const glm::vec3 &x)
-{
-    glUniform3f(glGetUniformLocation(id, location.c_str()), x.x, x.y, x.z);
-}
-
-void GlShader::setUniform(const std::string &location, const int &x)
-{
-    glUniform1i(glGetUniformLocation(id, location.c_str()), x);
-}
-
-void GlShader::setUniform(const std::string &location, const bool &x)
-{
-    glUniform1f(glGetUniformLocation(id, location.c_str()), x);
-}
-
-void GlShader::setUniform(const std::string &location, const glm::mat4 &x)
-{
-    glUniformMatrix4fv(glGetUniformLocation(id, location.c_str()), 1, GL_FALSE, glm::value_ptr(x));
-}
-
-void GlShader::setImages(std::vector<Image *> &textures) {
-    for (int i = 0; i < textures.size(); i++) {
-        GLuint id = static_cast<GlImage*>(textures[i])->getID();
-        glActiveTexture(GL_TEXTURE0 + i + 1);
-        glBindTexture(GL_TEXTURE_2D, id);
-
-        char uniformName[16];
-        snprintf(uniformName, sizeof(uniformName), "texture%d", (i + 1) % 1000);
-
-        GLint loc = glGetUniformLocation(id, uniformName);
-        if (loc != -1) {
-            glUniform1i(loc, i + 1);
-        }
-    }
-}
-
-void GlShader::SetShader() {
-    glUseProgram(id);
-
-    if (cullingEnabled) {
-        glEnable(GL_CULL_FACE);
-    }
-    else {
-        glDisable(GL_CULL_FACE);
-    }
-
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, UBO);
+GLuint GlShader::getID() {
+    return id;
 }

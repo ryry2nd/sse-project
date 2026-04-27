@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -15,6 +14,25 @@ namespace OpenGl
     using GLenum = unsigned int;
     using GLsizei = int;
 
+    class GlBuff : public Rendering::Buff {
+    public:
+        GlBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
+        ~GlBuff();
+        void write(const std::size_t offset, const std::size_t size, const void* data);
+        void read(const std::size_t offset, const std::size_t size, void* data);
+
+        GLuint getID();
+        GLenum getTarget();
+        GLenum getUsage();
+    private:
+        GLuint id;
+        GLenum target;
+        GLenum usage;
+
+        GLenum toGLTarget(Type type);
+        GLenum toGLUsage(Frequency freq);
+    };
+
     class GlWindow : public Rendering::Window
     {
     public:
@@ -24,6 +42,7 @@ namespace OpenGl
         void updateScreenRes();
         ~GlWindow();
 
+        SDL_GLContext getContext();
     private:
         SDL_GLContext glContext;
     };
@@ -50,49 +69,43 @@ namespace OpenGl
         GlShader(const char *vertexPath, const char *fragmentPath);
         ~GlShader();
 
-        void setUniform(const std::string &location, const float &x);
-        void setUniform(const std::string &location, const glm::vec3 &x);
-        void setUniform(const std::string &location, const int &x);
-        void setUniform(const std::string &location, const glm::mat4 &x);
-        void setUniform(const std::string &location, const bool &x);
+        GLuint getID();
 
-        void setImages(std::vector<Rendering::Image*> &textures);
-        void SetShader();  
+        const std::unordered_map<std::string, GLuint>& getBindingMap() const
+        {
+            return bindingMap;
+        }
 
     protected:
         GLuint id;
-        GLuint UBO;
+        std::unordered_map<std::string, GLuint> bindingMap;
     };
 
     class GlMesh : public Rendering::Mesh
     {
     public:
-        GlMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::Mesh::MeshTypes &meshType = Rendering::Mesh::MeshTypes::Triangles);
+        GlMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
         ~GlMesh();
-        // updates the vertices (you dont need to run this unless you changed the vertices)
-        void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::Mesh::MeshTypes &meshType = Rendering::Mesh::MeshTypes::Triangles);
-        void Draw();
-        glm::vec3 meshSize;
+        
+        void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
 
+        glm::vec3 getMeshSize();
+        GLuint getVAO();
+        GLuint getVBO();
+        GLuint getEBO();
+        GLenum getMeshType();
+        GLsizei getSize();
+
+        size_t getInd();
+        size_t getVert();
     private:
+        glm::vec3 meshSize;
         size_t ind_size;
+        size_t vert_size;
         GLuint VAO, VBO, EBO;
         GLenum glMeshType;
         GLsizei size;
     };
 
-    class GlBuff : public Rendering::Buff {
-    public:
-        GlBuff(Type type, Frequency freq, std::size_t size, void* data = nullptr);
-        ~GlBuff();
-        void write(const std::size_t offset, const std::size_t size, const void* data);
-        void read(const std::size_t offset, const std::size_t size, void* data);
-    private:
-        GLuint id;
-        GLenum target;
-        GLenum usage;
-
-        GLenum toGLTarget(Type type);
-        GLenum toGLUsage(Frequency freq);
-    };
+    void draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params);
 }

@@ -1,4 +1,3 @@
-#include <engine/BigObjects/BigObjects.hpp>
 #include <engine/Rendering/Rendering.hpp>
 #include <engine/Scripting/ScriptingHeaders.hpp>
 
@@ -18,15 +17,12 @@ int main(int argc, char *argv[])
         Rendering::Window::Update();
 
         ScriptingHeaders::Package::EventFunctions(&running);
-        ScriptingHeaders::Package::LoopFunctions();
-
-        BigObjects::Drawable::UpdateAllObjects();
 
         for (auto &win : Rendering::sdlWindows) {
             win->clearBackground();
         }
 
-        BigObjects::Drawable::DrawAllObjects();
+        ScriptingHeaders::Package::LoopFunctions();
 
         for (auto &win : Rendering::sdlWindows) {
             win->swapBuffer();

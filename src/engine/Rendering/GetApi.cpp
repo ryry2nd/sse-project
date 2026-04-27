@@ -28,14 +28,13 @@ using CreateShaderFn =
 
 using CreateMeshFn =
     std::unique_ptr<Mesh>(*)(
-        Rendering::Shader*,
         const float*,
         const size_t,
         const unsigned int*,
         const size_t,
         const short*,
         const size_t,
-        const Rendering::Mesh::MeshTypes&
+        Rendering::Mesh::MeshTypes
     );
 
 using CreateImageFromFileFn =
@@ -60,7 +59,14 @@ using CreateBuffFn =
         Buff::Type,
         Buff::Frequency,
         std::size_t,
-        void*
+        const void*
+    );
+
+using CreateDrawFn = 
+    void(*)(
+        Rendering::Material*,
+        Rendering::Mesh*,
+        Rendering::DrawParams*
     );
 
 typedef std::string (*GetNameFn)();
@@ -71,6 +77,7 @@ CreateImageFromFileFn createImageFromFileFunc = nullptr;
 CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
 CreateWindowFn createWindowFunc = nullptr;
 CreateBuffFn createBuffFunc = nullptr;
+CreateDrawFn createDrawFunc = nullptr;
 
 auto sdlDeleter = [](SDL_SharedObject* obj) {
     if (obj) SDL_UnloadObject(obj);
@@ -85,13 +92,35 @@ void createLibs() {
 
     for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
         if (entry.path().extension() == LIBRARY_SUFFIX) {
-            SDLSharedPtr lib(SDL_LoadObject(entry.path().c_str()), sdlDeleter);
+            SDL_SharedObject* raw = SDL_LoadObject(entry.path().c_str());
+
+            if (!raw)
+            {
+                spdlog::error("Failed to load {}: {}", entry.path().string(), SDL_GetError());
+                continue;
+            }
+
+            SDLSharedPtr lib(raw, sdlDeleter);
 
             auto getName = reinterpret_cast<GetNameFn>(SDL_LoadFunction(lib.get(), "getName"));
             if (!getName) continue;
 
             libs[getName()] = std::move(lib);
         }
+    }
+
+    std::string deb = "";
+    
+    for (const auto& [key, value] : libs)
+    {
+        deb += key + " ";
+    }
+
+    if (deb == "") {
+        spdlog::critical("No rendering APIs found");
+    }
+    else {
+        spdlog::info("Lib choice(s): {}", deb);
     }
 }
 
@@ -109,6 +138,7 @@ void CreationFunctions::initAPI(const std::string &apiName) {
     createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
     createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
     createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
+    createDrawFunc = (CreateDrawFn)SDL_LoadFunction(lib, "draw");
 
     spdlog::info("Successfully set API to {}", apiName);
 }
@@ -122,14 +152,14 @@ std::unique_ptr<Shader> CreationFunctions::createShader(const char* vertex, cons
     spdlog::debug("created shader with paths: \n{}\n{}", vertex, fragment);
     return createShaderFunc(vertex, fragment);
 }
-std::unique_ptr<Mesh> CreationFunctions::createMesh(Rendering::Shader *shady, const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, const Rendering::Mesh::MeshTypes &meshType) {
+std::unique_ptr<Mesh> CreationFunctions::createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType) {
     if (!createMeshFunc) {
         spdlog::error("createShader not loaded");
         return nullptr;
     }
 
     spdlog::debug("created mesh with {} vertices, and {} indicies.", vert_size, ind_size);
-    return createMeshFunc(shady, vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
+    return createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
     if (!createImageFromFileFunc) {
@@ -159,7 +189,7 @@ std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const cha
     return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
-std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, void* data) {
+std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data) {
     if (!createBuffFunc) {
         spdlog::error("createBuff not loaded");
         return nullptr;
@@ -167,4 +197,13 @@ std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequ
 
     spdlog::debug("created buffer with size: {}", size);
     return createBuffFunc(type, freq, size, data);
+}
+
+void CreationFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
+    if (!createDrawFunc) {
+        spdlog::error("draw not loaded");
+        return;
+    }
+
+    return createDrawFunc(mat, mesh, params);
 }
