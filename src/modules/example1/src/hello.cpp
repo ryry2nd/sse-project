@@ -140,6 +140,7 @@ extern "C" {
         float g = 0.5f + 0.5f * sin(t + 2.0f);
         float b = 0.5f + 0.5f * sin(t + 4.0f);
 
+        // makes background look like a 70s disco rave while under 20 pounds of lsd
         Rendering::sdlWindows[0]->setBackgroundColor({r, g, b, 1.0f});
 
 
