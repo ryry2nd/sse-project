@@ -1,65 +1,101 @@
 // #include <engine/BigObjects/BigObjects.hpp>
-#include "engine/Rendering/Rendering.hpp"
+#include <engine/Rendering/Rendering.hpp>
 #include <engine/CustomMath/CustomMath.hpp>
 #include <engine/Rendering/RenderObjects.hpp>
-// #include <iostream>
-// #include <vector>
-// #include <string>
-// #include <memory>
+
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_keycode.h>
 #include <SDL3/SDL_events.h>
 #include <memory>
-
-std::vector<std::unique_ptr<Rendering::Shader>> shaders;
-std::vector<std::unique_ptr<Rendering::Image>> images;
-std::vector<std::unique_ptr<Rendering::Mesh>> meshes;
-std::vector<std::unique_ptr<Rendering::Buff>> buffs;
-std::vector<Rendering::Material*> mats;
-std::vector<Rendering::DrawParams*> params;
-// std::vector<std::unique_ptr<BigObjects::Singularity>> bigObjects;
+#include <string>
 
 // const Bigint *speed;
 // const Bigint WALK_SPEED = Bigint(10);
 // Bigint run_speed = Bigint("100");
 
-struct Camera {
-    glm::mat4 view;
-    glm::mat4 proj;
-};
+static Objects::Scene scene;
 
-glm::vec3 camPos;
+#include <random>
+
+float random01()
+{
+    static std::mt19937 rng(std::random_device{}());
+    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+    return dist(rng);
+}
 
 extern "C" {
     void setup() {
+        auto &shaders = scene.shaders;
+        auto &images = scene.images;
+        auto &meshes = scene.meshes;
+        auto &buffs = scene.buffs;
+        auto &mats = scene.mats;
+        auto &params = scene.params;
+        auto &cams = scene.cams;
+        auto &objs = scene.objs;
+
         Rendering::CreationFunctions::initAPI("OpenGl4.6");
         glm::vec2 res(900, 500);
         Rendering::sdlWindows.push_back(std::move(Rendering::CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true)));
 
-        shaders.push_back(Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/debugVert.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/debugFrag.glsl").c_str()));
-        images.push_back(Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str()));
-        meshes.push_back(Rendering::CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3));
+        shaders["shader1"] = Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/floatVert.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/floatFrag.glsl").c_str());
+        shaders["shader2"] = Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/instanceVert.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/instanceFrag.glsl").c_str());
+        images["fish"] = Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str());
+        meshes["cube"] = Rendering::CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 
-
-        Camera cam = Camera();
-        cam.view = glm::translate(glm::mat4(1.0f), -camPos);
-        cam.proj = glm::perspective(glm::radians(70.0f), res.x/res.y, 0.1f, 100.0f);
-        buffs.push_back(Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Camera), &cam));
-
-        static glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3));
-        buffs.push_back(Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &model));
-
-        Rendering::Material *mat = new Rendering::Material();
-        mat->shader = shaders[0].get();
-        mat->images["im1"] = images[0].get();
-
-        Rendering::DrawParams *pr = new Rendering::DrawParams();
-        pr->buffers["Camera"] = buffs[0].get();
-        pr->buffers["pos"] = buffs[1].get();
+        cams["cam1"] = std::make_unique<Objects::FloatCamera3d>(glm::vec3(0,0,0));
         
 
-        mats.push_back(mat);
-        params.push_back(pr);
+        std::unique_ptr<Rendering::Material> mat = std::make_unique<Rendering::Material>();
+        mat->shader = shaders["shader1"].get();
+        mat->images["im1"] = images["fish"].get();
+        mats["mat1"] = std::move(mat);
+
+        std::unique_ptr<Rendering::Material> mat2 = std::make_unique<Rendering::Material>();
+        mat2->shader = shaders["shader2"].get();
+        mat2->images["im1"] = images["fish"].get();
+        mats["mat2"] = std::move(mat2);
+        
+        
+
+        auto p1 = std::make_unique<Rendering::DrawParams>();
+        p1->buffers["Camera"] = cams["cam1"]->buffs["Camera"].get();
+        
+
+        
+        
+        glm::vec3 gridSize(50,50,50);
+
+        std::vector<glm::mat4> models;
+        models.reserve(gridSize.x * gridSize.y * gridSize.z);
+
+        for (int x = 0; x < gridSize.x; x++) {
+            for (int y = 0; y < gridSize.y; y++) {
+                for (int z = 0; z < gridSize.z; z++) {
+                    glm::mat4 mat(1.0f);
+                    mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
+                    models.push_back(mat);
+                    // auto cube = std::make_unique<Objects::FloatObject>(meshes["cube"].get(), mats["mat1"].get());
+                    // cube->setPos({(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
+
+                    // p1->instanceBuffers["Model"].push_back(cube->buffs["Model"].get());
+
+                    // objs["cube_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z)] = std::move(cube);
+                }
+            }
+        }
+
+        auto modsBuff = Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
+
+        buffs["modsBuff"] = std::move(modsBuff);
+
+        p1->buffers["Model"] = buffs["modsBuff"].get();
+
+        p1->instanceCount = models.size();
+
+        params["p1"] = std::move(p1);
 
         // Bigint pos = Bigint::getHoweverManyDigits(0);
         // BigObjects::globalCamera.position.x = BigObjects::globalCamera.position.x + pos;
@@ -93,21 +129,60 @@ extern "C" {
 
     void loop() {
         static float rotate = 0;
-        const float &deltaTime = Rendering::Window::deltaTime;
+        auto deltaTime = Rendering::Window::deltaTime;
+        static float timer = 0.0f;
+        static int frameCount = 0;
+        static float t = 0.0f;
 
-        rotate += 10 * deltaTime;
+        t += 10.0f * deltaTime;
 
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0, 0, -3));
-        model = glm::rotate(model, glm::radians(rotate), glm::vec3(0.0f, 1.0f, 0.0f));
+        float r = 0.5f + 0.5f * sin(t);
+        float g = 0.5f + 0.5f * sin(t + 2.0f);
+        float b = 0.5f + 0.5f * sin(t + 4.0f);
+
+        Rendering::sdlWindows[0]->setBackgroundColor({r, g, b, 1.0f});
+
+
+        frameCount++;
+        timer += deltaTime;
+
+        if (timer >= 1.0f)
+        {
+            double fps = frameCount / timer;
+            spdlog::info("FPS: {}", fps);
+
+            frameCount = 0;
+            timer = 0.0f;
+        }
+
         
-        
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), -camPos);
 
-        buffs[0]->write(0, sizeof(glm::mat4), &view);
-        buffs[1]->write(0, sizeof(glm::mat4), &model);
+        auto &buffs = scene.buffs;
+        auto &mats = scene.mats;
+        auto &meshes = scene.meshes;
+        auto &params = scene.params;
+        auto &cams = scene.cams;
+        auto &objs = scene.objs;
 
-        Rendering::CreationFunctions::draw(mats[0], meshes[0].get(), params[0]);
+        Objects::FloatCamera3d *cam1 = static_cast<Objects::FloatCamera3d*>(cams["cam1"].get());
+        cam1->updateBuffs();
+
+        // rotate += 10 * deltaTime;
+
+        // Rendering::DrawParams dps;
+        // dps.buffers["Camera"] = cam1->buffs["Camera"].get();
+
+        // for (auto& [key, value] : objs) {
+        //     Objects::FloatObject *obj = static_cast<Objects::FloatObject*>(value.get());
+        //     obj->setRot({0, rotate,0});
+        //     obj->updateBuffs();
+
+            // dps.buffers["Model"] = obj->buffs["Model"].get();
+
+            // Rendering::CreationFunctions::draw(obj->renderPairs[0].mat, obj->renderPairs[0].mesh, &dps);
+        // }
+
+        Rendering::CreationFunctions::draw(mats["mat2"].get(), meshes["cube"].get(), params["p1"].get());
 
         // gets all keystates
         int numKeys;
@@ -119,35 +194,41 @@ extern "C" {
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            camPos.z -= 10 * deltaTime;
+            cam1->movePos(-((cam1->getForwardVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            camPos.z += 10 * deltaTime;
+            cam1->movePos(((cam1->getForwardVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getForwardVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
+            cam1->movePos(-((cam1->getRightVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_A])
         {
+            cam1->movePos(((cam1->getRightVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getRightVector() * deltaTime) * *speed;
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
+            cam1->movePos(((cam1->getDownVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position += BigVec3(BigObjects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
+            cam1->movePos(-((cam1->getDownVector() * deltaTime) * 10.0f));
             // BigObjects::globalCamera.position -= BigVec3(BigObjects::globalCamera.getDownVector() * deltaTime) * *speed;
         }
     }
 
     void event(SDL_Event *event, bool *running) {
+        Objects::FloatCamera3d *cam1 = static_cast<Objects::FloatCamera3d*>(scene.cams["cam1"].get());
+
         if (event->type == SDL_EVENT_QUIT)
             *running = false;
 
@@ -155,6 +236,7 @@ extern "C" {
         if (event->type == SDL_EVENT_MOUSE_MOTION)
         {
             // BigObjects::globalCamera.rotateCamera({event->motion.xrel, event->motion.yrel});
+            cam1->rotateCamera({event->motion.xrel, event->motion.yrel}, 0.1f);
         }
 
         if (event->type == SDL_EVENT_KEY_DOWN)
@@ -180,12 +262,6 @@ extern "C" {
     }
 
     void shutdown() {
-        delete mats[0];
-        delete params[0];
-
-        // bigObjects.clear();
-        meshes.clear();
-        shaders.clear();
-        images.clear();
+        scene.clear();
     }
 }

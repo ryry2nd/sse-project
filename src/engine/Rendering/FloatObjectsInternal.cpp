@@ -13,6 +13,9 @@ void FloatParticle::setRot(glm::vec3 rot) {
 void FloatParticle::setScl(glm::vec3 scl) {
     this->scl = scl;
 }
+void FloatParticle::movePos(glm::vec3 pos) {
+    this->pos += pos;
+}
 
 glm::vec3 FloatParticle::getPos() const {
     return pos;
@@ -36,9 +39,23 @@ void FloatCamera::setRot(glm::vec3 rot) {
     FloatParticle::setRot(rot);
     matChanged = true;
 }
-void FloatCamera::setScl(glm::vec3 scl) {
-    FloatParticle::setScl(scl);
+void FloatCamera::movePos(glm::vec3 pos) {
+    FloatParticle::movePos(pos);
     matChanged = true;
+}
+
+void FloatCamera::rotateCamera(glm::vec2 motion, float mouse_sensitivity) {
+        float deltaTime = Rendering::Window::deltaTime;
+
+        if (deltaTime == 0)
+        {
+            return;
+        }
+        glm::vec3 rotation;
+        rotation.y = getRot().y - ((motion.x / deltaTime) * mouse_sensitivity * deltaTime);
+        rotation.x = getRot().x - ((motion.y / deltaTime) * mouse_sensitivity * deltaTime);
+        rotation.z = getRot().z;
+        setRot(rotation);
 }
 
 void FloatCamera::updateBuffs() {

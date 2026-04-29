@@ -10,8 +10,8 @@ GLenum GlBuff::toGLTarget(Type type) {
     switch (type) {
         case Type::Uniform:      return GL_UNIFORM_BUFFER;
         case Type::Storage:      return GL_SHADER_STORAGE_BUFFER;
-        case Type::PixelPack:    return GL_PIXEL_PACK_BUFFER;
-        case Type::PixelUnpack:  return GL_PIXEL_UNPACK_BUFFER;
+        // case Type::PixelPack:    return GL_PIXEL_PACK_BUFFER;
+        // case Type::PixelUnpack:  return GL_PIXEL_UNPACK_BUFFER;
     }
     return GL_ARRAY_BUFFER;
 }

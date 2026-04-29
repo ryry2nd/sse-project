@@ -40,6 +40,7 @@ namespace OpenGl
         void clearBackground();
         void swapBuffer();
         void updateScreenRes();
+        void setBackgroundColor(glm::vec4 color);
         ~GlWindow();
 
         SDL_GLContext getContext();

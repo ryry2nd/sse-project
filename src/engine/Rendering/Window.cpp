@@ -86,6 +86,8 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
         SDL_SetWindowBordered(window, false);
     }
 
+    Window::res = res;
+
     spdlog::info("Successfully opened window with name: {}", name);
 }
 

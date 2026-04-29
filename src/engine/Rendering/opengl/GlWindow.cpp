@@ -72,6 +72,10 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
+void GlWindow::setBackgroundColor(glm::vec4 color) {
+    glClearColor(color.r, color.g, color.b, color.a);
+}
+
 void GlWindow::clearBackground()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

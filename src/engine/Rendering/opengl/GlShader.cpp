@@ -98,20 +98,66 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
     glDeleteShader(vertex);
     glDeleteShader(fragment);
     
-    GLint blockCount = 0;
-    glGetProgramiv(id, GL_ACTIVE_UNIFORM_BLOCKS, &blockCount);
+    // GLint blockCount = 0;
+    // glGetProgramiv(id, GL_ACTIVE_UNIFORM_BLOCKS, &blockCount);
 
-    for (GLuint i = 0; i < (GLuint)blockCount; i++)
+    // for (GLuint i = 0; i < (GLuint)blockCount; i++)
+    // {
+    //     char name[128];
+    //     glGetActiveUniformBlockName(id, i, sizeof(name), nullptr, name);
+    //     glUniformBlockBinding(id, i, i);
+    //     bindingMap[name] = i;
+    // }
+
+    GLuint nextBinding = 0;
+
+    // ====================================================
+    // UBO REFLECTION
+    // ====================================================
+
+    GLint uniformBlockCount = 0;
+    glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformBlockCount);
+
+    for (GLuint i = 0; i < (GLuint)uniformBlockCount; i++)
     {
-        char name[128];
+        char name[256];
+        GLsizei length = 0;
 
-        glGetActiveUniformBlockName(id, i, sizeof(name), nullptr, name);
+        glGetProgramResourceName(id,
+                                 GL_UNIFORM_BLOCK,
+                                 i,
+                                 sizeof(name),
+                                 &length,
+                                 name);
 
-        GLuint binding = i;
+        glUniformBlockBinding(id, i, nextBinding);
+        bindingMap[name] = nextBinding;
 
-        glUniformBlockBinding(id, i, binding);
+        nextBinding++;
+    }
 
-        bindingMap[name] = binding;
+    // ====================================================
+    // SSBO REFLECTION
+    // ====================================================
+    GLint storageBlockCount = 0;
+    glGetProgramInterfaceiv(id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &storageBlockCount);
+
+    for (GLuint i = 0; i < (GLuint)storageBlockCount; i++)
+    {
+        char name[256];
+        GLsizei length = 0;
+
+        glGetProgramResourceName(id,
+                                 GL_SHADER_STORAGE_BLOCK,
+                                 i,
+                                 sizeof(name),
+                                 &length,
+                                 name);
+
+        glShaderStorageBlockBinding(id, i, nextBinding);
+        bindingMap[name] = nextBinding;
+
+        nextBinding++;
     }
 }
 

@@ -10,13 +10,16 @@ layout(std140) uniform Camera
     mat4 view;
     mat4 proj;
 };
-layout(std140) uniform pos
+layout(std430) buffer Model
 {
-    mat4 model;
+    mat4 models[];
 };
 
 void main()
 {
+    mat4 model = models[gl_InstanceID];
+    
     TexCoord = aTexCoord;
+    
     gl_Position = proj * view * model * vec4(aPos, 1.0);
 }

@@ -10,13 +10,15 @@ namespace ObjectInternal {
         virtual void setRot(glm::vec3 rot);
         virtual void setScl(glm::vec3 scl);
 
+        virtual void movePos(glm::vec3 pos);
+
         glm::vec3 getPos() const;
         glm::vec3 getRot() const;
         glm::vec3 getScl() const;
-    private:
-        glm::vec3 pos;
-        glm::vec3 rot;
-        glm::vec3 scl;
+    protected:
+        glm::vec3 pos = glm::vec3(0.0f);
+        glm::vec3 rot = glm::vec3(0.0f);
+        glm::vec3 scl = glm::vec3(1.0f);
     };
 
     class FloatCamera : public FloatParticle, public Objects::Camera {
@@ -27,24 +29,30 @@ namespace ObjectInternal {
 
         void setPos(glm::vec3 pos);
         void setRot(glm::vec3 rot);
-        void setScl(glm::vec3 scl);
+        void movePos(glm::vec3 pos);
+
+        void rotateCamera(glm::vec2 rot, float mouse_sensitivity);
+        
     protected:
         void setupObject(CameraStruct camStruct);
     private:
+        void setScl(glm::vec3 scl) {};
         bool matChanged = false;
     };
 }
 
 namespace Objects {
     class FloatObject : public ObjectInternal::FloatParticle, public Object {
+    public:
         FloatObject();
+        FloatObject(Rendering::Mesh *mesh, Rendering::Material *mat);
         FloatObject(Rendering::Mesh **mesh, Rendering::Material **mat, size_t size=1);
 
         void setPos(glm::vec3 pos);
         void setRot(glm::vec3 rot);
         void setScl(glm::vec3 scl);
 
-        virtual void updateBuffs() = 0;
+        void updateBuffs();
     private:
         void setupObject();
         bool modelChanged = false;
@@ -59,11 +67,13 @@ namespace Objects {
 
         glm::mat4 getProj() const;
         glm::mat4 getView() const;
+
+        uint32_t viewMask = RenderLayer::UI;
     };
 
     class FloatCamera3d : public ObjectInternal::FloatCamera {
     public:
-        FloatCamera3d();
+        FloatCamera3d(glm::vec3 pos = glm::vec3(), glm::vec3 rot = glm::vec3());
 
         glm::vec3 getForwardVector() const;
         glm::vec3 getRightVector() const;
@@ -72,8 +82,10 @@ namespace Objects {
         glm::mat4 getProj() const;
         glm::mat4 getView() const;
 
+        uint32_t viewMask = RenderLayer::World;
+
         float fov = 70.0f;
         float nearPlane = 0.1f;
-        float farPlane = 100.0f;
+        float farPlane = 10000.0f;
     };
 }

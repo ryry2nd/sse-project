@@ -35,6 +35,7 @@ namespace Rendering
         virtual void clearBackground() = 0;
         virtual void swapBuffer() = 0;
         virtual void updateScreenRes() = 0;
+        virtual void setBackgroundColor(glm::vec4 color) = 0;
         static void Update();
         static const bool *getKeystates(int &numKeys);
 
@@ -61,13 +62,13 @@ namespace Rendering
         enum class Type {
             Uniform,
             Storage,
-            PixelPack,
-            PixelUnpack,
+            // PixelPack,
+            // PixelUnpack,
         };
         enum class Frequency {
             Static,
             Dynamic,
-            Stream
+            Stream,
         };
 
         Buff(Type type, Frequency freq, std::size_t size);
@@ -124,6 +125,7 @@ namespace Rendering
 
     struct DrawParams {
         std::unordered_map<std::string, Buff*> buffers;
+        size_t instanceCount;
     };
 
     class Mesh

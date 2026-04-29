@@ -1,5 +1,7 @@
 ToDo List
 
+IMPORTANT DONT FORGET
+use user level threads for modules (it's what you want it and just run them one at a time and configure stack size in yaml)
 
 
 PHASE 1 - CORE ENGINE
