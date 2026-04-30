@@ -41,6 +41,10 @@ namespace OpenGl
         void swapBuffer();
         void updateScreenRes();
         void setBackgroundColor(glm::vec4 color);
+        void disableDepthTest();
+        void enableDepthTest();
+        void enableBackfaceCull();
+        void disableBackfaceCull();
         ~GlWindow();
 
         SDL_GLContext getContext();
@@ -53,6 +57,7 @@ namespace OpenGl
     public:
         // it makes the image
         GlImage(const std::string &filePath);
+        GlImage(GLuint id, glm::vec2 size, bool ownsTexture = true);
         GlImage(SDL_Surface *surface);
         // it unmakes the image
         ~GlImage();
@@ -62,6 +67,29 @@ namespace OpenGl
     private:
         void setupObject(SDL_Surface *surface);
         GLuint textureID = 0;
+        bool ownsTexture = true;
+    };
+
+    class GlFrameBuffer : public Rendering::FrameBuffer {
+    public:
+        GlFrameBuffer(glm::vec2 size, uint32_t settings);
+        ~GlFrameBuffer();
+
+        void setSize(glm::vec2 size);
+
+        Rendering::Image* getColorImage();
+        Rendering::Image* getDepthImage();
+        Rendering::Image* getStencilImage();       
+
+
+        GLuint getID();
+
+    private:
+        GLuint id = 0;
+
+        GlImage* colorImage = nullptr;
+        GlImage* depthImage = nullptr;
+        GlImage* stencilImage = nullptr;
     };
 
     class GlShader : public Rendering::Shader

@@ -76,6 +76,22 @@ void GlWindow::setBackgroundColor(glm::vec4 color) {
     glClearColor(color.r, color.g, color.b, color.a);
 }
 
+void GlWindow::disableDepthTest() {
+    glDisable(GL_DEPTH_TEST);
+    
+}
+void GlWindow::enableDepthTest() {
+    glEnable(GL_DEPTH_TEST);
+}
+
+void GlWindow::enableBackfaceCull() {
+    glEnable(GL_CULL_FACE);
+}
+
+void GlWindow::disableBackfaceCull() {
+    glDisable(GL_CULL_FACE);
+}
+
 void GlWindow::clearBackground()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

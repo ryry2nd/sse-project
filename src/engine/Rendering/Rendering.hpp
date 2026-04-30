@@ -39,6 +39,11 @@ namespace Rendering
         static void Update();
         static const bool *getKeystates(int &numKeys);
 
+        virtual void disableDepthTest() = 0;
+        virtual void enableDepthTest() = 0;
+        virtual void enableBackfaceCull() = 0;
+        virtual void disableBackfaceCull() = 0;
+
         static float deltaTime;
         static double fps;
         static Uint64 now;
@@ -55,7 +60,6 @@ namespace Rendering
     };
 
     inline std::vector<std::unique_ptr<Window>> sdlWindows;
-
 
     class Buff {
     public:
@@ -107,6 +111,28 @@ namespace Rendering
         glm::vec2 imageSizes;
     };
 
+    class FrameBuffer {
+    public:
+        enum Settings : uint32_t {
+            Color = 1 << 0,
+            Depth = 1 << 1,
+            Stencil = 1 << 2,
+        };
+
+        virtual ~FrameBuffer() = default;
+        glm::vec2 getSize() const;
+        uint32_t getSettings() const;
+        virtual void setSize(glm::vec2 size) = 0;
+
+        virtual Image* getColorImage() = 0;
+        virtual Image* getDepthImage() = 0;
+        virtual Image* getStencilImage() = 0;
+
+    protected:
+        glm::vec2 size;
+        uint32_t settings;
+    };
+
     class Shader
     {
     public:
@@ -124,8 +150,15 @@ namespace Rendering
     };
 
     struct DrawParams {
+        enum Settings : uint32_t {
+            DisableScreen = 1 << 0,
+            EnableFBO = 1 << 1,
+        };
+
         std::unordered_map<std::string, Buff*> buffers;
         size_t instanceCount;
+        uint32_t settings;
+        FrameBuffer *fbo = nullptr;
     };
 
     class Mesh
@@ -159,6 +192,7 @@ namespace Rendering
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
         std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
         std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr);
+        std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings);
     }
 
     //-------- To be deleted --------//

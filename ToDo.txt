@@ -5,8 +5,10 @@ use user level threads for modules (it's what you want it and just run them one 
 
 
 PHASE 1 - CORE ENGINE
-
-trim down Slang and Clang and add them to the engine
+Framebuffer (FBO)
+Color + depth texture
+Secondary camera system
+Clip planes or stencil buffer
 make normal float objects
 move all bigint code to a module
 make it so bigint objects are just particles you make normal objects a parent to

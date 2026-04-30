@@ -1,5 +1,6 @@
 #include "GlRendering.hpp"
 #include "engine/Rendering/Rendering.hpp"
+#include <memory>
 
 #define NAME "OpenGl4.6"
 
@@ -27,6 +28,10 @@ extern "C" std::unique_ptr<Rendering::Window> createWindow(glm::vec2 res, const 
 
 extern "C" std::unique_ptr<Rendering::Buff> createBuff(Rendering::Buff::Type type, Rendering::Buff::Frequency freq, std::size_t size, const void* data = nullptr) {
     return std::make_unique<GlBuff>(type, freq, size, data);
+}
+
+extern "C" std::unique_ptr<Rendering::FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
+    return std::make_unique<GlFrameBuffer>(size, settings);
 }
 
 extern "C" void draw(Rendering::Material* mat, Rendering::Mesh* mesh, Rendering::DrawParams* params) {

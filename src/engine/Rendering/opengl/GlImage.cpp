@@ -18,6 +18,18 @@ GlImage::GlImage(const std::string &filePath)
     setupObject(loadFile(filePath));
 }
 
+GlImage::GlImage(GLuint existingTexture, glm::vec2 size, bool ownsTexture)
+{
+    if (existingTexture == 0)
+    {
+        spdlog::error("GlImage: trying to wrap invalid texture (0)");
+    }
+    
+    textureID = existingTexture;
+    imageSizes = size;
+    this->ownsTexture = ownsTexture;
+}
+
 GlImage::GlImage(SDL_Surface *surface)
 {
     setupObject(surface);
@@ -56,7 +68,7 @@ void GlImage::setupObject(SDL_Surface *surface)
 
 GlImage::~GlImage()
 {
-    if (textureID != 0)
+    if (textureID != 0 && ownsTexture)
         glDeleteTextures(1, &textureID);
 }
 

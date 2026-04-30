@@ -2,6 +2,7 @@
 
 #include "Rendering.hpp"
 
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 #include <glm/glm.hpp>
@@ -55,6 +56,7 @@ namespace Objects {
         std::unordered_map<std::string, std::unique_ptr<Rendering::Image>> images;
         std::unordered_map<std::string, std::unique_ptr<Rendering::Material>> mats;
         std::unordered_map<std::string, std::unique_ptr<Rendering::DrawParams>> params;
+        std::unordered_map<std::string, std::unique_ptr<Rendering::FrameBuffer>> fbos;
         void drawScene();
         void clear();
     };

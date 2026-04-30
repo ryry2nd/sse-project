@@ -84,6 +84,11 @@ void setImages(GlShader *glshdr, std::unordered_map<std::string, Rendering::Imag
 void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params) {
     auto *glshdr = static_cast<OpenGl::GlShader*>(mat->shader);
     auto *glmesh = static_cast<OpenGl::GlMesh*>(mesh);
+    auto *fbo = params->fbo;
+
+    bool disableScreen = params->settings & Rendering::DrawParams::DisableScreen;
+    bool useFBO        = params->settings & Rendering::DrawParams::EnableFBO;
+    bool hasFBO        = (fbo != nullptr);
 
     glUseProgram(glshdr->getID());
     glBindVertexArray(glmesh->getVAO());
@@ -101,26 +106,73 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 
 
     // -------------------------
-    // 3. DRAW
+    // 3. Render To FBO
     // -------------------------
-    if (params->instanceCount > 0)
-    {
-        glDrawElementsInstanced(
-            glmesh->getMeshType(),
-            static_cast<GLsizei>(glmesh->getInd()),
-            GL_UNSIGNED_INT,
-            nullptr,
-            params->instanceCount
-        );
+    if (useFBO) {
+        if (!hasFBO) {
+            spdlog::warn("DrawParams: EnableFBO set but fbo is nullptr");
+
+            if (disableScreen)
+            {
+                glBindVertexArray(0);
+                return; // nowhere to render
+            }
+        }
+        else {
+            auto glFBO = static_cast<GlFrameBuffer*>(fbo);
+            glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
+            glViewport(0, 0, (GLsizei)fbo->getSize().x, (GLsizei)fbo->getSize().y);
+
+            if (params->instanceCount > 0)
+            {
+                glDrawElementsInstanced(
+                    glmesh->getMeshType(),
+                    (GLsizei)glmesh->getInd(),
+                    GL_UNSIGNED_INT,
+                    nullptr,
+                    params->instanceCount
+                );
+            }
+            else
+            {
+                glDrawElements(
+                    glmesh->getMeshType(),
+                    (GLsizei)glmesh->getInd(),
+                    GL_UNSIGNED_INT,
+                    nullptr
+                );
+            }
+        }
     }
-    else
+    
+    // -------------------------
+    // 4. RENDER TO SCREEN
+    // -------------------------
+    if (!disableScreen)
     {
-        glDrawElements(
-            glmesh->getMeshType(),
-            static_cast<GLsizei>(glmesh->getInd()),
-            GL_UNSIGNED_INT,
-            nullptr
-        );
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // NOTE: ideally restore window viewport here
+
+        if (params->instanceCount > 0)
+        {
+            glDrawElementsInstanced(
+                glmesh->getMeshType(),
+                (GLsizei)glmesh->getInd(),
+                GL_UNSIGNED_INT,
+                nullptr,
+                params->instanceCount
+            );
+        }
+        else
+        {
+            glDrawElements(
+                glmesh->getMeshType(),
+                (GLsizei)glmesh->getInd(),
+                GL_UNSIGNED_INT,
+                nullptr
+            );
+        }
     }
 
     glBindVertexArray(0);

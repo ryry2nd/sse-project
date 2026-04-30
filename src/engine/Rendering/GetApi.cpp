@@ -1,5 +1,6 @@
 #include "Rendering.hpp"
 
+#include <memory>
 #include <spdlog/spdlog.h>
 #include <filesystem>
 #include <unordered_map>
@@ -69,6 +70,12 @@ using CreateDrawFn =
         Rendering::DrawParams*
     );
 
+using CreateFBOFn = 
+    std::unique_ptr<FrameBuffer>(*)(
+        glm::vec2 size, 
+        uint32_t settings
+    );
+
 typedef std::string (*GetNameFn)();
 
 CreateShaderFn createShaderFunc = nullptr;
@@ -78,6 +85,7 @@ CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
 CreateWindowFn createWindowFunc = nullptr;
 CreateBuffFn createBuffFunc = nullptr;
 CreateDrawFn createDrawFunc = nullptr;
+CreateFBOFn createFboFunc = nullptr;
 
 auto sdlDeleter = [](SDL_SharedObject* obj) {
     if (obj) SDL_UnloadObject(obj);
@@ -139,6 +147,7 @@ void CreationFunctions::initAPI(const std::string &apiName) {
     createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
     createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
     createDrawFunc = (CreateDrawFn)SDL_LoadFunction(lib, "draw");
+    createFboFunc = (CreateFBOFn)SDL_LoadFunction(lib, "createFrameBuffer");
 
     spdlog::info("Successfully set API to {}", apiName);
 }
@@ -197,6 +206,16 @@ std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequ
 
     spdlog::debug("created buffer with size: {}", size);
     return createBuffFunc(type, freq, size, data);
+}
+
+std::unique_ptr<FrameBuffer> CreationFunctions::createFrameBuffer(glm::vec2 size, uint32_t settings) {
+    if (!createFboFunc) {
+        spdlog::error("createFrameBuffer not loaded");
+        return nullptr;
+    }
+
+    spdlog::debug("created frame buffer with size: {},{}", size.x, size.y);
+    return createFboFunc(size, settings);
 }
 
 void CreationFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {

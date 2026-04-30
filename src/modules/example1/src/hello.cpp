@@ -62,10 +62,17 @@ extern "C" {
 
         auto p1 = std::make_unique<Rendering::DrawParams>();
         p1->buffers["Camera"] = cams["cam1"]->buffs["Camera"].get();
-        
 
+        auto p2 = std::make_unique<Rendering::DrawParams>();
+        p2->buffers["Camera"] = cams["cam1"]->buffs["Camera"].get();
+
+        glm::mat4 cubeMat(1.0f);
+        cubeMat = glm::translate(cubeMat, {-10, 0, 0});
+        buffs["cube_view"] = Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &cubeMat);
+        p2->buffers["Model"] = buffs["cube_view"].get();
         
-        
+        params["p2"] = std::move(p2);
+
         glm::vec3 gridSize(50,50,50);
 
         std::vector<glm::mat4> models;
@@ -94,6 +101,18 @@ extern "C" {
         p1->buffers["Model"] = buffs["modsBuff"].get();
 
         p1->instanceCount = models.size();
+
+        p1->settings = Rendering::DrawParams::Settings::EnableFBO;
+
+        auto fb = Rendering::CreationFunctions::createFrameBuffer(res, Rendering::FrameBuffer::Settings::Color);
+        p1->fbo = fb.get();
+
+        std::unique_ptr<Rendering::Material> mat3 = std::make_unique<Rendering::Material>();
+        mat3->shader = shaders["shader1"].get();
+        mat3->images["im1"] = fb->getColorImage();
+        mats["mat3"] = std::move(mat3);
+
+        scene.fbos["fbo1"] = std::move(fb);
 
         params["p1"] = std::move(p1);
 
@@ -134,11 +153,11 @@ extern "C" {
         static int frameCount = 0;
         static float t = 0.0f;
 
-        t += 10.0f * deltaTime;
+        t += deltaTime * 1.0f;
 
-        float r = 0.5f + 0.5f * sin(t);
-        float g = 0.5f + 0.5f * sin(t + 2.0f);
-        float b = 0.5f + 0.5f * sin(t + 4.0f);
+        float r = 0.5f + 0.3f * sin(t);
+        float g = 0.5f + 0.3f * sin(t + 2.0f);
+        float b = 0.5f + 0.3f * sin(t + 4.0f);
 
         // makes background look like a 70s disco rave while under 20 pounds of lsd
         Rendering::sdlWindows[0]->setBackgroundColor({r, g, b, 1.0f});
@@ -183,7 +202,12 @@ extern "C" {
             // Rendering::CreationFunctions::draw(obj->renderPairs[0].mat, obj->renderPairs[0].mesh, &dps);
         // }
 
+        // Rendering::sdlWindows[0]->disableDepthTest();
         Rendering::CreationFunctions::draw(mats["mat2"].get(), meshes["cube"].get(), params["p1"].get());
+
+        // Rendering::sdlWindows[0]->disableDepthTest();
+        Rendering::CreationFunctions::draw(mats["mat3"].get(), meshes["cube"].get(), params["p2"].get());
+        // Rendering::sdlWindows[0]->enableDepthTest();
 
         // gets all keystates
         int numKeys;
