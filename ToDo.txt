@@ -1,27 +1,19 @@
 ToDo List
 
-IMPORTANT DONT FORGET
+IMPORTANT DON'T FORGET
 use user level threads for modules (it's what you want it and just run them one at a time and configure stack size in yaml)
 
 
 PHASE 1 - CORE ENGINE
-Framebuffer (FBO)
-Color + depth texture
-Secondary camera system
 Clip planes or stencil buffer
 make normal float objects
 move all bigint code to a module
 make it so bigint objects are just particles you make normal objects a parent to
 make it so there is a relationship variable that is the bigint scale
 put the camera in base rendering and remove bigint references
-remove all global pointer things because thats a bad idea
-give the camera the ability to ether render to the buffer or render to an image
-add object groups
 have it so there is a positional relationship variable between float objects and bigint particles as a bigint offset
 add cache to bigints and make it relationship
 make it so bigint math module has a floating decimal point instead of just hardcoded at 5
-make it so references are used less so it copies less pointers because there is no point in copying like a 64 bit pointer for a character or some bullcrap
-
 
 
 PHASE 2 - TOOLING + BUILD + REPO
@@ -41,7 +33,7 @@ add central logging system
 maybe add timer functions or at least a way to collect unix epoch
 make it so there is a standard for paths. like a saves/ path and a cache/ path
 make it so clang compiles modules how they want and add JIT support and put compiled modules cached as .bin files
-
+slim down .git HARD
 
 
 PHASE 3 - MODULE SYSTEM
