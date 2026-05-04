@@ -1,9 +1,4 @@
 {
-    "files.exclude": {
-        "**/build/**": true,
-        "**/libs/**": true
-    },
-
     "files.watcherExclude": {
         "**/build/**": true,
         "**/libs/**": true
