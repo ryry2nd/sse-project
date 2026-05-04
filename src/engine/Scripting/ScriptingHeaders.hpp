@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 struct SDL_SharedObject;
 union SDL_Event;

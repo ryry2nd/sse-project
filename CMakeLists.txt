@@ -37,7 +37,7 @@ else()
         add_compile_options(
                 -DDEBUG
                 -O1
-                -g
+                -g3
                 -fno-omit-frame-pointer
         )
 

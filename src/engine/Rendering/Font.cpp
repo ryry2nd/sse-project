@@ -1,5 +1,4 @@
 #include "Rendering.hpp"
-#include <spdlog/spdlog.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 

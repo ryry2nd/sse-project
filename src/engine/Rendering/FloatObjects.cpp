@@ -1,6 +1,5 @@
 #include "FloatObjects.hpp"
 #include "Rendering.hpp"
-#include <spdlog/spdlog.h>
 
 using namespace Objects;
 

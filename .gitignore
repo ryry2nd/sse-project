@@ -1,4 +1,5 @@
-.vscode
 build
 .venv
-command.sh
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json

@@ -9,11 +9,17 @@
 #include <memory>
 #include <string>
 
+#ifndef MODULE_PATH
+    #define MODULE_PATH ""
+#endif
+
 // const Bigint *speed;
 // const Bigint WALK_SPEED = Bigint(10);
 // Bigint run_speed = Bigint("100");
 
 static Objects::Scene scene;
+
+static bool outputFPS = false;
 
 #include <random>
 
@@ -40,8 +46,8 @@ extern "C" {
         glm::vec2 res(900, 500);
         Rendering::sdlWindows.push_back(std::move(Rendering::CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true)));
 
-        shaders["shader1"] = Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/floatVert.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/floatFrag.glsl").c_str());
-        shaders["shader2"] = Rendering::CreationFunctions::createShader((std::string(MODULE_PATH) + "/assets/shaders/instanceVert.glsl").c_str(), (std::string(MODULE_PATH) + "/assets/shaders/instanceFrag.glsl").c_str());
+        shaders["shader1"] = Rendering::CreationFunctions::createShader(std::string(MODULE_PATH) + "/assets/shaders/floatCube.slang");
+        shaders["shader2"] = Rendering::CreationFunctions::createShader(std::string(MODULE_PATH) + "/assets/shaders/instanceCube.slang");
         images["fish"] = Rendering::CreationFunctions::createImage((std::string(MODULE_PATH) + "/assets/textures/FISH.png").c_str());
         meshes["cube"] = Rendering::CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 
@@ -50,26 +56,25 @@ extern "C" {
 
         std::unique_ptr<Rendering::Material> mat = std::make_unique<Rendering::Material>();
         mat->shader = shaders["shader1"].get();
-        mat->images["im1"] = images["fish"].get();
+        mat->images[0] = images["fish"].get();
         mats["mat1"] = std::move(mat);
 
         std::unique_ptr<Rendering::Material> mat2 = std::make_unique<Rendering::Material>();
         mat2->shader = shaders["shader2"].get();
-        mat2->images["im1"] = images["fish"].get();
+        mat2->images[0] = images["fish"].get();
         mats["mat2"] = std::move(mat2);
-        
         
 
         auto p1 = std::make_unique<Rendering::DrawParams>();
-        p1->buffers["Camera"] = cams["cam1"]->buffs["Camera"].get();
+        p1->ubo[0] = cams["cam1"]->buffs["Camera"].get();
 
         auto p2 = std::make_unique<Rendering::DrawParams>();
-        p2->buffers["Camera"] = cams["cam1"]->buffs["Camera"].get();
+        p2->ubo[0] = cams["cam1"]->buffs["Camera"].get();
 
         glm::mat4 cubeMat(1.0f);
         cubeMat = glm::translate(cubeMat, {-10, 0, 0});
         buffs["cube_view"] = Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &cubeMat);
-        p2->buffers["Model"] = buffs["cube_view"].get();
+        p2->ssbo[0] = buffs["cube_view"].get();
         
         params["p2"] = std::move(p2);
 
@@ -84,21 +89,15 @@ extern "C" {
                     glm::mat4 mat(1.0f);
                     mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
                     models.push_back(mat);
-                    // auto cube = std::make_unique<Objects::FloatObject>(meshes["cube"].get(), mats["mat1"].get());
-                    // cube->setPos({(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
-
-                    // p1->instanceBuffers["Model"].push_back(cube->buffs["Model"].get());
-
-                    // objs["cube_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z)] = std::move(cube);
                 }
             }
         }
 
-        auto modsBuff = Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
+        auto modsBuff = Rendering::CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Static, sizeof(glm::mat4)*models.size(), models.data());
 
         buffs["modsBuff"] = std::move(modsBuff);
 
-        p1->buffers["Model"] = buffs["modsBuff"].get();
+        p1->ssbo[0] = buffs["modsBuff"].get();
 
         p1->instanceCount = models.size();
 
@@ -109,7 +108,7 @@ extern "C" {
 
         std::unique_ptr<Rendering::Material> mat3 = std::make_unique<Rendering::Material>();
         mat3->shader = shaders["shader1"].get();
-        mat3->images["im1"] = fb->getColorImage();
+        mat3->images[0] = fb->getColorImage();
         mats["mat3"] = std::move(mat3);
 
         scene.fbos["fbo1"] = std::move(fb);
@@ -168,14 +167,14 @@ extern "C" {
 
         if (timer >= 1.0f)
         {
-            double fps = frameCount / timer;
-            spdlog::info("FPS: {}", fps);
+            if (outputFPS) {
+                double fps = frameCount / timer;
+                spdlog::info("FPS: {:.2f}", fps);
+            }
 
             frameCount = 0;
             timer = 0.0f;
         }
-
-        
 
         auto &buffs = scene.buffs;
         auto &mats = scene.mats;
@@ -187,27 +186,10 @@ extern "C" {
         Objects::FloatCamera3d *cam1 = static_cast<Objects::FloatCamera3d*>(cams["cam1"].get());
         cam1->updateBuffs();
 
-        // rotate += 10 * deltaTime;
-
-        // Rendering::DrawParams dps;
-        // dps.buffers["Camera"] = cam1->buffs["Camera"].get();
-
-        // for (auto& [key, value] : objs) {
-        //     Objects::FloatObject *obj = static_cast<Objects::FloatObject*>(value.get());
-        //     obj->setRot({0, rotate,0});
-        //     obj->updateBuffs();
-
-            // dps.buffers["Model"] = obj->buffs["Model"].get();
-
-            // Rendering::CreationFunctions::draw(obj->renderPairs[0].mat, obj->renderPairs[0].mesh, &dps);
-        // }
-
-        // Rendering::sdlWindows[0]->disableDepthTest();
+        params["p1"]->fbo->getColorImage()->clearTransparent();
         Rendering::CreationFunctions::draw(mats["mat2"].get(), meshes["cube"].get(), params["p1"].get());
 
-        // Rendering::sdlWindows[0]->disableDepthTest();
-        Rendering::CreationFunctions::draw(mats["mat3"].get(), meshes["cube"].get(), params["p2"].get());
-        // Rendering::sdlWindows[0]->enableDepthTest();
+        // Rendering::CreationFunctions::draw(mats["mat3"].get(), meshes["cube"].get(), params["p2"].get());
 
         // gets all keystates
         int numKeys;
@@ -278,6 +260,9 @@ extern "C" {
             if (key == SDLK_X)
             {
                 // run_speed /= Bigint(10);
+            }
+            if (key == SDLK_F3) {
+                outputFPS = !outputFPS;
             }
         }
         if (event->type == SDL_EVENT_WINDOW_RESIZED)

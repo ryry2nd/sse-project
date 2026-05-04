@@ -20,7 +20,7 @@ ExternalProject_Add(slang
         -DSLANG_ENABLE_TESTS=OFF
         -DSLANG_ENABLE_EXAMPLES=OFF
         -DSLANG_ENABLE_GFX=OFF
-        -DSLANG_ENABLE_SLANG_GLSLANG=OFF
+        -DSLANG_ENABLE_SLANG_GLSLANG=ON
         -DSLANG_SLANG_LLVM_FLAVOR=DISABLE
         -DSLANG_EMBED_CORE_MODULE=ON
         -DSLANG_EMBED_CORE_MODULE_SOURCE=ON
@@ -60,5 +60,17 @@ add_custom_target(copy_slang ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/libslang-compiler.so.0.2026.2.2
         ${OUT_LIB}/
+
+    # COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    #     ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/libslang-glsl-module-2026.2.2.so
+    #     ${OUT_LIB}/
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/libslang-glslang-2026.2.2.so
+        ${OUT_LIB}/
+    
+    # COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    #     ${slangBuild}/${CMAKE_BUILD_TYPE}/lib/slang-standard-module-2026.2.2
+    #     ${OUT_LIB}/
 )
 add_dependencies(copy_slang slang)

@@ -42,6 +42,8 @@ GlMesh::~GlMesh()
         glDeleteBuffers(1, &VBO);
     if (EBO != 0)
         glDeleteBuffers(1, &EBO);
+
+    spdlog::debug("Deleting mesh with VAO: 0x{:x}, VBO: 0x{:x}, EBO: 0x{:x}", VAO, VBO, EBO);
 }
 
 GlMesh::GlMesh(const float *vertices, const size_t vert_size,
@@ -50,11 +52,15 @@ GlMesh::GlMesh(const float *vertices, const size_t vert_size,
                 Rendering::Mesh::MeshTypes meshType
             ) : VAO(0), VBO(0), EBO(0)
 {
+    spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
+
+    spdlog::debug("VAO has id: 0x{:x}", VAO);
+
     updateVerts(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 
@@ -74,12 +80,16 @@ void GlMesh::updateVerts(
                  vertices,
                  GL_STATIC_DRAW);
 
+    spdlog::debug("FBO has id: 0x{:x}", VBO);
+
     // ---- EBO (IMPORTANT: while VAO bound) ----
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  ind_size * sizeof(unsigned int),
                  indices,
                  GL_STATIC_DRAW);
+
+    spdlog::debug("EBO has id: 0x{:x}", EBO);
 
     // ---- ATTRIBUTES ----
     GLuint offset = 0;

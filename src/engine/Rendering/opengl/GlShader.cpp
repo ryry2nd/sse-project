@@ -1,16 +1,20 @@
 #include "GlRendering.hpp"
 
-#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 #include <fstream>
-#include <sstream>
 #include <filesystem>
 
 using namespace OpenGl;
 using namespace Rendering;
 
-GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
+GlShader::GlShader(std::string path)
 {
+    std::string vertexPath;
+    std::string fragmentPath;
+    compileShaders(path, vertexPath, fragmentPath);
+
+    spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
+
     if (!std::filesystem::exists(vertexPath)) {
         spdlog::error("Shader path: {} does not exist", vertexPath);
         return;
@@ -20,149 +24,153 @@ GlShader::GlShader(const char *vertexPath, const char *fragmentPath)
         return;
     }
 
-    std::string vertexCode, fragmentCode;
-    std::ifstream vShaderFile, fShaderFile;
+    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-    // Ensure ifstream objects can throw exceptions
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    // ---- load binary files ----
+    auto loadSPV = [](const std::string& path) -> std::vector<uint32_t> {
+        std::ifstream file(path, std::ios::binary | std::ios::ate);
 
-    try
+        size_t size = file.tellg();
+        file.seekg(0);
+
+        std::vector<uint32_t> data(size / sizeof(uint32_t));
+        file.read(reinterpret_cast<char*>(data.data()), size);
+
+        return data;
+    };
+
+    auto vertSPV = loadSPV(vertexPath);
+    auto fragSPV = loadSPV(fragmentPath);
+
+    // ---- helper for OpenGL SPIR-V ----
+    auto compileSPIRV = [](GLuint shader,
+                        const std::vector<uint32_t>& spirv,
+                        const char* entryPoint)
     {
-        // Open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
+        glShaderBinary(
+            1,
+            &shader,
+            GL_SHADER_BINARY_FORMAT_SPIR_V_ARB,
+            spirv.data(),
+            spirv.size() * sizeof(uint32_t)
+        );
 
-        // Read file’s buffer contents into streams
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
+        glSpecializeShaderARB(
+            shader,
+            entryPoint,
+            0,
+            nullptr,
+            nullptr
+        );
 
-        // Close files
-        vShaderFile.close();
-        fShaderFile.close();
+        GLint success = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-        // Convert streams into strings
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    }
-    catch (std::ifstream::failure &e)
-    {
-        spdlog::error("ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ");
-    }
+        if (!success) {
+            char log[1024];
+            glGetShaderInfoLog(shader, 1024, nullptr, log);
+            spdlog::error("SPIR-V shader failed: {}", log);
+        }
+    };
 
-    const char *vShaderCode = vertexCode.c_str();
-    const char *fShaderCode = fragmentCode.c_str();
+    // ---- compile ----
+    compileSPIRV(vertex, vertSPV, "main");
+    compileSPIRV(fragment, fragSPV, "main");
 
-    // Compile shaders
-    GLuint vertex, fragment;
-    int success;
-    char infoLog[512];
-
-    // Vertex Shader
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, nullptr);
-    glCompileShader(vertex);
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vertex, 512, nullptr, infoLog);
-        spdlog::error("ERROR::SHADER::VERTEX::COMPILATION_FAILED: {}", infoLog);
-    }
-
-    // Fragment Shader
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, nullptr);
-    glCompileShader(fragment);
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(fragment, 512, nullptr, infoLog);
-        spdlog::error("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: {}", infoLog);
-    }
-
-    // Shader Program
+    // ---- link program ----
     id = glCreateProgram();
     glAttachShader(id, vertex);
     glAttachShader(id, fragment);
     glLinkProgram(id);
 
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(id, 512, nullptr, infoLog);
-        spdlog::error("ERROR::SHADER::PROGRAM::LINKING_FAILED: {}", infoLog);
-    }
-
     // Delete shaders; linked into program now and no longer needed
     glDeleteShader(vertex);
     glDeleteShader(fragment);
     
-    // GLint blockCount = 0;
-    // glGetProgramiv(id, GL_ACTIVE_UNIFORM_BLOCKS, &blockCount);
+    spdlog::debug("Set shader id to: 0x{:x}", id);
 
-    // for (GLuint i = 0; i < (GLuint)blockCount; i++)
-    // {
-    //     char name[128];
-    //     glGetActiveUniformBlockName(id, i, sizeof(name), nullptr, name);
-    //     glUniformBlockBinding(id, i, i);
-    //     bindingMap[name] = i;
-    // }
+    // ============================
+    // UBO REFLECTION
+    // ============================
 
     GLuint nextBinding = 0;
+    size_t nextCpuBinding = 0;
+    GLint uniformCount = 0;
+    
+    glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
 
-    // ====================================================
-    // UBO REFLECTION
-    // ====================================================
-
-    GLint uniformBlockCount = 0;
-    glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformBlockCount);
-
-    for (GLuint i = 0; i < (GLuint)uniformBlockCount; i++)
+    for (GLint i = 0; i < uniformCount; i++)
     {
-        char name[256];
-        GLsizei length = 0;
+        size_t cpuBinding = nextCpuBinding++;
+        GLuint gpuBinding = nextBinding++;
 
-        glGetProgramResourceName(id,
-                                 GL_UNIFORM_BLOCK,
-                                 i,
-                                 sizeof(name),
-                                 &length,
-                                 name);
+        glUniformBlockBinding(id, i, gpuBinding);
 
-        glUniformBlockBinding(id, i, nextBinding);
-        bindingMap[name] = nextBinding;
+        uboMap[cpuBinding] = gpuBinding;
 
-        nextBinding++;
+    #ifdef DEBUG
+        spdlog::debug("UBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
+    #endif
     }
 
-    // ====================================================
+    // ============================
     // SSBO REFLECTION
-    // ====================================================
-    GLint storageBlockCount = 0;
-    glGetProgramInterfaceiv(id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &storageBlockCount);
+    // ============================
 
-    for (GLuint i = 0; i < (GLuint)storageBlockCount; i++)
+    nextBinding = 0;
+    nextCpuBinding = 0;
+    uniformCount = 0;
+
+    glGetProgramInterfaceiv(id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
+
+    for (GLint i = 0; i < uniformCount; i++)
     {
-        char name[256];
-        GLsizei length = 0;
+        size_t cpuBinding = nextCpuBinding++;
+        GLuint gpuBinding = nextBinding++;
 
-        glGetProgramResourceName(id,
-                                 GL_SHADER_STORAGE_BLOCK,
-                                 i,
-                                 sizeof(name),
-                                 &length,
-                                 name);
+        glShaderStorageBlockBinding(id, i, gpuBinding);
 
-        glShaderStorageBlockBinding(id, i, nextBinding);
-        bindingMap[name] = nextBinding;
+        ssboMap[cpuBinding] = gpuBinding;
 
-        nextBinding++;
+    #ifdef DEBUG
+        spdlog::debug("SSBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
+    #endif
+    }
+
+    // =========================
+    // TEXTURE SLOTS (NEW)
+    // =========================
+
+    nextBinding = 0;
+    nextCpuBinding = 0;
+    uniformCount = 0;
+    glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &uniformCount);
+
+    for (GLint i = 0; i < uniformCount; i++)
+    {
+        GLenum props[] = { GL_TYPE };
+        GLint type = 0;
+
+        glGetProgramResourceiv(id, GL_UNIFORM, i,
+                            1, props,
+                            1, nullptr,
+                            &type);
+
+        if (type != GL_SAMPLER_2D)
+            continue;
+
+        imageMap[nextCpuBinding] = nextBinding;
+        #ifdef DEBUG
+        spdlog::debug("TEX CPU {} -> GPU {}", nextCpuBinding++, nextBinding);
+        nextBinding += 2;
+        #endif
     }
 }
 
 GlShader::~GlShader()
 {
+    spdlog::debug("Deleting shader with id: 0x{:x}", id);
     if (id != 0)
         glDeleteProgram(id);
 }

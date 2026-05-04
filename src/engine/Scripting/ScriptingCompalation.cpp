@@ -1,5 +1,4 @@
 #include "ScriptingHeaders.hpp"
-#include <spdlog/spdlog.h>
 #include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <string>
@@ -42,6 +41,12 @@ using namespace ScriptingHeaders;
 #else
 #define BIN_PREFIX "./"
 #endif
+#endif
+
+#ifdef DEBUG
+#define COMMAND_ADDON "-DDEBUG -O1 -g3 -fno-omit-frame-pointer"
+#else
+#define COMMAND_ADDON "-O2 -flto -fdata-sections -ffunction-sections -fno-omit-frame-pointer"
 #endif
 
 #define START_NAME "setup"
@@ -143,7 +148,7 @@ Package::Package(const std::string &path)
             " -o " + std::string(COMPILED_OUT_PATH) + "/" + module_filename + std::string(LIBRARY_SUFFIX) +
             " " + path + "/src/*.cpp -L" +
             std::string(LIBRARY_PATH) + libInclude + " -I" + std::string(INCLUDE_PATH) +
-            " -DMODULE_PATH=\\\"" + path + "\\\"";
+            " -DMODULE_PATH=\\\"" + path + "\\\"" + " " + COMMAND_ADDON;
         
         std::string out = compileCode(command);
         if (out.size()) {

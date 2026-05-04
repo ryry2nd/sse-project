@@ -57,17 +57,22 @@ namespace OpenGl
     public:
         // it makes the image
         GlImage(const std::string &filePath);
-        GlImage(GLuint id, glm::vec2 size, bool ownsTexture = true);
+        GlImage(GLuint id, glm::vec2 size);
         GlImage(SDL_Surface *surface);
         // it unmakes the image
         ~GlImage();
         // it gets the id
         GLuint getID() const;
+        GLuint getSID() const;
+
+        void clearTransparent();
 
     private:
+        static void init();
         void setupObject(SDL_Surface *surface);
         GLuint textureID = 0;
-        bool ownsTexture = true;
+        GLuint samplerID = 0;
+        static bool hasInit;
     };
 
     class GlFrameBuffer : public Rendering::FrameBuffer {
@@ -95,19 +100,30 @@ namespace OpenGl
     class GlShader : public Rendering::Shader
     {
     public:
-        GlShader(const char *vertexPath, const char *fragmentPath);
+        GlShader(std::string path);
         ~GlShader();
 
         GLuint getID();
 
-        const std::unordered_map<std::string, GLuint>& getBindingMap() const
+        const std::unordered_map<size_t, GLuint>& getUBOMap() const
         {
-            return bindingMap;
+            return uboMap;
+        }
+        const std::unordered_map<size_t, GLuint>& getSSBOMap() const
+        {
+            return ssboMap;
+        }
+        const std::unordered_map<size_t, GLuint>& getImageMap() const
+        {
+            return imageMap;
         }
 
     protected:
         GLuint id;
-        std::unordered_map<std::string, GLuint> bindingMap;
+        std::unordered_map<size_t, GLuint> uboMap;
+        std::unordered_map<size_t, GLuint> ssboMap;
+        std::unordered_map<size_t, GLuint> imageMap;
+        int compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
     };
 
     class GlMesh : public Rendering::Mesh

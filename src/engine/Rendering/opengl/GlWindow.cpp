@@ -1,6 +1,5 @@
 #include "GlRendering.hpp"
 
-#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_error.h>
@@ -9,13 +8,19 @@
 using namespace OpenGl;
 using namespace Rendering;
 
+#define MAJOR_VERSION 4
+#define MINOR_VERSION 6
+
 GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
     : Window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse)
 {
+    spdlog::debug("Creating window with resolution: {} by {}", res.x, res.y);
     // this does what it says
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 6);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MAJOR_VERSION);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MINOR_VERSION);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    spdlog::debug("Setting OpenGl version to {}.{}", MAJOR_VERSION, MINOR_VERSION);
 
     #ifdef DEBUG
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
@@ -52,7 +57,7 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
         nullptr
     );
 
-    spdlog::info("OpenGL debug output enabled.");
+    spdlog::debug("OpenGL debug output enabled.");
     #endif
 
     glViewport(0, 0, res.x, res.y);
@@ -70,6 +75,8 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
     glDepthFunc(GL_LESS); // or GL_LEQUAL
     glDepthMask(GL_TRUE); // enable writing to depth buffer
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+    spdlog::debug("Created Window with glContext id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 }
 
 void GlWindow::setBackgroundColor(glm::vec4 color) {
@@ -109,6 +116,7 @@ void GlWindow::updateScreenRes()
 
 GlWindow::~GlWindow()
 {
+    spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
     SDL_GL_DestroyContext(glContext);
 }
 

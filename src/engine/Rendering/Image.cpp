@@ -2,7 +2,6 @@
 #include <SDL3/SDL_error.h>
 
 #include "Rendering.hpp"
-#include <spdlog/spdlog.h>
 
 using namespace Rendering;
 

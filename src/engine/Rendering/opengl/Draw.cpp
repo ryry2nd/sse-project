@@ -1,83 +1,71 @@
 #include "GlRendering.hpp"
 
 #include <engine/Rendering/Rendering.hpp>
-#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 
 using namespace OpenGl;
 
 
-void loadBuffs(GlShader *glshdr, std::unordered_map<std::string, Rendering::Buff *> &buffs) {
-    if (buffs.empty()) return;
+void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ubo)
+{
+    if (ubo.empty()) return;
 
-    auto &map = glshdr->getBindingMap();
+    auto &map = glshdr->getUBOMap();
 
-    for (auto& [name, buf] : buffs)
+    for (auto &[cpuBinding, buf] : ubo)
     {
-        if (buf == nullptr) {
-            spdlog::warn("Buffer: {} is null", name);
-            continue;
-        }
-
-        auto it = map.find(name);
-
-        if (it == map.end()) {
-            spdlog::warn("Missing binding for buffer: {}", name);
-            continue;
-        }
+        if (!buf) continue;
 
         auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
 
-        glBindBufferBase(glbuf->getTarget(),
-                        it->second,
-                        glbuf->getID());
+        auto it = map.find(cpuBinding);
+        if (it == map.end()) continue;
+
+        GLuint gpuBinding = it->second;
+
+        glBindBufferBase(GL_UNIFORM_BUFFER,
+                         gpuBinding,
+                         glbuf->getID());
     }
 }
-
-int bindInstanceBuffers(GlShader *glshdr, const std::unordered_map<std::string, std::vector<Rendering::Buff*>> &instanceBuffers)
+void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ssbo)
 {
-    if (instanceBuffers.empty())
-        return 0;
+    if (ssbo.empty()) return;
 
-    int instanceCount = -1;
+    auto &map = glshdr->getSSBOMap();
 
-    for (const auto& [name, bufList] : instanceBuffers)
+    for (auto &[cpuBinding, buf] : ssbo)
     {
-        for (auto *buf : bufList)
-        {
-            if (!buf)
-                continue;
+        if (!buf) continue;
 
-            auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
-            int size = glbuf->getSize();
+        auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
 
-            if (instanceCount == -1)
-                instanceCount = size;
-            else
-                instanceCount = std::min(instanceCount, size);
-        }
+        auto it = map.find(cpuBinding);
+        if (it == map.end()) continue;
+
+        GLuint gpuBinding = it->second;
+
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
+                         gpuBinding,
+                         glbuf->getID());
     }
-
-    return instanceCount == -1 ? 0 : instanceCount;
 }
-
-void setImages(GlShader *glshdr, std::unordered_map<std::string, Rendering::Image *> &images) {
+void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &images)
+{
     if (images.empty()) return;
 
-    int texUnit = 0;
+    auto &map = glshdr->getImageMap();
 
-    for (const auto& [name, img] : images)
+    for (auto &[cpuBinding, img] : images)
     {
         auto *glimg = static_cast<OpenGl::GlImage*>(img);
 
-        glActiveTexture(GL_TEXTURE0 + texUnit);
-        glBindTexture(GL_TEXTURE_2D, glimg->getID());
+        auto it = map.find(cpuBinding);
+        if (it == map.end()) continue;
 
-        GLint loc = glGetUniformLocation(glshdr->getID(), name.c_str());
-        if (loc != -1)
-            glUniform1i(loc, texUnit);
+        GLuint gpuBinding = it->second;
 
-        texUnit++;
+        glBindTextureUnit(gpuBinding, glimg->getID());
     }
 }
 
@@ -101,8 +89,10 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
     // -------------------------
     // 2. BUFFERS Global
     // -------------------------`
-    loadBuffs(glshdr, mat->buffs);
-    loadBuffs(glshdr, params->buffers);
+    loadUBO(glshdr, mat->ubo);
+    loadSSBO(glshdr, mat->ssbo);
+    loadUBO(glshdr, params->ubo);
+    loadSSBO(glshdr, params->ssbo);
 
 
     // -------------------------

@@ -1,12 +1,12 @@
 #include "GlRendering.hpp"
 
-#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 
 using namespace OpenGl;
 
 GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 {
+    spdlog::debug("Creating frame buffer with size: {},{}", size.x, size.y);
     this->size = size;
     this->settings = settings;
 
@@ -15,6 +15,8 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 
     glGenFramebuffers(1, &id);
     glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+    spdlog::debug("Set FBO id to 0x{:x}", id);
 
     // -------------------------
     // COLOR
@@ -41,7 +43,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
         GLenum drawBuf = GL_COLOR_ATTACHMENT0;
         glDrawBuffers(1, &drawBuf);
 
-        colorImage = new GlImage(colorTex, size, true);
+        colorImage = new GlImage(colorTex, size);
     }
     else
     {
@@ -69,7 +71,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
                                depthTex,
                                0);
 
-        depthImage = new GlImage(depthTex, size, true);
+        depthImage = new GlImage(depthTex, size);
         stencilImage = depthImage;
     }
     else
@@ -91,7 +93,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
                                    depthTex,
                                    0);
 
-            depthImage = new GlImage(depthTex, size, true);
+            depthImage = new GlImage(depthTex, size);
         }
 
         if (settings & Settings::Stencil)
@@ -111,12 +113,12 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
                                    stencilTex,
                                    0);
 
-            stencilImage = new GlImage(stencilTex, size, true);
+            stencilImage = new GlImage(stencilTex, size);
         }
     }
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        spdlog::error("Framebuffer incomplete");
+        spdlog::error("id: 0x{:x} Framebuffer incomplete", id);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

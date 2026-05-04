@@ -6,8 +6,8 @@
 
 using namespace OpenGl;
 
-extern "C" std::unique_ptr<Rendering::Shader> createShader(const char* vertex, const char* fragment) {
-    return std::make_unique<GlShader>(vertex, fragment);
+extern "C" std::unique_ptr<Rendering::Shader> createShader(std::string path) {
+    return std::make_unique<GlShader>(path);
 }
 
 extern "C" std::unique_ptr<Rendering::Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles) {

@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 struct TTF_Font;
 struct SDL_Surface;
@@ -92,7 +93,7 @@ namespace Rendering
 
     protected:
         static bool canRead(Type t);
-        static bool canWrite(Type t);
+        static bool canWrite(Type t, Frequency freq);
         Type buffType;
         Frequency freq;
         std::size_t allocSize;
@@ -107,6 +108,7 @@ namespace Rendering
         virtual ~Image() = default;
         static SDL_Surface *loadFile(const std::string &filePath);
         glm::vec2 getSizes();
+        virtual void clearTransparent() = 0;
     protected:
         glm::vec2 imageSizes;
     };
@@ -145,8 +147,9 @@ namespace Rendering
 
     struct Material {
         Shader *shader;
-        std::unordered_map<std::string, Image*> images;
-        std::unordered_map<std::string, Buff*> buffs;
+        std::unordered_map<size_t, Image*> images;
+        std::unordered_map<size_t, Buff*> ubo;
+        std::unordered_map<size_t, Buff*> ssbo;
     };
 
     struct DrawParams {
@@ -155,7 +158,8 @@ namespace Rendering
             EnableFBO = 1 << 1,
         };
 
-        std::unordered_map<std::string, Buff*> buffers;
+        std::unordered_map<size_t, Buff*> ubo;
+        std::unordered_map<size_t, Buff*> ssbo;
         size_t instanceCount;
         uint32_t settings;
         FrameBuffer *fbo = nullptr;
@@ -186,7 +190,7 @@ namespace Rendering
 
         // ToDo important. make it so draw is not pulled through the dll every draw call. that might introduce performance issues
         void draw(Material *mat, Mesh *mesh = nullptr, DrawParams *params = nullptr);
-        std::unique_ptr<Shader> createShader(const char* vertex, const char* fragment);
+        std::unique_ptr<Shader> createShader(std::string path);
         std::unique_ptr<Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
         std::unique_ptr<Image> createImage(const std::string &filePath);
         std::unique_ptr<Image> createImage(SDL_Surface *surface);
