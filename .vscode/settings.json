@@ -1,0 +1,17 @@
+{
+    "files.exclude": {
+        "**/build/**": true,
+        "**/libs/**": true
+    },
+
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/libs/**": true
+    },
+
+    "editor.tabSize": 4,
+
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build"
+    ]
+}
