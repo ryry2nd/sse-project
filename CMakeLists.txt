@@ -168,3 +168,11 @@ add_custom_target(copy_lib_headers ALL
                 ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
         COMMENT "---- Copying Library headers ----"
 )
+
+add_custom_target(copy_compile_command ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+                ${CMAKE_CURRENT_BINARY_DIR}/..
+        DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+        COMMENT "---- Copying compile commands ----"
+)
