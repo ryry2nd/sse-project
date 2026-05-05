@@ -15,8 +15,7 @@ option(USECMDCLANG "Use the commandline clang" OFF)
 add_compile_options(
 	-Wdeprecated-literal-operator 
 	-Wdelete-abstract-non-virtual-dtor 
-	-Winconsistent-missing-override 
-	-Wnontrivial-memcall
+	-Winconsistent-missing-override
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
