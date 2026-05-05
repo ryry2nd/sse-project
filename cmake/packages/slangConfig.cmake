@@ -1,32 +1,40 @@
 include(FetchContent)
 
-# set(slangBuild "${CMAKE_BINARY_DIR}/slang-build")
-set(OUT_BIN ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/bin-tools)
-set(OUT_LIB ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/lib)
+set(SLANG_DOWNLOAD_PATH "" CACHE STRING "Download path for slang")
+set(SLANGC_BIN "" CACHE STRING "the file cmake needs to copy for slangc")
+set(SLANG_COMPILER_LIB "" CACHE STRING "the lib cmake needs to copy for the compiler")
+set(SLANG_GLSLANG_LIB "" CACHE STRING "the lib cmake needs to copy for glslang")
+set(SLANGC_BIN_OUT "" CACHE STRING "the file cmake needs to copy for slangc")
+set(SLANG_COMPILER_LIB_OUT "" CACHE STRING "the lib cmake needs to copy for the compiler")
+set(SLANG_GLSLANG_LIB_OUT "" CACHE STRING "the lib cmake needs to copy for glslang")
 
 FetchContent_Declare(
   slang
-  URL https://github.com/shader-slang/slang/releases/download/v2026.8/slang-2026.8-linux-x86_64.zip
+  URL ${SLANG_DOWNLOAD_PATH}
 )
 
 FetchContent_MakeAvailable(slang)
 
 
 add_custom_target(copy_slang ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUT_BIN}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUT_LIB}
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANGC_BIN_OUT}
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_COMPILER_LIB_OUT}
+    COMMAND ${CMAKE_COMMAND} -E make_directory
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_GLSLANG_LIB_OUT}
 
     # copy slangc
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${slang_SOURCE_DIR}/bin/slangc
-        ${OUT_BIN}/
+        ${slang_SOURCE_DIR}/${SLANGC_BIN}
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANGC_BIN_OUT}
 
     # copy only slang compiler libs
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${slang_SOURCE_DIR}/lib/libslang-compiler.so.0.2026.8
-        ${OUT_LIB}/
+        ${slang_SOURCE_DIR}/${SLANG_COMPILER_LIB}
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_COMPILER_LIB_OUT}
 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${slang_SOURCE_DIR}/lib/libslang-glslang-2026.8.so
-        ${OUT_LIB}/
+        ${slang_SOURCE_DIR}/${SLANG_GLSLANG_LIB}
+        ${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_GLSLANG_LIB_OUT}
 )

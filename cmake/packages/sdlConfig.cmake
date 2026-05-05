@@ -3,6 +3,7 @@ include(FetchContent)
 set(BUILD_SHARED_LIBS ON)
 set(BUILD_STATIC_LIBS OFF)
 set(SDL_TEST_LIBRARY OFF)
+set(SDL_VENDORED TRUE)
 
 FetchContent_Declare(
   sdl

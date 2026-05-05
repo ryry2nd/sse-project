@@ -2,6 +2,7 @@ include(FetchContent)
 
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
+set(SDLTTF_VENDORED TRUE)
 
 FetchContent_Declare(
   sdl-ttf
