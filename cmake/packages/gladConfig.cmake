@@ -26,8 +26,8 @@ set(PYTHON_PATH "" CACHE STRING "the path to run pip")
 
 set(GLAD_COMMAND "
     ${Python3_EXECUTABLE} -m venv ${VENV_DIR} && \
-    ${VENV_DIR}/${PIP_PATH} install --upgrade pip && \
-    ${VENV_DIR}/${PIP_PATH} install -r requirements.txt")
+    ${VENV_DIR}/${PYTHON_PATH} -m pip install --upgrade pip && \
+    ${VENV_DIR}/${PIP_PATH} install -r ${glad_SOURCE_DIR}/requirements.txt")
 
 if(USE_OPENGL AND NOT EXISTS ${OPENGL_PATH})
   string(APPEND GLAD_COMMAND "&& ${VENV_DIR}/${PYTHON_PATH} -m glad --api gl:core=4.6 --out-path ${OPENGL_PATH}")
