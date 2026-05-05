@@ -99,7 +99,7 @@ void createLibs() {
 
     for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
         if (entry.path().extension() == LIBRARY_SUFFIX) {
-            SDL_SharedObject* raw = SDL_LoadObject(entry.path().c_str());
+            SDL_SharedObject* raw = SDL_LoadObject(entry.path().string().c_str());
 
             if (!raw)
             {
