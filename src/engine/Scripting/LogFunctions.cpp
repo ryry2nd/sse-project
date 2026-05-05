@@ -18,7 +18,7 @@ std::string makeLogFile()
     #ifdef _WIN32
     localtime_s(&tm, &t);
     #else
-        localtime_r(&t, &tm);
+    localtime_r(&t, &tm);
     #endif
 
     std::filesystem::create_directories("logs");
