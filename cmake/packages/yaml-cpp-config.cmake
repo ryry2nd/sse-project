@@ -1,9 +1,16 @@
-option(YAML_CPP_BUILD_TOOLS OFF)
+include(FetchContent)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
-cmake_policy(PUSH)
-cmake_policy(VERSION 3.15)
-add_subdirectory("${CMAKE_SOURCE_DIR}/libs/yaml-cpp" YAML_build)
-cmake_policy(POP)
-add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
-target_compile_options(yaml-cpp INTERFACE -w)
+set(BUILD_TESTING OFF)
+option(YAML_CPP_BUILD_TOOLS OFF)
+option(YAML_CPP_BUILD_TESTS OFF)
+option(YAML_CPP_INSTALL OFF)
+
+
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG yaml-cpp-0.9.0
+)
+FetchContent_MakeAvailable(yaml-cpp)

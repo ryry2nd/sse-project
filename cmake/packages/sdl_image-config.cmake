@@ -1,6 +1,8 @@
-# set(SDLIMAGE_PNG OFF CACHE BOOL "Disable PNG support" FORCE)
-# set(SDLIMAGE_JPG OFF CACHE BOOL "Disable JPG support" FORCE)
 # do I look like I know what a jpeg is, I'm just trying to print out a picture of a god dang hot dog.
+include(FetchContent)
+
+set(SDLIMAGE_XV OFF CACHE BOOL "Disable XV support" FORCE)
+set(SDLIMAGE_ANI OFF CACHE BOOL "Disable ANI support" FORCE)
 set(SDLIMAGE_TIF OFF CACHE BOOL "Disable TIFF support" FORCE)
 set(SDLIMAGE_WEBP OFF CACHE BOOL "Disable WebP support" FORCE)
 set(SDLIMAGE_AVIF OFF CACHE BOOL "Disable AVIF support" FORCE)
@@ -17,16 +19,12 @@ set(SDLIMAGE_SVG OFF CACHE BOOL "Disable SVG support" FORCE)
 set(SDLIMAGE_TGA OFF CACHE BOOL "Disable TGA support" FORCE)
 set(SDLIMAGE_MOD OFF CACHE BOOL "Disable MOD support" FORCE)
 set(SDLIMAGE_OPUS OFF CACHE BOOL "Disable OPUS support" FORCE)
-
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
 
-add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_image" SDL_image_BUILD)
-
-if(TARGET SDL3_image)
-    add_library(SDL3_image::SDL3_image ALIAS SDL3_image)
-    target_compile_options(SDL3_image PRIVATE -w)
-elseif(TARGET SDL3_image-static)
-    add_library(SDL3_image::SDL3_image ALIAS SDL3_image-static)
-    target_compile_options(SDL3_image-static PRIVATE -w)
-endif()
+FetchContent_Declare(
+  sdl-image
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+  GIT_TAG release-3.4.4
+)
+FetchContent_MakeAvailable(sdl-image)

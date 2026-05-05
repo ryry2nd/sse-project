@@ -3,6 +3,11 @@ ToDo List
 IMPORTANT DON'T FORGET
 use user level threads for modules (it's what you want it and just run them one at a time and configure stack size in yaml)
 
+IMPORTANT LIBRARIES IM GONNA GET EVENTUALLY(MAYBE)
+https://github.com/sqlite/sqlite.git
+https://github.com/assimp/assimp.git
+https://github.com/mackron/miniaudio.git
+https://github.com/lsalzman/enet.git
 
 PHASE 1 - CORE ENGINE
 Clip planes or stencil buffer

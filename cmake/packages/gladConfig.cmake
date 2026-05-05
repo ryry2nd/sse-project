@@ -1,8 +1,19 @@
+include(FetchContent)
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
-set(GLAD_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs/glad)
-set(GLAD_OUT ${CMAKE_CURRENT_BINARY_DIR}/GLAD_BUILD)
-set(VENV_DIR ${CMAKE_CURRENT_BINARY_DIR}/.buildenv)
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_STATIC_LIBS ON)
+
+FetchContent_Declare(
+  glad
+  GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+  GIT_TAG v2.0.8
+)
+FetchContent_MakeAvailable(glad)
+
+set(GLAD_OUT ${glad_BINARY_DIR}/GLAD_BUILD)
+set(VENV_DIR ${glad_BINARY_DIR}/.buildenv)
 
 set(OPENGL_PATH ${GLAD_OUT}/OpenGL)
 set(VULKAN_PATH ${GLAD_OUT}/vulkan)
@@ -26,7 +37,7 @@ endif()
 if (NOT EXISTS ${VULKAN_PATH} AND NOT EXISTS ${OPENGL_PATH})
   execute_process(
     COMMAND bash -c "${GLAD_COMMAND}"
-    WORKING_DIRECTORY ${GLAD_DIR}
+    WORKING_DIRECTORY ${glad_SOURCE_DIR}
   )
 endif()
 

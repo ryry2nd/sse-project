@@ -1,13 +1,11 @@
-set(SDLTTF_VENDORED TRUE)
+include(FetchContent)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1)
-add_subdirectory("${CMAKE_SOURCE_DIR}/libs/sdl_ttf" SDL_ttf_BUILD)
 
-if(TARGET SDL3_ttf)
-    add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf)
-    target_compile_options(SDL3_ttf INTERFACE -w)
-elseif(TARGET SDL3_ttf-static)
-    add_library(SDL3_ttf::SDL3_ttf ALIAS SDL3_ttf-static)
-    target_compile_options(SDL3_ttf-static INTERFACE -w)
-endif()
+FetchContent_Declare(
+  sdl-ttf
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL_ttf.git
+  GIT_TAG release-3.2.2
+)
+FetchContent_MakeAvailable(sdl-ttf)

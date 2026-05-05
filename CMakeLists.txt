@@ -6,32 +6,33 @@ project(sse-project VERSION 0.0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 option(USE_VULKAN "Enable Vulkan support" OFF)
 option(USE_OPENGL "Enable OpenGL support" OFF)
 option(USECMDCLANG "Use the commandline clang" OFF)
 
 add_compile_options(
-    -Wdeprecated-literal-operator 
-    -Wdelete-abstract-non-virtual-dtor 
-    -Winconsistent-missing-override 
-    -Wnontrivial-memcall
+	-Wdeprecated-literal-operator 
+	-Wdelete-abstract-non-virtual-dtor 
+	-Winconsistent-missing-override 
+	-Wnontrivial-memcall
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
-        message(STATUS "Configuring Release build: stripping debug info")
-        add_compile_options(
-                -O2
-                -flto
-                -fdata-sections
-                -ffunction-sections
-                -fno-omit-frame-pointer
-        )
+	message(STATUS "Configuring Release build: stripping debug info")
+	add_compile_options(
+		-O2
+		-flto
+		-fdata-sections
+		-ffunction-sections
+		-fno-omit-frame-pointer
+	)
 
-        add_link_options(
-                -flto
-                -Wl,--gc-sections
-        )
+	add_link_options(
+		-flto
+		-Wl,--gc-sections
+)
 else()
         message(STATUS "Configuring Debug build: fast compile")
         add_compile_options(
@@ -136,37 +137,6 @@ add_custom_target(copy_assets ALL
                 ${CMAKE_CURRENT_SOURCE_DIR}/src/modules
                 ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules
         COMMENT "---- Copying assets ----"
-)
-
-add_custom_target(copy_lib_headers ALL
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/glm
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/copying.txt
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/include/boost
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/multiprecision/LICENSE
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/include/boost
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/boost_config/build.jam
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/sdl/include
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/include/spdlog
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${CMAKE_CURRENT_SOURCE_DIR}/libs/spdlog/LICENSE
-                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
-        COMMENT "---- Copying Library headers ----"
 )
 
 add_custom_target(copy_compile_command ALL

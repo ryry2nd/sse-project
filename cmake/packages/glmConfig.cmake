@@ -1,7 +1,21 @@
+include(FetchContent)
+
 set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
-add_subdirectory("${CMAKE_SOURCE_DIR}/libs/glm" GLM_build)
-target_compile_options(glm INTERFACE -w)
-add_library(glm::glm ALIAS glm)
 
-target_compile_definitions(glm INTERFACE GLM_ENABLE_EXPERIMENTAL)
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+  GIT_TAG 1.0.3
+)
+FetchContent_MakeAvailable(glm)
+
+add_custom_target(copy_glm_headers ALL
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                ${glm_SOURCE_DIR}/glm
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${glm_SOURCE_DIR}/copying.txt
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+        COMMENT "---- Copying glm headers ----"
+)
