@@ -21,3 +21,7 @@ add_custom_target(copy_sdl_headers ALL
                 ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/SDL3
         COMMENT "---- Copying SDL headers ----"
 )
+
+if (NOT TARGET SDL3::SDL3)
+    add_library(SDL3::SDL3 ALIAS SDL3)
+endif()

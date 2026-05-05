@@ -53,19 +53,19 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/libs)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/bin)
 
 # Packages
-find_package(sdl REQUIRED)
-find_package(sdl_image REQUIRED)
-find_package(sdl_ttf REQUIRED)
-find_package(glm REQUIRED)
-find_package(boost_multiprecision REQUIRED)
-find_package(yaml-cpp REQUIRED)
-find_package(glad REQUIRED)
-find_package(spdlog REQUIRED)
+find_package(sdl CONFIG REQUIRED)
+find_package(sdl_image CONFIG REQUIRED)
+find_package(sdl_ttf CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(boost_multiprecision CONFIG REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
-find_package(slang REQUIRED)
+find_package(slang CONFIG REQUIRED)
 
 if (USECMDCLANG STREQUAL "OFF")
-        find_package(clang REQUIRED)
+        find_package(clang CONFIG REQUIRED)
 endif()
 
 # Add subdirectories
