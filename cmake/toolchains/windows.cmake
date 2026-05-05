@@ -22,8 +22,8 @@ set(SLANGC_BIN_OUT "bin-tools" CACHE STRING "")
 set(SLANG_COMPILER_LIB_OUT "bin-tools" CACHE STRING "")
 set(SLANG_GLSLANG_LIB_OUT "bin-tools" CACHE STRING "")
 
-set(PIP_PATH "Scripts/pip" CACHE STRING "")
-set(PYTHON_PATH "Scripts/python" CACHE STRING "")
+set(PIP_PATH "Scripts/pip.exe" CACHE STRING "")
+set(PYTHON_PATH "Scripts/python.exe" CACHE STRING "")
 
 set(USE_VULKAN OFF CACHE BOOL "Enable Vulkan support")
 set(USE_OPENGL ON CACHE BOOL "Enable OpenGL support")
