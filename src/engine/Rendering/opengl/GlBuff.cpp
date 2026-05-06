@@ -6,90 +6,90 @@ using namespace Rendering;
 using namespace OpenGl;
 
 GLenum GlBuff::toGLTarget(Type type) {
-    switch (type) {
-        case Type::Uniform:      return GL_UNIFORM_BUFFER;
-        case Type::Storage:      return GL_SHADER_STORAGE_BUFFER;
-    }
-    return GL_SHADER_STORAGE_BUFFER;
+	switch (type) {
+		case Type::Uniform:      return GL_UNIFORM_BUFFER;
+		case Type::Storage:      return GL_SHADER_STORAGE_BUFFER;
+	}
+	return GL_SHADER_STORAGE_BUFFER;
 }
 
 GLenum GlBuff::toGLUsage(Frequency freq) {
-    switch (freq) {
-        case Frequency::Static:  return GL_STATIC_DRAW;
-        case Frequency::Dynamic: return GL_DYNAMIC_DRAW;
-        case Frequency::Stream:  return GL_STREAM_DRAW;
-    }
-    return GL_DYNAMIC_DRAW;
+	switch (freq) {
+		case Frequency::Static:  return GL_STATIC_DRAW;
+		case Frequency::Dynamic: return GL_DYNAMIC_DRAW;
+		case Frequency::Stream:  return GL_STREAM_DRAW;
+	}
+	return GL_DYNAMIC_DRAW;
 }
 
 GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
-    : Buff(type, freq, size)
+	: Buff(type, freq, size)
 {
-    spdlog::debug("Creating buffer with {} bytes", size);
-    target = toGLTarget(type);
-    usage  = toGLUsage(freq);
+	spdlog::debug("Creating buffer with {} bytes", size);
+	target = toGLTarget(type);
+	usage  = toGLUsage(freq);
 
-    glGenBuffers(1, &id);
-    glBindBuffer(target, id);
+	glGenBuffers(1, &id);
+	glBindBuffer(target, id);
 
-    if (data)
-    {
-        glBufferData(target, size, data, usage);
-    }
-    else
-    {
-        glBufferData(target, size, nullptr, usage);
-    }
+	if (data)
+	{
+		glBufferData(target, size, data, usage);
+	}
+	else
+	{
+		glBufferData(target, size, nullptr, usage);
+	}
 
-    glBindBuffer(target, 0);
+	glBindBuffer(target, 0);
 
-    spdlog::debug("Set Buffer id to: 0x{:x}", id);
+	spdlog::debug("Set Buffer id to: 0x{:x}", id);
 }
 
 GlBuff::~GlBuff() {
-    spdlog::debug("Deleting buffer with id: 0x{:x}", id);
-    glDeleteBuffers(1, &id);
+	spdlog::debug("Deleting buffer with id: 0x{:x}", id);
+	glDeleteBuffers(1, &id);
 }
 
 void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
-    #ifdef DEBUG
-    if (offset + size > allocSize) {
-        spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to write from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
-        return;
-    }
-    if (!canWrite(buffType, freq)) {
-        spdlog::error("Id: 0x{:x} Tried to write to buffer type that is not allowed to be written to", id);
-        return;
-    }
-    #endif
+	#ifdef DEBUG
+	if (offset + size > allocSize) {
+		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to write from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
+		return;
+	}
+	if (!canWrite(buffType, freq)) {
+		spdlog::error("Id: 0x{:x} Tried to write to buffer type that is not allowed to be written to", id);
+		return;
+	}
+	#endif
 
-    glBindBuffer(target, id);
-    glBufferSubData(target, offset, size, data);
+	glBindBuffer(target, id);
+	glBufferSubData(target, offset, size, data);
 }
 
 void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
-    #ifdef DEBUG
-    if (offset + size > allocSize) {
-        spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to read from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
-        return;
-    }
-    if (!canRead(buffType)) {
-        spdlog::error("Id: 0x{:x} Tried to read to buffer type that is not allowed to be written to");
-        return;
-    }
-    #endif
+	#ifdef DEBUG
+	if (offset + size > allocSize) {
+		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to read from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
+		return;
+	}
+	if (!canRead(buffType)) {
+		spdlog::error("Id: 0x{:x} Tried to read to buffer type that is not allowed to be written to");
+		return;
+	}
+	#endif
 
-    glBindBuffer(target, id);
-    glGetBufferSubData(target, offset, size, outData);
+	glBindBuffer(target, id);
+	glGetBufferSubData(target, offset, size, outData);
 }
 
 GLuint GlBuff::getID() {
-    return id;
+	return id;
 }
 
 GLenum GlBuff::getTarget() {
-    return target;
+	return target;
 }
 GLenum GlBuff::getUsage() {
-    return usage;
+	return usage;
 }

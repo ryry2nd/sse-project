@@ -5,45 +5,45 @@ using namespace BigObjects;
 
 BaseObject::~BaseObject()
 {
-    removeParent();
+	removeParent();
 
-    for (BaseObject *obj : children)
-    {
-        obj->position = obj->getTruePos();
-        obj->parent = nullptr;
-    }
+	for (BaseObject *obj : children)
+	{
+		obj->position = obj->getTruePos();
+		obj->parent = nullptr;
+	}
 }
 
 void BaseObject::makeParent(BaseObject &other)
 {
-    removeParent();
-    parent = &other;
-    parent->children.push_back(this);
-    position = position - other.getTruePos(); // make position relative to new parent
+	removeParent();
+	parent = &other;
+	parent->children.push_back(this);
+	position = position - other.getTruePos(); // make position relative to new parent
 }
 
 BigVec3 BaseObject::getTruePos()
 {
-    BigVec3 ret = position;
+	BigVec3 ret = position;
 
-    BaseObject *curr = parent;
+	BaseObject *curr = parent;
 
-    while (curr)
-    {
-        ret += curr->position;
-        curr = curr->parent;
-    }
-    return ret;
+	while (curr)
+	{
+		ret += curr->position;
+		curr = curr->parent;
+	}
+	return ret;
 }
 
 void BaseObject::removeParent()
 {
-    if (parent)
-    {
-        auto &vec = parent->children;
-        auto it = std::find(vec.begin(), vec.end(), this);
-        if (it != vec.end())
-            vec.erase(it);
-        parent = nullptr;
-    }
+	if (parent)
+	{
+		auto &vec = parent->children;
+		auto it = std::find(vec.begin(), vec.end(), this);
+		if (it != vec.end())
+			vec.erase(it);
+		parent = nullptr;
+	}
 }

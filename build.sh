@@ -9,30 +9,30 @@ NOCONFIG=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --debug)
-      BUILD_TYPE="Debug"
-      shift
-      ;;
-    --no-config)
-      NOCONFIG=1
-      shift
-      ;;
-    --os)
-      OS="$2"
-      shift 2
-      ;;
-    --cores)
-      CORES="$2"
-      shift 2
-      ;;
-    --useCMDClang)
-      useCMDClang="ON"
-      shift
-      ;;
-    *)
-      echo "Unknown option $1"
-      exit 1
-      ;;
+	--debug)
+	  BUILD_TYPE="Debug"
+	  shift
+	  ;;
+	--no-config)
+	  NOCONFIG=1
+	  shift
+	  ;;
+	--os)
+	  OS="$2"
+	  shift 2
+	  ;;
+	--cores)
+	  CORES="$2"
+	  shift 2
+	  ;;
+	--useCMDClang)
+	  useCMDClang="ON"
+	  shift
+	  ;;
+	*)
+	  echo "Unknown option $1"
+	  exit 1
+	  ;;
   esac
 done
 

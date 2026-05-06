@@ -9,172 +9,172 @@ using namespace Rendering;
 
 GlShader::GlShader(std::string path)
 {
-    std::string vertexPath;
-    std::string fragmentPath;
-    compileShaders(path, vertexPath, fragmentPath);
+	std::string vertexPath;
+	std::string fragmentPath;
+	compileShaders(path, vertexPath, fragmentPath);
 
-    spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
+	spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
 
-    if (!std::filesystem::exists(vertexPath)) {
-        spdlog::error("Shader path: {} does not exist", vertexPath);
-        return;
-    }
-    if (!std::filesystem::exists(fragmentPath)) {
-        spdlog::error("Shader path: {} does not exist", fragmentPath);
-        return;
-    }
+	if (!std::filesystem::exists(vertexPath)) {
+		spdlog::error("Shader path: {} does not exist", vertexPath);
+		return;
+	}
+	if (!std::filesystem::exists(fragmentPath)) {
+		spdlog::error("Shader path: {} does not exist", fragmentPath);
+		return;
+	}
 
-    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-    // ---- load binary files ----
-    auto loadSPV = [](const std::string& path) -> std::vector<uint32_t> {
-        std::ifstream file(path, std::ios::binary | std::ios::ate);
+	// ---- load binary files ----
+	auto loadSPV = [](const std::string& path) -> std::vector<uint32_t> {
+		std::ifstream file(path, std::ios::binary | std::ios::ate);
 
-        size_t size = file.tellg();
-        file.seekg(0);
+		size_t size = file.tellg();
+		file.seekg(0);
 
-        std::vector<uint32_t> data(size / sizeof(uint32_t));
-        file.read(reinterpret_cast<char*>(data.data()), size);
+		std::vector<uint32_t> data(size / sizeof(uint32_t));
+		file.read(reinterpret_cast<char*>(data.data()), size);
 
-        return data;
-    };
+		return data;
+	};
 
-    auto vertSPV = loadSPV(vertexPath);
-    auto fragSPV = loadSPV(fragmentPath);
+	auto vertSPV = loadSPV(vertexPath);
+	auto fragSPV = loadSPV(fragmentPath);
 
-    // ---- helper for OpenGL SPIR-V ----
-    auto compileSPIRV = [](GLuint shader,
-                        const std::vector<uint32_t>& spirv,
-                        const char* entryPoint)
-    {
-        glShaderBinary(
-            1,
-            &shader,
-            GL_SHADER_BINARY_FORMAT_SPIR_V_ARB,
-            spirv.data(),
-            spirv.size() * sizeof(uint32_t)
-        );
+	// ---- helper for OpenGL SPIR-V ----
+	auto compileSPIRV = [](GLuint shader,
+						const std::vector<uint32_t>& spirv,
+						const char* entryPoint)
+	{
+		glShaderBinary(
+			1,
+			&shader,
+			GL_SHADER_BINARY_FORMAT_SPIR_V_ARB,
+			spirv.data(),
+			spirv.size() * sizeof(uint32_t)
+		);
 
-        glSpecializeShaderARB(
-            shader,
-            entryPoint,
-            0,
-            nullptr,
-            nullptr
-        );
+		glSpecializeShaderARB(
+			shader,
+			entryPoint,
+			0,
+			nullptr,
+			nullptr
+		);
 
-        GLint success = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+		GLint success = 0;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-        if (!success) {
-            char log[1024];
-            glGetShaderInfoLog(shader, 1024, nullptr, log);
-            spdlog::error("SPIR-V shader failed: {}", log);
-        }
-    };
+		if (!success) {
+			char log[1024];
+			glGetShaderInfoLog(shader, 1024, nullptr, log);
+			spdlog::error("SPIR-V shader failed: {}", log);
+		}
+	};
 
-    // ---- compile ----
-    compileSPIRV(vertex, vertSPV, "main");
-    compileSPIRV(fragment, fragSPV, "main");
+	// ---- compile ----
+	compileSPIRV(vertex, vertSPV, "main");
+	compileSPIRV(fragment, fragSPV, "main");
 
-    // ---- link program ----
-    id = glCreateProgram();
-    glAttachShader(id, vertex);
-    glAttachShader(id, fragment);
-    glLinkProgram(id);
+	// ---- link program ----
+	id = glCreateProgram();
+	glAttachShader(id, vertex);
+	glAttachShader(id, fragment);
+	glLinkProgram(id);
 
-    // Delete shaders; linked into program now and no longer needed
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
-    
-    spdlog::debug("Set shader id to: 0x{:x}", id);
+	// Delete shaders; linked into program now and no longer needed
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
 
-    // ============================
-    // UBO REFLECTION
-    // ============================
+	spdlog::debug("Set shader id to: 0x{:x}", id);
 
-    GLuint nextBinding = 0;
-    size_t nextCpuBinding = 0;
-    GLint uniformCount = 0;
-    
-    glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
+	// ============================
+	// UBO REFLECTION
+	// ============================
 
-    for (GLint i = 0; i < uniformCount; i++)
-    {
-        size_t cpuBinding = nextCpuBinding++;
-        GLuint gpuBinding = nextBinding++;
+	GLuint nextBinding = 0;
+	size_t nextCpuBinding = 0;
+	GLint uniformCount = 0;
 
-        glUniformBlockBinding(id, i, gpuBinding);
+	glGetProgramInterfaceiv(id, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
 
-        uboMap[cpuBinding] = gpuBinding;
+	for (GLint i = 0; i < uniformCount; i++)
+	{
+		size_t cpuBinding = nextCpuBinding++;
+		GLuint gpuBinding = nextBinding++;
 
-    #ifdef DEBUG
-        spdlog::debug("UBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
-    #endif
-    }
+		glUniformBlockBinding(id, i, gpuBinding);
 
-    // ============================
-    // SSBO REFLECTION
-    // ============================
+		uboMap[cpuBinding] = gpuBinding;
 
-    nextBinding = 0;
-    nextCpuBinding = 0;
-    uniformCount = 0;
+	#ifdef DEBUG
+		spdlog::debug("UBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
+	#endif
+	}
 
-    glGetProgramInterfaceiv(id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
+	// ============================
+	// SSBO REFLECTION
+	// ============================
 
-    for (GLint i = 0; i < uniformCount; i++)
-    {
-        size_t cpuBinding = nextCpuBinding++;
-        GLuint gpuBinding = nextBinding++;
+	nextBinding = 0;
+	nextCpuBinding = 0;
+	uniformCount = 0;
 
-        glShaderStorageBlockBinding(id, i, gpuBinding);
+	glGetProgramInterfaceiv(id, GL_SHADER_STORAGE_BLOCK, GL_ACTIVE_RESOURCES, &uniformCount);
 
-        ssboMap[cpuBinding] = gpuBinding;
+	for (GLint i = 0; i < uniformCount; i++)
+	{
+		size_t cpuBinding = nextCpuBinding++;
+		GLuint gpuBinding = nextBinding++;
 
-    #ifdef DEBUG
-        spdlog::debug("SSBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
-    #endif
-    }
+		glShaderStorageBlockBinding(id, i, gpuBinding);
 
-    // =========================
-    // TEXTURE SLOTS (NEW)
-    // =========================
+		ssboMap[cpuBinding] = gpuBinding;
 
-    nextBinding = 0;
-    nextCpuBinding = 0;
-    uniformCount = 0;
-    glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &uniformCount);
+	#ifdef DEBUG
+		spdlog::debug("SSBO CPU {} -> GPU {}", cpuBinding, gpuBinding);
+	#endif
+	}
 
-    for (GLint i = 0; i < uniformCount; i++)
-    {
-        GLenum props[] = { GL_TYPE };
-        GLint type = 0;
+	// =========================
+	// TEXTURE SLOTS (NEW)
+	// =========================
 
-        glGetProgramResourceiv(id, GL_UNIFORM, i,
-                            1, props,
-                            1, nullptr,
-                            &type);
+	nextBinding = 0;
+	nextCpuBinding = 0;
+	uniformCount = 0;
+	glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &uniformCount);
 
-        if (type != GL_SAMPLER_2D)
-            continue;
+	for (GLint i = 0; i < uniformCount; i++)
+	{
+		GLenum props[] = { GL_TYPE };
+		GLint type = 0;
 
-        imageMap[nextCpuBinding] = nextBinding;
-        #ifdef DEBUG
-        spdlog::debug("TEX CPU {} -> GPU {}", nextCpuBinding++, nextBinding);
-        nextBinding += 2;
-        #endif
-    }
+		glGetProgramResourceiv(id, GL_UNIFORM, i,
+							1, props,
+							1, nullptr,
+							&type);
+
+		if (type != GL_SAMPLER_2D)
+			continue;
+
+		imageMap[nextCpuBinding] = nextBinding;
+		#ifdef DEBUG
+		spdlog::debug("TEX CPU {} -> GPU {}", nextCpuBinding++, nextBinding);
+		nextBinding += 2;
+		#endif
+	}
 }
 
 GlShader::~GlShader()
 {
-    spdlog::debug("Deleting shader with id: 0x{:x}", id);
-    if (id != 0)
-        glDeleteProgram(id);
+	spdlog::debug("Deleting shader with id: 0x{:x}", id);
+	if (id != 0)
+		glDeleteProgram(id);
 }
 
 GLuint GlShader::getID() {
-    return id;
+	return id;
 }

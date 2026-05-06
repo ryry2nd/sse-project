@@ -23,8 +23,8 @@ set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
 
 FetchContent_Declare(
-  sdl-image
-  GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
-  GIT_TAG release-3.4.4
+	sdl-image
+	GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+	GIT_TAG release-3.4.4
 )
 FetchContent_MakeAvailable(sdl-image)

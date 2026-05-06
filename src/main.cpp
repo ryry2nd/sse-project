@@ -4,34 +4,34 @@
 #define DEFAULT_MODULE "modules/example1"
 
 int main(int argc, char *argv[])
-{    
-    ScriptingHeaders::loginit();
-    Rendering::Window::init();
-    ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package(std::string(DEFAULT_MODULE));
+{
+	ScriptingHeaders::loginit();
+	Rendering::Window::init();
+	ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package(std::string(DEFAULT_MODULE));
 
-    // starts running the game loop
-    bool running = true;
+	// starts running the game loop
+	bool running = true;
 
-    while (running)
-    {
-        Rendering::Window::Update();
+	while (running)
+	{
+		Rendering::Window::Update();
 
-        ScriptingHeaders::Package::EventFunctions(&running);
+		ScriptingHeaders::Package::EventFunctions(&running);
 
-        for (auto &win : Rendering::sdlWindows) {
-            win->clearBackground();
-        }
+		for (auto &win : Rendering::sdlWindows) {
+			win->clearBackground();
+		}
 
-        ScriptingHeaders::Package::LoopFunctions();
+		ScriptingHeaders::Package::LoopFunctions();
 
-        for (auto &win : Rendering::sdlWindows) {
-            win->swapBuffer();
-        }
-    }
-    
-    delete example_package;
-    Rendering::Window::shutdown();
-    return 0;
+		for (auto &win : Rendering::sdlWindows) {
+			win->swapBuffer();
+		}
+	}
+
+	delete example_package;
+	Rendering::Window::shutdown();
+	return 0;
 }
 
 #ifdef _WIN32 // I HATE WINDOWS, THIS IS THE OS FOR THE DEVIL, ONLY THE DEVIL MAKES THEIR OPERATING SYSTEM THIS BAD
@@ -40,6 +40,6 @@ int main(int argc, char *argv[])
 
 extern "C" int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-    return main(__argc, __argv);
+	return main(__argc, __argv);
 }
 #endif

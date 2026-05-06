@@ -3,9 +3,9 @@
 using namespace Rendering;
 
 glm::vec2 FrameBuffer::getSize() const {
-    return size;
+	return size;
 }
 
 uint32_t FrameBuffer::getSettings() const {
-    return settings;
+	return settings;
 }
