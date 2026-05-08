@@ -22,15 +22,9 @@ FetchContent_MakeAvailable(boost-config)
 add_custom_target(copy_boost_headers ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 				${multiprecision_SOURCE_DIR}/include/boost
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${multiprecision_SOURCE_DIR}/LICENSE
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+				${CMAKE_CURRENT_BINARY_DIR}/include/extern/boost
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 				${boost-config_SOURCE_DIR}/include/boost
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${boost-config_SOURCE_DIR}/build.jam
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/boost
+				${CMAKE_CURRENT_BINARY_DIR}/include/extern/boost
 		COMMENT "---- Copying Boost headers ----"
 )

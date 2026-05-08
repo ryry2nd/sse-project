@@ -31,8 +31,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 	add_link_options(
 		-flto
 		-Wl,--gc-sections
-)
-else()
+	)
+endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	message(STATUS "Configuring Debug build: fast compile")
 	add_compile_options(
 		-DDEBUG
@@ -50,9 +51,9 @@ list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/cmake/packages")
 
 set(OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/libs)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/lib)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/libs)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}/lib)
 endif()
 
 
@@ -68,10 +69,7 @@ find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 find_package(slang CONFIG REQUIRED)
-
-if (USECMDCLANG STREQUAL "OFF")
-	find_package(clang CONFIG REQUIRED)
-endif()
+find_package(compiler CONFIG REQUIRED)
 
 # Add subdirectories
 add_subdirectory(src/engine)
@@ -91,57 +89,39 @@ add_custom_target(delete_cache ALL
 	COMMENT "---- Deleting folder recursively ----"
 )
 
-# copy headers
-file(GLOB_RECURSE MATH_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/src/engine/CustomMath/*.hpp
-)
-file(GLOB_RECURSE BIG_OBJECT_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/src/engine/BigObjects/*.hpp
-)
-file(GLOB_RECURSE SCRIPTING_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Scripting/*.hpp
-)
-file(GLOB_RECURSE RENDERING_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/src/engine/Rendering/*.hpp
-)
-list(FILTER RENDERING_HEADERS INCLUDE REGEX ".*/Rendering/[^/]+$")
-
-add_custom_target(copy_headers ALL
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/CustomMath
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/BigObjects
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Rendering
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Scripting
-
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${MATH_HEADERS}
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/CustomMath
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${BIG_OBJECT_HEADERS}
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/BigObjects
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${RENDERING_HEADERS}
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Rendering
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SCRIPTING_HEADERS}
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/engine/Scripting
-	COMMENT "---- Copying headers ----"
+#compile modules
+file(GLOB MODULE_DIRS LIST_DIRECTORIES true
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*"
 )
 
-# Post-build asset copy
-add_custom_target(copy_assets ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/src/modules
-		${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules
-	COMMENT "---- Copying assets ----"
-)
+foreach(MODULE ${MODULE_DIRS})
+    if(IS_DIRECTORY ${MODULE})
+
+        get_filename_component(MODULE_NAME ${MODULE} NAME)
+		set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
+		if(EXISTS "${MODULE}/CMakeLists.txt")
+            add_subdirectory(${MODULE})
+		endif()
+		if(EXISTS "${MODULE}/assets")
+		add_custom_target(copy_assets ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory
+				${MODULE}/assets
+				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}/assets
+			COMMENT "---- Copying assets ----"
+		)
+		endif()
+		if(EXISTS "${MODULE}/config.yaml")
+		add_custom_target(copy_config ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_if_different
+				${MODULE}/config.yaml
+				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}
+			COMMENT "---- Copying assets ----"
+		)
+		endif()
+        message(STATUS "Module: ${MODULE_NAME}")
+
+    endif()
+endforeach()
 
 add_custom_target(copy_compile_command ALL
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different

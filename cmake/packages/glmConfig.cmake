@@ -13,9 +13,6 @@ FetchContent_MakeAvailable(glm)
 add_custom_target(copy_glm_headers ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 				${glm_SOURCE_DIR}/glm
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${glm_SOURCE_DIR}/copying.txt
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/glm
+				${CMAKE_CURRENT_BINARY_DIR}/include/extern/glm
 		COMMENT "---- Copying glm headers ----"
 )

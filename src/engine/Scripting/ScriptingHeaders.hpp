@@ -8,9 +8,7 @@ union SDL_Event;
 
 namespace ScriptingHeaders
 {
-	typedef void(*FuncType)();
-	typedef void(*EventType)(SDL_Event*, bool*);
-	class Package
+	class EnginePackage
 	{
 	public:
 		std::string name;
@@ -18,17 +16,16 @@ namespace ScriptingHeaders
 		std::string version;
 		std::string path;
 
-		static std::vector<Package *> packages;
+		static std::vector<EnginePackage *> packages;
 		static void LoopFunctions();
 		static void EventFunctions(bool *running);
+		static bool ShouldStop();
 
-		Package(const std::string &path);
-		~Package();
+		EnginePackage(const std::string &path);
+		~EnginePackage();
 
 	private:
-		SDL_SharedObject* lib = nullptr;
-		FuncType loopFunc = nullptr;
-		EventType eventFunc = nullptr;
+		long llvmLocation;
 
 		void runLoopFunction();
 		void runEventFunction(SDL_Event *event, bool *running);

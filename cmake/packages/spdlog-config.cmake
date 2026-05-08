@@ -13,9 +13,6 @@ FetchContent_MakeAvailable(spdlog)
 add_custom_target(copy_spdlog_headers ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
 				${spdlog_SOURCE_DIR}/include/spdlog
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${spdlog_SOURCE_DIR}/LICENSE
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/include/spdlog
+				${CMAKE_CURRENT_BINARY_DIR}/include/extern/spdlog
 		COMMENT "---- Copying spdlog headers ----"
 )

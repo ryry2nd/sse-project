@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <SDL3/SDL_loadso.h>
 
-#define COMPILED_OUT_PATH "libs/Rendering"
+#define COMPILED_OUT_PATH "lib/Rendering"
 
 #ifdef _WIN32
 #define POPEN _popen

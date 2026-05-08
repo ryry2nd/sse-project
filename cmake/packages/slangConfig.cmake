@@ -25,16 +25,21 @@ add_custom_target(copy_slang ALL
 		${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_GLSLANG_LIB_OUT}
 
 	# copy slangc
+	COMMAND strip ${slang_SOURCE_DIR}/${SLANGC_BIN}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${slang_SOURCE_DIR}/${SLANGC_BIN}
 		${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANGC_BIN_OUT}
 
 	# copy only slang compiler libs
+	COMMAND strip ${slang_SOURCE_DIR}/${SLANG_COMPILER_LIB}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${slang_SOURCE_DIR}/${SLANG_COMPILER_LIB}
 		${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_COMPILER_LIB_OUT}
 
+	COMMAND strip ${slang_SOURCE_DIR}/${SLANG_GLSLANG_LIB}
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 		${slang_SOURCE_DIR}/${SLANG_GLSLANG_LIB}
 		${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANG_GLSLANG_LIB_OUT}
+
+	COMMENT "---- Copying Slang ----"
 )

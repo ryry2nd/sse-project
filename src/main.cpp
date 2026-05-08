@@ -7,30 +7,32 @@ int main(int argc, char *argv[])
 {
 	ScriptingHeaders::loginit();
 	Rendering::Window::init();
-	ScriptingHeaders::Package *example_package = new ScriptingHeaders::Package(std::string(DEFAULT_MODULE));
+	ScriptingHeaders::EnginePackage *example_package = new ScriptingHeaders::EnginePackage(std::string(DEFAULT_MODULE));
 
 	// starts running the game loop
-	bool running = true;
+	bool *running = new bool(true);
 
-	while (running)
+	while (*running)
 	{
 		Rendering::Window::Update();
 
-		ScriptingHeaders::Package::EventFunctions(&running);
+		ScriptingHeaders::EnginePackage::EventFunctions(running);
 
 		for (auto &win : Rendering::sdlWindows) {
 			win->clearBackground();
 		}
 
-		ScriptingHeaders::Package::LoopFunctions();
+		ScriptingHeaders::EnginePackage::LoopFunctions();
 
 		for (auto &win : Rendering::sdlWindows) {
 			win->swapBuffer();
 		}
+		if (ScriptingHeaders::EnginePackage::ShouldStop()) *running = false;
 	}
 
 	delete example_package;
 	Rendering::Window::shutdown();
+	delete running;
 	return 0;
 }
 
