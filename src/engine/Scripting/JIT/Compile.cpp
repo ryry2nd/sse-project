@@ -4,14 +4,7 @@
 #include <unordered_map>
 
 #include <llvm/ExecutionEngine/Orc/LLJIT.h>
-#include <llvm/ExecutionEngine/Orc/ThreadSafeModule.h>
-#include <llvm/ExecutionEngine/Orc/ExecutorProcessControl.h>
-#include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
-
-#include <llvm/Object/ObjectFile.h>
-
 #include <llvm/IRReader/IRReader.h>
-
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
 
@@ -25,7 +18,6 @@ public:
         InitializeNativeTarget();
 		InitializeNativeTargetAsmPrinter();
 		InitializeNativeTargetAsmParser();
-		InitializeNativeTargetDisassembler();
 
         m_jit = cantFail(LLJITBuilder().create());
 
@@ -40,12 +32,12 @@ public:
 			)
 		);
 
-		auto gen = llvm::orc::DynamicLibrarySearchGenerator::Load(
-			"lib/libSDL3.so",
-			m_jit->getDataLayout().getGlobalPrefix()
-		);
+		// auto gen = llvm::orc::DynamicLibrarySearchGenerator::Load(
+		// 	"lib/libSDL3.so",
+		// 	m_jit->getDataLayout().getGlobalPrefix()
+		// );
 
-		m_jit->getMainJITDylib().addGenerator(std::move(*gen));
+		// m_jit->getMainJITDylib().addGenerator(std::move(*gen));
     }
 
     bool loadModule(const std::string& path) {
@@ -71,24 +63,6 @@ public:
 
 			if (auto e = m_jit->addIRModule(std::move(tsm))) {
 				logAllUnhandledErrors(std::move(e), errs(), "Add IR Module Error: ");
-				return false;
-			}
-
-			return true;
-		}
-
-		// ---------- Object (.o / .obj) ----------
-		if (path.ends_with(".o") || path.ends_with(".obj")) {
-			auto file = MemoryBuffer::getFile(path);
-			if (!file) {
-				errs() << "Object load failed: " << file.getError().message() << "\n";
-				return false;
-			}
-
-			if (auto e = m_jit->addObjectFile(
-					std::move(file.get())
-				)) {
-				logAllUnhandledErrors(std::move(e), errs(), "Add Object Error: ");
 				return false;
 			}
 

@@ -139,7 +139,7 @@ GlShader::GlShader(std::string path)
 	}
 
 	// =========================
-	// TEXTURE SLOTS (NEW)
+	// TEXTURE SLOTS
 	// =========================
 
 	nextBinding = 0;

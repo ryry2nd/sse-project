@@ -104,7 +104,7 @@ EnginePackage::EnginePackage(const std::string &path)
 
 void EnginePackage::runLoopFunction() {
 	try {
-		// if (!loop(llvmLocation)) shouldShutDown = false;
+		if (!loop(llvmLocation)) shouldShutDown = false;
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -117,7 +117,7 @@ void EnginePackage::runLoopFunction() {
 
 void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
 	try {
-		// if(!event(llvmLocation, e, running)) shouldShutDown = false;
+		if(!event(llvmLocation, e, running)) shouldShutDown = false;
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -136,7 +136,7 @@ EnginePackage::~EnginePackage()
 		packages.erase(it);
 
 	try {
-		// shutdown(llvmLocation);
+		shutdown(llvmLocation);
 	}
 	catch (const std::exception& e) {
 		spdlog::error(e.what());

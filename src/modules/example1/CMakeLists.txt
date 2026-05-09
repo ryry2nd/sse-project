@@ -24,6 +24,7 @@ foreach(PATH ${ALL_ITEMS})
     endif()
 endforeach()
 
+set(MOD_PATH "modules/example1")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(MODULE_FILE ${MODULE_OUT_DIR}/module.bc)
@@ -35,6 +36,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
             -emit-llvm -c -O2 -flto -fdata-sections -ffunction-sections -fno-omit-frame-pointer
             ${INCLUDE_FLAGS}
             ${CPP_SOURCES}
+			"-DMODULE_PATH=\\\"${MOD_PATH}\\\""
             -o ${MODULE_FILE}
         DEPENDS ${CPP_SOURCES} ${MODULE_DEPS}
     )
@@ -50,6 +52,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             -emit-llvm -S -DDEBUG -O1 -g3 -fno-omit-frame-pointer
             ${INCLUDE_FLAGS}
             ${CPP_SOURCES}
+			"-DMODULE_PATH=\\\"${MOD_PATH}\\\""
             -o ${MODULE_FILE}
         DEPENDS ${CPP_SOURCES} ${MODULE_DEPS}
     )

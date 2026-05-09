@@ -9,7 +9,6 @@ llvm_map_components_to_libnames(LLVM_LIBS
 target_link_libraries(CLANG_IMPL INTERFACE
     LLVMX86CodeGen
     LLVMX86AsmParser
-    LLVMX86Disassembler
 )
 
 
