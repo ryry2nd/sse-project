@@ -14,36 +14,24 @@ using namespace llvm::orc;
 
 class LLVMRuntime {
 public:
-    LLVMRuntime() {
-        InitializeNativeTarget();
+	LLVMRuntime() {
+		InitializeNativeTarget();
 		InitializeNativeTargetAsmPrinter();
 		InitializeNativeTargetAsmParser();
 
-        m_jit = cantFail(LLJITBuilder().create());
+		m_jit = cantFail(LLJITBuilder().create());
 
 		auto &jd = m_jit->getMainJITDylib();
 
-		// THIS is the key piece
 		jd.addGenerator(
-			cantFail(
-				DynamicLibrarySearchGenerator::GetForCurrentProcess(
-					m_jit->getDataLayout().getGlobalPrefix()
-				)
-			)
+			cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
+				m_jit->getDataLayout().getGlobalPrefix()
+			))
 		);
+	}
 
-		// auto gen = llvm::orc::DynamicLibrarySearchGenerator::Load(
-		// 	"lib/libSDL3.so",
-		// 	m_jit->getDataLayout().getGlobalPrefix()
-		// );
-
-		// m_jit->getMainJITDylib().addGenerator(std::move(*gen));
-    }
-
-    bool loadModule(const std::string& path) {
-        auto context = std::make_unique<LLVMContext>();
-
-		auto &dl = m_jit->getDataLayout();
+	bool loadModule(const std::string& path) {
+		auto context = std::make_unique<LLVMContext>();
 
 		// ---------- IR (.bc / .ll) ----------
 		if (path.ends_with(".bc") || path.ends_with(".ll")) {
@@ -71,49 +59,45 @@ public:
 
 		errs() << "Unsupported module type: " << path << "\n";
 		return false;
-    }
+	}
 
-    template<typename T>
-    T getFunction(const std::string& name) {
-        auto symbol = m_jit->lookup(name);
+	template<typename T>
+	T getFunction(const std::string& name) {
+		auto symbol = m_jit->lookup(name);
 
-        if (!symbol) {
-            return nullptr;
-        }
+		if (!symbol) {
+			return nullptr;
+		}
 
-        return symbol->toPtr<T>();
-    }
+		return symbol->toPtr<T>();
+	}
 
-	void shutdown() {
+	void reset() {
 		m_jit.reset();
 	}
 
-	~LLVMRuntime() {
-		shutdown();
-	}
-
 private:
-    std::unique_ptr<LLJIT> m_jit;
+	std::unique_ptr<LLJIT> m_jit;
 };
 
 struct MyModule {
 	std::unique_ptr<LLVMRuntime> runtime;
 	void (*setup)();
-    void (*loop)();
-    void (*event)(SDL_Event*, bool*);
+	void (*loop)();
+	void (*event)(SDL_Event*, bool*);
 	void (*shutdown)();
 };
 
 std::unordered_map<long, MyModule> mods;
 
-long currID = 0;
-
 long initModule(const char* path) {
-    auto runtime = std::make_unique<LLVMRuntime>();
+	static long currID = 0;
 
-    if (!runtime->loadModule(path)) {
-        return -1;
-    }
+	auto runtime = std::make_unique<LLVMRuntime>();
+
+	if (!runtime->loadModule(path)) {
+		return -1;
+	}
 
 	auto setup = runtime->getFunction<void(*)()>("setup");
 	auto loop = runtime->getFunction<void(*)()>("loop");
@@ -133,50 +117,50 @@ long initModule(const char* path) {
 }
 
 void setup(long id) {
-	if (id >= mods.size() || id < 0) {
-        return;
-    }
+	auto it = mods.find(id);
+	if (it == mods.end()) return;
 
-    if (!mods[id].setup) {
-        return;
-    }
+	if (!mods[id].setup) return;
+
 	mods[id].setup();
 }
 bool loop(long id) {
-	if (id >= mods.size() || id < 0) {
-        return 1;
-    }
+	auto it = mods.find(id);
+	if (it == mods.end()) return 1;
 
-    if (!mods[id].loop) {
-        return 1;
-    }
+	if (!mods[id].loop)	return 1;
+
 	mods[id].loop();
 	return 0;
 }
 bool event(long id, SDL_Event *e, bool *running) {
-	if (id >= mods.size() || id < 0) {
-        return 1;
-    }
+	auto it = mods.find(id);
+	if (it == mods.end()) return 1;
 
-    if (!mods[id].event) {
-        return 1;
-    }
+	if (!mods[id].event) {
+		return 1;
+	}
 	mods[id].event(e, running);
 	return 0;
 }
 void shutdown(long id) {
-	if (id >= mods.size() || id < 0) {
-        return;
-    }
+	auto it = mods.find(id);
+	if (it == mods.end()) return;
 
-    if (!mods[id].shutdown) {
-        return;
-    }
+	if (!mods[id].shutdown) {
+		return;
+	}
 	mods[id].shutdown();
 }
 void remove(long id) {
-	if (id >= mods.size() || id < 0) {
-        return;
-    }
+	auto it = mods.find(id);
+	if (it == mods.end()) return;
+
+	mods[id].setup = nullptr;
+	mods[id].loop = nullptr;
+	mods[id].event = nullptr;
+	mods[id].shutdown = nullptr;
+
+	mods[id].runtime.reset();
 	mods.erase(id);
 }

@@ -15,9 +15,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml)
 
-add_custom_target(copy_yaml_headers ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${yaml_SOURCE_DIR}/include/yaml-cpp
-				${CMAKE_CURRENT_BINARY_DIR}/include/extern/yaml-cpp
-		COMMENT "---- Copying yaml headers ----"
-)
+# add_custom_target(copy_yaml_headers ALL
+# 		COMMAND ${CMAKE_COMMAND} -E copy_directory
+# 				${yaml_SOURCE_DIR}/include/yaml-cpp
+# 				${CMAKE_CURRENT_BINARY_DIR}/include/extern/yaml-cpp
+# 		COMMENT "---- Copying yaml headers ----"
+# )

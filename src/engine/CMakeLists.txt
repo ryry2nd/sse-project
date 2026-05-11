@@ -1,58 +1,77 @@
 file(GLOB_RECURSE MATH_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/CustomMath/*.hpp
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/CustomMath/*.hpp
 )
+
 file(GLOB_RECURSE BIG_OBJECT_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/BigObjects/*.hpp
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/BigObjects/*.hpp
 )
+
 file(GLOB_RECURSE SCRIPTING_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/Scripting/*.hpp
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/*.hpp
 )
+
+list(FILTER SCRIPTING_HEADERS INCLUDE REGEX ".*/Scripting/[^/]+$")
+
 file(GLOB_RECURSE RENDERING_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/Rendering/*.hpp
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Rendering/*.hpp
 )
+
 list(FILTER RENDERING_HEADERS INCLUDE REGEX ".*/Rendering/[^/]+$")
 
-add_custom_target(copy_src_headers ALL
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/CustomMath
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/CustomMath/engine
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/BigObjects
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/BigObjects/engine
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Rendering
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Rendering/engine
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Scripting
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Scripting/engine
-	COMMAND ${CMAKE_COMMAND} -E make_directory
-		${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${MATH_HEADERS}
-		${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${BIG_OBJECT_HEADERS}
-		${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${RENDERING_HEADERS}
-		${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different
-		${SCRIPTING_HEADERS}
-		${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
-	COMMENT "---- Copying headers ----"
+file(GLOB_RECURSE MODULE_STD_HEADERS
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/Standard/*.hpp
 )
+
+set(HEADER_STAMP ${CMAKE_BINARY_DIR}/include/.headers_ok)
+
+add_custom_command(
+    OUTPUT ${HEADER_STAMP}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include
+
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Engine/engine
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${MATH_HEADERS}
+        ${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${BIG_OBJECT_HEADERS}
+        ${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${RENDERING_HEADERS}
+        ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${SCRIPTING_HEADERS}
+        ${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
+
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${MODULE_STD_HEADERS}
+        ${CMAKE_BINARY_DIR}/include/Engine/engine
+
+    COMMAND ${CMAKE_COMMAND} -E touch ${HEADER_STAMP}
+
+    DEPENDS
+        ${MATH_HEADERS}
+        ${BIG_OBJECT_HEADERS}
+        ${RENDERING_HEADERS}
+        ${SCRIPTING_HEADERS}
+        ${MODULE_STD_HEADERS}
+
+    COMMENT "---- Copying headers ----"
+)
+
+add_custom_target(copy_src_headers DEPENDS ${HEADER_STAMP})
 
 
 
@@ -128,7 +147,7 @@ set_target_properties(ScriptingJIT PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG SDL3::SDL3)
+target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG SDL3::SDL3 spdlog::spdlog RenderingBase yaml-cpp::yaml-cpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 add_custom_command(
