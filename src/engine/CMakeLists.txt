@@ -86,6 +86,13 @@ endif()
 
 # Scripting Section
 file(GLOB_RECURSE scriptingJIT_SOURCES "Scripting/JIT/*.cpp")
+
+if (NOT SSE_MINIMAL)
+	list(FILTER scriptingJIT_SOURCES EXCLUDE REGEX ".*/CompileMinimal.cpp$")
+else()
+	list(FILTER scriptingJIT_SOURCES EXCLUDE REGEX ".*/Compile.cpp$")
+endif()
+
 add_library(ScriptingJIT SHARED ${scriptingJIT_SOURCES})
 add_dependencies(ScriptingJIT copy_src_headers)
 
@@ -93,7 +100,11 @@ set_target_properties(ScriptingJIT PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG SDL3::SDL3 spdlog::spdlog RenderingBase yaml-cpp::yaml-cpp)
+target_link_libraries(ScriptingJIT PRIVATE SDL3::SDL3 spdlog::spdlog RenderingBase yaml-cpp::yaml-cpp)
+
+if (NOT SSE_MINIMAL)
+target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG)
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
 add_custom_command(

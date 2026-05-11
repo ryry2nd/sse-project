@@ -1,7 +1,7 @@
 include(FetchContent)
 
-set(BUILD_SHARED_LIBS OFF)
-set(BUILD_STATIC_LIBS ON)
+set(BUILD_SHARED_LIBS ON)
+set(BUILD_STATIC_LIBS OFF)
 
 FetchContent_Declare(
 	spdlog

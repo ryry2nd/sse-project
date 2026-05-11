@@ -5,6 +5,7 @@ BUILD_TYPE="Release"
 OS="linux"
 CORES=$(nproc)
 NOCONFIG=0
+MINIMAL=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -14,6 +15,10 @@ while [[ $# -gt 0 ]]; do
 	  ;;
 	--no-config)
 	  NOCONFIG=1
+	  shift
+	  ;;
+	--minimal)
+	  MINIMAL=1
 	  shift
 	  ;;
 	--os)
@@ -31,13 +36,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-BUILD_DIR="./build/$OS-$BUILD_TYPE"
 TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
+
+if [ "$MINIMAL" -eq 1 ]; then
+BUILD_DIR="./build/$OS-$BUILD_TYPE-minimal"
+else
+BUILD_DIR="./build/$OS-$BUILD_TYPE"
+fi
 
 mkdir -p "$BUILD_DIR"
 
 if [ "$NOCONFIG" -eq 0 ]; then
-  cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE
+  cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DSSE_MINIMAL=$MINIMAL
 fi
 
 cmake --build "$BUILD_DIR" -- -j"$CORES"

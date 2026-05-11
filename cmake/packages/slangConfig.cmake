@@ -15,7 +15,7 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(slang)
 
-
+if (NOT SSE_MINIMAL)
 add_custom_target(copy_slang ALL
 	COMMAND ${CMAKE_COMMAND} -E make_directory
 		${CMAKE_BINARY_DIR}/${PROJECT_NAME}/${SLANGC_BIN_OUT}
@@ -43,3 +43,4 @@ add_custom_target(copy_slang ALL
 
 	COMMENT "---- Copying Slang ----"
 )
+endif()

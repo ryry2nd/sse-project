@@ -9,12 +9,13 @@ set(ALL_ITEMS
 
 set(MOD_PATH "modules/example1")
 
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if (SSE_MINIMAL)
+	set(MODULE_FILE ${MODULE_OUT_DIR}/module.so)
+	set(MODULE_FLAGS -shared -O2 -fPIC -flto -fdata-sections -ffunction-sections -fno-omit-frame-pointer -Wl,--gc-sections)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(MODULE_FILE ${MODULE_OUT_DIR}/module.bc)
 	set(MODULE_FLAGS -emit-llvm -c -O2 -flto -fdata-sections -ffunction-sections -fno-omit-frame-pointer)
-endif()
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(MODULE_FILE ${MODULE_OUT_DIR}/module.ll)
 	set(MODULE_FLAGS -emit-llvm -S -DDEBUG -O0 -g3 -fno-omit-frame-pointer)
 endif()

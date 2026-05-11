@@ -20,5 +20,5 @@ set(SLANG_GLSLANG_LIB_OUT "lib" CACHE STRING "")
 set(PIP_PATH "bin/pip" CACHE STRING "")
 set(PYTHON_PATH "bin/python" CACHE STRING "")
 
-set(USE_VULKAN OFF CACHE BOOL "Enable Vulkan support")
-set(USE_OPENGL ON CACHE BOOL "Enable OpenGL support")
+option(USE_VULKAN "Use Vulkan" OFF)
+option(USE_OPENGL "Use OpenGl" ON)

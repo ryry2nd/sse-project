@@ -1,3 +1,4 @@
+if (NOT SSE_MINIMAL)
 find_package(LLVM 20.1.8 REQUIRED CONFIG)
 
 add_library(CLANG_IMPL INTERFACE)
@@ -18,3 +19,4 @@ target_compile_definitions(CLANG_IMPL INTERFACE ${LLVM_DEFINITIONS})
 target_link_libraries(CLANG_IMPL INTERFACE ${LLVM_LIBS})
 
 add_library(CLANG::CLANG ALIAS CLANG_IMPL)
+endif()

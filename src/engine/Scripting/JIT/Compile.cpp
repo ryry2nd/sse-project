@@ -90,7 +90,8 @@ struct MyModule {
 
 std::unordered_map<long, MyModule> mods;
 
-long initModule(const char* path) {
+extern "C" {
+long initModuleJIT(const char* path) {
 	static long currID = 0;
 
 	auto runtime = std::make_unique<LLVMRuntime>();
@@ -116,7 +117,7 @@ long initModule(const char* path) {
 	return currID++;
 }
 
-void setup(long id) {
+void setupJIT(long id) {
 	auto it = mods.find(id);
 	if (it == mods.end()) return;
 
@@ -124,7 +125,7 @@ void setup(long id) {
 
 	mods[id].setup();
 }
-bool loop(long id) {
+bool loopJIT(long id) {
 	auto it = mods.find(id);
 	if (it == mods.end()) return 1;
 
@@ -133,7 +134,7 @@ bool loop(long id) {
 	mods[id].loop();
 	return 0;
 }
-bool event(long id, SDL_Event *e, bool *running) {
+bool eventJIT(long id, SDL_Event *e, bool *running) {
 	auto it = mods.find(id);
 	if (it == mods.end()) return 1;
 
@@ -143,7 +144,7 @@ bool event(long id, SDL_Event *e, bool *running) {
 	mods[id].event(e, running);
 	return 0;
 }
-void shutdown(long id) {
+void shutdownJIT(long id) {
 	auto it = mods.find(id);
 	if (it == mods.end()) return;
 
@@ -152,7 +153,7 @@ void shutdown(long id) {
 	}
 	mods[id].shutdown();
 }
-void remove(long id) {
+void removeJIT(long id) {
 	auto it = mods.find(id);
 	if (it == mods.end()) return;
 
@@ -163,4 +164,5 @@ void remove(long id) {
 
 	mods[id].runtime.reset();
 	mods.erase(id);
+}
 }

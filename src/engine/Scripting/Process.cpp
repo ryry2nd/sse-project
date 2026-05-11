@@ -13,12 +13,14 @@ using namespace ScriptingHeaders;
 #define LIBRARY_PATH "lib"
 #define CONFIG_NAME "/config.yaml"
 
-extern size_t initModule(const char* path);
-extern void setup(long id);
-extern bool loop(long id);
-extern bool event(long id, SDL_Event *e, bool *running);
-extern void shutdown(long id);
-extern void remove(long id);
+extern "C" {
+	long initModuleJIT(const char* path);
+	void setupJIT(long id);
+	long loopJIT(long id);
+	long eventJIT(long id, SDL_Event *e, bool *running);
+	void shutdownJIT(long id);
+	void removeJIT(long id);
+}
 
 std::vector<EnginePackage *> EnginePackage::packages;
 
@@ -73,7 +75,7 @@ EnginePackage::EnginePackage(const std::string &path)
 	bool hasCode = false;
 	for (const auto &entry : std::filesystem::directory_iterator(path)) {
 		std::string ext = entry.path().extension().string();
-		if (ext == ".bc" || ext == ".ll" || ext == ".o" || ext == ".obj") {
+		if (ext == ".bc" || ext == ".ll" || ext == ".o" || ext == ".obj" || ext == ".so" || ext == ".dll") {
 			hasCode = true;
 			codeFile = entry.path().string();
 			break;
@@ -83,12 +85,12 @@ EnginePackage::EnginePackage(const std::string &path)
 
 	if (!hasCode) return;
 
-	llvmLocation = initModule(codeFile.c_str());
+	llvmLocation = initModuleJIT(codeFile.c_str());
 
 	if (llvmLocation < 0) return;
 
 	try {
-		setup(llvmLocation);
+		setupJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -104,7 +106,7 @@ EnginePackage::EnginePackage(const std::string &path)
 
 void EnginePackage::runLoopFunction() {
 	try {
-		if (!loop(llvmLocation)) shouldShutDown = false;
+		if (!loopJIT(llvmLocation)) shouldShutDown = false;
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -117,7 +119,7 @@ void EnginePackage::runLoopFunction() {
 
 void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
 	try {
-		if(!event(llvmLocation, e, running)) shouldShutDown = false;
+		if(!eventJIT(llvmLocation, e, running)) shouldShutDown = false;
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -136,13 +138,13 @@ EnginePackage::~EnginePackage()
 		packages.erase(it);
 
 	try {
-		shutdown(llvmLocation);
+		shutdownJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
 		spdlog::error(e.what());
 	}
 
-	remove(llvmLocation);
+	removeJIT(llvmLocation);
 
 	spdlog::info("Successfully shut down module: {}", id);
 }

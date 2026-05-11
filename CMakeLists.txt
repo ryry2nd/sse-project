@@ -10,7 +10,6 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 option(USE_VULKAN "Enable Vulkan support" OFF)
 option(USE_OPENGL "Enable OpenGL support" OFF)
-option(USECMDCLANG "Use the commandline clang" OFF)
 
 add_compile_options(
 	-Wdeprecated-literal-operator
