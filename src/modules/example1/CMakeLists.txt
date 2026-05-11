@@ -12,10 +12,8 @@ set(MODULE_DEPS
     yaml-cpp::yaml-cpp
     SDL3::SDL3
     spdlog::spdlog
-    Boost::multiprecision
     RenderingBase
     Scripting
-    CustomMath
 )
 
 set(MOD_PATH "modules/example1")

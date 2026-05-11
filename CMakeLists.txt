@@ -63,7 +63,7 @@ find_package(sdl CONFIG REQUIRED)
 find_package(sdl_image CONFIG REQUIRED)
 find_package(sdl_ttf CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(boost_multiprecision CONFIG REQUIRED)
+# find_package(boost_multiprecision CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
@@ -76,12 +76,8 @@ add_subdirectory(src/engine)
 add_executable(main src/main.cpp)
 
 target_link_libraries(main PRIVATE
-	SDL3::SDL3
-	CustomMath
 	RenderingBase
-	# BigObjects
 	Scripting
-	spdlog::spdlog
 )
 
 add_custom_target(delete_cache ALL
@@ -96,30 +92,30 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
 
 foreach(MODULE ${MODULE_DIRS})
     if(IS_DIRECTORY ${MODULE})
-
-        get_filename_component(MODULE_NAME ${MODULE} NAME)
-		set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
-		if(EXISTS "${MODULE}/CMakeLists.txt")
-            add_subdirectory(${MODULE})
+		if (NOT EXISTS "${MODULE}/.ignore")
+			get_filename_component(MODULE_NAME ${MODULE} NAME)
+			set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
+			if(EXISTS "${MODULE}/CMakeLists.txt")
+				add_subdirectory(${MODULE})
+			endif()
+			if(EXISTS "${MODULE}/assets")
+			add_custom_target(copy_assets ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_directory
+					${MODULE}/assets
+					${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}/assets
+				COMMENT "---- Copying assets ----"
+			)
+			endif()
+			if(EXISTS "${MODULE}/config.yaml")
+			add_custom_target(copy_config ALL
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different
+					${MODULE}/config.yaml
+					${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}
+				COMMENT "---- Copying assets ----"
+			)
+			endif()
+			message(STATUS "Module: ${MODULE_NAME}")
 		endif()
-		if(EXISTS "${MODULE}/assets")
-		add_custom_target(copy_assets ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${MODULE}/assets
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}/assets
-			COMMENT "---- Copying assets ----"
-		)
-		endif()
-		if(EXISTS "${MODULE}/config.yaml")
-		add_custom_target(copy_config ALL
-			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-				${MODULE}/config.yaml
-				${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}
-			COMMENT "---- Copying assets ----"
-		)
-		endif()
-        message(STATUS "Module: ${MODULE_NAME}")
-
     endif()
 endforeach()
 

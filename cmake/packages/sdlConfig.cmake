@@ -11,10 +11,3 @@ FetchContent_Declare(
 	GIT_TAG release-3.4.8
 )
 FetchContent_MakeAvailable(sdl)
-
-# add_custom_target(copy_sdl_headers ALL
-# 		COMMAND ${CMAKE_COMMAND} -E copy_directory
-# 				${sdl_SOURCE_DIR}/include
-# 				${CMAKE_CURRENT_BINARY_DIR}/include/extern
-# 		COMMENT "---- Copying SDL headers ----"
-# )

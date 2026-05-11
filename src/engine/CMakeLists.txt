@@ -1,13 +1,3 @@
-file(GLOB_RECURSE MATH_HEADERS
-    CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/CustomMath/*.hpp
-)
-
-file(GLOB_RECURSE BIG_OBJECT_HEADERS
-    CONFIGURE_DEPENDS
-    ${CMAKE_CURRENT_SOURCE_DIR}/BigObjects/*.hpp
-)
-
 file(GLOB_RECURSE SCRIPTING_HEADERS
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/*.hpp
@@ -33,19 +23,9 @@ add_custom_command(
     OUTPUT ${HEADER_STAMP}
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include
 
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Engine/engine
-
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${MATH_HEADERS}
-        ${CMAKE_BINARY_DIR}/include/CustomMath/engine/CustomMath
-
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${BIG_OBJECT_HEADERS}
-        ${CMAKE_BINARY_DIR}/include/BigObjects/engine/BigObjects
 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${RENDERING_HEADERS}
@@ -73,21 +53,6 @@ add_custom_command(
 
 add_custom_target(copy_src_headers DEPENDS ${HEADER_STAMP})
 
-
-
-#Custom Math section
-add_library(CustomMath INTERFACE)
-add_dependencies(CustomMath copy_src_headers)
-target_include_directories(CustomMath INTERFACE
-	${CMAKE_BINARY_DIR}/include/CustomMath
-)
-target_link_libraries(CustomMath INTERFACE glm::glm Boost::multiprecision spdlog::spdlog)
-set_target_properties(CustomMath PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
-)
-
-
-
 #Rendering Section
 
 file(GLOB_RECURSE rendering_SOURCES "Rendering/*.cpp")
@@ -102,7 +67,7 @@ set_target_properties(RenderingBase PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(RenderingBase PRIVATE SDL3::SDL3 SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image glm::glm spdlog::spdlog)
+target_link_libraries(RenderingBase PRIVATE SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
 
 
 if(USE_OPENGL)
@@ -117,25 +82,6 @@ if(USE_OPENGL)
 		RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 	)
 endif()
-
-
-
-# #BigObjects Section
-
-# file(GLOB_RECURSE object_SOURCES "BigObjects/*.cpp")
-
-# add_library(BigObjects SHARED ${object_SOURCES})
-# add_dependencies(BigObjects copy_src_headers)
-# target_include_directories(BigObjects PUBLIC
-#     ${CMAKE_BINARY_DIR}/include/BigObjects
-# )
-# target_link_libraries(BigObjects INTERFACE glm::glm spdlog::spdlog)
-
-# target_link_libraries(BigObjects PRIVATE RenderingBase CustomMath)
-# set_target_properties(BigObjects PROPERTIES
-#     RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
-# )
-
 
 
 # Scripting Section
@@ -170,4 +116,4 @@ set_target_properties(Scripting PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(Scripting PRIVATE ScriptingJIT glm::glm yaml-cpp::yaml-cpp SDL3::SDL3 spdlog::spdlog)
+target_link_libraries(Scripting PRIVATE ScriptingJIT yaml-cpp::yaml-cpp PUBLIC glm::glm SDL3::SDL3 spdlog::spdlog)
