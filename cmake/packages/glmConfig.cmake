@@ -9,10 +9,3 @@ FetchContent_Declare(
 	GIT_TAG 1.0.3
 )
 FetchContent_MakeAvailable(glm)
-
-add_custom_target(copy_glm_headers ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${glm_SOURCE_DIR}/glm
-				${CMAKE_CURRENT_BINARY_DIR}/include/extern/glm
-		COMMENT "---- Copying glm headers ----"
-)

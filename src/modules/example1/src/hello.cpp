@@ -1,8 +1,9 @@
 #include <engine/Engine.hpp>
+#include <glm/glm.hpp>
 
 extern "C" void setup() {
-	float i = 100;
-	Engine::Logging::info("test {}", i);
+	glm::vec3 i(1.0f);
+	Engine::Logging::info("test {:0.2f}", i.x);
 }
 
 // // #include <engine/BigObjects/BigObjects.hpp>

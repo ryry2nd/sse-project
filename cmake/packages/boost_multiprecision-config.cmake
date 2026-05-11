@@ -18,13 +18,3 @@ FetchContent_Declare(
 	GIT_TAG boost-1.91.0
 )
 FetchContent_MakeAvailable(boost-config)
-
-add_custom_target(copy_boost_headers ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${multiprecision_SOURCE_DIR}/include/boost
-				${CMAKE_CURRENT_BINARY_DIR}/include/extern/boost
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-				${boost-config_SOURCE_DIR}/include/boost
-				${CMAKE_CURRENT_BINARY_DIR}/include/extern/boost
-		COMMENT "---- Copying Boost headers ----"
-)

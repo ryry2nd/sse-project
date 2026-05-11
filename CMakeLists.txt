@@ -30,7 +30,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 
 	add_link_options(
 		-flto
-		-Wl,--gc-sections
+    	-Wl,--gc-sections,-s
 	)
 endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
