@@ -1,6 +1,11 @@
 #pragma once
 
 #include "Window.hpp"
+#include "Buffer.hpp"
+#include "FrameBuffer.hpp"
+#include "Image.hpp"
+#include "Mesh.hpp"
+#include "Shader.hpp"
 
 extern "C" {
 	void hostShutDownAll();
