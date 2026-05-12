@@ -5,6 +5,7 @@ file(GLOB CPP_SOURCES CONFIGURE_DEPENDS
 set(ALL_ITEMS
     "-I${CMAKE_BINARY_DIR}/include/Engine"
     "-I${glm_SOURCE_DIR}"
+	"-I${sdl_SOURCE_DIR}/include"
 )
 
 set(MOD_PATH "modules/example1")

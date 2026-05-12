@@ -18,15 +18,15 @@ int main(int argc, char *argv[])
 
 		ScriptingHeaders::EnginePackage::EventFunctions(running);
 
-		for (auto &win : Rendering::sdlWindows) {
-			win->clearBackground();
-		}
+		// for (auto &win : Rendering::sdlWindows) {
+		// 	win->clearBackground();
+		// }
 
 		ScriptingHeaders::EnginePackage::LoopFunctions();
 
-		for (auto &win : Rendering::sdlWindows) {
-			win->swapBuffer();
-		}
+		// for (auto &win : Rendering::sdlWindows) {
+		// 	win->swapBuffer();
+		// }
 		if (ScriptingHeaders::EnginePackage::ShouldStop()) *running = false;
 	}
 

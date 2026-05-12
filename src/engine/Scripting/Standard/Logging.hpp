@@ -2,14 +2,15 @@
 
 #include <format>
 
-extern "C" void hostLogInfo(const char* str);
-extern "C" void hostLogWarn(const char* str);
-extern "C" void hostLogDebug(const char* str);
-extern "C" void hostLogError(const char* str);
-extern "C" void hostLogCritical(const char* str);
+extern "C"  {
+	void hostLogInfo(const char* str);
+	void hostLogWarn(const char* str);
+	void hostLogDebug(const char* str);
+	void hostLogError(const char* str);
+	void hostLogCritical(const char* str);
+}
 
 namespace Engine::Logging {
-
 template<typename... Args>
 inline void info(std::format_string<Args...> fmtStr, Args&&... args) {
 	auto msg = std::format(fmtStr, std::forward<Args>(args)...);

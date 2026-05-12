@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <string>
-#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <memory>
@@ -58,8 +57,6 @@ namespace Rendering
 	private:
 		static Uint64 lastCounter;
 	};
-
-	inline std::vector<std::unique_ptr<Window>> sdlWindows;
 
 	class Buff {
 	public:

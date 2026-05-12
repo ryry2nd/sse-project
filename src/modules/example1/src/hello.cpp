@@ -1,9 +1,30 @@
 #include <engine/Engine.hpp>
+#include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 
 extern "C" void setup() {
+	Engine::Rendering::setAPI("OpenGl4.6");
+	Engine::Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 9, true);
 	glm::vec3 i(1.0f);
 	Engine::Logging::info("test {:0.2f}", i.x);
+}
+
+extern "C" void loop() {
+
+}
+
+extern "C" void event(SDL_Event *event, bool *running) {
+	if (event->type == SDL_EVENT_QUIT)
+		*running = false;
+
+	if (event->type == SDL_EVENT_KEY_DOWN)
+	{
+		SDL_Keycode key = event->key.key;
+		if (key == SDLK_ESCAPE)
+		{
+			*running = false;
+		}
+	}
 }
 
 // // #include <engine/BigObjects/BigObjects.hpp>

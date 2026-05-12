@@ -27,8 +27,10 @@ Uint64 Window::now = SDL_GetTicks();
 glm::vec2 Window::res;
 SDL_Window *Window::window = nullptr;
 
+extern "C" void hostShutDownAll();
+
 void Window::shutdown() {
-	Rendering::sdlWindows.clear();
+	hostShutDownAll();
 	SDL_Quit();
 	spdlog::info("Quit out of sdl");
 	spdlog::warn("Note that you should only run this once per program and not per window");
