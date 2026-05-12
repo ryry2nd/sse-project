@@ -59,8 +59,8 @@ endif()
 
 # Packages
 find_package(sdl CONFIG REQUIRED)
-find_package(sdl_image CONFIG REQUIRED)
-find_package(sdl_ttf CONFIG REQUIRED)
+find_package(images CONFIG REQUIRED)
+# find_package(sdl_ttf CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 # find_package(boost_multiprecision CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)

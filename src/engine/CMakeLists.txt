@@ -67,7 +67,7 @@ set_target_properties(RenderingBase PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(RenderingBase PRIVATE SDL3_ttf::SDL3_ttf SDL3_image::SDL3_image PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
+target_link_libraries(RenderingBase PRIVATE PNG::PNG JPEG::JPEG PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
 
 
 if(USE_OPENGL)

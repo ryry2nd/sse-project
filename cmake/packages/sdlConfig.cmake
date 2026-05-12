@@ -4,6 +4,7 @@ set(BUILD_SHARED_LIBS ON)
 set(BUILD_STATIC_LIBS OFF)
 set(SDL_TEST_LIBRARY OFF)
 set(SDL_VENDORED TRUE)
+set(SDL_RENDER OFF)
 
 FetchContent_Declare(
 	sdl

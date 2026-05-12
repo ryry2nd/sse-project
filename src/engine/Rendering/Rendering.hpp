@@ -8,7 +8,6 @@
 #include <memory>
 #include <spdlog/spdlog.h>
 
-struct TTF_Font;
 struct SDL_Surface;
 struct SDL_Window;
 struct SDL_Color;
@@ -198,19 +197,4 @@ namespace Rendering
 		std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr);
 		std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings);
 	}
-
-	//-------- To be deleted --------//
-	class Font
-	{
-	public:
-		static void init();
-		static void deinit();
-		Font(const std::string &fontPath, int size);
-		~Font();
-		SDL_Surface *renderText(const std::string &message, const glm::vec4 &color);
-
-	private:
-		TTF_Font *font;
-	};
-	//-------- To be deleted --------//
 }

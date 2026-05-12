@@ -12,27 +12,32 @@ namespace Engine::Logging {
 
 template<typename... Args>
 inline void info(std::format_string<Args...> fmtStr, Args&&... args) {
-    hostLogInfo(std::format(fmtStr, args...).c_str());
+	auto msg = std::format(fmtStr, std::forward<Args>(args)...);
+	hostLogInfo(msg.c_str());
 }
 
 template<typename... Args>
 inline void warn(std::format_string<Args...> fmtStr, Args&&... args) {
-    hostLogWarn(std::format(fmtStr, args...).c_str());
+	auto msg = std::format(fmtStr, std::forward<Args>(args)...);
+	hostLogWarn(msg.c_str());
 }
 
 template<typename... Args>
 inline void debug(std::format_string<Args...> fmtStr, Args&&... args) {
-    hostLogDebug(std::format(fmtStr, args...).c_str());
+	auto msg = std::format(fmtStr, std::forward<Args>(args)...);
+	hostLogDebug(msg.c_str());
 }
 
 template<typename... Args>
 inline void error(std::format_string<Args...> fmtStr, Args&&... args) {
-    hostLogError(std::format(fmtStr, args...).c_str());
+	auto msg = std::format(fmtStr, std::forward<Args>(args)...);
+	hostLogError(msg.c_str());
 }
 
 template<typename... Args>
 inline void critical(std::format_string<Args...> fmtStr, Args&&... args) {
-    hostLogCritical(std::format(fmtStr, args...).c_str());
+	auto msg = std::format(fmtStr, std::forward<Args>(args)...);
+	hostLogCritical(msg.c_str());
 }
 
 }

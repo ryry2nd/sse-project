@@ -1,4 +1,6 @@
-#include "Rendering.hpp"
+#include "Font.hpp"
+#include <SDL3/SDL_log.h>
+#include <spdlog/spdlog.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
 

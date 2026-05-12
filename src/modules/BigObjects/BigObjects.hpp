@@ -1,6 +1,6 @@
 #pragma once
 
-#include <engine/CustomMath/CustomMath.hpp>
+#include "CustomMath.hpp"
 #include <engine/Rendering/Rendering.hpp>
 #include <glm/glm.hpp>
 #include <vector>
