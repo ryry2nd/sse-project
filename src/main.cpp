@@ -3,6 +3,7 @@
 
 #define DEFAULT_MODULE "modules/example1"
 
+extern "C" void hostUpdateWindows();
 extern "C" void hostWindowClearBackground();
 extern "C" void hostWindowSwapBuffers();
 
@@ -18,6 +19,7 @@ int main(int argc, char *argv[])
 	while (*running)
 	{
 		Rendering::Window::Update();
+		hostUpdateWindows();
 
 		ScriptingHeaders::EnginePackage::EventFunctions(running);
 

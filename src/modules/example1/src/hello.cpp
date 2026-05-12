@@ -4,9 +4,11 @@
 
 using namespace Engine;
 
+bool outputFPS = false;
+
 extern "C" void setup() {
 	Rendering::setAPI("OpenGl4.6");
-	Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 9, true);
+	Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 }
 
 extern "C" void loop() {
@@ -23,6 +25,20 @@ extern "C" void loop() {
 
         // makes background look like a 70s disco rave while under 20 pounds of lsd
         Rendering::Window::setBackgroundColor("win1", {r, g, b, 1.0f});
+
+		frameCount++;
+        timer += deltaTime;
+
+        if (timer >= 1.0f)
+        {
+            if (outputFPS) {
+                double fps = frameCount / timer;
+                Logging::info("FPS: {:.2f}", fps);
+            }
+
+            frameCount = 0;
+            timer = 0.0f;
+        }
 }
 
 extern "C" void event(SDL_Event *event, bool *running) {
@@ -35,6 +51,9 @@ extern "C" void event(SDL_Event *event, bool *running) {
 		if (key == SDLK_ESCAPE)
 		{
 			*running = false;
+		}
+		if (key == SDLK_F3) {
+			outputFPS = !outputFPS;
 		}
 	}
 }

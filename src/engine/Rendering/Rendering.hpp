@@ -36,6 +36,7 @@ namespace Rendering
 		virtual void updateScreenRes() = 0;
 		virtual void setBackgroundColor(glm::vec4 color) = 0;
 		static void Update();
+		void update();
 		static const bool *getKeystates(int &numKeys);
 
 		virtual void disableDepthTest() = 0;
@@ -43,19 +44,20 @@ namespace Rendering
 		virtual void enableBackfaceCull() = 0;
 		virtual void disableBackfaceCull() = 0;
 
-		static float deltaTime;
-		static double fps;
 		static Uint64 now;
-		static glm::vec2 res;
 
 		static void init();
 		static void shutdown();
 
+		float fps;
+		float deltaTime;
+		glm::vec2 res;
+
 	protected:
-		static SDL_Window *window;
+		SDL_Window *window;
 
 	private:
-		static Uint64 lastCounter;
+		Uint64 lastCounter;
 	};
 
 	class Buff {
@@ -63,8 +65,6 @@ namespace Rendering
 		enum class Type {
 			Uniform,
 			Storage,
-			// PixelPack,
-			// PixelUnpack,
 		};
 		enum class Frequency {
 			Static,

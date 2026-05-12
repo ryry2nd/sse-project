@@ -1,3 +1,4 @@
+#include "glm/ext/vector_float2.hpp"
 #include <engine/Rendering/Rendering.hpp>
 #include <memory>
 #include <unordered_map>
@@ -38,7 +39,21 @@ extern "C" {
 		wins[name]->setBackgroundColor(color);
 	}
 
-	float getWindowDeltaTime(const char *name) {
+	float hostGetWindowDeltaTime(const char *name) {
 		return wins[name]->deltaTime;
+	}
+
+	float hostGetWindowFPS(const char *name) {
+		return wins[name]->fps;
+	}
+
+	glm::vec2 hostGetWindowRes(const char *name) {
+		return wins[name]->res;
+	}
+
+	void hostUpdateWindows() {
+		for (auto &win : wins) {
+			win.second->update();
+		}
 	}
 }

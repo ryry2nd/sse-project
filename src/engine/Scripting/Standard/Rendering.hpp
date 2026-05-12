@@ -11,7 +11,9 @@ extern "C" {
 	void hostCreateWindow(const char *name, glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa=0, bool fullscreen=false, int vsync = 0, bool hideMouse = true);
 	void hostShutDownAll();
 	void hostWindowSetBackgroundColor(const char *name, glm::vec4 color);
-	float getWindowDeltaTime(const char *name);
+	float hostGetWindowDeltaTime(const char *name);
+	float hostGetWindowFPS(const char *name);
+	glm::vec2 hostGetWindowRes(const char *name);
 }
 
 namespace Engine::Rendering {
@@ -26,7 +28,13 @@ namespace Window {
 		hostWindowSetBackgroundColor(name, color);
 	}
 	inline float getDeltaTime(const char *name) {
-		return getWindowDeltaTime(name);
+		return hostGetWindowDeltaTime(name);
+	}
+	inline float getFPS(const char *name) {
+		return hostGetWindowFPS(name);
+	}
+	inline glm::vec2 getWindowRes(const char *name) {
+		return hostGetWindowRes(name);
 	}
 }
 inline void ShutdownAll() {

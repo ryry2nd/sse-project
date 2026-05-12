@@ -20,12 +20,7 @@ SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
 using namespace Rendering;
 
 
-Uint64 Window::lastCounter = SDL_GetPerformanceCounter();
-double Window::fps = 0.0f;
-float Window::deltaTime = 0.0f;
 Uint64 Window::now = SDL_GetTicks();
-glm::vec2 Window::res;
-SDL_Window *Window::window = nullptr;
 
 extern "C" void hostShutDownAll();
 
@@ -49,10 +44,15 @@ void Window::init() {
 void Window::Update()
 {
 	SDL_PumpEvents();
+	now = SDL_GetTicks();
+
+}
+
+void Window::update() {
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	res = glm::vec2(width, height);
-	now = SDL_GetTicks();
+
 	Uint64 currentCounter = SDL_GetPerformanceCounter();
 	deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
 	fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
@@ -65,6 +65,8 @@ const bool *Window::getKeystates(int &numKeys) {
 
 Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
+	lastCounter = SDL_GetPerformanceCounter();
+
 	if (aa > 0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
@@ -87,9 +89,7 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
 		SDL_SetWindowResizable(window, true);
 		SDL_SetWindowBordered(window, false);
 	}
-
-	Window::res = res;
-
+	this->res = res;
 	spdlog::info("Successfully opened window with name: {}", name);
 }
 
