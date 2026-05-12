@@ -77,6 +77,7 @@ add_executable(main src/main.cpp)
 target_link_libraries(main PRIVATE
 	RenderingBase
 	Scripting
+	ScriptingJIT
 )
 
 add_custom_target(delete_cache ALL

@@ -3,6 +3,9 @@
 
 #define DEFAULT_MODULE "modules/example1"
 
+extern "C" void hostWindowClearBackground();
+extern "C" void hostWindowSwapBuffers();
+
 int main(int argc, char *argv[])
 {
 	ScriptingHeaders::loginit();
@@ -18,15 +21,12 @@ int main(int argc, char *argv[])
 
 		ScriptingHeaders::EnginePackage::EventFunctions(running);
 
-		// for (auto &win : Rendering::sdlWindows) {
-		// 	win->clearBackground();
-		// }
+		hostWindowClearBackground();
 
 		ScriptingHeaders::EnginePackage::LoopFunctions();
 
-		// for (auto &win : Rendering::sdlWindows) {
-		// 	win->swapBuffer();
-		// }
+		hostWindowSwapBuffers();
+
 		if (ScriptingHeaders::EnginePackage::ShouldStop()) *running = false;
 	}
 

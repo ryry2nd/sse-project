@@ -2,15 +2,27 @@
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 
+using namespace Engine;
+
 extern "C" void setup() {
-	Engine::Rendering::setAPI("OpenGl4.6");
-	Engine::Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 9, true);
-	glm::vec3 i(1.0f);
-	Engine::Logging::info("test {:0.2f}", i.x);
+	Rendering::setAPI("OpenGl4.6");
+	Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 9, true);
 }
 
 extern "C" void loop() {
+        auto deltaTime = Rendering::Window::getDeltaTime("win1");
+        static float timer = 0.0f;
+        static int frameCount = 0;
+        static float t = 0.0f;
 
+        t += deltaTime * 1.0f;
+
+        float r = 0.5f + 0.3f * sin(t);
+        float g = 0.5f + 0.3f * sin(t + 2.0f);
+        float b = 0.5f + 0.3f * sin(t + 4.0f);
+
+        // makes background look like a 70s disco rave while under 20 pounds of lsd
+        Rendering::Window::setBackgroundColor("win1", {r, g, b, 1.0f});
 }
 
 extern "C" void event(SDL_Event *event, bool *running) {

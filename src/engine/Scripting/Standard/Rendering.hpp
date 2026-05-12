@@ -10,6 +10,8 @@ extern "C" {
 	void hostSetAPI(const char* api);
 	void hostCreateWindow(const char *name, glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa=0, bool fullscreen=false, int vsync = 0, bool hideMouse = true);
 	void hostShutDownAll();
+	void hostWindowSetBackgroundColor(const char *name, glm::vec4 color);
+	float getWindowDeltaTime(const char *name);
 }
 
 namespace Engine::Rendering {
@@ -19,6 +21,12 @@ inline void setAPI(const char* api) {
 namespace Window {
 	inline void CreateWindow(const char *name, glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa=0, bool fullscreen=false, int vsync = 0, bool hideMouse = true) {
 		hostCreateWindow(name,res,winName,flags,aa,fullscreen,vsync,hideMouse);
+	}
+	inline void setBackgroundColor(const char *name, glm::vec4 color) {
+		hostWindowSetBackgroundColor(name, color);
+	}
+	inline float getDeltaTime(const char *name) {
+		return getWindowDeltaTime(name);
 	}
 }
 inline void ShutdownAll() {

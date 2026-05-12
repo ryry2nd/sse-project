@@ -21,4 +21,24 @@ extern "C" {
 	void hostShutDownAll() {
 		wins.clear();
 	}
+
+	void hostWindowClearBackground() {
+		for (auto &win : wins) {
+			win.second->clearBackground();
+		}
+	}
+
+	void hostWindowSwapBuffers() {
+		for (auto &win : wins) {
+			win.second->swapBuffer();
+		}
+	}
+
+	void hostWindowSetBackgroundColor(const char *name, glm::vec4 color) {
+		wins[name]->setBackgroundColor(color);
+	}
+
+	float getWindowDeltaTime(const char *name) {
+		return wins[name]->deltaTime;
+	}
 }

@@ -128,3 +128,10 @@ set_target_properties(Scripting PROPERTIES
 )
 
 target_link_libraries(Scripting PRIVATE ScriptingJIT yaml-cpp::yaml-cpp PUBLIC glm::glm SDL3::SDL3 spdlog::spdlog)
+
+
+add_library(EngineABI INTERFACE)
+
+target_include_directories(EngineABI INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/Engine
+)
