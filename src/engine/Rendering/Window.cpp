@@ -49,10 +49,6 @@ void Window::Update()
 }
 
 void Window::update() {
-	int width, height;
-	SDL_GetWindowSize(window, &width, &height);
-	res = glm::vec2(width, height);
-
 	Uint64 currentCounter = SDL_GetPerformanceCounter();
 	deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
 	fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);

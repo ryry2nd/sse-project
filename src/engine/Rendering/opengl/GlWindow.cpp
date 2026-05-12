@@ -111,6 +111,9 @@ void GlWindow::swapBuffer()
 
 void GlWindow::updateScreenRes()
 {
+	int width, height;
+	SDL_GetWindowSize(window, &width, &height);
+	res = glm::vec2(width, height);
 	glViewport(0, 0, res.x, res.y);
 }
 
