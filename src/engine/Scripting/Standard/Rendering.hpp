@@ -6,6 +6,7 @@
 #include "Image.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
+#include "Draw.hpp"
 
 extern "C" {
 	void hostShutDownAll();

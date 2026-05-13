@@ -14,11 +14,13 @@ std::unordered_map<std::string, std::unique_ptr<Rendering::Shader>> shaders;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Buff>> buffers;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Mesh>> meshes;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Image>> images;
+std::unordered_map<std::string, std::unique_ptr<Rendering::FrameBuffer>> fbos;
 
 Rendering::Window *cacheWin;
 Rendering::Buff *cacheBuff;
 Rendering::Mesh *cacheMesh;
 Rendering::Image *cacheImage;
+Rendering::FrameBuffer *cacheFbo;
 
 extern "C" {
 	void hostShutDownAll() {
@@ -45,7 +47,15 @@ extern "C" {
 	void hostSetWindow(const char *name) {
 		cacheWin = wins[name].get();
 	}
-
+	void hostRemoveWindow() {
+		for (auto &win : wins) {
+			if (win.second.get() == cacheWin) {
+				wins.erase(win.first);
+				break;
+			}
+		}
+		cacheWin = nullptr;
+	}
 	void hostWindowClearBackground() {
 		for (auto &win : wins) {
 			win.second->clearBackground();
@@ -98,6 +108,9 @@ extern "C" {
 		auto shdr = CreationFunctions::createShader(path);
 		shaders[name] = std::move(shdr);
 	}
+	void hostRemoveShader(const char *name) {
+		shaders.erase(name);
+	}
 
 
 
@@ -105,6 +118,15 @@ extern "C" {
 		auto buff = CreationFunctions::createBuff(type, freq, size, data);
 		cacheBuff = buff.get();
 		buffers[name] = std::move(buff);
+	}
+	void hostRemoveBuffer() {
+		for (auto &buff : buffers) {
+			if (buff.second.get() == cacheBuff) {
+				buffers.erase(buff.first);
+				break;
+			}
+		}
+		cacheBuff = nullptr;
 	}
 	void hostSetBuffer(const char *name) {
 		cacheBuff = buffers[name].get();
@@ -131,6 +153,15 @@ extern "C" {
 		auto mesh = CreationFunctions::createMesh(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 		cacheMesh = mesh.get();
 		meshes[name] = std::move(mesh);
+	}
+	void hostRemoveMesh() {
+		for (auto &mesh : meshes) {
+			if (mesh.second.get() == cacheMesh) {
+				meshes.erase(mesh.first);
+				break;
+			}
+		}
+		cacheMesh = nullptr;
 	}
 	void hostSetMesh(const char *name) {
 		cacheMesh = meshes[name].get();
@@ -160,6 +191,15 @@ extern "C" {
 		cacheImage = img.get();
 		images[name] = std::move(img);
 	}
+	void hostRemoveImage() {
+		for (auto &img : images) {
+			if (img.second.get() == cacheImage) {
+				images.erase(img.first);
+				break;
+			}
+		}
+		cacheImage = nullptr;
+	}
 	void hostSetImage(const char *name) {
 		cacheImage = images[name].get();
 	}
@@ -169,4 +209,37 @@ extern "C" {
 	void hostImageClearTransparent() {
 		cacheImage->clearTransparent();
 	}
+
+
+
+	void hostCreateFrameBuffer(const char *name, glm::vec2 size, uint32_t settings) {
+		auto fbo = CreationFunctions::createFrameBuffer(size, settings);
+		cacheFbo = fbo.get();
+		fbos[name] = std::move(fbo);
+	}
+	void hostRemoveFrameBuffer() {
+		for (auto &fbo : fbos) {
+			if (fbo.second.get() == cacheFbo) {
+				fbos.erase(fbo.first);
+				break;
+			}
+		}
+		cacheFbo = nullptr;
+	}
+	void hostSetFrameBuffer(const char *name) {
+		cacheFbo = fbos[name].get();
+	}
+	glm::vec2 hostFBOGetSize() {
+		return cacheFbo->getSize();
+	}
+	uint32_t hostFBOGetSettings() {
+		return cacheFbo->getSettings();
+	}
+	void hostFBOSetSize(glm::vec2 size) {
+		cacheFbo->setSize(size);
+	}
+
+	// Image* getColorImage();
+	// Image* getDepthImage();
+	// Image* getStencilImage();
 }

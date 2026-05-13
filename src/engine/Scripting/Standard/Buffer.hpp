@@ -22,11 +22,15 @@ extern "C" {
 	void hostBuffWrite(const std::size_t offset, const std::size_t size, const void* data);
 	void hostBuffRead(const std::size_t offset, const std::size_t size, void* data);
 	void hostSetBuffer(const char *name);
+	void hostRemoveBuffer();
 }
 
 namespace Engine::Rendering::Buff {
 	inline void createBuffer(const char *name, Engine::Rendering::Buff::Type type, Engine::Rendering::Buff::Frequency freq, std::size_t size, const void* data = nullptr) {
 		hostCreateBuffer(name, type, freq, size, data);
+	}
+	inline void removeBuffer() {
+		hostRemoveBuffer();
 	}
 	inline std::size_t getSize() {
 		return hostBuffGetSize();

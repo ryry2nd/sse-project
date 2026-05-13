@@ -20,6 +20,7 @@ extern "C" {
 	void hostWindowEnableBackfaceCull();
 	void hostWindowDisableBackfaceCull();
 	const bool *hostWindowGetKeystates(int &numKeys);
+	void hostRemoveWindow();
 }
 
 namespace Engine::Rendering::Window {
@@ -28,6 +29,9 @@ namespace Engine::Rendering::Window {
 	}
 	inline void CreateWindow(const char *name, glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa=0, bool fullscreen=false, int vsync = 0, bool hideMouse = true) {
 		hostCreateWindow(name,res,winName,flags,aa,fullscreen,vsync,hideMouse);
+	}
+	inline void removeWindow() {
+		hostRemoveWindow();
 	}
 	inline void setWindow(const char *name) {
 		hostSetWindow(name);

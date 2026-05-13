@@ -9,11 +9,15 @@ extern "C" {
 	void hostSetImage(const char *name);
 	glm::vec2 hostGetImageSizes();
 	void hostImageClearTransparent();
+	void hostRemoveImage();
 }
 
 namespace Engine::Rendering::Image {
 	inline void createImage(const char *name, const char *filePath) {
 		hostCreateImage(name, filePath);
+	}
+	inline void removeImage() {
+		hostRemoveImage();
 	}
 	inline void createImage(const char *name, SDL_Surface *surface) {
 		hostCreateImage2(name, surface);
