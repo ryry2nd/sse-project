@@ -10,7 +10,7 @@ using namespace Rendering;
 
 bool GlImage::hasInit = false;
 
-GlImage::GlImage(const std::string &filePath)
+GlImage::GlImage(const char *filePath)
 {
 	spdlog::debug("Creating image at path {}", filePath);
 

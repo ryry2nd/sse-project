@@ -14,7 +14,7 @@ extern "C" std::unique_ptr<Rendering::Mesh> createMesh(const float *vertices, co
     return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 
-extern "C" std::unique_ptr<Rendering::Image> createImageFromFile(const std::string &filePath) {
+extern "C" std::unique_ptr<Rendering::Image> createImageFromFile(const char *filePath) {
     return std::make_unique<GlImage>(filePath);
 }
 

@@ -56,7 +56,7 @@ namespace OpenGl
 	{
 	public:
 		// it makes the image
-		GlImage(const std::string &filePath);
+		GlImage(const char *filePath);
 		GlImage(GLuint id, glm::vec2 size);
 		GlImage(SDL_Surface *surface);
 		// it unmakes the image

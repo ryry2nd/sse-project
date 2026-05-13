@@ -13,10 +13,12 @@ std::unordered_map<std::string, std::unique_ptr<Rendering::Window>> wins;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Shader>> shaders;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Buff>> buffers;
 std::unordered_map<std::string, std::unique_ptr<Rendering::Mesh>> meshes;
+std::unordered_map<std::string, std::unique_ptr<Rendering::Image>> images;
 
 Rendering::Window *cacheWin;
 Rendering::Buff *cacheBuff;
 Rendering::Mesh *cacheMesh;
+Rendering::Image *cacheImage;
 
 extern "C" {
 	void hostShutDownAll() {
@@ -27,6 +29,8 @@ extern "C" {
 		buffers.clear();
 		cacheMesh = nullptr;
 		meshes.clear();
+		cacheImage = nullptr;
+		images.clear();
 	}
 
 
@@ -142,5 +146,27 @@ extern "C" {
 	}
 	void hostMeshToggleBackFaceCulling() {
 		cacheMesh->toggleBackFaceCulling();
+	}
+
+
+
+	void hostCreateImage(const char *name, const char *filePath) {
+		auto img = CreationFunctions::createImage(filePath);
+		cacheImage = img.get();
+		images[name] = std::move(img);
+	}
+	void hostCreateImage2(const char *name, SDL_Surface *surface) {
+		auto img = CreationFunctions::createImage(surface);
+		cacheImage = img.get();
+		images[name] = std::move(img);
+	}
+	void hostSetImage(const char *name) {
+		cacheImage = images[name].get();
+	}
+	glm::vec2 hostGetImageSizes() {
+		return cacheImage->getSizes();
+	}
+	void hostImageClearTransparent() {
+		cacheImage->clearTransparent();
 	}
 }

@@ -18,6 +18,7 @@ extern "C" void setup() {
 	Rendering::Shader::createShader("shader1", MODULE_PATH "/assets/shaders/floatCube.slang");
 	Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube.slang");
 	Rendering::Mesh::createMesh("cube", Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
+	Rendering::Image::createImage("im1", MODULE_PATH "/assets/textures/FISH.png");
 }
 
 extern "C" void loop() {

@@ -38,7 +38,7 @@ using CreateMeshFn =
 	);
 
 using CreateImageFromFileFn =
-	std::unique_ptr<Image>(*)(const std::string&);
+	std::unique_ptr<Image>(*)(const char*);
 
 using CreateImageFromSurfaceFn =
 	std::unique_ptr<Image>(*)(SDL_Surface*);
@@ -167,7 +167,7 @@ std::unique_ptr<Mesh> CreationFunctions::createMesh(const float *vertices, const
 
 	return createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
-std::unique_ptr<Image> CreationFunctions::createImage(const std::string &filePath) {
+std::unique_ptr<Image> CreationFunctions::createImage(const char *filePath) {
 	if (!createImageFromFileFunc) {
 		spdlog::error("createImage not loaded");
 		return nullptr;

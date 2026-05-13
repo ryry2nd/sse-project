@@ -108,14 +108,14 @@ SDL_Surface* LoadJPG(const char* path)
     return surf;
 }
 
-SDL_Surface *Image::loadFile(const std::string &filePath)
+SDL_Surface *Image::loadFile(const char *filePath)
 {
 	std::filesystem::path file = filePath;
 
 	SDL_Surface *surface = nullptr;
 
-	if (file.extension() == ".jpg" || file.extension() == ".jpeg") surface = LoadJPG(filePath.c_str());
-	else if (file.extension() == ".png") surface = LoadPNG(filePath.c_str());
+	if (file.extension() == ".jpg" || file.extension() == ".jpeg") surface = LoadJPG(filePath);
+	else if (file.extension() == ".png") surface = LoadPNG(filePath);
 	else {
 		spdlog::error("Image extention: {} not known", file.extension().string());
 		return nullptr;
@@ -127,8 +127,4 @@ SDL_Surface *Image::loadFile(const std::string &filePath)
 		return nullptr;
 	}
 	return surface;
-}
-
-glm::vec2 Image::getSizes() {
-	return imageSizes;
 }
