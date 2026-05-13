@@ -1,6 +1,8 @@
 #include <engine/Engine.hpp>
 #include <SDL3/SDL.h>
 #include <glm/glm.hpp>
+#include <string>
+#include "Objects.hpp"
 
 using namespace Engine;
 
@@ -13,6 +15,9 @@ bool outputFPS = false;
 extern "C" void setup() {
 	Rendering::Window::setAPI("OpenGl4.6");
 	Rendering::Window::CreateWindow("win1", {900, 500}, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+	Rendering::Shader::createShader("shader1", MODULE_PATH "/assets/shaders/floatCube.slang");
+	Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube.slang");
+	Rendering::Mesh::createMesh("cube", Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 }
 
 extern "C" void loop() {
@@ -47,7 +52,6 @@ extern "C" void loop() {
 }
 
 extern "C" void event(SDL_Event *event, bool *running) {
-	Rendering::Window::setWindow("win1");
 	if (event->type == SDL_EVENT_QUIT)
 		*running = false;
 
@@ -64,6 +68,7 @@ extern "C" void event(SDL_Event *event, bool *running) {
 	}
 	if (event->type == SDL_EVENT_WINDOW_RESIZED)
 	{
+		Rendering::Window::setWindow("win1");
 		Rendering::Window::updateScreenRes();
 	}
 }

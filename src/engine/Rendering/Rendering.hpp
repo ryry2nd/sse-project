@@ -141,6 +141,33 @@ namespace Rendering
 		virtual ~Shader() = default;
 	};
 
+	class Mesh
+	{
+	public:
+		enum class MeshTypes
+		{
+			Points,
+			Lines,
+			Triangles
+		};
+
+		virtual ~Mesh() = default;
+
+		Mesh& operator=(const Mesh&) = delete;
+		Mesh& operator=(Mesh&&) noexcept = default;
+
+		MeshTypes getMeshType() {return meshType;}
+		void setMeshType(MeshTypes meshType) {this->meshType = meshType;}
+
+		bool getBackFaceCulling() {return backFaceCulling;}
+		void toggleBackFaceCulling() {backFaceCulling = !backFaceCulling;}
+	protected:
+		MeshTypes meshType;
+		bool backFaceCulling = true;
+	};
+
+
+
 	struct Material {
 		Shader *shader;
 		std::unordered_map<size_t, Image*> images;
@@ -159,26 +186,6 @@ namespace Rendering
 		size_t instanceCount;
 		uint32_t settings;
 		FrameBuffer *fbo = nullptr;
-	};
-
-	class Mesh
-	{
-	public:
-		enum class MeshTypes
-		{
-			Points,
-			Lines,
-			Triangles
-		};
-
-		virtual ~Mesh() = default;
-
-		Mesh& operator=(const Mesh&) = delete;
-		Mesh& operator=(Mesh&&) noexcept = default;
-
-
-		MeshTypes meshType;
-		bool backFaceCulling = true;
 	};
 
 	namespace CreationFunctions {
