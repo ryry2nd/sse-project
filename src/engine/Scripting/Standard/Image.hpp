@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/ext/vector_float2.hpp>
+#include <glm/glm.hpp>
 #include <SDL3/SDL_surface.h>
 
 extern "C" {
