@@ -20,6 +20,7 @@ extern "C" {
 	long eventJIT(long id, SDL_Event *e, bool *running);
 	void shutdownJIT(long id);
 	void removeJIT(long id);
+	bool JITRunnable(long id);
 }
 
 std::vector<EnginePackage *> EnginePackage::packages;
@@ -30,7 +31,6 @@ bool EnginePackage::ShouldStop() {
 		spdlog::info("No loop or event functions implemented. Shutting down");
 		return true;
 	}
-	shouldShutDown = true;
 	return false;
 }
 
@@ -89,6 +89,10 @@ EnginePackage::EnginePackage(const std::string &path)
 
 	if (llvmLocation < 0) return;
 
+	if (!JITRunnable(llvmLocation)) {
+		shouldShutDown = false;
+	}
+
 	try {
 		setupJIT(llvmLocation);
 	}
@@ -106,7 +110,7 @@ EnginePackage::EnginePackage(const std::string &path)
 
 void EnginePackage::runLoopFunction() {
 	try {
-		if (!loopJIT(llvmLocation)) shouldShutDown = false;
+		loopJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -119,7 +123,7 @@ void EnginePackage::runLoopFunction() {
 
 void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
 	try {
-		if(!eventJIT(llvmLocation, e, running)) shouldShutDown = false;
+		eventJIT(llvmLocation, e, running);
 	}
 	catch (const std::exception& e) {
 		#ifdef DEBUG
@@ -141,7 +145,11 @@ EnginePackage::~EnginePackage()
 		shutdownJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
+		#ifdef DEBUG
+		throw e;
+		#else
 		spdlog::error(e.what());
+		#endif
 	}
 
 	removeJIT(llvmLocation);

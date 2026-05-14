@@ -87,12 +87,6 @@ endif()
 # Scripting Section
 file(GLOB_RECURSE scriptingJIT_SOURCES "Scripting/JIT/*.cpp")
 
-if (NOT SSE_MINIMAL)
-	list(FILTER scriptingJIT_SOURCES EXCLUDE REGEX ".*/CompileMinimal.cpp$")
-else()
-	list(FILTER scriptingJIT_SOURCES EXCLUDE REGEX ".*/Compile.cpp$")
-endif()
-
 add_library(ScriptingJIT SHARED ${scriptingJIT_SOURCES})
 add_dependencies(ScriptingJIT copy_src_headers)
 
@@ -102,7 +96,9 @@ set_target_properties(ScriptingJIT PROPERTIES
 
 target_link_libraries(ScriptingJIT PRIVATE SDL3::SDL3 spdlog::spdlog RenderingBase yaml-cpp::yaml-cpp)
 
-if (NOT SSE_MINIMAL)
+if (SSE_MINIMAL)
+target_compile_definitions(ScriptingJIT PRIVATE MINIMAL)
+else()
 target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG)
 endif()
 

@@ -9,44 +9,31 @@ https://github.com/assimp/assimp.git
 https://github.com/mackron/miniaudio.git
 https://github.com/lsalzman/enet.git
 
+
+
 PHASE 1 - CORE ENGINE
-Clip planes or stencil buffer
-make normal float objects
-move all bigint code to a module
-make it so bigint objects are just particles you make normal objects a parent to
-make it so there is a relationship variable that is the bigint scale
-put the camera in base rendering and remove bigint references
-have it so there is a positional relationship variable between float objects and bigint particles as a bigint offset
-add cache to bigints and make it relationship
-make it so bigint math module has a floating decimal point instead of just hardcoded at 5
+Finish ABI
+make better base rendering
+make images work
 
 
 PHASE 2 - TOOLING + BUILD + REPO
 
-make a tool that compiles modules (the executable)
-make a build.yaml file that doesn't persist to the binary
-make it so there is an option to save time building by not running the cmake config command and just compiling, call it quickCompile
-put a config file for vscode to run with debug/os/quickCompile settings
-separate libs for the engine and libs for base modules in git like have libs/engine and libs/modules
-implement library support in the modules
 have it so modules can demand to have there own separate executables
-remove automatic module pickup
-make module pickup the side of the executing module
-make it so compilation happens in a subprocess so it doesn't take up unessissary program memory
-clean cmake format and architecture
-add central logging system
 maybe add timer functions or at least a way to collect unix epoch
-make it so there is a standard for paths. like a saves/ path and a cache/ path
-make it so clang compiles modules how they want and add JIT support and put compiled modules cached as .bin files
-slim down .git HARD
+
 
 
 PHASE 3 - MODULE SYSTEM
 
+add cache to bigints and make it relationship
+make it so bigint math module has a floating decimal point instead of just hardcoded at 5
+make it so bigint objects are just particles you make normal objects a parent to
+put the camera in base rendering and remove bigint references
+make normal float objects
 put sqlite into a module
 add default assets to a module
 put networking into a module
-remove fonts and image code and put them in a module
 make a base helper module to have stuff like a character creator and a rigid body object
 remove fish penis texture
 make example module more interesting
@@ -55,7 +42,6 @@ update readme after critical engine architecture has been built
 get module versioning and library modules working
 make it so modules have there own stack memory using stack switching (use boost?)
 add module threading so modules can make and use and manage there own threads
-add simple module garbage collector so it deletes all heap objects after module destruction (basically just make a custom allocator)
 have module suicide function so modules can shut themselves down
 add basic modding module to make adding video game mod support easy
 add some sort of way to make it so mods can get pointers if they want to (idk how id do this, maybe id let other modules take a peak at the other modules ram)
@@ -65,19 +51,16 @@ add generator texture feature in helper module
 add 2d textures and fonts and make them able to be clickable
 add materials and model file format in default module
 add fun text to 3d model thing
+make a physics engine
 
 
 
 PHASE 4 - RUNTIME SYSTEMS
 
-make a physics engine
 make code cleaner
 make all consents definitions instead of variables
-have minimum consents
 remove all magic numbers
 remove all bad practices
-add global object list
-make it so cameras have objects parented to them and make it a Uint64 so it can just use the array as a lookup
 use as little pointers as possible
 
 
@@ -85,13 +68,11 @@ use as little pointers as possible
 PHASE 5 - PLATFORM + RENDERING
 
 add vulkan and other apis
-make it work for all platforms
 
 
 
 PHASE 6 - CLEANUP
 
-make sure all packages are on stable versions
 documentation
 do a full git rebase (suck in the belly fat and don't remove history)
 
@@ -118,8 +99,8 @@ engine segments
             DX
             ect
     scripting (compiles modules)
-        core compilation (ran as subprocess)
-        scripting runner (just puts the libs into program memory)
+        llvm loader
+        logging and loading configs
 
 module segments
     bigint math

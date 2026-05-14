@@ -1,5 +1,5 @@
 #include "GlRendering.hpp"
-#include "engine/Rendering/Rendering.hpp"
+#include <engine/Rendering/Rendering.hpp>
 #include <memory>
 
 #define NAME "OpenGl4.6"

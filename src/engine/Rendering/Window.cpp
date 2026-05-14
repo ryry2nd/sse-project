@@ -49,10 +49,28 @@ void Window::Update()
 }
 
 void Window::update() {
-	Uint64 currentCounter = SDL_GetPerformanceCounter();
-	deltaTime = static_cast<float>(currentCounter - lastCounter) / SDL_GetPerformanceFrequency();
-	fps = SDL_GetPerformanceFrequency() / static_cast<double>(currentCounter - lastCounter);
-	lastCounter = currentCounter;
+	static Uint64 fpsStart = SDL_GetPerformanceCounter();
+    static float frameCount = 0;
+    static float fpsSum = 0;
+
+    Uint64 currentCounter = SDL_GetPerformanceCounter();
+    Uint64 freq = SDL_GetPerformanceFrequency();
+
+    deltaTime = (currentCounter - lastCounter) / (float)freq;
+
+    fpsSum += 1.0f / deltaTime;
+    frameCount++;
+
+    double elapsed = (currentCounter - fpsStart) / (double)freq;
+
+    if (elapsed >= 0.1) {
+        fps = fpsSum / frameCount;
+        fpsSum = 0;
+        frameCount = 0;
+        fpsStart = currentCounter;
+    }
+
+    lastCounter = currentCounter;
 }
 
 const bool *Window::getKeystates(int &numKeys) {

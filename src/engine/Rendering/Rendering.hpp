@@ -49,8 +49,8 @@ namespace Rendering
 		static void init();
 		static void shutdown();
 
-		float fps;
-		float deltaTime;
+		float fps = 0;
+		float deltaTime = 0;
 		glm::vec2 res;
 
 	protected:

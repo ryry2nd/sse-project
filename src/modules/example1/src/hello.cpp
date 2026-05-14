@@ -25,7 +25,6 @@ extern "C" void loop() {
 		Rendering::Window::setWindow("win1");
         float deltaTime = Rendering::Window::getDeltaTime();
         static float timer = 0.0f;
-        static int frameCount = 0;
         static float t = 0.0f;
 
         t += deltaTime * 1.0f;
@@ -37,26 +36,22 @@ extern "C" void loop() {
         // makes background look like a 70s disco rave while under 20 pounds of lsd
         Rendering::Window::setBackgroundColor({r, g, b, 1.0f});
 
-		frameCount++;
         timer += deltaTime;
 
         if (timer >= 1.0f)
         {
             if (outputFPS) {
-                double fps = frameCount / timer;
-                Logging::info("FPS: {:.2f}", fps);
+                Logging::info("FPS: {:.2f}", Rendering::Window::getFPS());
             }
-
-            frameCount = 0;
             timer = 0.0f;
         }
 }
 
 extern "C" void event(SDL_Event *event, bool *running) {
-	if (event->type == SDL_EVENT_QUIT)
+	auto type = event->type;
+	if (type == SDL_EVENT_QUIT)
 		*running = false;
-
-	if (event->type == SDL_EVENT_KEY_DOWN)
+	if (type == SDL_EVENT_KEY_DOWN)
 	{
 		SDL_Keycode key = event->key.key;
 		if (key == SDLK_ESCAPE)
@@ -67,7 +62,7 @@ extern "C" void event(SDL_Event *event, bool *running) {
 			outputFPS = !outputFPS;
 		}
 	}
-	if (event->type == SDL_EVENT_WINDOW_RESIZED)
+	if (type == SDL_EVENT_WINDOW_RESIZED)
 	{
 		Rendering::Window::setWindow("win1");
 		Rendering::Window::updateScreenRes();

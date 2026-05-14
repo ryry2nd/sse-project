@@ -34,11 +34,11 @@ struct MyModule {
 	void (*shutdown)();
 };
 
-std::unordered_map<long, MyModule> mods;
+std::unordered_map<long, MyModule> modsMin;
 
 
 extern "C" {
-long initModuleJIT(const char* path) {
+long initModuleJITMin(const char* path) {
 	static long currID = 0;
 	std::filesystem::path file = path;
 
@@ -68,54 +68,61 @@ long initModuleJIT(const char* path) {
 	mod.event = reinterpret_cast<void(*)(SDL_Event*, bool*)>(event);
 	mod.shutdown = reinterpret_cast<void(*)()>(shutdown);
 
-	mods[currID] = std::move(mod);
+	modsMin[currID] = std::move(mod);
 	return currID++;
 }
-void setupJIT(long id) {
-	auto it = mods.find(id);
-	if (it == mods.end()) return;
+void setupJITMin(long id) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return;
 
-	if (!mods[id].setup) return;
+	if (!modsMin[id].setup) return;
 
-	mods[id].setup();
+	modsMin[id].setup();
 }
-bool loopJIT(long id) {
-	auto it = mods.find(id);
-	if (it == mods.end()) return 1;
+bool loopJITMin(long id) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return 1;
 
-	if (!mods[id].loop)	return 1;
+	if (!modsMin[id].loop)	return 1;
 
-	mods[id].loop();
+	modsMin[id].loop();
 	return 0;
 }
-bool eventJIT(long id, SDL_Event *e, bool *running) {
-	auto it = mods.find(id);
-	if (it == mods.end()) return 1;
+bool eventJITMin(long id, SDL_Event *e, bool *running) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return 1;
 
-	if (!mods[id].event) {
+	if (!modsMin[id].event) {
 		return 1;
 	}
-	mods[id].event(e, running);
+	modsMin[id].event(e, running);
 	return 0;
 }
-void shutdownJIT(long id) {
-	auto it = mods.find(id);
-	if (it == mods.end()) return;
+void shutdownJITMin(long id) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return;
 
-	if (!mods[id].shutdown) {
+	if (!modsMin[id].shutdown) {
 		return;
 	}
-	mods[id].shutdown();
+	modsMin[id].shutdown();
 }
-void removeJIT(long id) {
-	auto it = mods.find(id);
-	if (it == mods.end()) return;
+void removeJITMin(long id) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return;
 
-	mods[id].setup = nullptr;
-	mods[id].loop = nullptr;
-	mods[id].event = nullptr;
-	mods[id].shutdown = nullptr;
-	mods[id].runtime.reset();
-	mods.erase(id);
+	modsMin[id].setup = nullptr;
+	modsMin[id].loop = nullptr;
+	modsMin[id].event = nullptr;
+	modsMin[id].shutdown = nullptr;
+	modsMin[id].runtime.reset();
+	modsMin.erase(id);
+}
+
+bool JITRunnableMin(long id) {
+	auto it = modsMin.find(id);
+	if (it == modsMin.end()) return 0;
+
+	return !(modsMin[id].loop || modsMin[id].event);
 }
 }

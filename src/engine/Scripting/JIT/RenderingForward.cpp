@@ -1,4 +1,4 @@
-#include <glm/ext/vector_float2.hpp>
+#include <glm/glm.hpp>
 #include <engine/Rendering/Rendering.hpp>
 #include <memory>
 #include <unordered_map>

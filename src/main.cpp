@@ -16,6 +16,8 @@ int main(int argc, char *argv[])
 	// starts running the game loop
 	bool *running = new bool(true);
 
+	if (ScriptingHeaders::EnginePackage::ShouldStop()) *running = false;
+
 	while (*running)
 	{
 		Rendering::Window::Update();
@@ -28,8 +30,6 @@ int main(int argc, char *argv[])
 		ScriptingHeaders::EnginePackage::LoopFunctions();
 
 		hostWindowSwapBuffers();
-
-		if (ScriptingHeaders::EnginePackage::ShouldStop()) *running = false;
 	}
 
 	delete example_package;

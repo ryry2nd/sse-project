@@ -36,7 +36,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	message(STATUS "Configuring Debug build: fast compile")
 	add_compile_options(
 		-DDEBUG
-		-O1
+		-O0
 		-g3
 		-fno-omit-frame-pointer
 	)
