@@ -1,55 +1,43 @@
 struct VSInput
 {
-	float3 aPos      : POSITION;
-	float2 aTexCoord : TEXCOORD0;
+    float3 aPos      : POSITION;
 };
 
 struct VSOutput
 {
-	float2 TexCoord  : TEXCOORD0;
-	float4 position  : SV_Position;
+    float4 position : SV_Position;
 };
 
-struct PSInput
+cbuffer Model
 {
-	float2 TexCoord : TEXCOORD0;
+    float4x4 model;
 };
 
-struct Camera
+cbuffer Camera
 {
-	float4x4 view;
-	float4x4 proj;
+    float4x4 view;
+    float4x4 proj;
 };
-
-struct Model
-{
-	float4x4 model;
-};
-
-ConstantBuffer<Camera> camera;
-ConstantBuffer<Model> model;
 
 // =======================
-// VERTEX ENTRY
+// VERTEX
 // =======================
 [shader("vertex")]
 VSOutput vertMain(VSInput input)
 {
-	VSOutput output;
+    VSOutput output;
 
-	output.TexCoord = input.aTexCoord;
+    float4 worldPos = mul(model, float4(input.aPos, 1.0));
+    output.position = mul(proj, mul(view, worldPos));
 
-	float4 worldPos = mul(model.model, float4(input.aPos, 1.0));
-	output.position = mul(camera.proj, mul(camera.view, worldPos));
-
-	return output;
+    return output;
 }
 
 // =======================
-// FRAGMENT ENTRY
+// FRAGMENT
 // =======================
 [shader("fragment")]
-float4 fragMain(PSInput input) : SV_Target
+float4 fragMain() : SV_Target
 {
-	return float4(input.TexCoord, 0.0, 1.0);
+    return float4(0, 1, 0, 1);
 }

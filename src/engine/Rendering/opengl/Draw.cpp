@@ -69,14 +69,27 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &
 	}
 }
 
-void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params) {
+void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params = nullptr) {
 	auto *glshdr = static_cast<OpenGl::GlShader*>(mat->shader);
 	auto *glmesh = static_cast<OpenGl::GlMesh*>(mesh);
-	auto *fbo = params->fbo;
 
-	bool disableScreen = params->settings & Rendering::DrawParams::DisableScreen;
-	bool useFBO        = params->settings & Rendering::DrawParams::EnableFBO;
-	bool hasFBO        = (fbo != nullptr);
+	bool disableScreen;
+	bool useFBO;
+	bool hasFBO;
+	Rendering::FrameBuffer *fbo = nullptr;
+
+	if (params) {
+		fbo = params->fbo;
+
+		disableScreen = params->settings & Rendering::DrawParams::DisableScreen;
+		useFBO        = params->settings & Rendering::DrawParams::EnableFBO;
+		hasFBO        = (fbo != nullptr);
+	}
+	else {
+		disableScreen = false;
+		useFBO = false;
+		hasFBO = false;
+	}
 
 	glUseProgram(glshdr->getID());
 	glBindVertexArray(glmesh->getVAO());
@@ -91,8 +104,11 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 	// -------------------------`
 	loadUBO(glshdr, mat->ubo);
 	loadSSBO(glshdr, mat->ssbo);
-	loadUBO(glshdr, params->ubo);
-	loadSSBO(glshdr, params->ssbo);
+
+	if (params) {
+		loadUBO(glshdr, params->ubo);
+		loadSSBO(glshdr, params->ssbo);
+	}
 
 
 	// -------------------------
@@ -144,7 +160,7 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 
 		// NOTE: ideally restore window viewport here
 
-		if (params->instanceCount > 0)
+		if (params && params->instanceCount > 0)
 		{
 			glDrawElementsInstanced(
 				glmesh->getMeshType(),

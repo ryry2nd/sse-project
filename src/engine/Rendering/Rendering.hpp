@@ -209,7 +209,6 @@ namespace Rendering
 	namespace CreationFunctions {
 		void initAPI(const std::string &apiName);
 
-		// ToDo important. make it so draw is not pulled through the dll every draw call. that might introduce performance issues
 		void draw(Material *mat, Mesh *mesh = nullptr, DrawParams *params = nullptr);
 		std::unique_ptr<Shader> createShader(std::string path);
 		std::unique_ptr<Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);

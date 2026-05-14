@@ -22,6 +22,27 @@ Rendering::Mesh *cacheMesh;
 Rendering::Image *cacheImage;
 Rendering::FrameBuffer *cacheFbo;
 
+
+struct OtherMaterial {
+	const char *shader;
+	std::unordered_map<size_t, const char*> images;
+	std::unordered_map<size_t, const char*> ubo;
+	std::unordered_map<size_t, const char*> ssbo;
+};
+struct OtherDrawParams {
+	enum Settings : uint32_t {
+		DisableScreen = 1 << 0,
+		EnableFBO = 1 << 1,
+	};
+
+	std::unordered_map<size_t, const char*> ubo;
+	std::unordered_map<size_t, const char*> ssbo;
+	size_t instanceCount;
+	uint32_t settings;
+	const char *fbo = nullptr;
+};
+
+
 extern "C" {
 	void hostShutDownAll() {
 		cacheWin = nullptr;
@@ -33,6 +54,46 @@ extern "C" {
 		meshes.clear();
 		cacheImage = nullptr;
 		images.clear();
+	}
+
+
+	void hostDraw(OtherMaterial *mat, const char *mesh = nullptr, OtherDrawParams *params = nullptr) {
+		auto retMesh = meshes[mesh].get();
+
+		Material retMat;
+		retMat.shader = shaders[mat->shader].get();
+		for (auto &im : mat->images) {
+			retMat.images[im.first] = images[im.second].get();
+		}
+		for (auto &ubo : mat->ubo) {
+			retMat.ubo[ubo.first] = buffers[ubo.second].get();
+		}
+		for (auto &ssbo : mat->ssbo) {
+			retMat.ubo[ssbo.first] = buffers[ssbo.second].get();
+		}
+
+		if (params == nullptr) {
+			CreationFunctions::draw(&retMat, retMesh);
+			return;
+		}
+
+		DrawParams retParams;
+
+		retParams.instanceCount = params->instanceCount;
+		retParams.settings = params->settings;
+
+		if (params->fbo) {
+			retParams.fbo = fbos[params->fbo].get();
+		}
+
+		for (auto &ubo : params->ubo) {
+			retParams.ubo[ubo.first] = buffers[ubo.second].get();
+		}
+		for (auto &ssbo : params->ssbo) {
+			retParams.ubo[ssbo.first] = buffers[ssbo.second].get();
+		}
+
+		CreationFunctions::draw(&retMat, retMesh, &retParams);
 	}
 
 
