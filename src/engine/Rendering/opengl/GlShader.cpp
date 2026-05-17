@@ -145,6 +145,7 @@ GlShader::GlShader(std::string path)
 	nextBinding = 0;
 	nextCpuBinding = 0;
 	uniformCount = 0;
+
 	glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &uniformCount);
 
 	for (GLint i = 0; i < uniformCount; i++)
@@ -152,19 +153,29 @@ GlShader::GlShader(std::string path)
 		GLenum props[] = { GL_TYPE };
 		GLint type = 0;
 
-		glGetProgramResourceiv(id, GL_UNIFORM, i,
-							1, props,
-							1, nullptr,
-							&type);
+		glGetProgramResourceiv(
+			id,
+			GL_UNIFORM,
+			i,
+			1,
+			props,
+			1,
+			nullptr,
+			&type
+		);
 
 		if (type != GL_SAMPLER_2D)
 			continue;
 
+		// Map CPU binding → GPU texture unit
 		imageMap[nextCpuBinding] = nextBinding;
-		#ifdef DEBUG
-		spdlog::debug("TEX CPU {} -> GPU {}", nextCpuBinding++, nextBinding);
-		nextBinding += 2;
-		#endif
+
+	#ifdef DEBUG
+		spdlog::debug("TEX CPU {} -> GPU {}", nextCpuBinding, nextBinding);
+	#endif
+
+		nextCpuBinding++;
+		nextBinding++;
 	}
 }
 

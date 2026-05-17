@@ -16,7 +16,7 @@ void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ubo
 	{
 		if (!buf) continue;
 
-		auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
+		auto glbuf = static_cast<OpenGl::GlBuff*>(buf);
 
 		auto it = map.find(cpuBinding);
 		if (it == map.end()) continue;
@@ -52,21 +52,22 @@ void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ss
 }
 void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &images)
 {
-	if (images.empty()) return;
+    if (images.empty()) return;
 
-	auto &map = glshdr->getImageMap();
+    auto &map = glshdr->getImageMap();
 
-	for (auto &[cpuBinding, img] : images)
-	{
-		auto *glimg = static_cast<OpenGl::GlImage*>(img);
+    for (auto &[cpuBinding, img] : images)
+    {
+        auto *glimg = static_cast<OpenGl::GlImage*>(img);
 
-		auto it = map.find(cpuBinding);
-		if (it == map.end()) continue;
+        auto it = map.find(cpuBinding);
+        if (it == map.end()) continue;
 
-		GLuint gpuBinding = it->second;
+        GLuint gpuBinding = it->second;
 
-		glBindTextureUnit(gpuBinding, glimg->getID());
-	}
+        glBindTextureUnit(gpuBinding, glimg->getID());
+        glBindSampler(gpuBinding, glimg->getSID());
+    }
 }
 
 void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params = nullptr) {
@@ -97,7 +98,14 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
-	setImages(glshdr, mat->images);
+	// setImages(glshdr, mat->images);
+	auto *glimg = static_cast<OpenGl::GlImage*>(mat->images[0]);
+	// HARD FORCE texture 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, glimg->getID());
+
+	// FORCE sampler slot 0 (optional but safe)
+	glBindSampler(0, glimg->getSID());
 
 	// -------------------------
 	// 2. BUFFERS Global

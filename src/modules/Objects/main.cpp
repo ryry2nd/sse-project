@@ -168,7 +168,7 @@ extern "C" {
         if (event->type == SDL_EVENT_QUIT)
             *running = false;
 
-        // // rotates camera
+        // rotates camera
         if (event->type == SDL_EVENT_MOUSE_MOTION)
         {
             cam1->rotateCamera({event->motion.xrel, event->motion.yrel}, 0.1f);
