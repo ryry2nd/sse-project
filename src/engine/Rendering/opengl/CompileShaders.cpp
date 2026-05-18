@@ -18,8 +18,25 @@
 
 #define ASSET_SHADER "/assets/shaders"
 
-#define VERT_EXT ".vert.spv"
-#define FRAG_EXT ".frag.spv"
+
+#define USE_SPV
+
+#ifdef USE_SPV
+	#define VERT_EXT ".vert.spv"
+	#define FRAG_EXT ".frag.spv"
+	#define FLAGS \
+		" -O3" \
+		" -line-directive-mode none" \
+		" -matrix-layout-column-major" \
+		" -target spirv"
+#else
+	#define VERT_EXT ".vert.glsl"
+	#define FRAG_EXT ".frag.glsl"
+	#define FLAGS \
+		" -O3" \
+		" -line-directive-mode none" \
+		" -matrix-layout-column-major"
+#endif
 
 namespace fs = std::filesystem;
 
@@ -48,9 +65,13 @@ std::string compileShaderCode(const std::string& arguments) {
 int OpenGl::GlShader::compileShaders(std::string path, std::string &vertPath, std::string &fragPath) {
 	fs::create_directories(COMPILED_OUT_PATH);
 
-	std::filesystem::path entry(path);
+	fs::path entry(path);
 
-	std::string command = path + " -target spirv -stage vertex -entry vertMain -O3 -line-directive-mode none -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
+	std::string command = path +
+		FLAGS
+		" -stage vertex"
+		" -entry vertMain"
+		" -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
 	std::string out = compileShaderCode(command);
 	if (out.size()) {
 		spdlog::error("Program: {} failed to compile vertex shader and gave the error:\n{}", id, out);
@@ -59,7 +80,11 @@ int OpenGl::GlShader::compileShaders(std::string path, std::string &vertPath, st
 
 	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
 
-	command = path + " -target spirv -stage fragment -entry fragMain -O3 -line-directive-mode none -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
+	command = path +
+		FLAGS
+		" -stage fragment"
+		" -entry fragMain"
+		" -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
 	out = compileShaderCode(command);
 	if (out.size()) {
 		spdlog::error("Program: {} failed to compile fragment shader and gave the error:\n{}", id, out);

@@ -10,21 +10,14 @@ void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ubo
 {
 	if (ubo.empty()) return;
 
-	auto &map = glshdr->getUBOMap();
-
-	for (auto &[cpuBinding, buf] : ubo)
+	for (auto &[binding, buf] : ubo)
 	{
 		if (!buf) continue;
 
 		auto glbuf = static_cast<OpenGl::GlBuff*>(buf);
 
-		auto it = map.find(cpuBinding);
-		if (it == map.end()) continue;
-
-		GLuint gpuBinding = it->second;
-
 		glBindBufferBase(GL_UNIFORM_BUFFER,
-						 gpuBinding,
+						 (GLuint)binding,
 						 glbuf->getID());
 	}
 }
@@ -32,21 +25,14 @@ void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ss
 {
 	if (ssbo.empty()) return;
 
-	auto &map = glshdr->getSSBOMap();
-
-	for (auto &[cpuBinding, buf] : ssbo)
+	for (auto &[binding, buf] : ssbo)
 	{
 		if (!buf) continue;
 
 		auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
 
-		auto it = map.find(cpuBinding);
-		if (it == map.end()) continue;
-
-		GLuint gpuBinding = it->second;
-
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
-						 gpuBinding,
+						 (GLuint)binding,
 						 glbuf->getID());
 	}
 }
@@ -54,19 +40,15 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &
 {
     if (images.empty()) return;
 
-    auto &map = glshdr->getImageMap();
-
-    for (auto &[cpuBinding, img] : images)
+    for (auto &[binding, img] : images)
     {
+		if (!img) continue;
+
         auto *glimg = static_cast<OpenGl::GlImage*>(img);
 
-        auto it = map.find(cpuBinding);
-        if (it == map.end()) continue;
-
-        GLuint gpuBinding = it->second;
-
-        glBindTextureUnit(gpuBinding, glimg->getID());
-        glBindSampler(gpuBinding, glimg->getSID());
+		glActiveTexture(GL_TEXTURE0 + (GLuint)binding);
+		glBindTexture(GL_TEXTURE_2D, glimg->getID());
+		glBindSampler((GLuint)binding, glimg->getSID());
     }
 }
 
@@ -95,21 +77,16 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 	glUseProgram(glshdr->getID());
 	glBindVertexArray(glmesh->getVAO());
 
+
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
-	// setImages(glshdr, mat->images);
-	auto *glimg = static_cast<OpenGl::GlImage*>(mat->images[0]);
-	// HARD FORCE texture 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, glimg->getID());
+	setImages(glshdr, mat->images);
 
-	// FORCE sampler slot 0 (optional but safe)
-	glBindSampler(0, glimg->getSID());
 
 	// -------------------------
 	// 2. BUFFERS Global
-	// -------------------------`
+	// -------------------------
 	loadUBO(glshdr, mat->ubo);
 	loadSSBO(glshdr, mat->ssbo);
 
@@ -122,40 +99,29 @@ void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::Dr
 	// -------------------------
 	// 3. Render To FBO
 	// -------------------------
-	if (useFBO) {
-		if (!hasFBO) {
-			spdlog::warn("DrawParams: EnableFBO set but fbo is nullptr");
+	if (useFBO && hasFBO) {
+		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
+		glViewport(0, 0, (GLsizei)fbo->getSize().x, (GLsizei)fbo->getSize().y);
 
-			if (disableScreen)
-			{
-				glBindVertexArray(0);
-				return; // nowhere to render
-			}
+		if (params->instanceCount > 0)
+		{
+			glDrawElementsInstanced(
+				glmesh->getMeshType(),
+				(GLsizei)glmesh->getInd(),
+				GL_UNSIGNED_INT,
+				nullptr,
+				params->instanceCount
+			);
 		}
-		else {
-			auto glFBO = static_cast<GlFrameBuffer*>(fbo);
-			glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
-			glViewport(0, 0, (GLsizei)fbo->getSize().x, (GLsizei)fbo->getSize().y);
-
-			if (params->instanceCount > 0)
-			{
-				glDrawElementsInstanced(
-					glmesh->getMeshType(),
-					(GLsizei)glmesh->getInd(),
-					GL_UNSIGNED_INT,
-					nullptr,
-					params->instanceCount
-				);
-			}
-			else
-			{
-				glDrawElements(
-					glmesh->getMeshType(),
-					(GLsizei)glmesh->getInd(),
-					GL_UNSIGNED_INT,
-					nullptr
-				);
-			}
+		else
+		{
+			glDrawElements(
+				glmesh->getMeshType(),
+				(GLsizei)glmesh->getInd(),
+				GL_UNSIGNED_INT,
+				nullptr
+			);
 		}
 	}
 

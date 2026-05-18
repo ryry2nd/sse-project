@@ -97,15 +97,6 @@ GlImage::~GlImage()
 		glDeleteSamplers(1, &samplerID);
 }
 
-GLuint GlImage::getID() const
-{
-	return textureID;
-}
-
-GLuint GlImage::getSID() const {
-	return samplerID;
-}
-
 void GlImage::clearTransparent()
 {
 	if (textureID == 0) return;

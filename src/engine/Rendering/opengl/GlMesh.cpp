@@ -4,36 +4,6 @@
 using namespace OpenGl;
 using namespace Rendering;
 
-glm::vec3 calculateSizes(const float *vertices, const size_t vert_size,
-						  const unsigned int *indices, const size_t ind_size,
-						  const short *vertLogic, const size_t vert_logic_size)
-{
-	glm::vec3 minCorner(FLT_MAX);
-	glm::vec3 maxCorner(-FLT_MAX);
-
-	int total = 0;
-	for (size_t i = 0; i < vert_logic_size; i++)
-		total += vertLogic[i];
-
-	glm::vec3 pos;
-
-	for (size_t i = 0; i < vert_size; i += total)
-	{
-		if (vertLogic[0] == 3)
-		{
-			pos = glm::vec3(vertices[i], vertices[i + 1], vertices[i + 2]);
-		}
-		else
-		{
-			pos = glm::vec3(vertices[i], vertices[i + 1], 0);
-		}
-		minCorner = glm::min(minCorner, pos);
-		maxCorner = glm::max(maxCorner, pos);
-	}
-
-	return maxCorner - minCorner;
-}
-
 GlMesh::~GlMesh()
 {
 	if (VAO != 0)
@@ -127,36 +97,6 @@ void GlMesh::updateVerts(
 	this->ind_size = ind_size;
 	this->vert_size = vert_size;
 
-	meshSize = calculateSizes(vertices, vert_size, indices, ind_size,
-							  vertLogic, vert_logic_size);
-
 	// IMPORTANT: unbind VAO LAST
 	glBindVertexArray(0);
-}
-
-glm::vec3 GlMesh::getMeshSize() {
-	return meshSize;
-}
-GLuint GlMesh::getVAO() {
-	return VAO;
-}
-GLuint GlMesh::getVBO() {
-	return VBO;
-}
-GLuint GlMesh::getEBO() {
-	return EBO;
-}
-GLenum GlMesh::getMeshType() {
-	return glMeshType;
-}
-GLsizei GlMesh::getSize() {
-	return size;
-}
-
-size_t GlMesh::getInd() {
-	return ind_size;
-}
-
-size_t GlMesh::getVert() {
-	return vert_size;
 }

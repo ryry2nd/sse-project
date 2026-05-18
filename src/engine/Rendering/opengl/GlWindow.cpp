@@ -122,7 +122,3 @@ GlWindow::~GlWindow()
 	spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 	SDL_GL_DestroyContext(glContext);
 }
-
-SDL_GLContext GlWindow::getContext() {
-	return glContext;
-}

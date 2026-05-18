@@ -159,17 +159,3 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
-
-Rendering::Image* GlFrameBuffer::getColorImage() {
-	return colorImage;
-}
-Rendering::Image* GlFrameBuffer::getDepthImage() {
-	return depthImage;
-}
-Rendering::Image* GlFrameBuffer::getStencilImage() {
-	return stencilImage;
-}
-
-GLuint GlFrameBuffer::getID() {
-	return id;
-}

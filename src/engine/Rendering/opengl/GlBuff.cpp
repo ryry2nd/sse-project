@@ -57,10 +57,6 @@ void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
 		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to write from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
 		return;
 	}
-	if (!canWrite(buffType, freq)) {
-		spdlog::error("Id: 0x{:x} Tried to write to buffer type that is not allowed to be written to", id);
-		return;
-	}
 	#endif
 
 	glBindBuffer(target, id);
@@ -73,23 +69,8 @@ void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
 		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to read from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
 		return;
 	}
-	if (!canRead(buffType)) {
-		spdlog::error("Id: 0x{:x} Tried to read to buffer type that is not allowed to be written to");
-		return;
-	}
 	#endif
 
 	glBindBuffer(target, id);
 	glGetBufferSubData(target, offset, size, outData);
-}
-
-GLuint GlBuff::getID() {
-	return id;
-}
-
-GLenum GlBuff::getTarget() {
-	return target;
-}
-GLenum GlBuff::getUsage() {
-	return usage;
 }

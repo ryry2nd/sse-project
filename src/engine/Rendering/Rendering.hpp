@@ -92,22 +92,6 @@ namespace Rendering
 		virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
 
 	protected:
-		static bool canRead(Type t) {
-			switch (t) {
-				case Type::Uniform:      return 0;
-				case Type::Storage:      return 1;
-			}
-			return 0;
-		}
-		static bool canWrite(Type t, Frequency freq) {
-			if (freq == Frequency::Static) return 0;
-			switch (t) {
-				case Type::Uniform:      return 1;
-				case Type::Storage:      return 1;
-			}
-			return 0;
-		}
-
 		Type buffType;
 		Frequency freq;
 		std::size_t allocSize;

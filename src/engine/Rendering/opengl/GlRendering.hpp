@@ -21,9 +21,9 @@ namespace OpenGl
 		void write(const std::size_t offset, const std::size_t size, const void* data);
 		void read(const std::size_t offset, const std::size_t size, void* data);
 
-		GLuint getID();
-		GLenum getTarget();
-		GLenum getUsage();
+		GLuint getID() {return id;}
+		GLenum getTarget() {return target;}
+		GLenum getUsage() {return usage;}
 	private:
 		GLuint id;
 		GLenum target;
@@ -47,7 +47,7 @@ namespace OpenGl
 		void disableBackfaceCull();
 		~GlWindow();
 
-		SDL_GLContext getContext();
+		SDL_GLContext getContext() {return glContext;}
 	private:
 		SDL_GLContext glContext;
 	};
@@ -62,8 +62,8 @@ namespace OpenGl
 		// it unmakes the image
 		~GlImage();
 		// it gets the id
-		GLuint getID() const;
-		GLuint getSID() const;
+		GLuint getID() const {return textureID;}
+		GLuint getSID() const {return samplerID;}
 
 		void clearTransparent();
 
@@ -82,12 +82,12 @@ namespace OpenGl
 
 		void setSize(glm::vec2 size);
 
-		Rendering::Image* getColorImage();
-		Rendering::Image* getDepthImage();
-		Rendering::Image* getStencilImage();
+		Rendering::Image* getColorImage() {return colorImage;}
+		Rendering::Image* getDepthImage() {return depthImage;}
+		Rendering::Image* getStencilImage() {return stencilImage;}
 
 
-		GLuint getID();
+		GLuint getID() {return id;}
 
 	private:
 		GLuint id = 0;
@@ -103,26 +103,10 @@ namespace OpenGl
 		GlShader(std::string path);
 		~GlShader();
 
-		GLuint getID();
-
-		const std::unordered_map<size_t, GLuint>& getUBOMap() const
-		{
-			return uboMap;
-		}
-		const std::unordered_map<size_t, GLuint>& getSSBOMap() const
-		{
-			return ssboMap;
-		}
-		const std::unordered_map<size_t, GLuint>& getImageMap() const
-		{
-			return imageMap;
-		}
+		GLuint getID() {return id;}
 
 	protected:
 		GLuint id;
-		std::unordered_map<size_t, GLuint> uboMap;
-		std::unordered_map<size_t, GLuint> ssboMap;
-		std::unordered_map<size_t, GLuint> imageMap;
 		int compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
 	};
 
@@ -134,15 +118,14 @@ namespace OpenGl
 
 		void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
 
-		glm::vec3 getMeshSize();
-		GLuint getVAO();
-		GLuint getVBO();
-		GLuint getEBO();
-		GLenum getMeshType();
-		GLsizei getSize();
+		GLuint getVAO() {return VAO;}
+		GLuint getVBO() {return VBO;}
+		GLuint getEBO() {return EBO;}
+		GLenum getMeshType() {return glMeshType;}
+		GLsizei getSize() {return size;}
 
-		size_t getInd();
-		size_t getVert();
+		size_t getInd() {return ind_size;}
+		size_t getVert() {return vert_size;}
 	private:
 		glm::vec3 meshSize;
 		size_t ind_size;

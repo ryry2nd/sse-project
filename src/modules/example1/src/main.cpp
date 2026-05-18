@@ -3,8 +3,10 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Objects.hpp"
+
 
 using namespace Engine;
 
@@ -58,6 +60,22 @@ void rotateCamera(glm::vec3 *rot, glm::vec2 motion, float mouse_sensitivity) {
 		rotation.z = rot->z;
 		*rot = rotation;
 }
+void printMat4Flat(const glm::mat4& m)
+{
+    const float* p = glm::value_ptr(m);
+
+    Logging::info(
+        "\n"
+        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
+        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
+        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
+        "{: .4f} {: .4f} {: .4f} {: .4f}",
+        p[0], p[1], p[2], p[3],
+        p[4], p[5], p[6], p[7],
+        p[8], p[9], p[10], p[11],
+        p[12], p[13], p[14], p[15]
+    );
+}
 
 struct Camera {
 	glm::mat4 view;
@@ -76,12 +94,14 @@ glm::vec3 camPos;
 glm::vec3 camRot;
 
 extern "C" void setup() {
-	glm::vec2 res({900, 500});
+	glm::vec2 res({900.0f, 500.0f});
 
-	cam.proj = glm::perspective(glm::radians(90.0f), res.x / res.y, 0.1f, 100.0f);
+	cam.proj = (glm::perspective(glm::radians(90.0f), static_cast<float>(res.x) / static_cast<float>(res.y), 0.01f, 10000.0f));
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
-	cam.view = cameraGetView(camPos, camRot);
+	cam.view = (cameraGetView(camPos, camRot));
+
+	// printMat4Flat(cam.proj);
 
 	Model model;
 	model.model = glm::mat4(1.0f);
@@ -100,7 +120,7 @@ extern "C" void setup() {
 	Rendering::Buff::createBuffer("model", Engine::Rendering::Buff::Type::Uniform, Engine::Rendering::Buff::Frequency::Dynamic, sizeof(Model), &model);
 
 
-	mat.images[0] = "im1";
+	// mat.images[0] = "im1";
 	mat.shader = "shader1";
 	mat.ubo[0] = "model";
 	mat.ubo[1] = "cam1";

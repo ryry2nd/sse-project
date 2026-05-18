@@ -24,8 +24,6 @@ SDL_Surface* MakeSurfaceFromRGBA(unsigned char* pixels, int w, int h)
     return surface;
 }
 
-
-
 SDL_Surface* LoadPNG(const char* path)
 {
     FILE* fp = fopen(path, "rb");
