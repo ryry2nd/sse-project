@@ -36,37 +36,20 @@ cbuffer Camera
 [shader("vertex")]
 VSOutput vertMain(VSInput input)
 {
-	float4x4 identity =
-	{
-		1.0, 0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0, 0.0,
-		0.0, 0.0, 1.0, 0.0,
-		0.0, 0.0, 0.0, 1.0
-	};
-
-	// float4x4 model = identity;
-	// float4x4 view = identity;
-	// float4x4 proj = identity;
-
 	VSOutput output;
 
     // local position
     float4 pos = float4(input.aPos, 1.0f);
-
-    // move cube forward into visible space
-    pos.z -= 3.0f;
 
     // transforms
     float4 worldPos = mul(model, pos);
     float4 viewPos  = mul(view, worldPos);
     float4 clipPos  = mul(proj, viewPos);
 
-    // outputs
     output.position = clipPos;
     output.WorldPos = worldPos.xyz;
 
     output.Normal = normalize(mul(input.aNormal, normalMatrix));
-
     output.TexCoord = input.aTexCoord;
 
     return output;
@@ -78,6 +61,10 @@ VSOutput vertMain(VSInput input)
 [shader("fragment")]
 float4 fragMain(VSOutput input) : SV_Target
 {
-    // return diffuseTexture.Sample(diffuseSampler, input.TexCoord);
-	return float4(0.0f, 1.0f, 0.0f, 1.0f);
+    float2 uv = input.TexCoord - 0.5f;
+    float edge = length(uv);
+    float dark = smoothstep(0.2f, 0.5f, edge);
+    float3 green = float3(0.0f, 1.0f, 0.0f);
+    float3 color = green * (1.0f - dark * 0.15f);
+    return float4(color, 1.0f);
 }

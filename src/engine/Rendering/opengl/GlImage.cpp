@@ -49,43 +49,39 @@ GlImage::GlImage(SDL_Surface *surface)
 void GlImage::setupObject(SDL_Surface *surface_old)
 {
 	SDL_Surface* surface =
-        SDL_ConvertSurface(surface_old, SDL_PIXELFORMAT_RGBA32);
+		SDL_ConvertSurface(surface_old, SDL_PIXELFORMAT_RGBA32);
 
     if (!surface)
     {
-        spdlog::error("Convert failed: {}", SDL_GetError());
-        return;
+		spdlog::error("Convert failed: {}", SDL_GetError());
+		return;
     }
 
-    glGenTextures(1, &textureID);
-    glGenSamplers(1, &samplerID);
+	glGenTextures(1, &textureID);
+	glGenSamplers(1, &samplerID);
 
-    glBindTexture(GL_TEXTURE_2D, textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RGBA8,
+		surface->w,
+		surface->h,
+		0,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		surface->pixels
+	);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        surface->w,
-        surface->h,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        surface->pixels
-    );
+	imageSizes = glm::vec2(surface->w, surface->h);
 
-    glBindSampler(0, samplerID);
-
-    imageSizes = glm::vec2(surface->w, surface->h);
-
-    SDL_DestroySurface(surface);
+	SDL_DestroySurface(surface);
 }
 
 GlImage::~GlImage()

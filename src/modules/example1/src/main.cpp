@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "Objects.hpp"
 
@@ -16,79 +15,10 @@ using namespace Engine;
 
 bool outputFPS = false;
 
-glm::mat4 cameraGetView(glm::vec3 pos, glm::vec3 rot) {
-	glm::mat4 T = glm::translate(glm::mat4(1.0f), -pos);
-
-	glm::mat4 R =
-		glm::rotate(glm::mat4(1.0f), glm::radians(-rot.x), glm::vec3(1,0,0)) *
-		glm::rotate(glm::mat4(1.0f), glm::radians(-rot.y), glm::vec3(0,1,0)) *
-		glm::rotate(glm::mat4(1.0f), glm::radians(-rot.z), glm::vec3(0,0,1));
-
-	return R * T;
-}
-glm::vec3 getForwardVector(glm::vec3 rot) {
-	float yawRad = glm::radians(rot.y);
-	float pitchRad = glm::radians(rot.x);
-	return glm::normalize(glm::vec3(
-		cos(pitchRad) * sin(yawRad),
-		-sin(pitchRad),
-		cos(pitchRad) * cos(yawRad)));
-}
-glm::vec3 getRightVector(glm::vec3 rot) {
-	float yawRad = glm::radians(rot.y);
-	return glm::normalize(glm::vec3(
-		-cos(yawRad),
-		0.0f,
-		sin(yawRad)));
-}
-glm::vec3 getDownVector(glm::vec3 rot) {
-	glm::vec3 forward = getForwardVector(rot);
-	glm::vec3 right = getRightVector(rot);
-	return glm::normalize(glm::cross(right, forward));
-}
-
-void rotateCamera(glm::vec3 *rot, glm::vec2 motion, float mouse_sensitivity) {
-		float deltaTime = Rendering::Window::getDeltaTime();
-
-		if (deltaTime == 0)
-		{
-			return;
-		}
-		glm::vec3 rotation;
-		rotation.y = rot->y - ((motion.x / deltaTime) * mouse_sensitivity * deltaTime);
-		rotation.x = rot->x - ((motion.y / deltaTime) * mouse_sensitivity * deltaTime);
-		rotation.z = rot->z;
-		*rot = rotation;
-}
-void printMat4Flat(const glm::mat4& m)
-{
-    const float* p = glm::value_ptr(m);
-
-    Logging::info(
-        "\n"
-        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
-        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
-        "{: .4f} {: .4f} {: .4f} {: .4f}\n"
-        "{: .4f} {: .4f} {: .4f} {: .4f}",
-        p[0], p[1], p[2], p[3],
-        p[4], p[5], p[6], p[7],
-        p[8], p[9], p[10], p[11],
-        p[12], p[13], p[14], p[15]
-    );
-}
-
-struct Camera {
-	glm::mat4 view;
-	glm::mat4 proj;
-};
-
-struct Model {
-	glm::mat4 model;
-	glm::mat3 normalMatrix;
-};
 
 Rendering::Material mat;
-Camera cam;
+Helper::Camera cam;
+Helper::Model model;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
@@ -96,14 +26,14 @@ glm::vec3 camRot;
 extern "C" void setup() {
 	glm::vec2 res({900.0f, 500.0f});
 
-	cam.proj = (glm::perspective(glm::radians(90.0f), static_cast<float>(res.x) / static_cast<float>(res.y), 0.01f, 10000.0f));
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
-	cam.view = (cameraGetView(camPos, camRot));
 
-	// printMat4Flat(cam.proj);
+	cam.proj = Helper::cameraGetProj(res);
+	cam.view = Helper::cameraGetView(camPos, camRot);
 
-	Model model;
+	// Helper::printMat4Flat(cam.proj);
+
 	model.model = glm::mat4(1.0f);
 	model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
 
@@ -114,10 +44,10 @@ extern "C" void setup() {
 	Rendering::Shader::createShader("shader1", MODULE_PATH "/assets/shaders/floatCube.slang");
 	// Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube.slang");
 	Rendering::Mesh::createMesh("cube", Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
-	Rendering::Image::createImage("im1", MODULE_PATH "/assets/textures/FISH.png");
+	// Rendering::Image::createImage("im1", MODULE_PATH "/assets/textures/FISH.png");
 
-	Rendering::Buff::createBuffer("cam1", Engine::Rendering::Buff::Type::Uniform, Engine::Rendering::Buff::Frequency::Dynamic, sizeof(Camera), &cam);
-	Rendering::Buff::createBuffer("model", Engine::Rendering::Buff::Type::Uniform, Engine::Rendering::Buff::Frequency::Dynamic, sizeof(Model), &model);
+	Rendering::Buff::createBuffer("cam1", Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Helper::Camera), &cam);
+	Rendering::Buff::createBuffer("model", Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Helper::Model), &model);
 
 
 	// mat.images[0] = "im1";
@@ -155,7 +85,6 @@ extern "C" void loop() {
 
 		rotate += 1.0f * deltaTime;
 
-		Model model;
 		model.model = glm::mat4(1.0f);
 		model.model = glm::rotate(model.model, rotate, glm::vec3({0, 0, 1}));
 		model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
@@ -166,37 +95,37 @@ extern "C" void loop() {
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            camPos += -((getForwardVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((Helper::getForwardVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            camPos += ((getForwardVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((Helper::getForwardVector(camRot) * deltaTime) * 10.0f);
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
-            camPos += -((getRightVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((Helper::getRightVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_A])
         {
-            camPos += ((getRightVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((Helper::getRightVector(camRot) * deltaTime) * 10.0f);
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
-            camPos += ((getDownVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((Helper::getDownVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
-            camPos += -((getDownVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((Helper::getDownVector(camRot) * deltaTime) * 10.0f);
         }
 
-		cam.view = cameraGetView(camPos, camRot);
+		cam.view = Helper::cameraGetView(camPos, camRot);
 
 		Rendering::Buff::setBuffer("model");
-		Rendering::Buff::write(0, sizeof(Model), &model);
+		Rendering::Buff::write(0, sizeof(Helper::Model), &model);
 		Rendering::Buff::setBuffer("cam1");
-		Rendering::Buff::write(0, sizeof(Camera), &cam);
+		Rendering::Buff::write(0, sizeof(Helper::Camera), &cam);
 
 		Rendering::Draw(&mat, "cube");
 }
@@ -218,7 +147,7 @@ extern "C" void event(SDL_Event *event, bool *running) {
 	}
 	if (event->type == SDL_EVENT_MOUSE_MOTION)
 	{
-		rotateCamera(&camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
+		Helper::rotateCamera(&camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
 	}
 	if (type == SDL_EVENT_WINDOW_RESIZED)
 	{
