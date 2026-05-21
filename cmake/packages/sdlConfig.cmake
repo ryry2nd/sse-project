@@ -2,9 +2,75 @@ include(FetchContent)
 
 set(BUILD_SHARED_LIBS ON)
 set(BUILD_STATIC_LIBS OFF)
+
+# --- CORE (must stay ON) ---
+set(SDL_VIDEO ON)
+set(SDL_PTHREADS ON)
+set(SDL_LIBC ON)
+
+# --- WINDOW BACKENDS (keep both for safety) ---
+set(SDL_WAYLAND ON)
+set(SDL_X11 ON)
+
+# --- EVERYTHING ELSE OFF ---
+set(SDL_AUDIO OFF)
+set(SDL_CAMERA OFF)
+set(SDL_JOYSTICK OFF)
+set(SDL_HAPTIC OFF)
+set(SDL_HIDAPI OFF)
+set(SDL_SENSOR OFF)
+set(SDL_DIALOG OFF)
+set(SDL_POWER OFF)
+set(SDL_GPU OFF)
+
+# --- RENDERING OFF (you use GL/Vulkan directly) ---
+set(SDL_RENDER_D3D OFF)
+set(SDL_RENDER_D3D11 OFF)
+set(SDL_RENDER_D3D12 OFF)
+set(SDL_RENDER_GPU OFF)
+set(SDL_RENDER_METAL OFF)
+set(SDL_RENDER_VULKAN OFF)
+
+# --- AUDIO BACKENDS ---
+set(SDL_ALSA OFF)
+set(SDL_PIPEWIRE OFF)
+set(SDL_PULSEAUDIO OFF)
+set(SDL_JACK OFF)
+set(SDL_OSS OFF)
+set(SDL_SNDIO OFF)
+
+# --- INPUT / DEVICE BACKENDS ---
+set(SDL_HIDAPI OFF)
+set(SDL_LIBUDEV OFF)
+set(SDL_DBUS OFF)
+set(SDL_IBUS OFF)
+
+# --- GRAPHICS API SUPPORT (only keep what you need) ---
+set(SDL_OPENGL ON)
+set(SDL_OPENGLES OFF)
+set(SDL_VULKAN OFF)
+
+# --- DEV / BLOAT OFF ---
+set(SDL_TESTS OFF)
+set(SDL_EXAMPLES OFF)
+set(SDL_CLANG_TIDY OFF)
+set(SDL_ASAN OFF)
+set(SDL_CCACHE OFF)
+
+# --- CPU OPTIMIZATION (safe ON) ---
+set(SDL_SSE OFF)
+set(SDL_SSE2 OFF)
+set(SDL_SSE3 OFF)
+set(SDL_SSE4_1 OFF)
+set(SDL_SSE4_2 OFF)
+set(SDL_AVX OFF)
+set(SDL_AVX2 OFF)
+
+
 set(SDL_TEST_LIBRARY OFF)
 set(SDL_VENDORED TRUE)
 set(SDL_RENDER OFF)
+
 
 FetchContent_Declare(
 	sdl

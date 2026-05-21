@@ -46,14 +46,14 @@ struct OtherDrawParams {
 extern "C" {
 	void hostShutDownAll() {
 		cacheWin = nullptr;
-		wins.clear();
-		shaders.clear();
 		cacheBuff = nullptr;
-		buffers.clear();
 		cacheMesh = nullptr;
-		meshes.clear();
 		cacheImage = nullptr;
+		meshes.clear();
 		images.clear();
+		buffers.clear();
+		shaders.clear();
+		wins.clear();
 	}
 
 

@@ -17,10 +17,10 @@ add_compile_options(
 	-Winconsistent-missing-override
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
+if (SSE_MINIMAL)
 	message(STATUS "Configuring Release build: stripping debug info")
 	add_compile_options(
-		-O2
+		-Oz
 		-flto
 		-fdata-sections
 		-ffunction-sections
@@ -31,8 +31,21 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 		-flto
     	-Wl,--gc-sections,-s
 	)
-endif()
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+	message(STATUS "Configuring Release build: stripping debug info")
+	add_compile_options(
+		-O3
+		-flto
+		-fdata-sections
+		-ffunction-sections
+		-fno-omit-frame-pointer
+	)
+
+	add_link_options(
+		-flto
+    	-Wl,--gc-sections,-s
+	)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	message(STATUS "Configuring Debug build: fast compile")
 	add_compile_options(
 		-DDEBUG
