@@ -1,4 +1,4 @@
-# do I look like I know what a jpeg is, I'm just trying to print out a picture of a god dang hot dog.
+# “Do I look like I know what a JPEG is? I just want a picture of a god-dang hot dog!”
 include(FetchContent)
 
 set(BUILD_SHARED_LIBS OFF)

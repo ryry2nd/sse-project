@@ -73,9 +73,7 @@ endif()
 # Packages
 find_package(sdl CONFIG REQUIRED)
 find_package(images CONFIG REQUIRED)
-# find_package(sdl_ttf CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-# find_package(boost_multiprecision CONFIG REQUIRED)
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
@@ -104,32 +102,33 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
 )
 
 foreach(MODULE ${MODULE_DIRS})
-    if(IS_DIRECTORY ${MODULE})
-		if (NOT EXISTS "${MODULE}/.ignore")
-			get_filename_component(MODULE_NAME ${MODULE} NAME)
-			set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
-			if(EXISTS "${MODULE}/CMakeLists.txt")
-				add_subdirectory(${MODULE})
-			endif()
-			if(EXISTS "${MODULE}/assets")
+    if(IS_DIRECTORY ${MODULE} AND NOT EXISTS "${MODULE}/.ignore")
+		get_filename_component(MODULE_NAME ${MODULE} NAME)
+		set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
+		if(EXISTS "${MODULE}/CMakeLists.txt")
+			add_subdirectory(${MODULE})
+		elseif(EXISTS "${MODULE}/assets")
 			add_custom_target(copy_assets ALL
+				COMMAND ${CMAKE_COMMAND} -E make_directory
+					"${MODULE_OUT_DIR}"
 				COMMAND ${CMAKE_COMMAND} -E copy_directory
 					${MODULE}/assets
-					${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}/assets
+					${MODULE_OUT_DIR}/assets
 				COMMENT "---- Copying assets ----"
 			)
-			endif()
-			if(EXISTS "${MODULE}/config.yaml")
+		endif()
+		if(EXISTS "${MODULE}/config.yaml")
 			add_custom_target(copy_config ALL
+				COMMAND ${CMAKE_COMMAND} -E make_directory
+					"${MODULE_OUT_DIR}"
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different
 					${MODULE}/config.yaml
-					${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}
-				COMMENT "---- Copying assets ----"
+					${MODULE_OUT_DIR}
+				COMMENT "---- Copying yaml ----"
 			)
-			endif()
-			message(STATUS "Module: ${MODULE_NAME}")
 		endif()
-    endif()
+		message(STATUS "Module: ${MODULE_NAME}")
+	endif()
 endforeach()
 
 add_custom_target(copy_compile_command ALL

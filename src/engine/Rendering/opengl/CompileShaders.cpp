@@ -18,12 +18,16 @@
 
 #define ASSET_SHADER "/assets/shaders"
 
+#define SLANG_EXT ".slang"
 
 #define USE_SPV
 
+#define OVERRIDE_VERT_EXT ".vert.spv"
+#define OVERRIDE_FRAG_EXT ".frag.spv"
+
 #ifdef USE_SPV
-	#define VERT_EXT ".vert.spv"
-	#define FRAG_EXT ".frag.spv"
+	#define VERT_EXT OVERRIDE_VERT_EXT
+	#define FRAG_EXT OVERRIDE_FRAG_EXT
 	#define FLAGS \
 		" -O3" \
 		" -line-directive-mode none" \
@@ -62,12 +66,30 @@ std::string compileShaderCode(const std::string& arguments) {
 	return output;
 }
 
-int OpenGl::GlShader::compileShaders(std::string path, std::string &vertPath, std::string &fragPath) {
+int OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
+	if (!fs::exists(SLANG_PATH EXE_EXT)) {
+		vertPath = prePath + OVERRIDE_VERT_EXT;
+		fragPath = prePath + OVERRIDE_FRAG_EXT;
+		return 0;
+	}
+
+	std::string path = prePath + SLANG_EXT;
+	fs::path entry(path);
 	fs::create_directories(COMPILED_OUT_PATH);
 
-	fs::path entry(path);
+	// if (!fs::exists(entry)){// && !fs::is_regular_file(entry)) {
+	// 	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
+	// 	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
+	// 	return 0;
+	// }
 
-	std::string command = path +
+	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
+	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
+
+
+	std::string command;
+
+	command = path +
 		FLAGS
 		" -stage vertex"
 		" -entry vertMain"
@@ -77,8 +99,6 @@ int OpenGl::GlShader::compileShaders(std::string path, std::string &vertPath, st
 		spdlog::error("Program: {} failed to compile vertex shader and gave the error:\n{}", id, out);
 		return 1;
 	}
-
-	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
 
 	command = path +
 		FLAGS
@@ -90,8 +110,6 @@ int OpenGl::GlShader::compileShaders(std::string path, std::string &vertPath, st
 		spdlog::error("Program: {} failed to compile fragment shader and gave the error:\n{}", id, out);
 		return 1;
 	}
-
-	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
 
 	spdlog::debug("Successfully compiled shader {}", entry.stem().string());
 

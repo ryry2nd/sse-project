@@ -41,8 +41,8 @@ extern "C" void setup() {
 
 	Rendering::Window::setAPI("OpenGl4.6");
 	Rendering::Window::CreateWindow("win1", res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-	Rendering::Shader::createShader("shader1", MODULE_PATH "/assets/shaders/floatCube.slang");
-	// Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube.slang");
+	Rendering::Shader::createShader("shader1", MODULE_PATH "/shaders/floatCube");
+	// Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube");
 	Rendering::Mesh::createMesh("cube", Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 	// Rendering::Image::createImage("im1", MODULE_PATH "/assets/textures/FISH.png");
 
