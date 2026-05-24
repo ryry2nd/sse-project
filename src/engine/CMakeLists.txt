@@ -1,18 +1,15 @@
-file(GLOB_RECURSE SCRIPTING_HEADERS
+file(GLOB SCRIPTING_HEADERS
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/*.hpp
 )
-list(FILTER SCRIPTING_HEADERS INCLUDE REGEX ".*/Scripting/[^/]+$")
 
-
-file(GLOB_RECURSE RENDERING_HEADERS
+file(GLOB RENDERING_HEADERS
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Rendering/*.hpp
 )
-list(FILTER RENDERING_HEADERS INCLUDE REGEX ".*/Rendering/[^/]+$")
 
 
-file(GLOB_RECURSE MODULE_STD_HEADERS
+file(GLOB MODULE_STD_HEADERS
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Scripting/Standard/*.hpp
 )
@@ -55,8 +52,7 @@ add_custom_target(copy_src_headers DEPENDS ${HEADER_STAMP})
 
 #Rendering Section
 
-file(GLOB_RECURSE rendering_SOURCES "Rendering/*.cpp")
-list(FILTER rendering_SOURCES INCLUDE REGEX ".*/Rendering/[^/]+$")
+file(GLOB rendering_SOURCES "Rendering/*.cpp")
 
 add_library(RenderingBase SHARED ${rendering_SOURCES})
 add_dependencies(RenderingBase copy_src_headers)
@@ -71,7 +67,7 @@ target_link_libraries(RenderingBase PRIVATE PNG::PNG JPEG::JPEG PUBLIC SDL3::SDL
 
 
 if(USE_OPENGL)
-	file(GLOB_RECURSE GL_SOURCES "Rendering/opengl/*.cpp")
+	file(GLOB GL_SOURCES "Rendering/opengl/*.cpp")
 	add_library(RenderingOpenGL SHARED ${GL_SOURCES})
 	add_dependencies(RenderingOpenGL copy_src_headers)
 	set_target_properties(RenderingOpenGL PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Rendering)
@@ -85,7 +81,7 @@ endif()
 
 
 # Scripting Section
-file(GLOB_RECURSE scriptingJIT_SOURCES "Scripting/JIT/*.cpp")
+file(GLOB scriptingJIT_SOURCES "Scripting/JIT/*.cpp")
 
 add_library(ScriptingJIT SHARED ${scriptingJIT_SOURCES})
 add_dependencies(ScriptingJIT copy_src_headers)
@@ -111,8 +107,7 @@ add_custom_command(
 endif()
 
 
-file(GLOB_RECURSE scripting_SOURCES "Scripting/*.cpp")
-list(FILTER scripting_SOURCES INCLUDE REGEX ".*/Scripting/[^/]+$")
+file(GLOB scripting_SOURCES "Scripting/*.cpp")
 
 add_library(Scripting SHARED ${scripting_SOURCES})
 add_dependencies(Scripting copy_src_headers)
