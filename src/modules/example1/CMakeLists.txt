@@ -63,8 +63,8 @@ string(JOIN " " ALL_ITEMS_STR ${ALL_ITEMS})
 string(JOIN " " CC_ENTRY
 "{"
 "\"directory\":\"${CMAKE_SOURCE_DIR}\","
-"\"file\":\"${CMAKE_CURRENT_SOURCE_DIR}/src/modules/example1/src/main.cpp\","
-"\"command\":\"${CMAKE_CXX_COMPILER} -std=c++20 ${MODULE_FLAGS_STR} ${ALL_ITEMS_STR} ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/example1/src/main.cpp -DMODULE_PATH=\\\"${MOD_PATH}\\\" -o ${MODULE_FILE}\""
+"\"file\":\"${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp\","
+"\"command\":\"${CMAKE_CXX_COMPILER} -std=c++20 ${MODULE_FLAGS_STR} ${ALL_ITEMS_STR} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp -DMODULE_PATH=\\\"${MOD_PATH}\\\" -o ${MODULE_FILE}\""
 "}"
 )
 
