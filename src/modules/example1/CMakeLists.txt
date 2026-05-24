@@ -57,6 +57,30 @@ add_custom_target(MyModule ALL
     DEPENDS MyModule_build
 )
 
+string(JOIN " " MODULE_FLAGS_STR ${MODULE_FLAGS})
+string(JOIN " " ALL_ITEMS_STR ${ALL_ITEMS})
+
+string(JOIN " " CC_ENTRY
+"{"
+"\"directory\":\"${CMAKE_SOURCE_DIR}\","
+"\"file\":\"${CMAKE_CURRENT_SOURCE_DIR}/src/modules/example1/src/main.cpp\","
+"\"command\":\"${CMAKE_CXX_COMPILER} -std=c++20 ${MODULE_FLAGS_STR} ${ALL_ITEMS_STR} ${CMAKE_CURRENT_SOURCE_DIR}/src/modules/example1/src/main.cpp -DMODULE_PATH=\\\"${MOD_PATH}\\\" -o ${MODULE_FILE}\""
+"}"
+)
+
+file(WRITE
+    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+    "[${CC_ENTRY}]"
+)
+
+include(${CMAKE_SOURCE_DIR}/cmake/helper/merge.cmake)
+
+merge_compile_commands(
+    ${CMAKE_BINARY_DIR}/../compile_commands.json
+    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+)
+
 add_custom_target(copy_assets ALL
 	COMMAND ${CMAKE_COMMAND} -E make_directory
 		"${MODULE_OUT_DIR}/assets"

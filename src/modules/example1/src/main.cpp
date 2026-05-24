@@ -9,10 +9,6 @@
 
 using namespace Engine;
 
-#ifndef MODULE_PATH
-    #define MODULE_PATH ""
-#endif
-
 bool outputFPS = false;
 
 
