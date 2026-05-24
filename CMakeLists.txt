@@ -83,13 +83,6 @@ find_package(compiler CONFIG REQUIRED)
 
 # Add subdirectories
 add_subdirectory(src/engine)
-add_executable(main src/main.cpp)
-
-target_link_libraries(main PRIVATE
-	RenderingBase
-	Scripting
-	ScriptingJIT
-)
 
 add_custom_target(delete_cache ALL
 	COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/cache"

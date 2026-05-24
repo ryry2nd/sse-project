@@ -27,7 +27,7 @@
 			"type": "lldb",
 			"request": "launch",
 			"name": "Launch",
-			"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/main",
+			"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
 			"preLaunchTask": "Run build.sh",
 			"args": [],
 			"cwd": "${workspaceFolder}/build/linux-Debug/sse-project",

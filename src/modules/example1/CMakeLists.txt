@@ -118,3 +118,11 @@ add_custom_target(copy_shaders ALL
 	COMMENT "---- Copying Shaders ----"
 )
 endif()
+
+add_executable(example1 ${CMAKE_SOURCE_DIR}/src/main.cpp)
+
+target_link_libraries(example1 PRIVATE
+	RenderingBase
+	Scripting
+	ScriptingJIT
+)

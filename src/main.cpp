@@ -1,7 +1,9 @@
 #include <engine/Rendering/Rendering.hpp>
 #include <engine/Scripting/ScriptingHeaders.hpp>
 
+#ifndef DEFAULT_MODULE
 #define DEFAULT_MODULE "modules/example1"
+#endif
 
 extern "C" void hostUpdateWindows();
 extern "C" void hostWindowClearBackground();
