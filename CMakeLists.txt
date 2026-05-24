@@ -94,6 +94,9 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
     "${CMAKE_CURRENT_SOURCE_DIR}/src/modules/*"
 )
 
+include(${CMAKE_SOURCE_DIR}/cmake/helper.cmake)
+
+
 foreach(MODULE ${MODULE_DIRS})
     if(IS_DIRECTORY ${MODULE} AND NOT EXISTS "${MODULE}/.ignore")
 		get_filename_component(MODULE_NAME ${MODULE} NAME)

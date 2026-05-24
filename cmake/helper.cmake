@@ -7,7 +7,7 @@ function(merge_compile_commands OUTPUT_FILE)
 
 	set(CMD
 		${Python3_EXECUTABLE}
-		${CMAKE_SOURCE_DIR}/cmake/helper/merge.py
+		${CMAKE_SOURCE_DIR}/cmake/merge.py
 		${OUTPUT_FILE}
 	)
 
@@ -126,8 +126,8 @@ function(compile_module MAKE_SO)
 	)
 endfunction()
 
-function(copyassets)
-	add_custom_target(copy_assets ALL
+function(copy_assets)
+	add_custom_target(copy_assets_target ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
 			"${MODULE_OUT_DIR}/assets"
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -153,7 +153,7 @@ function(copyassets)
 			-o "${MODULE_OUT_DIR}/shaders/floatCube.frag.spv"
 		COMMENT "---- Compiling Shaders ----"
 	)
-	add_dependencies(compile_slang_shaders copy_assets)
+	add_dependencies(compile_slang_shaders copy_assets_target)
 	else()
 	add_custom_target(copy_shaders ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
