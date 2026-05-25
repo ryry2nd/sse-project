@@ -12,7 +12,7 @@ extern "C" void hostWindowSwapBuffers();
 int main(int argc, char *argv[])
 {
 	ScriptingHeaders::loginit();
-	Rendering::Window::init();
+	Engine::Rendering::Window::init();
 	ScriptingHeaders::EnginePackage *example_package = new ScriptingHeaders::EnginePackage(std::string(DEFAULT_MODULE));
 
 	// starts running the game loop
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
 	while (*running)
 	{
-		Rendering::Window::Update();
+		Engine::Rendering::Window::Update();
 		hostUpdateWindows();
 
 		ScriptingHeaders::EnginePackage::EventFunctions(running);
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	}
 
 	delete example_package;
-	Rendering::Window::shutdown();
+	Engine::Rendering::Window::shutdown();
 	delete running;
 	return 0;
 }

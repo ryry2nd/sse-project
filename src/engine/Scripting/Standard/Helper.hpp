@@ -1,8 +1,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/glm.hpp>
 
+#include <engine/Rendering/Rendering.hpp>
+
 #include "Logging.hpp"
-#include "Rendering.hpp"
 
 namespace Engine::Helper {
 	struct Camera {
@@ -68,9 +69,7 @@ namespace Engine::Helper {
 		return glm::perspective(glm::radians(fov), res.x / res.y, zNear, zFar);
 	}
 
-	inline void rotateCamera(glm::vec3 *rot, glm::vec2 motion, float mouse_sensitivity) {
-		float deltaTime = Engine::Rendering::Window::getDeltaTime();
-
+	inline void rotateCamera(float deltaTime, glm::vec3 *rot, glm::vec2 motion, float mouse_sensitivity) {
 		if (deltaTime == 0)
 		{
 			return;

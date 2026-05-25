@@ -3,9 +3,10 @@
 #include <glad/gl.h>
 #include <fstream>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 using namespace OpenGl;
-using namespace Rendering;
+using namespace Engine::Rendering;
 
 void compileSpirV(const char *path, GLuint shader, const char* entryPoint) {
 	std::ifstream file(path, std::ios::binary | std::ios::ate);

@@ -4,6 +4,9 @@
 #include <filesystem>
 #include <unordered_map>
 #include <SDL3/SDL_loadso.h>
+#include <spdlog/spdlog.h>
+
+#include "internal/Internal.hpp"
 
 #define COMPILED_OUT_PATH "lib/Rendering"
 
@@ -21,7 +24,7 @@
 #define LIBRARY_SUFFIX ".so"
 #endif
 
-using namespace Rendering;
+using namespace Engine::Rendering;
 
 using CreateShaderFn =
 	std::unique_ptr<Shader>(*)(std::string);
@@ -34,7 +37,7 @@ using CreateMeshFn =
 		const size_t,
 		const short*,
 		const size_t,
-		Rendering::Mesh::MeshTypes
+		Mesh::MeshTypes
 	);
 
 using CreateImageFromFileFn =
@@ -64,9 +67,9 @@ using CreateBuffFn =
 
 using CreateDrawFn =
 	void(*)(
-		Rendering::Material*,
-		Rendering::Mesh*,
-		Rendering::DrawParams*
+		Material*,
+		Mesh*,
+		DrawParams*
 	);
 
 using CreateFBOFn =
@@ -131,7 +134,7 @@ void createLibs() {
 	}
 }
 
-void CreationFunctions::initAPI(const std::string &apiName) {
+void InternalFunctions::initAPI(const char *apiName) {
 	if (libs.empty()) createLibs();
 
 	auto it = libs.find(apiName);
@@ -151,7 +154,7 @@ void CreationFunctions::initAPI(const std::string &apiName) {
 	spdlog::info("Successfully set API to {}", apiName);
 }
 
-std::unique_ptr<Shader> CreationFunctions::createShader(std::string path) {
+std::unique_ptr<Shader> InternalFunctions::createShader(const char *path) {
 	if (!createShaderFunc) {
 		spdlog::error("createShader not loaded");
 		return nullptr;
@@ -159,7 +162,7 @@ std::unique_ptr<Shader> CreationFunctions::createShader(std::string path) {
 
 	return createShaderFunc(path);
 }
-std::unique_ptr<Mesh> CreationFunctions::createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType) {
+std::unique_ptr<Mesh> InternalFunctions::createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Mesh::MeshTypes meshType) {
 	if (!createMeshFunc) {
 		spdlog::error("createShader not loaded");
 		return nullptr;
@@ -167,7 +170,7 @@ std::unique_ptr<Mesh> CreationFunctions::createMesh(const float *vertices, const
 
 	return createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
-std::unique_ptr<Image> CreationFunctions::createImage(const char *filePath) {
+std::unique_ptr<Image> InternalFunctions::createImage(const char *filePath) {
 	if (!createImageFromFileFunc) {
 		spdlog::error("createImage not loaded");
 		return nullptr;
@@ -175,7 +178,7 @@ std::unique_ptr<Image> CreationFunctions::createImage(const char *filePath) {
 
 	return createImageFromFileFunc(filePath);
 }
-std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
+std::unique_ptr<Image> InternalFunctions::createImage(SDL_Surface *surface) {
 	if (!createImageFromSurfaceFunc) {
 		spdlog::error("createImage not loaded");
 		return nullptr;
@@ -183,7 +186,7 @@ std::unique_ptr<Image> CreationFunctions::createImage(SDL_Surface *surface) {
 
 	return createImageFromSurfaceFunc(surface);
 }
-std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
+std::unique_ptr<Window> InternalFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
 	if (!createWindowFunc) {
 		spdlog::error("createWindow not loaded");
 		return nullptr;
@@ -192,7 +195,7 @@ std::unique_ptr<Window> CreationFunctions::createWindow(glm::vec2 res, const cha
 	return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
-std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data) {
+std::unique_ptr<Buff> InternalFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data) {
 	if (!createBuffFunc) {
 		spdlog::error("createBuff not loaded");
 		return nullptr;
@@ -201,7 +204,7 @@ std::unique_ptr<Buff> CreationFunctions::createBuff(Buff::Type type, Buff::Frequ
 	return createBuffFunc(type, freq, size, data);
 }
 
-std::unique_ptr<FrameBuffer> CreationFunctions::createFrameBuffer(glm::vec2 size, uint32_t settings) {
+std::unique_ptr<FrameBuffer> InternalFunctions::createFrameBuffer(glm::vec2 size, uint32_t settings) {
 	if (!createFboFunc) {
 		spdlog::error("createFrameBuffer not loaded");
 		return nullptr;
@@ -210,7 +213,7 @@ std::unique_ptr<FrameBuffer> CreationFunctions::createFrameBuffer(glm::vec2 size
 	return createFboFunc(size, settings);
 }
 
-void CreationFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
+void InternalFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
 	#ifdef DEBUG
 	if (!createDrawFunc) {
 		spdlog::error("draw not loaded");

@@ -1,8 +1,9 @@
 #include "GlRendering.hpp"
 
 #include <glad/gl.h>
+#include <spdlog/spdlog.h>
 
-using namespace Rendering;
+using namespace Engine::Rendering;
 using namespace OpenGl;
 
 GLenum GlBuff::toGLTarget(Type type) {

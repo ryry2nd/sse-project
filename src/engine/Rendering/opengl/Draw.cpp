@@ -1,12 +1,14 @@
 #include "GlRendering.hpp"
 
 #include <engine/Rendering/Rendering.hpp>
+#include <spdlog/spdlog.h>
 #include <glad/gl.h>
 
 using namespace OpenGl;
 
+using namespace Engine::Rendering;
 
-void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ubo)
+void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ubo)
 {
 	if (ubo.empty()) return;
 
@@ -14,14 +16,14 @@ void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ubo
 	{
 		if (!buf) continue;
 
-		auto glbuf = static_cast<OpenGl::GlBuff*>(buf);
+		auto glbuf = static_cast<GlBuff*>(buf);
 
 		glBindBufferBase(GL_UNIFORM_BUFFER,
 						 (GLuint)binding,
 						 glbuf->getID());
 	}
 }
-void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ssbo)
+void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ssbo)
 {
 	if (ssbo.empty()) return;
 
@@ -29,14 +31,14 @@ void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Rendering::Buff*> &ss
 	{
 		if (!buf) continue;
 
-		auto *glbuf = static_cast<OpenGl::GlBuff*>(buf);
+		auto *glbuf = static_cast<GlBuff*>(buf);
 
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
 						 (GLuint)binding,
 						 glbuf->getID());
 	}
 }
-void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &images)
+void setImages(GlShader *glshdr, std::unordered_map<size_t, Image*> &images)
 {
     if (images.empty()) return;
 
@@ -44,7 +46,7 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &
     {
 		if (!img) continue;
 
-        auto *glimg = static_cast<OpenGl::GlImage*>(img);
+        auto *glimg = static_cast<GlImage*>(img);
 
 		glActiveTexture(GL_TEXTURE0 + (GLuint)binding);
 		glBindTexture(GL_TEXTURE_2D, glimg->getID());
@@ -52,20 +54,20 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Rendering::Image*> &
     }
 }
 
-void OpenGl::draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params = nullptr) {
-	auto *glshdr = static_cast<OpenGl::GlShader*>(mat->shader);
-	auto *glmesh = static_cast<OpenGl::GlMesh*>(mesh);
+void OpenGl::draw(Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
+	auto *glshdr = static_cast<GlShader*>(mat->shader);
+	auto *glmesh = static_cast<GlMesh*>(mesh);
 
 	bool disableScreen;
 	bool useFBO;
 	bool hasFBO;
-	Rendering::FrameBuffer *fbo = nullptr;
+	FrameBuffer *fbo = nullptr;
 
 	if (params) {
 		fbo = params->fbo;
 
-		disableScreen = params->settings & Rendering::DrawParams::DisableScreen;
-		useFBO        = params->settings & Rendering::DrawParams::EnableFBO;
+		disableScreen = params->settings & DrawParams::DisableScreen;
+		useFBO        = params->settings & DrawParams::EnableFBO;
 		hasFBO        = (fbo != nullptr);
 	}
 	else {

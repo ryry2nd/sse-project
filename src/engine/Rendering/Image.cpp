@@ -2,13 +2,14 @@
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
+#include <spdlog/spdlog.h>
 #include <cstring>
 #include <filesystem>
 #include <png.h>
 #include <jpeglib.h>
 #include <cstdio>
 
-using namespace Rendering;
+using namespace Engine::Rendering;
 
 SDL_Surface* MakeSurfaceFromRGBA(unsigned char* pixels, int w, int h)
 {

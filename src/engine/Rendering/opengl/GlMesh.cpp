@@ -1,8 +1,9 @@
 #include "GlRendering.hpp"
 #include <glad/gl.h>
+#include <spdlog/spdlog.h>
 
 using namespace OpenGl;
-using namespace Rendering;
+using namespace Engine::Rendering;
 
 GlMesh::~GlMesh()
 {
@@ -19,7 +20,7 @@ GlMesh::~GlMesh()
 GlMesh::GlMesh(const float *vertices, const size_t vert_size,
 				const unsigned int *indices, const size_t ind_size,
 				const short *vertLogic, const size_t vert_logic_size,
-				Rendering::Mesh::MeshTypes meshType
+				Mesh::MeshTypes meshType
 			) : VAO(0), VBO(0), EBO(0)
 {
 	spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
@@ -38,7 +39,7 @@ void GlMesh::updateVerts(
 	const float *vertices, const size_t vert_size,
 	const unsigned int *indices, const size_t ind_size,
 	const short *vertLogic, const size_t vert_logic_size,
-	Rendering::Mesh::MeshTypes meshType
+	Mesh::MeshTypes meshType
 )
 {
 	glBindVertexArray(VAO);

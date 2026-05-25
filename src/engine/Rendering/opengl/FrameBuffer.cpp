@@ -1,6 +1,7 @@
 #include "GlRendering.hpp"
 
 #include <glad/gl.h>
+#include <spdlog/spdlog.h>
 
 using namespace OpenGl;
 

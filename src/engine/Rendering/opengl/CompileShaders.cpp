@@ -1,4 +1,5 @@
 #include "GlRendering.hpp"
+#include <spdlog/spdlog.h>
 #include <filesystem>
 
 #define COMPILED_OUT_PATH "cache/compiled_shaders/OpenGl"

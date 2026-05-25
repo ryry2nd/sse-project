@@ -7,17 +7,30 @@
 #include "Objects.hpp"
 
 
+typedef uint32_t Uint32;
+typedef uint64_t Uint64;
+typedef uint8_t Uint8;
+
 using namespace Engine;
+using namespace Engine::Rendering;
+using namespace Engine::Helper;
 
 bool outputFPS = false;
 
 
-Rendering::Material mat;
-Helper::Camera cam;
-Helper::Model model;
+Material mat;
+Camera cam;
+Model model;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
+
+Window *win;
+Shader *shader;
+Mesh *cube;
+Image *img;
+Buff *camBuff;
+Buff *modelBuff;
 
 extern "C" void setup() {
 	glm::vec2 res({900.0f, 500.0f});
@@ -25,8 +38,8 @@ extern "C" void setup() {
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	cam.proj = Helper::cameraGetProj(res);
-	cam.view = Helper::cameraGetView(camPos, camRot);
+	cam.proj = cameraGetProj(res);
+	cam.view = cameraGetView(camPos, camRot);
 
 	// Helper::printMat4Flat(cam.proj);
 
@@ -35,26 +48,24 @@ extern "C" void setup() {
 
 
 
-	Rendering::Window::setAPI("OpenGl4.6");
-	Rendering::Window::CreateWindow("win1", res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-	Rendering::Shader::createShader("shader1", MODULE_PATH "/shaders/floatCube");
-	// Rendering::Shader::createShader("shader2", MODULE_PATH "/assets/shaders/instanceCube");
-	Rendering::Mesh::createMesh("cube", Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
-	// Rendering::Image::createImage("im1", MODULE_PATH "/assets/textures/FISH.png");
+	CreationFunctions::initAPI("OpenGl4.6");
+	win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+	shader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
+	// CreationFunctions::createShader(MODULE_PATH "/assets/shaders/instanceCube");
+	cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
+	img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 
-	Rendering::Buff::createBuffer("cam1", Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Helper::Camera), &cam);
-	Rendering::Buff::createBuffer("model", Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Helper::Model), &model);
+	camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Camera), &cam);
+	modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Model), &model);
 
-
-	// mat.images[0] = "im1";
-	mat.shader = "shader1";
-	mat.ubo[0] = "model";
-	mat.ubo[1] = "cam1";
+	// mat.images[0] = img;
+	mat.shader = shader;
+	mat.ubo[0] = modelBuff;
+	mat.ubo[1] = camBuff;
 }
 
 extern "C" void loop() {
-		Rendering::Window::setWindow("win1");
-        float deltaTime = Rendering::Window::getDeltaTime();
+        float deltaTime = win->getDeltaTime();
         static float timer = 0.0f;
         static float t = 0.0f;
 
@@ -65,14 +76,14 @@ extern "C" void loop() {
         float b = 0.5f + 0.3f * sin(t + 4.0f);
 
         // makes background look like a 70s disco rave while under 20 pounds of lsd
-        Rendering::Window::setBackgroundColor({r, g, b, 1.0f});
+        win->setBackgroundColor({r, g, b, 1.0f});
 
         timer += deltaTime;
 
         if (timer >= 1.0f)
         {
             if (outputFPS) {
-                Logging::info("FPS: {:.2f}", Rendering::Window::getFPS());
+                Logging::info("FPS: {:.2f}", win->getFPS());
             }
             timer = 0.0f;
         }
@@ -118,15 +129,15 @@ extern "C" void loop() {
 
 		cam.view = Helper::cameraGetView(camPos, camRot);
 
-		Rendering::Buff::setBuffer("model");
-		Rendering::Buff::write(0, sizeof(Helper::Model), &model);
-		Rendering::Buff::setBuffer("cam1");
-		Rendering::Buff::write(0, sizeof(Helper::Camera), &cam);
+		modelBuff->write(0, sizeof(Helper::Model), &model);
+		camBuff->write(0, sizeof(Helper::Camera), &cam);
 
-		Rendering::Draw(&mat, "cube");
+		CreationFunctions::draw(&mat, cube);
 }
 
 extern "C" void event(SDL_Event *event, bool *running) {
+	auto dt = win->getDeltaTime();
+
 	auto type = event->type;
 	if (type == SDL_EVENT_QUIT)
 		*running = false;
@@ -143,11 +154,10 @@ extern "C" void event(SDL_Event *event, bool *running) {
 	}
 	if (event->type == SDL_EVENT_MOUSE_MOTION)
 	{
-		Helper::rotateCamera(&camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
+		Helper::rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
 	}
 	if (type == SDL_EVENT_WINDOW_RESIZED)
 	{
-		Rendering::Window::setWindow("win1");
-		Rendering::Window::updateScreenRes();
+		win->updateScreenRes();
 	}
 }

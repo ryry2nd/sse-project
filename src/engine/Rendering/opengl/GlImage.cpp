@@ -4,9 +4,10 @@
 #include <filesystem>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
+#include <spdlog/spdlog.h>
 
 using namespace OpenGl;
-using namespace Rendering;
+using namespace Engine::Rendering;
 
 bool GlImage::hasInit = false;
 

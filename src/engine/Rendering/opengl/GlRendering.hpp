@@ -14,7 +14,7 @@ namespace OpenGl
 	using GLenum = unsigned int;
 	using GLsizei = int;
 
-	class GlBuff : public Rendering::Buff {
+	class GlBuff : public Engine::Rendering::Buff {
 	public:
 		GlBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
 		~GlBuff();
@@ -33,7 +33,7 @@ namespace OpenGl
 		GLenum toGLUsage(Frequency freq);
 	};
 
-	class GlWindow : public Rendering::Window
+	class GlWindow : public Engine::Rendering::Window
 	{
 	public:
 		GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
@@ -52,7 +52,7 @@ namespace OpenGl
 		SDL_GLContext glContext;
 	};
 
-	class GlImage : public Rendering::Image
+	class GlImage : public Engine::Rendering::Image
 	{
 	public:
 		// it makes the image
@@ -75,16 +75,16 @@ namespace OpenGl
 		static bool hasInit;
 	};
 
-	class GlFrameBuffer : public Rendering::FrameBuffer {
+	class GlFrameBuffer : public Engine::Rendering::FrameBuffer {
 	public:
 		GlFrameBuffer(glm::vec2 size, uint32_t settings);
 		~GlFrameBuffer();
 
 		void setSize(glm::vec2 size);
 
-		Rendering::Image* getColorImage() {return colorImage;}
-		Rendering::Image* getDepthImage() {return depthImage;}
-		Rendering::Image* getStencilImage() {return stencilImage;}
+		Engine::Rendering::Image* getColorImage() {return colorImage;}
+		Engine::Rendering::Image* getDepthImage() {return depthImage;}
+		Engine::Rendering::Image* getStencilImage() {return stencilImage;}
 
 
 		GLuint getID() {return id;}
@@ -97,7 +97,7 @@ namespace OpenGl
 		GlImage* stencilImage = nullptr;
 	};
 
-	class GlShader : public Rendering::Shader
+	class GlShader : public Engine::Rendering::Shader
 	{
 	public:
 		GlShader(std::string path);
@@ -110,13 +110,13 @@ namespace OpenGl
 		int compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
 	};
 
-	class GlMesh : public Rendering::Mesh
+	class GlMesh : public Engine::Rendering::Mesh
 	{
 	public:
-		GlMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
+		GlMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
 		~GlMesh();
 
-		void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
+		void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
 
 		GLuint getVAO() {return VAO;}
 		GLuint getVBO() {return VBO;}
@@ -135,5 +135,5 @@ namespace OpenGl
 		GLsizei size;
 	};
 
-	void draw(Rendering::Material *mat, Rendering::Mesh *mesh, Rendering::DrawParams *params);
+	void draw(Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh, Engine::Rendering::DrawParams *params);
 }

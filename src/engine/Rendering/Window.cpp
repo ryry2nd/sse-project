@@ -8,7 +8,9 @@
 
 #include <spdlog/spdlog.h>
 
-SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
+using namespace Engine::Rendering;
+
+SDL_Color Engine::Rendering::Vec4ToSDLColor(const glm::vec4& color) {
 	return SDL_Color{
 		static_cast<Uint8>(color.r),
 		static_cast<Uint8>(color.g),
@@ -16,8 +18,6 @@ SDL_Color Rendering::Vec4ToSDLColor(const glm::vec4& color) {
 		static_cast<Uint8>(color.a)
 	};
 }
-
-using namespace Rendering;
 
 
 Uint64 Window::now = SDL_GetTicks();

@@ -1,11 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <memory>
-#include <spdlog/spdlog.h>
 
 struct SDL_Surface;
 struct SDL_Window;
@@ -15,7 +12,7 @@ typedef uint32_t Uint32;
 typedef uint64_t Uint64;
 typedef uint8_t Uint8;
 
-namespace Rendering
+namespace Engine::Rendering
 {
 	SDL_Color Vec4ToSDLColor(const glm::vec4& color);
 
@@ -49,11 +46,14 @@ namespace Rendering
 		static void init();
 		static void shutdown();
 
-		float fps = 0;
-		float deltaTime = 0;
-		glm::vec2 res;
+		float getDeltaTime() {return deltaTime;}
+		glm::vec2 getRes() {return res;}
+		float getFPS() {return fps;}
 
 	protected:
+		float fps = 0;
+		glm::vec2 res;
+		float deltaTime = 0;
 		SDL_Window *window;
 
 	private:
@@ -191,15 +191,21 @@ namespace Rendering
 	};
 
 	namespace CreationFunctions {
-		void initAPI(const std::string &apiName);
+		void initAPI(const char *apiName);
 
 		void draw(Material *mat, Mesh *mesh = nullptr, DrawParams *params = nullptr);
-		std::unique_ptr<Shader> createShader(std::string path);
-		std::unique_ptr<Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
-		std::unique_ptr<Image> createImage(const char *filePath);
-		std::unique_ptr<Image> createImage(SDL_Surface *surface);
-		std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-		std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr);
-		std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings);
+		Shader *createShader(const char *path);
+		void removeShader(Shader *shader);
+		Mesh *createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
+		void removeMesh(Mesh *mesh);
+		Image *createImage(const char *filePath);
+		Image *createImage(SDL_Surface *surface);
+		void removeImage(Image *image);
+		Window *createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+		void removeWindow(Window *window);
+		Buff *createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr);
+		void removeBuff(Buff *buff);
+		FrameBuffer *createFrameBuffer(glm::vec2 size, uint32_t settings);
+		void removeFrameBuffer(FrameBuffer *fbo);
 	}
 }

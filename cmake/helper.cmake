@@ -59,6 +59,7 @@ function(compile_module MAKE_SO)
 
 	set(ALL_ITEMS
 		"-I${CMAKE_BINARY_DIR}/include/Engine"
+		"-I${CMAKE_BINARY_DIR}/include/Rendering"
 		"-I${glm_SOURCE_DIR}"
 		"-I${sdl_SOURCE_DIR}/include"
 	)
