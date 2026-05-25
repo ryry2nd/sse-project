@@ -85,6 +85,10 @@ void OpenGl::draw(Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
 	// -------------------------
 	setImages(glshdr, mat->images);
 
+	if (params) {
+		setImages(glshdr, params->images);
+	}
+
 
 	// -------------------------
 	// 2. BUFFERS Global

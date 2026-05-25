@@ -1,175 +1,14 @@
 #pragma once
 
-#include <cstdint>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-struct SDL_Surface;
-struct SDL_Window;
-struct SDL_Color;
-
-typedef uint32_t Uint32;
-typedef uint64_t Uint64;
-typedef uint8_t Uint8;
+#include "Shader.hpp"
+#include "Buff.hpp"
+#include "Image.hpp"
+#include "FrameBuffer.hpp"
+#include "Mesh.hpp"
+#include "Window.hpp"
 
 namespace Engine::Rendering
 {
-	SDL_Color Vec4ToSDLColor(const glm::vec4& color);
-
-	class Window
-	{
-	public:
-		Window(const Window&) = delete;
-		Window& operator=(const Window&) = delete;
-		Window(Window&&) noexcept = default;
-		Window& operator=(Window&&) noexcept = default;
-
-		virtual ~Window() = 0;
-
-		virtual void updateScreenRes() = 0;
-		virtual void setBackgroundColor(glm::vec4 color) = 0;
-		static const bool *getKeystates(int &numKeys);
-
-		virtual void enableDepthTest() = 0;
-		virtual void disableDepthTest() = 0;
-		virtual void enableBackfaceCull() = 0;
-		virtual void disableBackfaceCull() = 0;
-
-
-		static Uint64 getTime() {return now;}
-
-		float getDeltaTime() {return deltaTime;}
-		glm::vec2 getRes() {return res;}
-		float getFPS() {return fps;}
-
-		// internal functions
-		void update();
-		static void Update();
-		virtual void clearBackground() = 0;
-		virtual void swapBuffer() = 0;
-		static void init();
-		static void shutdown();
-
-	protected:
-		static Uint64 now;
-		Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
-		float fps = 0;
-		glm::vec2 res;
-		float deltaTime = 0;
-		SDL_Window *window;
-
-	private:
-		Uint64 lastCounter;
-	};
-
-	class Buff {
-	public:
-		enum class Type {
-			Uniform,
-			Storage,
-		};
-		enum class Frequency {
-			Static,
-			Dynamic,
-			Stream,
-		};
-
-		virtual ~Buff() = default;
-
-		Buff(const Buff&) = delete;
-		Buff& operator=(const Buff&) = delete;
-		Buff(Buff&&) noexcept = default;
-		Buff& operator=(Buff&&) noexcept = default;
-
-		std::size_t getSize() {return allocSize;}
-		Type getType() {return buffType;}
-		Frequency getFrequency() {return freq;}
-
-		virtual void write(const std::size_t offset, const std::size_t size, const void* data) = 0;
-		virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
-
-	protected:
-		Buff(Type type, Frequency freq, std::size_t size) {
-			this->buffType = type;
-			this->freq = freq;
-			this->allocSize = size;
-		}
-		Type buffType;
-		Frequency freq;
-		std::size_t allocSize;
-	};
-
-	class Image
-	{
-	public:
-		Image& operator=(const Image&) = delete;
-		Image& operator=(Image&&) noexcept = default;
-
-		virtual ~Image() = default;
-		static SDL_Surface *loadFile(const char *filePath);
-		glm::vec2 getSizes() {return imageSizes;}
-		virtual void clearTransparent() = 0;
-	protected:
-		glm::vec2 imageSizes;
-	};
-
-	class FrameBuffer {
-	public:
-		enum Settings : uint32_t {
-			Color = 1 << 0,
-			Depth = 1 << 1,
-			Stencil = 1 << 2,
-		};
-
-		virtual ~FrameBuffer() = default;
-		glm::vec2 getSize() const {return size;}
-		uint32_t getSettings() const {return settings;}
-		virtual void setSize(glm::vec2 size) = 0;
-
-		virtual Image* getColorImage() = 0;
-		virtual Image* getDepthImage() = 0;
-		virtual Image* getStencilImage() = 0;
-
-	protected:
-		glm::vec2 size;
-		uint32_t settings;
-	};
-
-	class Shader
-	{
-	public:
-		Shader& operator=(const Shader&) = delete;
-		Shader& operator=(Shader&&) noexcept = default;
-
-		virtual ~Shader() = default;
-	};
-
-	class Mesh
-	{
-	public:
-		enum class MeshTypes
-		{
-			Points,
-			Lines,
-			Triangles
-		};
-
-		virtual ~Mesh() = default;
-
-		Mesh& operator=(const Mesh&) = delete;
-		Mesh& operator=(Mesh&&) noexcept = default;
-
-		MeshTypes getMeshType() {return meshType;}
-		void setMeshType(MeshTypes meshType) {this->meshType = meshType;}
-
-		bool getBackFaceCulling() {return backFaceCulling;}
-		void toggleBackFaceCulling() {backFaceCulling = !backFaceCulling;}
-	protected:
-		MeshTypes meshType;
-		bool backFaceCulling = true;
-	};
-
-
 	struct Material {
 		Shader *shader;
 		std::unordered_map<size_t, Image*> images;
@@ -182,6 +21,7 @@ namespace Engine::Rendering
 			EnableFBO = 1 << 1,
 		};
 
+		std::unordered_map<size_t, Image*> images;
 		std::unordered_map<size_t, Buff*> ubo;
 		std::unordered_map<size_t, Buff*> ssbo;
 		size_t instanceCount;

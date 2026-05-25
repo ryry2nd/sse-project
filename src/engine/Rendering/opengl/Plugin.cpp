@@ -40,4 +40,4 @@ extern "C" void draw(Material* mat, Mesh* mesh, DrawParams* params) {
     OpenGl::draw(mat, mesh, params);
 }
 
-extern "C" std::string getName() {return NAME;}
+extern "C" const char *getName() {return NAME;}

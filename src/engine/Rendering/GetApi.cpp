@@ -78,16 +78,19 @@ using CreateFBOFn =
 		uint32_t settings
 	);
 
-typedef std::string (*GetNameFn)();
+typedef const char *(*GetNameFn)();
 
-CreateShaderFn createShaderFunc = nullptr;
-CreateMeshFn createMeshFunc = nullptr;
-CreateImageFromFileFn createImageFromFileFunc = nullptr;
-CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
-CreateWindowFn createWindowFunc = nullptr;
-CreateBuffFn createBuffFunc = nullptr;
-CreateDrawFn createDrawFunc = nullptr;
-CreateFBOFn createFboFunc = nullptr;
+struct APIFunctions {
+	CreateShaderFn createShaderFunc = nullptr;
+	CreateMeshFn createMeshFunc = nullptr;
+	CreateImageFromFileFn createImageFromFileFunc = nullptr;
+	CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
+	CreateWindowFn createWindowFunc = nullptr;
+	CreateBuffFn createBuffFunc = nullptr;
+	CreateDrawFn createDrawFunc = nullptr;
+	CreateFBOFn createFboFunc = nullptr;
+};
+APIFunctions apiFunctions;
 
 auto sdlDeleter = [](SDL_SharedObject* obj) {
 	if (obj) SDL_UnloadObject(obj);
@@ -142,84 +145,54 @@ void InternalFunctions::initAPI(const char *apiName) {
 
 	SDL_SharedObject *lib = it->second.get();
 
-	createShaderFunc = (CreateShaderFn)SDL_LoadFunction(lib, "createShader");
-	createMeshFunc = (CreateMeshFn)SDL_LoadFunction(lib, "createMesh");
-	createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
-	createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
-	createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
-	createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
-	createDrawFunc = (CreateDrawFn)SDL_LoadFunction(lib, "draw");
-	createFboFunc = (CreateFBOFn)SDL_LoadFunction(lib, "createFrameBuffer");
+	apiFunctions.createShaderFunc = (CreateShaderFn)SDL_LoadFunction(lib, "createShader");
+	apiFunctions.createMeshFunc = (CreateMeshFn)SDL_LoadFunction(lib, "createMesh");
+	apiFunctions.createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
+	apiFunctions.createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
+	apiFunctions.createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
+	apiFunctions.createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
+	apiFunctions.createDrawFunc = (CreateDrawFn)SDL_LoadFunction(lib, "draw");
+	apiFunctions.createFboFunc = (CreateFBOFn)SDL_LoadFunction(lib, "createFrameBuffer");
+
+	if (!apiFunctions.createShaderFunc ||
+		!apiFunctions.createMeshFunc ||
+		!apiFunctions.createImageFromFileFunc ||
+		!apiFunctions.createWindowFunc ||
+		!apiFunctions.createBuffFunc ||
+		!apiFunctions.createDrawFunc ||
+		!apiFunctions.createFboFunc
+	)
+	{
+		spdlog::warn("One of the creation functions in the {} api. If you call it you will segfault", apiName);
+	}
 
 	spdlog::info("Successfully set API to {}", apiName);
 }
 
 std::unique_ptr<Shader> InternalFunctions::createShader(const char *path) {
-	if (!createShaderFunc) {
-		spdlog::error("createShader not loaded");
-		return nullptr;
-	}
-
-	return createShaderFunc(path);
+	return apiFunctions.createShaderFunc(path);
 }
 std::unique_ptr<Mesh> InternalFunctions::createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Mesh::MeshTypes meshType) {
-	if (!createMeshFunc) {
-		spdlog::error("createShader not loaded");
-		return nullptr;
-	}
-
-	return createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
+	return apiFunctions.createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
 }
 std::unique_ptr<Image> InternalFunctions::createImage(const char *filePath) {
-	if (!createImageFromFileFunc) {
-		spdlog::error("createImage not loaded");
-		return nullptr;
-	}
-
-	return createImageFromFileFunc(filePath);
+	return apiFunctions.createImageFromFileFunc(filePath);
 }
 std::unique_ptr<Image> InternalFunctions::createImage(SDL_Surface *surface) {
-	if (!createImageFromSurfaceFunc) {
-		spdlog::error("createImage not loaded");
-		return nullptr;
-	}
-
-	return createImageFromSurfaceFunc(surface);
+	return apiFunctions.createImageFromSurfaceFunc(surface);
 }
 std::unique_ptr<Window> InternalFunctions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
-	if (!createWindowFunc) {
-		spdlog::error("createWindow not loaded");
-		return nullptr;
-	}
-
-	return createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
+	return apiFunctions.createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }
 
 std::unique_ptr<Buff> InternalFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data) {
-	if (!createBuffFunc) {
-		spdlog::error("createBuff not loaded");
-		return nullptr;
-	}
-
-	return createBuffFunc(type, freq, size, data);
+	return apiFunctions.createBuffFunc(type, freq, size, data);
 }
 
 std::unique_ptr<FrameBuffer> InternalFunctions::createFrameBuffer(glm::vec2 size, uint32_t settings) {
-	if (!createFboFunc) {
-		spdlog::error("createFrameBuffer not loaded");
-		return nullptr;
-	}
-
-	return createFboFunc(size, settings);
+	return apiFunctions.createFboFunc(size, settings);
 }
 
 void InternalFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
-	#ifdef DEBUG
-	if (!createDrawFunc) {
-		spdlog::error("draw not loaded");
-		return;
-	}
-	#endif
-
-	return createDrawFunc(mat, mesh, params);
+	return apiFunctions.createDrawFunc(mat, mesh, params);
 }

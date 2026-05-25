@@ -1,4 +1,4 @@
-#include "Rendering.hpp"
+#include "Image.hpp"
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>

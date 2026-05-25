@@ -1,4 +1,4 @@
-#include "Rendering.hpp"
+#include "Window.hpp"
 
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
