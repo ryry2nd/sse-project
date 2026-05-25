@@ -132,7 +132,7 @@ extern "C" {
 		modelBuff->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		CreationFunctions::draw(&mat, cube);
+		CreationFunctions::draw(win, &mat, cube);
 	}
 
 	void event(SDL_Event *event, bool *running) {

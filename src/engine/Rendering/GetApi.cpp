@@ -67,6 +67,7 @@ using CreateBuffFn =
 
 using CreateDrawFn =
 	void(*)(
+		Window*,
 		Material*,
 		Mesh*,
 		DrawParams*
@@ -109,7 +110,7 @@ void createLibs() {
 
 			if (!raw)
 			{
-				spdlog::error("Failed to load {}: {}", entry.path().string(), SDL_GetError());
+				spdlog::warn("Failed to load {}: {}", entry.path().string(), SDL_GetError());
 				continue;
 			}
 
@@ -141,7 +142,10 @@ void InternalFunctions::initAPI(const char *apiName) {
 	if (libs.empty()) createLibs();
 
 	auto it = libs.find(apiName);
-	if (it == libs.end()) {spdlog::error("Library not found: {}", apiName);return;}
+	if (it == libs.end()) {
+		spdlog::critical("Library not found: {}", apiName);
+		std::exit(1);
+	}
 
 	SDL_SharedObject *lib = it->second.get();
 
@@ -193,6 +197,6 @@ std::unique_ptr<FrameBuffer> InternalFunctions::createFrameBuffer(glm::vec2 size
 	return apiFunctions.createFboFunc(size, settings);
 }
 
-void InternalFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
-	return apiFunctions.createDrawFunc(mat, mesh, params);
+void InternalFunctions::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params) {
+	return apiFunctions.createDrawFunc(win, mat, mesh, params);
 }

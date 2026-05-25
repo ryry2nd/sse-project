@@ -34,8 +34,8 @@ void Window::shutdown() {
 void Window::init() {
 	if (!SDL_Init(SDL_INIT_VIDEO))
 	{
-		spdlog::error("SDL_Init Error: {}", SDL_GetError());
-		return;
+		spdlog::critical("SDL_Init Error: {}", SDL_GetError());
+		std::exit(1);
 	}
 	spdlog::info("Initalized sdl");
 	spdlog::warn("Note that you should only run this once per program and not per window");
@@ -90,9 +90,9 @@ Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fu
 	window = SDL_CreateWindow(name, res.x, res.y, flags);
 	if (!window)
 	{
-		spdlog::error("SDL_CreateWindow Error: {}", SDL_GetError());
+		spdlog::critical("SDL_CreateWindow Error: {}", SDL_GetError());
 		SDL_Quit();
-		return;
+		std::exit(1);
 	}
 
 	if (hideMouse)

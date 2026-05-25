@@ -45,8 +45,10 @@ namespace OpenGl
 		void enableDepthTest();
 		void enableBackfaceCull();
 		void disableBackfaceCull();
+		void setWindow();
 		~GlWindow();
 
+		SDL_Window *getWindow() {return window;}
 		SDL_GLContext getContext() {return glContext;}
 	private:
 		SDL_GLContext glContext;
@@ -107,7 +109,7 @@ namespace OpenGl
 
 	protected:
 		GLuint id;
-		int compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
+		void compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
 	};
 
 	class GlMesh : public Engine::Rendering::Mesh
@@ -135,5 +137,5 @@ namespace OpenGl
 		GLsizei size;
 	};
 
-	void draw(Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh, Engine::Rendering::DrawParams *params);
+	void draw(Engine::Rendering::Window *win, Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh, Engine::Rendering::DrawParams *params);
 }

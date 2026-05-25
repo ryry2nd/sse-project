@@ -17,13 +17,13 @@ GlImage::GlImage(const char *filePath)
 
 	if (!std::filesystem::exists(filePath)) {
 		spdlog::error("Image path: {} does not exist", filePath);
-		return;
+		std::exit(1);
 	}
 	SDL_Surface *surf = loadFile(filePath);
 	if (!surf)
 	{
 		spdlog::error("Failed to load image: {}", filePath);
-		return;
+		std::exit(1);
 	}
 	setupObject(surf);
 	SDL_DestroySurface(surf);
@@ -35,6 +35,7 @@ GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 	if (existingTexture == 0)
 	{
 		spdlog::error("GlImage: trying to wrap invalid texture (0)");
+		std::exit(1);
 	}
 
 	textureID = existingTexture;
@@ -54,8 +55,8 @@ void GlImage::setupObject(SDL_Surface *surface_old)
 
     if (!surface)
     {
-		spdlog::error("Convert failed: {}", SDL_GetError());
-		return;
+		spdlog::critical("Convert failed: {}", SDL_GetError());
+		std::exit(1);
     }
 
 	glGenTextures(1, &textureID);

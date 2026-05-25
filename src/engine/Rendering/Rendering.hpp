@@ -32,7 +32,7 @@ namespace Engine::Rendering
 	namespace CreationFunctions {
 		void initAPI(const char *apiName);
 
-		void draw(Material *mat, Mesh *mesh = nullptr, DrawParams *params = nullptr);
+		void draw(Window *win, Material *mat, Mesh *mesh = nullptr, DrawParams *params = nullptr);
 		Shader *createShader(const char *path);
 		void removeShader(Shader *shader);
 		Mesh *createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);

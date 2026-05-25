@@ -67,11 +67,11 @@ std::string compileShaderCode(const std::string& arguments) {
 	return output;
 }
 
-int OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
+void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
 	if (!fs::exists(SLANG_PATH EXE_EXT)) {
 		vertPath = prePath + OVERRIDE_VERT_EXT;
 		fragPath = prePath + OVERRIDE_FRAG_EXT;
-		return 0;
+		return;
 	}
 
 	std::string path = prePath + SLANG_EXT;
@@ -91,8 +91,8 @@ int OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath,
 		" -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
 	std::string out = compileShaderCode(command);
 	if (out.size()) {
-		spdlog::error("Program: {} failed to compile vertex shader and gave the error:\n{}", id, out);
-		return 1;
+		spdlog::critical("Program: {} failed to compile vertex shader and gave the error:\n{}", id, out);
+		std::exit(1);
 	}
 
 	command = path +
@@ -102,11 +102,9 @@ int OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath,
 		" -o " + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
 	out = compileShaderCode(command);
 	if (out.size()) {
-		spdlog::error("Program: {} failed to compile fragment shader and gave the error:\n{}", id, out);
-		return 1;
+		spdlog::critical("Program: {} failed to compile fragment shader and gave the error:\n{}", id, out);
+		std::exit(1);
 	}
 
 	spdlog::debug("Successfully compiled shader {}", entry.stem().string());
-
-	return 0;
 }

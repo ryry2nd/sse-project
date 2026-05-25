@@ -118,8 +118,10 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 		}
 	}
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		spdlog::error("id: 0x{:x} Framebuffer incomplete", id);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		spdlog::critical("id: 0x{:x} Framebuffer incomplete", id);
+		std::exit(1);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

@@ -97,10 +97,9 @@ EnginePackage::EnginePackage(const std::string &path)
 		setupJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
+		spdlog::error(e.what());
 		#ifdef DEBUG
 		throw e;
-		#else
-		spdlog::error(e.what());
 		#endif
 	}
 
@@ -113,10 +112,9 @@ void EnginePackage::runLoopFunction() {
 		loopJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
+		spdlog::error(e.what());
 		#ifdef DEBUG
 		throw e;
-		#else
-		spdlog::error(e.what());
 		#endif
 	}
 }
@@ -126,10 +124,9 @@ void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
 		eventJIT(llvmLocation, e, running);
 	}
 	catch (const std::exception& e) {
+		spdlog::error(e.what());
 		#ifdef DEBUG
 		throw e;
-		#else
-		spdlog::error(e.what());
 		#endif
 	}
 }
@@ -145,10 +142,9 @@ EnginePackage::~EnginePackage()
 		shutdownJIT(llvmLocation);
 	}
 	catch (const std::exception& e) {
+		spdlog::error(e.what());
 		#ifdef DEBUG
 		throw e;
-		#else
-		spdlog::error(e.what());
 		#endif
 	}
 

@@ -55,8 +55,8 @@ GlBuff::~GlBuff() {
 void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
 	#ifdef DEBUG
 	if (offset + size > allocSize) {
-		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to write from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
-		return;
+		spdlog::critical("Id: 0x{:x} Invalid GPU Memory space: tried to write from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
+		std::exit(1);
 	}
 	#endif
 
@@ -67,8 +67,8 @@ void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
 void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
 	#ifdef DEBUG
 	if (offset + size > allocSize) {
-		spdlog::error("Id: 0x{:x} Invalid GPU Memory space: tried to read from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
-		return;
+		spdlog::critical("Id: 0x{:x} Invalid GPU Memory space: tried to read from byte {} to byte {} but buffer ends at byte {}", id, offset, size, allocSize);
+		std::exit(1);
 	}
 	#endif
 

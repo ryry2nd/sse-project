@@ -16,6 +16,7 @@ namespace Engine::Rendering
 
 		virtual void updateScreenRes() = 0;
 		virtual void setBackgroundColor(glm::vec4 color) = 0;
+		virtual void setWindow() = 0;
 		static const bool *getKeystates(int &numKeys);
 
 		virtual void enableDepthTest() = 0;

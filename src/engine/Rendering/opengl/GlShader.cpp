@@ -39,7 +39,8 @@ void compileSpirV(const char *path, GLuint shader, const char* entryPoint) {
 	if (!success) {
 		char log[1024];
 		glGetShaderInfoLog(shader, 1024, nullptr, log);
-		spdlog::error("SPIR-V shader failed: {}", log);
+		spdlog::critical("SPIR-V shader failed: {}", log);
+		std::exit(1);
 	}
 }
 
@@ -48,8 +49,8 @@ void compileGlSl(const char *path, GLuint shader)
     std::ifstream file(path, std::ios::binary | std::ios::ate);
 
     if (!file.is_open()) {
-        spdlog::error("Failed to open shader file: {}", path);
-        return;
+        spdlog::critical("Failed to open shader file: {}", path);
+        std::exit(1);
     }
 
     size_t size = file.tellg();
@@ -69,7 +70,8 @@ void compileGlSl(const char *path, GLuint shader)
     if (!success) {
         char log[1024];
         glGetShaderInfoLog(shader, 1024, nullptr, log);
-        spdlog::error("Shader compile failed ({}): {}", path, log);
+        spdlog::critical("Shader compile failed ({}): {}", path, log);
+		std::exit(1);
     }
 }
 
@@ -82,12 +84,12 @@ GlShader::GlShader(std::string path)
 	spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
 
 	if (!std::filesystem::exists(vertexPath)) {
-		spdlog::error("Shader path: {} does not exist", vertexPath);
-		return;
+		spdlog::critical("Shader path: {} does not exist", vertexPath);
+		std::exit(1);
 	}
 	if (!std::filesystem::exists(fragmentPath)) {
-		spdlog::error("Shader path: {} does not exist", fragmentPath);
-		return;
+		spdlog::critical("Shader path: {} does not exist", fragmentPath);
+		std::exit(1);
 	}
 
 	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);

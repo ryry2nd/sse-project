@@ -6,7 +6,7 @@
 namespace InternalFunctions {
 	void initAPI(const char *apiName);
 
-	void draw(Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh = nullptr, Engine::Rendering::DrawParams *params = nullptr);
+	void draw(Engine::Rendering::Window *win, Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh = nullptr, Engine::Rendering::DrawParams *params = nullptr);
 	std::unique_ptr<Engine::Rendering::Shader> createShader(const char *path);
 	std::unique_ptr<Engine::Rendering::Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
 	std::unique_ptr<Engine::Rendering::Image> createImage(const char *filePath);

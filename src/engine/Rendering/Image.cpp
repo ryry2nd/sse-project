@@ -117,13 +117,13 @@ SDL_Surface *Image::loadFile(const char *filePath)
 	else if (file.extension() == ".png") surface = LoadPNG(filePath);
 	else {
 		spdlog::error("Image extention: {} not known", file.extension().string());
-		return nullptr;
+		std::exit(1);
 	}
 
 	if (!surface)
 	{
 		spdlog::error("Image load fail: {}", SDL_GetError());
-		return nullptr;
+		std::exit(1);
 	}
 	return surface;
 }

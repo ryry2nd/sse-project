@@ -31,19 +31,19 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 	glContext = SDL_GL_CreateContext(window);
 	if (!glContext)
 	{
-		spdlog::error("SDL_GL_CreateContext Error: {}", SDL_GetError());
+		spdlog::critical("SDL_GL_CreateContext Error: {}", SDL_GetError());
 		SDL_DestroyWindow(window);
 		SDL_Quit();
-		throw std::runtime_error("Had issues making the opengl context");
+		std::exit(1);
 	}
 
 	if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress))
 	{
-		spdlog::error("Failed to initialize GLAD");
+		spdlog::critical("Failed to initialize GLAD");
 		SDL_GL_DestroyContext(glContext);
 		SDL_DestroyWindow(window);
 		SDL_Quit();
-		throw std::runtime_error("Failed to initialize GLAD");
+		std::exit(1);
 	}
 	#ifdef DEBUG
 	glEnable(GL_DEBUG_OUTPUT);
@@ -53,7 +53,8 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 		[](GLenum source, GLenum type, GLuint id, GLenum severity,
 		GLsizei length, const GLchar* message, const void* userParam)
 		{
-			spdlog::error("OPENGL DEBUG [{}]: {}", id, message);
+			spdlog::critical("OPENGL DEBUG [{}]: {}", id, message);
+			std::exit(1);
 		},
 		nullptr
 	);
@@ -116,6 +117,10 @@ void GlWindow::updateScreenRes()
 	SDL_GetWindowSize(window, &width, &height);
 	res = glm::vec2(width, height);
 	glViewport(0, 0, res.x, res.y);
+}
+
+void GlWindow::setWindow() {
+	SDL_GL_MakeCurrent(window, glContext);
 }
 
 GlWindow::~GlWindow()

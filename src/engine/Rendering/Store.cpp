@@ -16,8 +16,8 @@ std::vector<std::unique_ptr<FrameBuffer>> fbos;
 
 
 
-void CreationFunctions::draw(Material *mat, Mesh *mesh, DrawParams *params) {
-	InternalFunctions::draw(mat, mesh, params);
+void CreationFunctions::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params) {
+	InternalFunctions::draw(win, mat, mesh, params);
 }
 
 

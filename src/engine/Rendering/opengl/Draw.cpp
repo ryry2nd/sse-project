@@ -1,12 +1,32 @@
 #include "GlRendering.hpp"
 
 #include <engine/Rendering/Rendering.hpp>
+#include <SDL3/SDL_video.h>
 #include <spdlog/spdlog.h>
 #include <glad/gl.h>
 
 using namespace OpenGl;
 
 using namespace Engine::Rendering;
+
+#define DRAW_CALL(mesh, params) \
+    { \
+        if ((params) && (params)->instanceCount > 0) \
+            glDrawElementsInstanced( \
+				glmesh->getMeshType(), \
+				(GLsizei)glmesh->getInd(), \
+				GL_UNSIGNED_INT, \
+				nullptr, \
+				params->instanceCount \
+			); \
+        else \
+            glDrawElements( \
+				glmesh->getMeshType(), \
+				(GLsizei)glmesh->getInd(), \
+				GL_UNSIGNED_INT, \
+				nullptr \
+			); \
+    }
 
 void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ubo)
 {
@@ -54,7 +74,8 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Image*> &images)
     }
 }
 
-void OpenGl::draw(Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
+void OpenGl::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
+	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(mat->shader);
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
@@ -108,27 +129,13 @@ void OpenGl::draw(Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
 	if (useFBO && hasFBO) {
 		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
+
 		glViewport(0, 0, (GLsizei)fbo->getSize().x, (GLsizei)fbo->getSize().y);
 
-		if (params->instanceCount > 0)
-		{
-			glDrawElementsInstanced(
-				glmesh->getMeshType(),
-				(GLsizei)glmesh->getInd(),
-				GL_UNSIGNED_INT,
-				nullptr,
-				params->instanceCount
-			);
-		}
-		else
-		{
-			glDrawElements(
-				glmesh->getMeshType(),
-				(GLsizei)glmesh->getInd(),
-				GL_UNSIGNED_INT,
-				nullptr
-			);
-		}
+		DRAW_CALL(glmesh, params);
+
+		auto res = glwin->getRes();
+		glViewport(0, 0, res.x, res.y);
 	}
 
 	// -------------------------
@@ -138,27 +145,7 @@ void OpenGl::draw(Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		// NOTE: ideally restore window viewport here
-
-		if (params && params->instanceCount > 0)
-		{
-			glDrawElementsInstanced(
-				glmesh->getMeshType(),
-				(GLsizei)glmesh->getInd(),
-				GL_UNSIGNED_INT,
-				nullptr,
-				params->instanceCount
-			);
-		}
-		else
-		{
-			glDrawElements(
-				glmesh->getMeshType(),
-				(GLsizei)glmesh->getInd(),
-				GL_UNSIGNED_INT,
-				nullptr
-			);
-		}
+		DRAW_CALL(glmesh, params);
 	}
 
 	glBindVertexArray(0);
