@@ -102,29 +102,29 @@ extern "C" {
 		// movement
 		if (keystates[SDL_SCANCODE_W])
 		{
-			camPos += -((getForwardVector(camRot) * deltaTime) * 10.0f);
+			camPos += -(getForwardVector(camRot) * deltaTime * 10.0f);
 		}
 		if (keystates[SDL_SCANCODE_S])
 		{
-			camPos += ((getForwardVector(camRot) * deltaTime) * 10.0f);
+			camPos += (getForwardVector(camRot) * deltaTime * 10.0f);
 		}
 
 		if (keystates[SDL_SCANCODE_D])
 		{
-			camPos += -((getRightVector(camRot) * deltaTime) * 10.0f);
+			camPos += -(getRightVector(camRot) * deltaTime * 10.0f);
 		}
 		if (keystates[SDL_SCANCODE_A])
 		{
-			camPos += ((getRightVector(camRot) * deltaTime) * 10.0f);
+			camPos += (getRightVector(camRot) * deltaTime * 10.0f);
 		}
 
 		if (keystates[SDL_SCANCODE_SPACE])
 		{
-			camPos += ((getDownVector(camRot) * deltaTime) * 10.0f);
+			camPos += (getDownVector(camRot) * deltaTime * 10.0f);
 		}
 		if (keystates[SDL_SCANCODE_LCTRL])
 		{
-			camPos += -((getDownVector(camRot) * deltaTime) * 10.0f);
+			camPos += -(getDownVector(camRot) * deltaTime * 10.0f);
 		}
 
 		cam.view = cameraGetView(camPos, camRot);
