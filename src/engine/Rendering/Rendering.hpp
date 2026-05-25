@@ -24,33 +24,35 @@ namespace Engine::Rendering
 		Window(Window&&) noexcept = default;
 		Window& operator=(Window&&) noexcept = default;
 
-		Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
 		virtual ~Window() = 0;
 
-
-		virtual void clearBackground() = 0;
-		virtual void swapBuffer() = 0;
 		virtual void updateScreenRes() = 0;
 		virtual void setBackgroundColor(glm::vec4 color) = 0;
-		static void Update();
-		void update();
 		static const bool *getKeystates(int &numKeys);
 
-		virtual void disableDepthTest() = 0;
 		virtual void enableDepthTest() = 0;
+		virtual void disableDepthTest() = 0;
 		virtual void enableBackfaceCull() = 0;
 		virtual void disableBackfaceCull() = 0;
 
-		static Uint64 now;
 
-		static void init();
-		static void shutdown();
+		static Uint64 getTime() {return now;}
 
 		float getDeltaTime() {return deltaTime;}
 		glm::vec2 getRes() {return res;}
 		float getFPS() {return fps;}
 
+		// internal functions
+		void update();
+		static void Update();
+		virtual void clearBackground() = 0;
+		virtual void swapBuffer() = 0;
+		static void init();
+		static void shutdown();
+
 	protected:
+		static Uint64 now;
+		Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
 		float fps = 0;
 		glm::vec2 res;
 		float deltaTime = 0;
@@ -72,11 +74,6 @@ namespace Engine::Rendering
 			Stream,
 		};
 
-		Buff(Type type, Frequency freq, std::size_t size) {
-			this->buffType = type;
-			this->freq = freq;
-			this->allocSize = size;
-		}
 		virtual ~Buff() = default;
 
 		Buff(const Buff&) = delete;
@@ -92,6 +89,11 @@ namespace Engine::Rendering
 		virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
 
 	protected:
+		Buff(Type type, Frequency freq, std::size_t size) {
+			this->buffType = type;
+			this->freq = freq;
+			this->allocSize = size;
+		}
 		Type buffType;
 		Frequency freq;
 		std::size_t allocSize;
@@ -139,7 +141,6 @@ namespace Engine::Rendering
 		Shader& operator=(const Shader&) = delete;
 		Shader& operator=(Shader&&) noexcept = default;
 
-
 		virtual ~Shader() = default;
 	};
 
@@ -169,14 +170,12 @@ namespace Engine::Rendering
 	};
 
 
-
 	struct Material {
 		Shader *shader;
 		std::unordered_map<size_t, Image*> images;
 		std::unordered_map<size_t, Buff*> ubo;
 		std::unordered_map<size_t, Buff*> ssbo;
 	};
-
 	struct DrawParams {
 		enum Settings : uint32_t {
 			DisableScreen = 1 << 0,

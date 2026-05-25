@@ -78,12 +78,6 @@ int OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath,
 	fs::path entry(path);
 	fs::create_directories(COMPILED_OUT_PATH);
 
-	// if (!fs::exists(entry)){// && !fs::is_regular_file(entry)) {
-	// 	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
-	// 	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
-	// 	return 0;
-	// }
-
 	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
 	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
 

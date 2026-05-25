@@ -143,7 +143,7 @@ extern "C" {
 			*running = false;
 		if (type == SDL_EVENT_KEY_DOWN)
 		{
-			SDL_Keycode key = event->key.key;
+			auto key = event->key.key;
 			if (key == SDLK_ESCAPE)
 			{
 				*running = false;
@@ -152,7 +152,7 @@ extern "C" {
 				outputFPS = !outputFPS;
 			}
 		}
-		if (event->type == SDL_EVENT_MOUSE_MOTION)
+		if (type == SDL_EVENT_MOUSE_MOTION)
 		{
 			rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
 		}
