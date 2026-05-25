@@ -41,7 +41,7 @@ extern "C" void setup() {
 	cam.proj = cameraGetProj(res);
 	cam.view = cameraGetView(camPos, camRot);
 
-	// Helper::printMat4Flat(cam.proj);
+	// printMat4Flat(cam.proj);
 
 	model.model = glm::mat4(1.0f);
 	model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
@@ -53,7 +53,7 @@ extern "C" void setup() {
 	shader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
 	// CreationFunctions::createShader(MODULE_PATH "/assets/shaders/instanceCube");
 	cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
-	img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
+	// img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 
 	camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Camera), &cam);
 	modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Model), &model);
@@ -102,35 +102,35 @@ extern "C" void loop() {
         // movement
         if (keystates[SDL_SCANCODE_W])
         {
-            camPos += -((Helper::getForwardVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((getForwardVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_S])
         {
-            camPos += ((Helper::getForwardVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((getForwardVector(camRot) * deltaTime) * 10.0f);
         }
 
         if (keystates[SDL_SCANCODE_D])
         {
-            camPos += -((Helper::getRightVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((getRightVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_A])
         {
-            camPos += ((Helper::getRightVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((getRightVector(camRot) * deltaTime) * 10.0f);
         }
 
         if (keystates[SDL_SCANCODE_SPACE])
         {
-            camPos += ((Helper::getDownVector(camRot) * deltaTime) * 10.0f);
+            camPos += ((getDownVector(camRot) * deltaTime) * 10.0f);
         }
         if (keystates[SDL_SCANCODE_LCTRL])
         {
-            camPos += -((Helper::getDownVector(camRot) * deltaTime) * 10.0f);
+            camPos += -((getDownVector(camRot) * deltaTime) * 10.0f);
         }
 
-		cam.view = Helper::cameraGetView(camPos, camRot);
+		cam.view = cameraGetView(camPos, camRot);
 
-		modelBuff->write(0, sizeof(Helper::Model), &model);
-		camBuff->write(0, sizeof(Helper::Camera), &cam);
+		modelBuff->write(0, sizeof(Model), &model);
+		camBuff->write(0, sizeof(Camera), &cam);
 
 		CreationFunctions::draw(&mat, cube);
 }
@@ -154,7 +154,7 @@ extern "C" void event(SDL_Event *event, bool *running) {
 	}
 	if (event->type == SDL_EVENT_MOUSE_MOTION)
 	{
-		Helper::rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
+		rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
 	}
 	if (type == SDL_EVENT_WINDOW_RESIZED)
 	{
