@@ -6,12 +6,12 @@
 #include "Logging.hpp"
 
 namespace Engine::Helper {
-	struct Camera {
+	struct CameraStruct {
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
 
-	struct Model {
+	struct ModelStruct {
 		glm::mat4 model;
 		glm::mat3 normalMatrix;
 	};
