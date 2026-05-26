@@ -1,5 +1,5 @@
 if (NOT SSE_MINIMAL)
-find_package(LLVM 20.1.8 REQUIRED CONFIG)
+find_package(LLVM 20.1 REQUIRED CONFIG)
 
 add_library(CLANG_IMPL INTERFACE)
 
