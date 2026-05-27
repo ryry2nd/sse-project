@@ -13,3 +13,5 @@ sudo apt install -y cmake \
     build-essential \
     libzstd-dev \
 	nasm
+
+# pacman -S cmake clang llvm ccache ninja nasm python3
