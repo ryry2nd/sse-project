@@ -13,14 +13,8 @@ https://github.com/lsalzman/enet.git
 
 PHASE 1 - CORE ENGINE
 Finish ABI
-make better base rendering
 make images work
-
-
-PHASE 2 - TOOLING + BUILD + REPO
-
-have it so modules can demand to have there own separate executables
-maybe add timer functions or at least a way to collect unix epoch
+make module interaction work
 
 
 
@@ -38,11 +32,9 @@ make a base helper module to have stuff like a character creator and a rigid bod
 remove fish penis texture
 make example module more interesting
 add reload function to modules (may or may not be a good idea)
-update readme after critical engine architecture has been built
 get module versioning and library modules working
 make it so modules have there own stack memory using stack switching (use boost?)
 add module threading so modules can make and use and manage there own threads
-have module suicide function so modules can shut themselves down
 add basic modding module to make adding video game mod support easy
 add some sort of way to make it so mods can get pointers if they want to (idk how id do this, maybe id let other modules take a peak at the other modules ram)
 make it so other modules can override commands
@@ -61,7 +53,6 @@ make code cleaner
 make all consents definitions instead of variables
 remove all magic numbers
 remove all bad practices
-use as little pointers as possible
 
 
 
@@ -73,6 +64,7 @@ add vulkan and other apis
 
 PHASE 6 - CLEANUP
 
+update readme
 documentation
 do a full git rebase (suck in the belly fat and don't remove history)
 
@@ -86,10 +78,7 @@ get working on as many platforms as possible
 
 Engine segment architecture
 
-core/cmake
-executables/core tools
-
-engine segments
+engine
     rendering
         core rendering
         api specific
@@ -99,10 +88,12 @@ engine segments
             DX
             ect
     scripting (compiles modules)
-        llvm loader
+        llvm loader / dlopen
         logging and loading configs
+		Standard headers
+		Standard backend
 
-module segments
+module
     bigint math
     bigint objects
     sqlite3
