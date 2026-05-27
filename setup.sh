@@ -11,4 +11,5 @@ sudo apt install -y cmake \
     ccache \
     xorg-dev \
     build-essential \
-    libzstd-dev
+    libzstd-dev \
+	nasm
