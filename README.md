@@ -13,9 +13,10 @@ I tried my best to make building as easy as possible. All of the libraries get p
 ### Linux
 Run setup.sh to install all of the required packages and run build.sh to compile<br>
 Check the script flags for more options. Please note that by default the script uses all possible cores on your machine, just use --cores to specify the amount of cores you want if you don't want your machine firing on all cylinders.<br>
+TL;DR if you just want it to work just run setup.sh and then build.sh with no flags <br>
 
 ### Windows
-Windows is a little rough, I suggest you install git bash so you can run the build.sh command but technically you don't have to. You need to have cmake, ccache, clang, llvm, ninja, python3, python3-venv, nasm, MinGW headers. Keep in mind to use the MinGW version of clang, not the MSVC one.
+Windows is a little rough, I suggest you just install wsl and use the --os windows flag to make it compile.
 
 ### MacOS
 Install a VM, thats your best bet right now and for a while. Apple is the worst. Opengl 4 isn't allowed on MacOS, they only do metal. There is a plugin for Vulkan so it converts the protocols to metal so I'll look into it when I get to it but I don't have a mac device to test on so I'll have to figure something out. None of this is a promise.
