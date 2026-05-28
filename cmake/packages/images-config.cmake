@@ -27,38 +27,38 @@ endif()
 
 
 
-include(ExternalProject)
+# include(ExternalProject)
 
-set(JPEG_PREFIX ${CMAKE_BINARY_DIR}/thirdparty/libjpeg)
+# set(JPEG_PREFIX ${CMAKE_BINARY_DIR}/thirdparty/libjpeg)
 
-ExternalProject_Add(libjpeg_turbo
-    GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
-    GIT_TAG 3.1.4
+# ExternalProject_Add(libjpeg_turbo
+#     GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+#     GIT_TAG 3.1.4
 
-    CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${JPEG_PREFIX}
-        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
-        -DENABLE_SHARED=OFF
-        -DENABLE_STATIC=ON
-        -DWITH_JPEG8=ON
-        -DWITH_SIMD=ON
+#     CMAKE_ARGS
+#         -DCMAKE_INSTALL_PREFIX=${JPEG_PREFIX}
+#         -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+#         -DENABLE_SHARED=OFF
+#         -DENABLE_STATIC=ON
+#         -DWITH_JPEG8=ON
+#         -DWITH_SIMD=ON
 
-    BUILD_BYPRODUCTS
-        ${JPEG_PREFIX}/lib/libturbojpeg.a
-        ${JPEG_PREFIX}/lib/libjpeg.a
+#     BUILD_BYPRODUCTS
+#         ${JPEG_PREFIX}/lib/libturbojpeg.a
+#         ${JPEG_PREFIX}/lib/libjpeg.a
 
-    INSTALL_DIR
-        ${JPEG_PREFIX}
-)
+#     INSTALL_DIR
+#         ${JPEG_PREFIX}
+# )
 
-# prevent configure-time include errors
-file(MAKE_DIRECTORY ${JPEG_PREFIX}/include)
+# # prevent configure-time include errors
+# file(MAKE_DIRECTORY ${JPEG_PREFIX}/include)
 
-add_library(JPEG::JPEG STATIC IMPORTED GLOBAL)
+# add_library(JPEG::JPEG STATIC IMPORTED GLOBAL)
 
-set_target_properties(JPEG::JPEG PROPERTIES
-    IMPORTED_LOCATION "${JPEG_PREFIX}/lib/libturbojpeg.a"
-    INTERFACE_INCLUDE_DIRECTORIES "${JPEG_PREFIX}/include"
-)
+# set_target_properties(JPEG::JPEG PROPERTIES
+#     IMPORTED_LOCATION "${JPEG_PREFIX}/lib/libturbojpeg.a"
+#     INTERFACE_INCLUDE_DIRECTORIES "${JPEG_PREFIX}/include"
+# )
 
-add_dependencies(JPEG::JPEG libjpeg_turbo)
+# add_dependencies(JPEG::JPEG libjpeg_turbo)

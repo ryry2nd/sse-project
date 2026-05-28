@@ -6,7 +6,7 @@
 #include <cstring>
 #include <filesystem>
 #include <png.h>
-#include <jpeglib.h>
+// #include <jpeglib.h>
 #include <cstdio>
 
 using namespace Engine::Rendering;
@@ -62,49 +62,50 @@ SDL_Surface* LoadPNG(const char* path)
 
 SDL_Surface* LoadJPG(const char* path)
 {
-    FILE* fp = fopen(path, "rb");
-    if (!fp) return nullptr;
+	return nullptr;
+//     FILE* fp = fopen(path, "rb");
+//     if (!fp) return nullptr;
 
-    jpeg_decompress_struct cinfo;
-    jpeg_error_mgr jerr;
+//     jpeg_decompress_struct cinfo;
+//     jpeg_error_mgr jerr;
 
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
+//     cinfo.err = jpeg_std_error(&jerr);
+//     jpeg_create_decompress(&cinfo);
 
-    jpeg_stdio_src(&cinfo, fp);
-    jpeg_read_header(&cinfo, TRUE);
-    jpeg_start_decompress(&cinfo);
+//     jpeg_stdio_src(&cinfo, fp);
+//     jpeg_read_header(&cinfo, TRUE);
+//     jpeg_start_decompress(&cinfo);
 
-    int width = cinfo.output_width;
-    int height = cinfo.output_height;
-    int channels = cinfo.output_components;
+//     int width = cinfo.output_width;
+//     int height = cinfo.output_height;
+//     int channels = cinfo.output_components;
 
-    unsigned char* pixels = new unsigned char[width * height * channels];
+//     unsigned char* pixels = new unsigned char[width * height * channels];
 
-    while (cinfo.output_scanline < height)
-    {
-        unsigned char* row = pixels + cinfo.output_scanline * width * channels;
-        jpeg_read_scanlines(&cinfo, &row, 1);
-    }
+//     while (cinfo.output_scanline < height)
+//     {
+//         unsigned char* row = pixels + cinfo.output_scanline * width * channels;
+//         jpeg_read_scanlines(&cinfo, &row, 1);
+//     }
 
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(fp);
+//     jpeg_finish_decompress(&cinfo);
+//     jpeg_destroy_decompress(&cinfo);
+//     fclose(fp);
 
-    SDL_Surface* surf;
+//     SDL_Surface* surf;
 
-    if (channels == 3)
-    {
-        surf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24);
-        std::memcpy(surf->pixels, pixels, width * height * 3);
-    }
-    else
-    {
-        surf = MakeSurfaceFromRGBA(pixels, width, height);
-    }
+//     if (channels == 3)
+//     {
+//         surf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24);
+//         std::memcpy(surf->pixels, pixels, width * height * 3);
+//     }
+//     else
+//     {
+//         surf = MakeSurfaceFromRGBA(pixels, width, height);
+//     }
 
-    delete[] pixels;
-    return surf;
+//     delete[] pixels;
+//     return surf;
 }
 
 SDL_Surface *Image::loadFile(const char *filePath)
