@@ -27,6 +27,9 @@ namespace Engine::Rendering
 		size_t instanceCount;
 		uint32_t settings;
 		FrameBuffer *fbo = nullptr;
+
+		int vertFirst;
+		int vertCount;
 	};
 
 	namespace CreationFunctions {

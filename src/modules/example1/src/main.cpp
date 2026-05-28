@@ -20,6 +20,7 @@ bool outputFPS = false;
 
 
 Material mat;
+Material debugMat;
 CameraStruct cam;
 ModelStruct model;
 
@@ -27,7 +28,8 @@ glm::vec3 camPos;
 glm::vec3 camRot;
 
 Window *win;
-Shader *shader;
+Shader *cubeShader;
+Shader *debugVectorShader;
 Mesh *cube;
 Image *img;
 Buff *camBuff;
@@ -50,7 +52,8 @@ extern "C" {
 
 		CreationFunctions::initAPI("OpenGl4.6");
 		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-		shader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
+		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
+		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
 		// CreationFunctions::createShader(MODULE_PATH "/assets/shaders/instanceCube");
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 		// img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
@@ -59,9 +62,12 @@ extern "C" {
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
 		// mat.images[0] = img;
-		mat.shader = shader;
+		mat.shader = cubeShader;
 		mat.ubo[0] = modelBuff;
 		mat.ubo[1] = camBuff;
+
+		debugMat.shader = debugVectorShader;
+		debugMat.ubo[0] = camBuff;
 	}
 
 	void loop() {
@@ -92,7 +98,7 @@ extern "C" {
 
 		rotate += 1.0f * deltaTime;
 
-		model.model = glm::mat4(1.0f);
+		model.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
 		model.model = glm::rotate(model.model, rotate, glm::vec3({0, 0, 1}));
 		model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
 
@@ -133,6 +139,7 @@ extern "C" {
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
 		CreationFunctions::draw(win, &mat, cube);
+		CreationFunctions::draw(win, &debugMat);
 	}
 
 	void event(SDL_Event *event, bool *running) {

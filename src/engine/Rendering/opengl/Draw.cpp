@@ -11,21 +11,28 @@ using namespace Engine::Rendering;
 
 #define DRAW_CALL(mesh, params) \
     { \
-        if ((params) && (params)->instanceCount > 0) \
-            glDrawElementsInstanced( \
-				glmesh->getMeshType(), \
-				(GLsizei)glmesh->getInd(), \
-				GL_UNSIGNED_INT, \
-				nullptr, \
-				params->instanceCount \
-			); \
-        else \
-            glDrawElements( \
-				glmesh->getMeshType(), \
-				(GLsizei)glmesh->getInd(), \
-				GL_UNSIGNED_INT, \
-				nullptr \
-			); \
+		if (mesh) \
+		{ \
+			if (params && params->instanceCount > 0) \
+				glDrawElementsInstanced( \
+					mesh->getMeshType(), \
+					(GLsizei)mesh->getInd(), \
+					GL_UNSIGNED_INT, \
+					nullptr, \
+					params->instanceCount \
+				); \
+			else \
+				glDrawElements( \
+					mesh->getMeshType(), \
+					(GLsizei)mesh->getInd(), \
+					GL_UNSIGNED_INT, \
+					nullptr \
+				); \
+		} \
+		else { \
+			if (params) glDrawArrays(GL_LINES, params->vertFirst, params->vertCount); \
+			else glDrawArrays(GL_LINES, 0, 6); \
+		} \
     }
 
 void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ubo)
@@ -77,6 +84,7 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Image*> &images)
 void OpenGl::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(mat->shader);
+
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
 	bool disableScreen;
@@ -98,7 +106,14 @@ void OpenGl::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params = n
 	}
 
 	glUseProgram(glshdr->getID());
-	glBindVertexArray(glmesh->getVAO());
+
+	if (glmesh)
+		glBindVertexArray(glmesh->getVAO());
+	else {
+		GLuint defaultVAO;
+		glGenVertexArrays(1, &defaultVAO);
+		glBindVertexArray(defaultVAO);
+	}
 
 
 	// -------------------------
