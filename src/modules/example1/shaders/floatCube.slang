@@ -1,3 +1,5 @@
+typedef float4x4 mat4;
+
 struct VSInput
 {
     float3 aPos      : POSITION;
@@ -15,14 +17,13 @@ struct VSOutput
 
 cbuffer Model
 {
-    float4x4 model;
-    float3x3 normalMatrix;
+    mat4 model;
 };
 
 cbuffer Camera
 {
-    float4x4 view;
-    float4x4 proj;
+    mat4 view;
+    mat4 proj;
 };
 
 
@@ -49,7 +50,7 @@ VSOutput vertMain(VSInput input)
     output.position = clipPos;
     output.WorldPos = worldPos.xyz;
 
-    output.Normal = normalize(mul(input.aNormal, normalMatrix));
+	output.Normal = mul((float3x3)model, input.aNormal);
     output.TexCoord = input.aTexCoord;
 
     return output;

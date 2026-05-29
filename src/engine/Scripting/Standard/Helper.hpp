@@ -11,10 +11,7 @@ namespace Engine::Helper {
 		glm::mat4 proj;
 	};
 
-	struct ModelStruct {
-		glm::mat4 model;
-		glm::mat3 normalMatrix;
-	};
+	typedef glm::mat4 ModelStruct;
 
 	inline void printMat4Flat(const glm::mat4& m)
 	{

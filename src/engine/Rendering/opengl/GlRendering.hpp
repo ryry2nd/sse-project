@@ -1,5 +1,6 @@
 #pragma once
 
+#include <glad/gl.h>
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -125,6 +126,15 @@ namespace OpenGl
 		GLuint getEBO() {return EBO;}
 		GLenum getMeshType() {return glMeshType;}
 		GLsizei getSize() {return size;}
+
+		static GLenum convertMeshType(MeshTypes meshType) {
+			switch (meshType)
+			{
+				case MeshTypes::Points:     return GL_POINTS;
+				case MeshTypes::Lines:      return GL_LINES;
+				case MeshTypes::Triangles:  return GL_TRIANGLES;
+			}
+		}
 
 		size_t getInd() {return ind_size;}
 		size_t getVert() {return vert_size;}

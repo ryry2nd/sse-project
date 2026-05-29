@@ -20,6 +20,7 @@ bool outputFPS = false;
 
 
 Material mat;
+Material mat2;
 Material debugMat;
 CameraStruct cam;
 ModelStruct model;
@@ -29,11 +30,13 @@ glm::vec3 camRot;
 
 Window *win;
 Shader *cubeShader;
+Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Mesh *cube;
 Image *img;
 Buff *camBuff;
 Buff *modelBuff;
+Buff *cubeInstanceBuff;
 
 extern "C" {
 	void setup() {
@@ -45,16 +48,14 @@ extern "C" {
 		cam.proj = cameraGetProj(res);
 		cam.view = cameraGetView(camPos, camRot);
 
-		model.model = glm::mat4(1.0f);
-		model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
-
+		model = glm::mat4(1.0f);
 
 
 		CreationFunctions::initAPI("OpenGl4.6");
 		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
+		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
 		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
-		// CreationFunctions::createShader(MODULE_PATH "/assets/shaders/instanceCube");
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
 		// img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 
@@ -65,6 +66,27 @@ extern "C" {
 		mat.shader = cubeShader;
 		mat.ubo[0] = modelBuff;
 		mat.ubo[1] = camBuff;
+
+		mat2.shader = cubeInstanceShader;
+		mat2.ubo[0] = camBuff;
+
+		glm::vec3 gridSize(50,50,50);
+		std::vector<glm::mat4> models;
+        models.reserve(gridSize.x * gridSize.y * gridSize.z);
+
+        for (int x = 0; x < gridSize.x; x++) {
+            for (int y = 0; y < gridSize.y; y++) {
+                for (int z = 0; z < gridSize.z; z++) {
+                    glm::mat4 mat(1.0f);
+                    mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
+                    models.push_back(mat);
+                }
+            }
+        }
+
+		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
+
+		mat2.ssbo[0] = cubeInstanceBuff;
 
 		debugMat.shader = debugVectorShader;
 		debugMat.ubo[0] = camBuff;
@@ -98,9 +120,8 @@ extern "C" {
 
 		rotate += 1.0f * deltaTime;
 
-		model.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
-		model.model = glm::rotate(model.model, rotate, glm::vec3({0, 0, 1}));
-		model.normalMatrix = glm::transpose(glm::inverse(glm::mat3(model.model)));
+		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
+		model = glm::rotate(model, rotate, glm::vec3({0, 0, 1}));
 
 		int numKeys;
 		const bool *keystates = Rendering::Window::getKeystates(numKeys);
@@ -139,6 +160,7 @@ extern "C" {
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
 		CreationFunctions::draw(win, &mat, cube);
+		CreationFunctions::draw(win, &mat2, cube);
 		CreationFunctions::draw(win, &debugMat);
 	}
 

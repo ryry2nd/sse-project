@@ -26,10 +26,12 @@ namespace Engine::Rendering
 		std::unordered_map<size_t, Buff*> ssbo;
 		size_t instanceCount;
 		uint32_t settings;
+
 		FrameBuffer *fbo = nullptr;
 
-		int vertFirst;
-		int vertCount;
+		Mesh::MeshTypes arrayType = Mesh::MeshTypes::Lines;
+		int arrayFirst;
+		int arrayCount;
 	};
 
 	namespace CreationFunctions {

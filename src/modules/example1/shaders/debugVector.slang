@@ -1,3 +1,5 @@
+typedef float4x4 mat4;
+
 struct VSOutput
 {
     float4 position : SV_Position;
@@ -6,8 +8,8 @@ struct VSOutput
 
 cbuffer Camera
 {
-    float4x4 view;
-    float4x4 proj;
+    mat4 view;
+    mat4 proj;
 };
 
 // axis line vertices generated from vertex id

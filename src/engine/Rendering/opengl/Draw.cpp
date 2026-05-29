@@ -3,7 +3,6 @@
 #include <engine/Rendering/Rendering.hpp>
 #include <SDL3/SDL_video.h>
 #include <spdlog/spdlog.h>
-#include <glad/gl.h>
 
 using namespace OpenGl;
 
@@ -30,7 +29,7 @@ using namespace Engine::Rendering;
 				); \
 		} \
 		else { \
-			if (params) glDrawArrays(GL_LINES, params->vertFirst, params->vertCount); \
+			if (params) glDrawArrays(GlMesh::convertMeshType(params->arrayType), params->arrayFirst, params->arrayCount); \
 			else glDrawArrays(GL_LINES, 0, 6); \
 		} \
     }

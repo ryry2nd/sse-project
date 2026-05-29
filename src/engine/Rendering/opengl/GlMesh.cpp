@@ -1,5 +1,4 @@
 #include "GlRendering.hpp"
-#include <glad/gl.h>
 #include <spdlog/spdlog.h>
 
 using namespace OpenGl;
@@ -86,14 +85,7 @@ void GlMesh::updateVerts(
 		offset += vertLogic[i];
 	}
 
-	// ---- TYPE ----
-	switch (meshType)
-	{
-		case MeshTypes::Points:     glMeshType = GL_POINTS; break;
-		case MeshTypes::Lines:      glMeshType = GL_LINES; break;
-		case MeshTypes::Triangles:  glMeshType = GL_TRIANGLES; break;
-	}
-
+	this->glMeshType = convertMeshType(meshType);
 	this->meshType = meshType;
 	this->ind_size = ind_size;
 	this->vert_size = vert_size;

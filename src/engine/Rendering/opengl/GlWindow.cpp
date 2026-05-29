@@ -1,6 +1,5 @@
 #include "GlRendering.hpp"
 
-#include <glad/gl.h>
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_init.h>
