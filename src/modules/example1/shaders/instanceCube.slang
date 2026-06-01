@@ -37,5 +37,5 @@ float4 fragMain(VSOutput input) : SV_Target
 	float3 color = COLOR_GREEN * edgeFactor;
 	float3 fogColor = COLOR_GRAY_FOG;
 
-	return float4(applyFog(color, fogColor, input, 0.02), 1.0f);
+	return float4(applyFog(color, fogColor, input, 0.006), 1.0f);
 }
