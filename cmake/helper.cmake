@@ -154,22 +154,42 @@ function(copy_assets)
 		set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	endif()
 
+	file(GLOB SLANG_SHADERS
+		"${CMAKE_SOURCE_DIR}/src/modules/example1/shaders/*.slang"
+	)
+
+	list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
+
 	add_custom_target(compile_slang_shaders ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
 			"${MODULE_OUT_DIR}/shaders"
-		COMMAND ${SLANGC_CMD}
-			"${CMAKE_SOURCE_DIR}/src/modules/example1/shaders/floatCube.slang"
-			-O3 -line-directive-mode none -matrix-layout-column-major
-			-target spirv -stage vertex -entry vertMain
-			-o "${MODULE_OUT_DIR}/shaders/floatCube.vert.spv"
-
-		COMMAND ${SLANGC_CMD}
-			"${CMAKE_SOURCE_DIR}/src/modules/example1/shaders/floatCube.slang"
-			-O3 -line-directive-mode none -matrix-layout-column-major
-			-target spirv -stage fragment -entry fragMain
-			-o "${MODULE_OUT_DIR}/shaders/floatCube.frag.spv"
-		COMMENT "---- Compiling Shaders ----"
 	)
+
+	foreach(SHADER ${SLANG_SHADERS})
+
+		get_filename_component(NAME ${SHADER} NAME_WE)
+
+		add_custom_command(
+			TARGET compile_slang_shaders
+			COMMAND ${SLANGC_CMD}
+				"${SHADER}"
+				-O3 -line-directive-mode none -matrix-layout-column-major
+				-target spirv -stage vertex
+				-entry vertMain
+				-o "${MODULE_OUT_DIR}/shaders/${NAME}.vert.spv"
+
+			COMMAND ${SLANGC_CMD}
+				"${SHADER}"
+				-O3 -line-directive-mode none -matrix-layout-column-major
+				-target spirv -stage fragment
+				-entry fragMain
+				-o "${MODULE_OUT_DIR}/shaders/${NAME}.frag.spv"
+
+			COMMENT "Compiling ${NAME}"
+		)
+
+	endforeach()
+
 	add_dependencies(compile_slang_shaders copy_assets_target)
 	else()
 	add_custom_target(copy_shaders ALL
