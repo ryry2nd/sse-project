@@ -5,8 +5,8 @@ sudo apt install -y cmake \
 	ninja-build \
 	python3 \
 	python3-venv \
-	clang-22 \
-	llvm-22 \
+	clang-21 \
+	llvm-21 \
 	ccache \
 	xorg-dev \
 	build-essential \

@@ -10,15 +10,22 @@ using namespace Engine::Rendering;
 
 #define DRAW_CALL(mesh, params) \
     { \
-		if (mesh) \
+		if (params.useArray || !mesh) \
 		{ \
-			if (params && params->instanceCount > 0) \
+			glDrawArrays( \
+				GlMesh::convertMeshType(params.arrayType), \
+				params.arrayFirst, params.arrayCount \
+			); \
+		} \
+		else \
+		{ \
+			if (params.instanceCount) \
 				glDrawElementsInstanced( \
 					mesh->getMeshType(), \
 					(GLsizei)mesh->getInd(), \
 					GL_UNSIGNED_INT, \
 					nullptr, \
-					params->instanceCount \
+					params.instanceCount \
 				); \
 			else \
 				glDrawElements( \
@@ -27,10 +34,6 @@ using namespace Engine::Rendering;
 					GL_UNSIGNED_INT, \
 					nullptr \
 				); \
-		} \
-		else { \
-			if (params) glDrawArrays(GlMesh::convertMeshType(params->arrayType), params->arrayFirst, params->arrayCount); \
-			else glDrawArrays(GL_LINES, 0, 6); \
 		} \
     }
 
@@ -70,39 +73,62 @@ void setImages(GlShader *glshdr, std::unordered_map<size_t, Image*> &images)
 
     for (auto &[binding, img] : images)
     {
-		if (!img) continue;
+        if (!img) continue;
 
         auto *glimg = static_cast<GlImage*>(img);
 
-		glActiveTexture(GL_TEXTURE0 + (GLuint)binding);
-		glBindTexture(GL_TEXTURE_2D, glimg->getID());
-		glBindSampler((GLuint)binding, glimg->getSID());
+        GLuint unit = (GLuint)binding;
+
+        glActiveTexture(GL_TEXTURE0 + unit);
+        glBindTexture(GL_TEXTURE_2D, glimg->getID());
+        glBindSampler(unit, glimg->getSID());
     }
 }
 
-void OpenGl::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params = nullptr) {
-	auto *glwin = static_cast<GlWindow*>(win);
-	auto *glshdr = static_cast<GlShader*>(mat->shader);
+InternalParams combineParams(InternalParams* params, size_t size)
+{
+    InternalParams out = *params;
 
+    for (size_t i = 0; i < size; i++)
+    {
+        const auto& p = params[i];
+
+		if (p.fieldMask & InternalParams::HasSettings) out.settings |= p.settings;
+        if (p.fieldMask & InternalParams::HasInstanceCount) out.instanceCount = p.instanceCount;
+        if (p.fbo) out.fbo = p.fbo;
+        if (p.shader) out.shader = p.shader;
+        if (p.fieldMask & InternalParams::HasUseArray) out.useArray = p.useArray;
+        if (p.fieldMask & InternalParams::HasArrayData)
+        {
+            out.arrayType  = p.arrayType;
+            out.arrayFirst = p.arrayFirst;
+            out.arrayCount = p.arrayCount;
+        }
+
+        for (auto& [k, v] : p.images) out.images[k] = v;
+        for (auto& [k, v] : p.ubo)    out.ubo[k] = v;
+        for (auto& [k, v] : p.ssbo)   out.ssbo[k] = v;
+    }
+
+	return out;
+}
+
+void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
+	if (!pms) return;
+
+	// auto params = *pms;
+	auto params = combineParams(pms, size);
+
+	if (!params.shader) return;
+
+	auto *glwin = static_cast<GlWindow*>(win);
+	auto *glshdr = static_cast<GlShader*>(params.shader);
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
-	bool disableScreen;
-	bool useFBO;
-	bool hasFBO;
-	FrameBuffer *fbo = nullptr;
-
-	if (params) {
-		fbo = params->fbo;
-
-		disableScreen = params->settings & DrawParams::DisableScreen;
-		useFBO        = params->settings & DrawParams::EnableFBO;
-		hasFBO        = (fbo != nullptr);
-	}
-	else {
-		disableScreen = false;
-		useFBO = false;
-		hasFBO = false;
-	}
+	FrameBuffer *fbo	= params.fbo;
+	bool disableScreen	= params.settings & InternalParams::DisableScreen;
+	bool useFBO       	= params.settings & InternalParams::EnableFBO;
+	bool hasFBO       	= (fbo != nullptr);
 
 	glUseProgram(glshdr->getID());
 
@@ -118,23 +144,14 @@ void OpenGl::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params = n
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
-	setImages(glshdr, mat->images);
-
-	if (params) {
-		setImages(glshdr, params->images);
-	}
+	setImages(glshdr, params.images);
 
 
 	// -------------------------
 	// 2. BUFFERS Global
 	// -------------------------
-	loadUBO(glshdr, mat->ubo);
-	loadSSBO(glshdr, mat->ssbo);
-
-	if (params) {
-		loadUBO(glshdr, params->ubo);
-		loadSSBO(glshdr, params->ssbo);
-	}
+	loadUBO(glshdr, params.ubo);
+	loadSSBO(glshdr, params.ssbo);
 
 
 	// -------------------------

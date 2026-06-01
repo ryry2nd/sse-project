@@ -6,11 +6,6 @@
 
 #include "Objects.hpp"
 
-
-typedef uint32_t Uint32;
-typedef uint64_t Uint64;
-typedef uint8_t Uint8;
-
 using namespace Engine;
 using namespace Engine::Rendering;
 using namespace Engine::Helper;
@@ -57,12 +52,12 @@ extern "C" {
 		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
 		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
-		// img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
+		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
-		// mat.images[0] = img;
+		mat.images[0] = img;
 		mat.shader = cubeShader;
 		mat.ubo[0] = modelBuff;
 		mat.ubo[1] = camBuff;
@@ -85,6 +80,8 @@ extern "C" {
         }
 
 		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
+
+		mat2.instanceCount = models.size();
 
 		mat2.ssbo[0] = cubeInstanceBuff;
 
@@ -159,9 +156,9 @@ extern "C" {
 		modelBuff->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		CreationFunctions::draw(win, &mat, cube);
-		CreationFunctions::draw(win, &mat2, cube);
-		CreationFunctions::draw(win, &debugMat);
+		CreationFunctions::draw(win, cube, &mat);
+		CreationFunctions::draw(win, cube, &mat2);
+		CreationFunctions::draw(win, nullptr, &debugMat);
 	}
 
 	void event(SDL_Event *event, bool *running) {

@@ -147,5 +147,5 @@ namespace OpenGl
 		GLsizei size;
 	};
 
-	void draw(Engine::Rendering::Window *win, Engine::Rendering::Material *mat, Engine::Rendering::Mesh *mesh, Engine::Rendering::DrawParams *params);
+	void draw(Engine::Rendering::Window *win, Engine::Rendering::Mesh *mesh, Engine::Rendering::InternalParams *params, size_t size);
 }

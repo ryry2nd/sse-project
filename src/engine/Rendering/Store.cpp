@@ -3,10 +3,6 @@
 
 using namespace Engine::Rendering;
 
-typedef uint32_t Uint32;
-typedef uint64_t Uint64;
-typedef uint8_t Uint8;
-
 std::vector<std::unique_ptr<Window>> wins;
 std::vector<std::unique_ptr<Shader>> shaders;
 std::vector<std::unique_ptr<Buff>> buffers;
@@ -16,8 +12,8 @@ std::vector<std::unique_ptr<FrameBuffer>> fbos;
 
 
 
-void CreationFunctions::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params) {
-	InternalFunctions::draw(win, mat, mesh, params);
+void CreationFunctions::draw(Window *win, Mesh *mesh, DrawParams *params, size_t size) {
+	InternalFunctions::draw(win, mesh, params, size);
 }
 
 

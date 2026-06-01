@@ -63,17 +63,22 @@ void GlImage::setupObject(SDL_Surface *surface_old)
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		GL_RGBA8,
-		surface->w,
-		surface->h,
-		0,
-		GL_RGBA,
-		GL_UNSIGNED_BYTE,
-		surface->pixels
-	);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			GL_RGBA8,
+			surface->w,
+			surface->h,
+			0,
+			GL_RGBA,
+			GL_UNSIGNED_BYTE,
+			surface->pixels
+		);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

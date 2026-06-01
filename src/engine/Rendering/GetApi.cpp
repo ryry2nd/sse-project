@@ -68,9 +68,9 @@ using CreateBuffFn =
 using CreateDrawFn =
 	void(*)(
 		Window*,
-		Material*,
 		Mesh*,
-		DrawParams*
+		InternalParams*,
+		size_t
 	);
 
 using CreateFBOFn =
@@ -197,6 +197,6 @@ std::unique_ptr<FrameBuffer> InternalFunctions::createFrameBuffer(glm::vec2 size
 	return apiFunctions.createFboFunc(size, settings);
 }
 
-void InternalFunctions::draw(Window *win, Material *mat, Mesh *mesh, DrawParams *params) {
-	return apiFunctions.createDrawFunc(win, mat, mesh, params);
+void InternalFunctions::draw(Window *win, Mesh *mesh, InternalParams *params, size_t size) {
+	return apiFunctions.createDrawFunc(win, mesh, params, size);
 }

@@ -36,8 +36,8 @@ extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32
     return std::make_unique<GlFrameBuffer>(size, settings);
 }
 
-extern "C" void draw(Window *win, Material* mat, Mesh* mesh, DrawParams* params) {
-    OpenGl::draw(win, mat, mesh, params);
+extern "C" void draw(Window *win, Mesh* mesh, DrawParams* params, size_t size) {
+    OpenGl::draw(win, mesh, params, size);
 }
 
 extern "C" const char *getName() {return NAME;}

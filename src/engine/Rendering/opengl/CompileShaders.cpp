@@ -33,6 +33,7 @@
 		" -O3" \
 		" -line-directive-mode none" \
 		" -matrix-layout-column-major" \
+		" -DVULKAN" \
 		" -target spirv"
 #else
 	#define VERT_EXT ".vert.glsl"
