@@ -69,19 +69,56 @@ std::string compileShaderCode(const std::string& arguments) {
 }
 
 void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
-	if (!fs::exists(SLANG_PATH EXE_EXT)) {
-		vertPath = prePath + OVERRIDE_VERT_EXT;
-		fragPath = prePath + OVERRIDE_FRAG_EXT;
+	std::string possibleVert;
+	std::string possibleFrag;
+
+	possibleVert = prePath + OVERRIDE_VERT_EXT;
+	possibleFrag = prePath + OVERRIDE_FRAG_EXT;
+
+	if (
+		fs::exists(possibleVert) &&
+		fs::exists(possibleFrag)
+	) {
+		vertPath = possibleVert;
+		fragPath = possibleFrag;
 		return;
+	}
+
+	#ifdef MINIMAL
+	spdlog::critical("Shader path {} does not exist. Shaders in engine's minimal setting has to be precompiled", prePath);
+	std::exit(1);
+	#else
+	if (!fs::exists(SLANG_PATH EXE_EXT)) {
+		spdlog::critical("Could not find Slang executable. Executable has to exist in: {}", SLANG_PATH EXE_EXT);
+		std::exit(1);
 	}
 
 	std::string path = prePath + SLANG_EXT;
 	fs::path entry(path);
+
+	if (!fs::exists(entry)) {
+		spdlog::critical("Could not find: {}", path);
+		std::exit(1);
+	}
+
+
+
+	possibleVert = COMPILED_OUT_PATH "/" + entry.stem().string() + OVERRIDE_VERT_EXT;
+	possibleFrag = COMPILED_OUT_PATH "/" + entry.stem().string() + OVERRIDE_FRAG_EXT;
+
+	if (
+		fs::exists(possibleVert) &&
+		fs::exists(possibleFrag)
+	) {
+		vertPath = possibleVert;
+		fragPath = possibleFrag;
+		return;
+	}
+
+	possibleVert = COMPILED_OUT_PATH "/" + entry.stem().string() + VERT_EXT;
+	possibleFrag = COMPILED_OUT_PATH "/" + entry.stem().string() + FRAG_EXT;
+
 	fs::create_directories(COMPILED_OUT_PATH);
-
-	vertPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + VERT_EXT;
-	fragPath = std::string() + COMPILED_OUT_PATH + "/" + entry.stem().string() + FRAG_EXT;
-
 
 	std::string command;
 
@@ -107,5 +144,14 @@ void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath
 		std::exit(1);
 	}
 
+	if (!fs::exists(possibleVert) || !fs::exists(possibleFrag)) {
+		spdlog::critical("Program: {} silently errored in the background. Outputted compiled shader path does not exist:\n{}\n", id, possibleVert, possibleFrag);
+		std::exit(1);
+	}
+
+	vertPath = possibleVert;
+	fragPath = possibleFrag;
+
 	spdlog::debug("Successfully compiled shader {}", entry.stem().string());
+	#endif
 }

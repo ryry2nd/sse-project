@@ -82,15 +82,6 @@ GlShader::GlShader(std::string path)
 
 	spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
 
-	if (!std::filesystem::exists(vertexPath)) {
-		spdlog::critical("Shader path: {} does not exist", vertexPath);
-		std::exit(1);
-	}
-	if (!std::filesystem::exists(fragmentPath)) {
-		spdlog::critical("Shader path: {} does not exist", fragmentPath);
-		std::exit(1);
-	}
-
 	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
 	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 

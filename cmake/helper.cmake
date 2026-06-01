@@ -175,6 +175,7 @@ function(copy_assets)
 				"${SHADER}"
 				-O3 -line-directive-mode none -matrix-layout-column-major
 				-target spirv -stage vertex
+				-DVULKAN
 				-entry vertMain
 				-o "${MODULE_OUT_DIR}/shaders/${NAME}.vert.spv"
 
@@ -182,6 +183,7 @@ function(copy_assets)
 				"${SHADER}"
 				-O3 -line-directive-mode none -matrix-layout-column-major
 				-target spirv -stage fragment
+				-DVULKAN
 				-entry fragMain
 				-o "${MODULE_OUT_DIR}/shaders/${NAME}.frag.spv"
 

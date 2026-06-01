@@ -23,3 +23,5 @@ set(PYTHON_PATH "bin/python" CACHE STRING "")
 
 option(USE_VULKAN "Use Vulkan" OFF)
 option(USE_OPENGL "Use OpenGl" ON)
+
+set(PREFERRED_API "opengl" CACHE STRING "")
