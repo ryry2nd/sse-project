@@ -1,3 +1,4 @@
+#include ".colors.slang"
 #include ".base.slang"
 
 typedef Input VSInput;
@@ -32,10 +33,9 @@ float4 fragMain(VSOutput input) : SV_Target
 {
 	float edgeFactor = edgeDarken(input.TexCoord, 0.2f, 0.5f, 0.15f);
 
-	float3 green = float3(0.0f, 1.0f, 0.0f);
-	float3 inColor = green * edgeFactor;
 
-	float3 fogColor = float3(0.5, 0.6, 0.7);
+	float3 color = COLOR_GREEN * edgeFactor;
+	float3 fogColor = COLOR_GRAY_FOG;
 
-	return float4(applyFog(inColor, fogColor, input, 0.02), 1.0f);
+	return float4(applyFog(color, fogColor, input, 0.02), 1.0f);
 }
