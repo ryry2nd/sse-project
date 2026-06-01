@@ -37,87 +37,61 @@ using namespace Engine::Rendering;
 		} \
     }
 
-void loadUBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ubo)
-{
-	if (ubo.empty()) return;
-
-	for (auto &[binding, buf] : ubo)
-	{
-		if (!buf) continue;
-
-		auto glbuf = static_cast<GlBuff*>(buf);
-
-		glBindBufferBase(GL_UNIFORM_BUFFER,
-						 (GLuint)binding,
-						 glbuf->getID());
-	}
-}
-void loadSSBO(GlShader *glshdr, std::unordered_map<size_t, Buff*> &ssbo)
-{
-	if (ssbo.empty()) return;
-
-	for (auto &[binding, buf] : ssbo)
-	{
-		if (!buf) continue;
-
-		auto *glbuf = static_cast<GlBuff*>(buf);
-
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER,
-						 (GLuint)binding,
-						 glbuf->getID());
-	}
-}
-void setImages(GlShader *glshdr, std::unordered_map<size_t, Image*> &images)
-{
-    if (images.empty()) return;
-
-    for (auto &[binding, img] : images)
-    {
-        if (!img) continue;
-
-        auto *glimg = static_cast<GlImage*>(img);
-
-        GLuint unit = (GLuint)binding;
-
-        glActiveTexture(GL_TEXTURE0 + unit);
-        glBindTexture(GL_TEXTURE_2D, glimg->getID());
-        glBindSampler(unit, glimg->getSID());
-    }
+#define loadBuffer(glshdr, buffs, type) \
+{ \
+	if (!buffs.empty()) \
+		for (auto &[binding, buf] : buffs) \
+		{ \
+			if (!buf) continue; \
+			auto glbuf = static_cast<GlBuff*>(buf); \
+			glBindBufferBase(type, \
+							(GLuint)binding, \
+							glbuf->getID()); \
+		} \
 }
 
-InternalParams combineParams(InternalParams* params, size_t size)
-{
-    InternalParams out = *params;
+#define setImages(glshdr, images) \
+{ \
+    if (!images.empty()) \
+		for (auto &[binding, img] : images) \
+		{ \
+			if (!img) continue; \
+			auto *glimg = static_cast<GlImage*>(img); \
+			GLuint unit = (GLuint)binding; \
+			glActiveTexture(GL_TEXTURE0 + unit); \
+			glBindTexture(GL_TEXTURE_2D, glimg->getID()); \
+			glBindSampler(unit, glimg->getSID()); \
+		} \
+}
 
-    for (size_t i = 0; i < size; i++)
-    {
-        const auto& p = params[i];
-
-		if (p.fieldMask & InternalParams::HasSettings) out.settings |= p.settings;
-        if (p.fieldMask & InternalParams::HasInstanceCount) out.instanceCount = p.instanceCount;
-        if (p.fbo) out.fbo = p.fbo;
-        if (p.shader) out.shader = p.shader;
-        if (p.fieldMask & InternalParams::HasUseArray) out.useArray = p.useArray;
-        if (p.fieldMask & InternalParams::HasArrayData)
-        {
-            out.arrayType  = p.arrayType;
-            out.arrayFirst = p.arrayFirst;
-            out.arrayCount = p.arrayCount;
-        }
-
-        for (auto& [k, v] : p.images) out.images[k] = v;
-        for (auto& [k, v] : p.ubo)    out.ubo[k] = v;
-        for (auto& [k, v] : p.ssbo)   out.ssbo[k] = v;
-    }
-
-	return out;
+#define combineParams(out, params, size) \
+{ \
+	out = *params; \
+    for (size_t i = 0; i < size; i++) \
+    { \
+        const auto& p = params[i]; \
+		if (p.fieldMask & InternalParams::HasSettings) out.settings |= p.settings; \
+        if (p.fieldMask & InternalParams::HasInstanceCount) out.instanceCount = p.instanceCount; \
+        if (p.fbo) out.fbo = p.fbo; \
+        if (p.shader) out.shader = p.shader; \
+        if (p.fieldMask & InternalParams::HasUseArray) out.useArray = p.useArray; \
+        if (p.fieldMask & InternalParams::HasArrayData) \
+        { \
+            out.arrayType  = p.arrayType; \
+            out.arrayFirst = p.arrayFirst; \
+            out.arrayCount = p.arrayCount; \
+        } \
+        for (auto& [k, v] : p.images) out.images[k] = v; \
+        for (auto& [k, v] : p.ubo)    out.ubo[k] = v; \
+        for (auto& [k, v] : p.ssbo)   out.ssbo[k] = v; \
+    } \
 }
 
 void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	if (!pms) return;
 
-	// auto params = *pms;
-	auto params = combineParams(pms, size);
+	InternalParams params;
+	combineParams(params, pms, size);
 
 	if (!params.shader) return;
 
@@ -132,13 +106,12 @@ void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 
 	glUseProgram(glshdr->getID());
 
-	if (glmesh)
-		glBindVertexArray(glmesh->getVAO());
-	else {
-		GLuint defaultVAO;
+	static GLuint defaultVAO = 0;
+
+	if (!defaultVAO)
 		glGenVertexArrays(1, &defaultVAO);
-		glBindVertexArray(defaultVAO);
-	}
+
+	glBindVertexArray(mesh ? glmesh->getVAO() : defaultVAO);
 
 
 	// -------------------------
@@ -150,8 +123,8 @@ void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	// -------------------------
 	// 2. BUFFERS Global
 	// -------------------------
-	loadUBO(glshdr, params.ubo);
-	loadSSBO(glshdr, params.ssbo);
+	loadBuffer(glshdr, params.ubo, GL_UNIFORM_BUFFER);
+	loadBuffer(glshdr, params.ssbo, GL_SHADER_STORAGE_BUFFER);
 
 
 	// -------------------------
