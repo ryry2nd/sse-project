@@ -22,10 +22,6 @@ typedef float3x3 mat3;
 	#define BINDING_SAMPLER(x, y)
 #endif
 
-float3 transformNormal(float3 normal, mat4 model)
-{
-    return normalize(mul((mat3)model, normal));
-}
 
 struct Input
 {
@@ -43,22 +39,17 @@ struct Output
 	float4 position : SV_Position;
 };
 
-Output getPosition(mat4 model, mat4 view, mat4 proj, Input input) {
-	Output output;
+struct Camera
+{
+	mat4 view;
+	mat4 proj;
+};
 
-	float4 worldPos = mul(model, float4(input.aPos, 1.0));
+typedef mat4 Model;
 
-	output.WorldPos = worldPos.xyz;
-
-	output.Normal = transformNormal(input.aNormal, model);
-
-	output.TexCoord = input.aTexCoord;
-
-	output.ViewPos = mul(view, worldPos);
-
-	output.position = mul(proj, output.ViewPos);
-
-	return output;
+float3 transformNormal(float3 normal, mat4 model)
+{
+    return normalize(mul((mat3)model, normal));
 }
 
 float edgeDarken(float2 texCoord, float inner, float outer, float strength)
@@ -80,4 +71,22 @@ float3 applyFog(float3 inColor, float3 fogColor, Output input, float strength) {
 	float dist = abs(input.ViewPos.z);
 	float fog = fogExp2(dist, strength);
 	return lerp(fogColor, inColor, fog);
+}
+
+Output getPosition(mat4 model, mat4 view, mat4 proj, Input input) {
+	Output output;
+
+	float4 worldPos = mul(model, float4(input.aPos, 1.0));
+
+	output.WorldPos = worldPos.xyz;
+
+	output.Normal = transformNormal(input.aNormal, model);
+
+	output.TexCoord = input.aTexCoord;
+
+	output.ViewPos = mul(view, worldPos);
+
+	output.position = mul(proj, output.ViewPos);
+
+	return output;
 }

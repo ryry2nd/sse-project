@@ -7,15 +7,14 @@ struct VSOutput
 };
 
 BINDING_CBV(0,0)
-cbuffer Camera
-{
-	mat4 view;
-	mat4 proj;
-};
+ConstantBuffer<Camera> cam;
 
 // axis line vertices generated from vertex id
 VSOutput vertMain(uint vertexID : SV_VertexID)
 {
+	mat4 proj = cam.proj;
+	mat4 view = cam.view;
+
 	VSOutput o;
 
 	float3 pos;
