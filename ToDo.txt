@@ -13,7 +13,6 @@ https://github.com/lsalzman/enet.git
 
 PHASE 1 - CORE ENGINE
 Finish ABI
-make images work
 make module interaction work
 
 
