@@ -1,4 +1,5 @@
 #include ".base.slang"
+#include ".colors.slang"
 
 typedef Input VSInput;
 typedef Output VSOutput;
@@ -28,15 +29,13 @@ VSOutput vertMain(VSInput input)
 [shader("fragment")]
 vec4 fragMain(VSOutput input) : SV_Target
 {
-	float2 uv = input.TexCoord;
+	vec4 texRaw = diffuseTexture.Sample(input.TexCoord);
 
-	int2 size;
-	diffuseTexture.GetDimensions(size.x, size.y);
+	float edgeFactor = edgeDarken(input.TexCoord, 0.2f, 0.5f, 0.15f);
 
-	int2 pixel = int2(uv * size);
 
-	float4 texture = diffuseTexture.Load(int3(pixel, 0));
+	vec3 color = texRaw.xyz * edgeFactor;
+	vec3 fogColor = Color::GRAY_FOG;
 
-	float edgeFactor = edgeDarken(uv, 0.2f, 0.5f, 0.15f);
-	return edgeFactor * texture;
+	return vec4(applyFog(color, fogColor, input.ViewPos, 0.006), texRaw.a);
 }

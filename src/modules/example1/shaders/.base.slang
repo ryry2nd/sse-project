@@ -74,8 +74,8 @@ float fogExp2(float dist, float density)
 }
 
 
-vec3 applyFog(vec3 inColor, vec3 fogColor, Output input, float density) {
-	float dist = length(input.ViewPos.xyz);
+vec3 applyFog(vec3 inColor, vec3 fogColor, vec4 viewPos, float density) {
+	float dist = length(viewPos.xyz);
 	float fog = fogExp2(dist, density);
 	return lerp(fogColor, inColor, fog);
 }
