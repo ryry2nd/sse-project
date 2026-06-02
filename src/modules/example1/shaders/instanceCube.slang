@@ -8,7 +8,7 @@ typedef Output VSOutput;
 BINDING_CBV(0)
 ConstantBuffer<Camera> cam;
 
-BINDING_SRV(1)
+BINDING_SRV(0)
 StructuredBuffer<Model> models;
 
 
@@ -26,13 +26,13 @@ VSOutput vertMain(VSInput input, uint instanceID : SV_InstanceID)
 
 
 [shader("fragment")]
-float4 fragMain(VSOutput input) : SV_Target
+vec4 fragMain(VSOutput input) : SV_Target
 {
 	float edgeFactor = edgeDarken(input.TexCoord, 0.2f, 0.5f, 0.15f);
 
 
-	float3 color = Color::GREEN * edgeFactor;
-	float3 fogColor = Color::GRAY_FOG;
+	vec3 color = Color::GREEN * edgeFactor;
+	vec3 fogColor = Color::GRAY_FOG;
 
-	return float4(applyFog(color, fogColor, input, 0.006), 1.0f);
+	return vec4(applyFog(color, fogColor, input, 0.006), 1.0f);
 }

@@ -3,10 +3,10 @@
 typedef Input VSInput;
 typedef Output VSOutput;
 
-// BINDING_SRV(0)
-// Texture2D diffuseTexture;
-// BINDING_SAMPLER(0)
-// SamplerState diffuseSampler;
+BINDING_IMG(0)
+Texture2D diffuseTexture;
+BINDING_SAMPLER(0)
+SamplerState diffuseSampler;
 
 BINDING_CBV(0)
 ConstantBuffer<Model> model;
@@ -28,8 +28,8 @@ VSOutput vertMain(VSInput input)
 
 
 [shader("fragment")]
-float4 fragMain(VSOutput input) : SV_Target
+vec4 fragMain(VSOutput input) : SV_Target
 {
-	// float4 texColor = diffuseTexture.Sample(diffuseSampler, input.TexCoord);
-	return float4(0,0,0,1);
+	vec4 texColor = diffuseTexture.Sample(diffuseSampler, input.TexCoord);
+	return texColor;
 }

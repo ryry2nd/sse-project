@@ -54,15 +54,15 @@ using namespace Engine::Rendering;
 #define setImages(glshdr, images) \
 { \
     if (!images.empty()) \
-		for (auto &[binding, img] : images) \
-		{ \
-			if (!img) continue; \
-			auto *glimg = static_cast<GlImage*>(img); \
-			GLuint unit = (GLuint)(binding); \
-			glActiveTexture(GL_TEXTURE0 + unit); \
-			glBindTexture(GL_TEXTURE_2D, glimg->getID()); \
-			glBindSampler(unit, glimg->getSID()); \
-		} \
+        for (auto &[binding, img] : images) \
+        { \
+            if (!img) continue; \
+            auto *glimg = static_cast<GlImage*>(img); \
+            GLuint unit = (GLuint)(binding); \
+            glActiveTexture(GL_TEXTURE0 + unit); \
+            glBindTexture(GL_TEXTURE_2D, glimg->getID()); \
+            glBindSampler(unit, glimg->getSID()); \
+        } \
 }
 
 #define combineParams(out, params, size) \

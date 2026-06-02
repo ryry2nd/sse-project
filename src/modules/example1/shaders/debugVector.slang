@@ -2,8 +2,8 @@
 
 struct VSOutput
 {
-	float4 position : SV_Position;
-	float3 color    : COLOR0;
+	vec4 position : SV_Position;
+	vec3 color    : COLOR0;
 };
 
 BINDING_CBV(0)
@@ -17,52 +17,52 @@ VSOutput vertMain(uint vertexID : SV_VertexID)
 
 	VSOutput o;
 
-	float3 pos;
-	float3 color;
+	vec3 pos;
+	vec3 color;
 
 	// X axis (red)
 	if (vertexID == 0)
 	{
-		pos = float3(0,0,0);
-		color = float3(1,0,0);
+		pos = vec3(0,0,0);
+		color = vec3(1,0,0);
 	}
 	else if (vertexID == 1)
 	{
-		pos = float3(1,0,0);
-		color = float3(1,0,0);
+		pos = vec3(1,0,0);
+		color = vec3(1,0,0);
 	}
 
 	// Y axis (green)
 	else if (vertexID == 2)
 	{
-		pos = float3(0,0,0);
-		color = float3(0,1,0);
+		pos = vec3(0,0,0);
+		color = vec3(0,1,0);
 	}
 	else if (vertexID == 3)
 	{
-		pos = float3(0,1,0);
-		color = float3(0,1,0);
+		pos = vec3(0,1,0);
+		color = vec3(0,1,0);
 	}
 
 	// Z axis (blue)
 	else if (vertexID == 4)
 	{
-		pos = float3(0,0,0);
-		color = float3(0,0,1);
+		pos = vec3(0,0,0);
+		color = vec3(0,0,1);
 	}
 	else
 	{
-		pos = float3(0,0,1);
-		color = float3(0,0,1);
+		pos = vec3(0,0,1);
+		color = vec3(0,0,1);
 	}
 
-	o.position = mul(proj, mul(view, float4(pos, 1.0)));
+	o.position = mul(proj, mul(view, vec4(pos, 1.0)));
 	o.color = color;
 
 	return o;
 }
 
-float4 fragMain(VSOutput input) : SV_Target0
+vec4 fragMain(VSOutput input) : SV_Target0
 {
-	return float4(input.color, 1.0);
+	return vec4(input.color, 1.0);
 }
