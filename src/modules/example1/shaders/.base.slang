@@ -2,24 +2,24 @@ typedef float4x4 mat4;
 typedef float3x3 mat3;
 
 #if defined(VULKAN)
-	#define BINDING_SRV(x, y)     [[vk::binding(x, y)]]
-	#define BINDING_UAV(x, y)     [[vk::binding(x, y)]]
-	#define BINDING_CBV(x, y)     [[vk::binding(x, y)]]
-	#define BINDING_SAMPLER(x, y) [[vk::binding(x, y)]]
+	#define BINDING_SRV(x)     [[vk::binding(x, 0)]]
+	#define BINDING_UAV(x)     [[vk::binding(x, 0)]]
+	#define BINDING_CBV(x)     [[vk::binding(x, 0)]]
+	#define BINDING_SAMPLER(x) [[vk::binding(x, 0)]]
 #elif defined(DX12)
-	#define BINDING_SRV(x, y)     [[register(t##x, space##y)]]
-	#define BINDING_UAV(x, y)     [[register(u##x, space##y)]]
-	#define BINDING_CBV(x, y)     [[register(b##x, space##y)]]
-	#define BINDING_SAMPLER(x, y) [[register(s##x, space##y)]]
+	#define BINDING_SRV(x)     [[register(t##x, space0)]]
+	#define BINDING_UAV(x)     [[register(u##x, space0)]]
+	#define BINDING_CBV(x)     [[register(b##x, space0)]]
+	#define BINDING_SAMPLER(x) [[register(s##x, space0)]]
 #else
 	// Read-only textures/buffers
-	#define BINDING_SRV(x, y)
+	#define BINDING_SRV(x)
 	// Read-write textures/buffers
-	#define BINDING_UAV(x, y)
+	#define BINDING_UAV(x)
 	// Constant buffers
-	#define BINDING_CBV(x, y)
+	#define BINDING_CBV(x)
 	// Samplers
-	#define BINDING_SAMPLER(x, y)
+	#define BINDING_SAMPLER(x)
 #endif
 
 

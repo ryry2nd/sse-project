@@ -8,34 +8,36 @@ using namespace OpenGl;
 
 using namespace Engine::Rendering;
 
+#define MAX_BINDINGS_PER_SET (1 << 7)
+
 #define DRAW_CALL(mesh, params) \
-    { \
-		if (params.useArray || !mesh) \
-		{ \
-			glDrawArrays( \
-				GlMesh::convertMeshType(params.arrayType), \
-				params.arrayFirst, params.arrayCount \
+{ \
+	if (params.useArray || !mesh) \
+	{ \
+		glDrawArrays( \
+			GlMesh::convertMeshType(params.arrayType), \
+			params.arrayFirst, params.arrayCount \
+		); \
+	} \
+	else \
+	{ \
+		if (params.instanceCount) \
+			glDrawElementsInstanced( \
+				mesh->getMeshType(), \
+				(GLsizei)mesh->getInd(), \
+				GL_UNSIGNED_INT, \
+				nullptr, \
+				params.instanceCount \
 			); \
-		} \
 		else \
-		{ \
-			if (params.instanceCount) \
-				glDrawElementsInstanced( \
-					mesh->getMeshType(), \
-					(GLsizei)mesh->getInd(), \
-					GL_UNSIGNED_INT, \
-					nullptr, \
-					params.instanceCount \
-				); \
-			else \
-				glDrawElements( \
-					mesh->getMeshType(), \
-					(GLsizei)mesh->getInd(), \
-					GL_UNSIGNED_INT, \
-					nullptr \
-				); \
-		} \
-    }
+			glDrawElements( \
+				mesh->getMeshType(), \
+				(GLsizei)mesh->getInd(), \
+				GL_UNSIGNED_INT, \
+				nullptr \
+			); \
+	} \
+}
 
 #define loadBuffer(glshdr, buffs, type) \
 { \
@@ -44,9 +46,8 @@ using namespace Engine::Rendering;
 		{ \
 			if (!buf) continue; \
 			auto glbuf = static_cast<GlBuff*>(buf); \
-			glBindBufferBase(type, \
-							(GLuint)binding, \
-							glbuf->getID()); \
+			GLuint unit = (GLuint)(binding); \
+			glBindBufferBase(type, unit, glbuf->getID()); \
 		} \
 }
 
@@ -57,7 +58,7 @@ using namespace Engine::Rendering;
 		{ \
 			if (!img) continue; \
 			auto *glimg = static_cast<GlImage*>(img); \
-			GLuint unit = (GLuint)binding; \
+			GLuint unit = (GLuint)(binding); \
 			glActiveTexture(GL_TEXTURE0 + unit); \
 			glBindTexture(GL_TEXTURE_2D, glimg->getID()); \
 			glBindSampler(unit, glimg->getSID()); \

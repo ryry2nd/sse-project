@@ -37,9 +37,9 @@ namespace Engine::Rendering
 		int arrayFirst = 0;
 		int arrayCount = 6;
 
-		std::unordered_map<size_t, Image*> images;
-		std::unordered_map<size_t, Buff*> ubo;
-		std::unordered_map<size_t, Buff*> ssbo;
+		std::unordered_map<uint32_t, Image*> images;
+		std::unordered_map<uint32_t, Buff*> ubo;
+		std::unordered_map<uint32_t, Buff*> ssbo;
 	};
 
 	typedef InternalParams DrawParams;

@@ -6,7 +6,7 @@ struct VSOutput
 	float3 color    : COLOR0;
 };
 
-BINDING_CBV(0,0)
+BINDING_CBV(0)
 ConstantBuffer<Camera> cam;
 
 // axis line vertices generated from vertex id

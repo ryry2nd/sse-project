@@ -83,7 +83,7 @@ extern "C" {
 
 		mat2.instanceCount = models.size();
 
-		mat2.ssbo[0] = cubeInstanceBuff;
+		mat2.ssbo[1] = cubeInstanceBuff;
 
 		debugMat.shader = debugVectorShader;
 		debugMat.ubo[0] = camBuff;

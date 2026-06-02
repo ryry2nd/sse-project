@@ -5,10 +5,10 @@ typedef Input VSInput;
 typedef Output VSOutput;
 
 
-BINDING_CBV(0,0)
+BINDING_CBV(0)
 ConstantBuffer<Camera> cam;
 
-BINDING_SRV(0,1)
+BINDING_SRV(1)
 StructuredBuffer<Model> models;
 
 

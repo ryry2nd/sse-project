@@ -21,28 +21,14 @@
 
 #define SLANG_EXT ".slang"
 
-#define USE_SPV
-
-#define OVERRIDE_VERT_EXT ".vert.spv"
-#define OVERRIDE_FRAG_EXT ".frag.spv"
-
-#ifdef USE_SPV
-	#define VERT_EXT OVERRIDE_VERT_EXT
-	#define FRAG_EXT OVERRIDE_FRAG_EXT
-	#define FLAGS \
-		" -O3" \
-		" -line-directive-mode none" \
-		" -matrix-layout-column-major" \
-		" -DVULKAN" \
-		" -target spirv"
-#else
-	#define VERT_EXT ".vert.glsl"
-	#define FRAG_EXT ".frag.glsl"
-	#define FLAGS \
-		" -O3" \
-		" -line-directive-mode none" \
-		" -matrix-layout-column-major"
-#endif
+#define VERT_EXT ".vert.spv"
+#define FRAG_EXT ".frag.spv"
+#define FLAGS \
+	" -O3" \
+	" -line-directive-mode none" \
+	" -matrix-layout-column-major" \
+	" -target spirv" \
+	" -DVULKAN"
 
 namespace fs = std::filesystem;
 
@@ -72,8 +58,8 @@ void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath
 	std::string possibleVert;
 	std::string possibleFrag;
 
-	possibleVert = prePath + OVERRIDE_VERT_EXT;
-	possibleFrag = prePath + OVERRIDE_FRAG_EXT;
+	possibleVert = prePath + VERT_EXT;
+	possibleFrag = prePath + FRAG_EXT;
 
 	if (
 		fs::exists(possibleVert) &&
@@ -102,9 +88,8 @@ void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath
 	}
 
 
-
-	possibleVert = COMPILED_OUT_PATH "/" + entry.stem().string() + OVERRIDE_VERT_EXT;
-	possibleFrag = COMPILED_OUT_PATH "/" + entry.stem().string() + OVERRIDE_FRAG_EXT;
+	possibleVert = COMPILED_OUT_PATH "/" + entry.stem().string() + VERT_EXT;
+	possibleFrag = COMPILED_OUT_PATH "/" + entry.stem().string() + FRAG_EXT;
 
 	if (
 		fs::exists(possibleVert) &&
@@ -114,9 +99,6 @@ void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath
 		fragPath = possibleFrag;
 		return;
 	}
-
-	possibleVert = COMPILED_OUT_PATH "/" + entry.stem().string() + VERT_EXT;
-	possibleFrag = COMPILED_OUT_PATH "/" + entry.stem().string() + FRAG_EXT;
 
 	fs::create_directories(COMPILED_OUT_PATH);
 
