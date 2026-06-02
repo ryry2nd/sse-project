@@ -23,10 +23,11 @@ Install a VM, thats your best bet right now and for a while. Apple is the worst.
 
 ## Loading Custom Programs
 ### Yaml
-A lot of the programming configuration is going to be surrounded by the config.yaml file in the base of your program. A lot of what I have down now for the example might not be even close to what is going to be on the final product.
+A lot of the module configuration is going to be surrounded by the config.yaml file in the base of your program.
 
 ### Scripting
-To do scripting I suggest you just copy the example module and rewrite it. To compile you have to put in a CMakeLists.txt file in the base of the module. Then all you have to do is put your cpp file in src.
+To do scripting I suggest you just copy the example module and rewrite it. To compile you have to put in a CMakeLists.txt file in the base of the module. Then all you have to do is put your cpp file in src.<br>
+This is an example of how my module system works and how to interact with the engine core.
 ```
 #include <iostream>
 
