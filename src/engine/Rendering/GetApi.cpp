@@ -31,11 +31,9 @@ using CreateShaderFn =
 
 using CreateMeshFn =
 	std::unique_ptr<Mesh>(*)(
-		const float*,
+		const Vert*,
 		const size_t,
-		const unsigned int*,
-		const size_t,
-		const short*,
+		const Ind*,
 		const size_t,
 		Mesh::MeshTypes
 	);
@@ -176,8 +174,8 @@ void InternalFunctions::initAPI(const char *apiName) {
 std::unique_ptr<Shader> InternalFunctions::createShader(const char *path) {
 	return apiFunctions.createShaderFunc(path);
 }
-std::unique_ptr<Mesh> InternalFunctions::createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Mesh::MeshTypes meshType) {
-	return apiFunctions.createMeshFunc(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
+std::unique_ptr<Mesh> InternalFunctions::createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size, Mesh::MeshTypes meshType) {
+	return apiFunctions.createMeshFunc(vertices, vert_size, indices, ind_size, meshType);
 }
 std::unique_ptr<Image> InternalFunctions::createImage(const char *filePath) {
 	return apiFunctions.createImageFromFileFunc(filePath);

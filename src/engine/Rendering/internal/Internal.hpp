@@ -8,7 +8,7 @@ namespace InternalFunctions {
 
 	void draw(Engine::Rendering::Window*, Engine::Rendering::Mesh*, Engine::Rendering::DrawParams*, size_t);
 	std::unique_ptr<Engine::Rendering::Shader> createShader(const char *);
-	std::unique_ptr<Engine::Rendering::Mesh> createMesh(const float *, const size_t, const unsigned int *, const size_t, const short *, const size_t, Engine::Rendering::Mesh::MeshTypes);
+	std::unique_ptr<Engine::Rendering::Mesh> createMesh(const Engine::Rendering::Vert *, const size_t, const Engine::Rendering::Ind *, const size_t, Engine::Rendering::Mesh::MeshTypes);
 	std::unique_ptr<Engine::Rendering::Image> createImage(const char *);
 	std::unique_ptr<Engine::Rendering::Image> createImage(SDL_Surface *);
 	std::unique_ptr<Engine::Rendering::Window> createWindow(glm::vec2, const char *, Uint32, Uint32, bool, int, bool);

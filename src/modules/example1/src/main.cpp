@@ -5,6 +5,7 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "Objects.hpp"
+#include "GenMesh.hpp"
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -15,7 +16,8 @@ bool outputFPS = false;
 
 
 Material mat;
-Material mat2;
+Material inMat;
+Material bigMat;
 Material debugMat;
 CameraStruct cam;
 ModelStruct model;
@@ -28,9 +30,11 @@ Shader *cubeShader;
 Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Mesh *cube;
+Mesh *megaCube;
 Image *img;
 Buff *camBuff;
 Buff *modelBuff;
+Buff *megaBuff;
 Buff *cubeInstanceBuff;
 
 extern "C" {
@@ -45,25 +49,41 @@ extern "C" {
 
 		model = glm::mat4(1.0f);
 
+		std::vector<Vert> vert;
+		std::vector<Ind> ind;
+
+		buildVoxelGrid(vert, ind, {100, 100, 100});
+
 
 		CreationFunctions::initAPI("OpenGl4.6");
 		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
 		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
 		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
-		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount, (short[]){3,2,3}, 3);
+		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
+		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
 		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
+
+		ModelStruct bigModel = glm::mat4(1.0f);
+		bigModel = glm::translate(bigModel, {0, -102, 0});
+
+		megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
 
 		mat.images[0] = img;
 		mat.shader = cubeShader;
 		mat.ubo[0] = modelBuff;
 		mat.ubo[1] = camBuff;
 
-		mat2.shader = cubeInstanceShader;
-		mat2.ubo[0] = camBuff;
+		bigMat.images[0] = img;
+		bigMat.shader = cubeShader;
+		bigMat.ubo[0] = megaBuff;
+		bigMat.ubo[1] = camBuff;
+
+		inMat.shader = cubeInstanceShader;
+		inMat.ubo[0] = camBuff;
 
 		glm::vec3 gridSize(50,50,50);
 		std::vector<glm::mat4> models;
@@ -73,7 +93,7 @@ extern "C" {
             for (int y = 0; y < gridSize.y; y++) {
                 for (int z = 0; z < gridSize.z; z++) {
                     glm::mat4 mat(1.0f);
-                    mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), y * 3, ((z * 3) - (gridSize.z * 3)) - 20});
+                    mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), (y * 3) + 10, ((z * 3) - (gridSize.z * 3)) - 20});
                     models.push_back(mat);
                 }
             }
@@ -81,9 +101,9 @@ extern "C" {
 
 		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
 
-		mat2.instanceCount = models.size();
+		inMat.instanceCount = models.size();
 
-		mat2.ssbo[0] = cubeInstanceBuff;
+		inMat.ssbo[0] = cubeInstanceBuff;
 
 		debugMat.shader = debugVectorShader;
 		debugMat.ubo[0] = camBuff;
@@ -118,7 +138,7 @@ extern "C" {
 		rotate += 1.0f * deltaTime;
 
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
-		model = glm::rotate(model, rotate, glm::vec3({0, 0, 1}));
+		model = glm::rotate(model, rotate, glm::vec3({0, 1, 0}));
 
 		int numKeys;
 		const bool *keystates = Rendering::Window::getKeystates(numKeys);
@@ -157,7 +177,8 @@ extern "C" {
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
 		CreationFunctions::draw(win, cube, &mat);
-		CreationFunctions::draw(win, cube, &mat2);
+		CreationFunctions::draw(win, cube, &inMat);
+		CreationFunctions::draw(win, megaCube, &bigMat);
 		CreationFunctions::draw(win, nullptr, &debugMat);
 	}
 

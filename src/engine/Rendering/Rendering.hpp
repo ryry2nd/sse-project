@@ -51,7 +51,7 @@ namespace Engine::Rendering
 		void draw(Window *win, Mesh *mesh = nullptr, DrawParams *params = nullptr, size_t size = 0);
 		Shader *createShader(const char *path);
 		void removeShader(Shader *shader);
-		Mesh *createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
+		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
 		void removeMesh(Mesh *mesh);
 		Image *createImage(const char *filePath);
 		Image *createImage(SDL_Surface *surface);

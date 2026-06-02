@@ -116,10 +116,10 @@ namespace OpenGl
 	class GlMesh : public Engine::Rendering::Mesh
 	{
 	public:
-		GlMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
+		GlMesh(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
 		~GlMesh();
 
-		void updateVerts(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
+		void updateVerts(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
 
 		GLuint getVAO() {return VAO;}
 		GLuint getVBO() {return VBO;}

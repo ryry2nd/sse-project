@@ -12,8 +12,8 @@ extern "C" std::unique_ptr<Shader> createShader(std::string path) {
     return std::make_unique<GlShader>(path);
 }
 
-extern "C" std::unique_ptr<Mesh> createMesh(const float *vertices, const size_t vert_size, const unsigned int *indices, const size_t ind_size, const short *vertLogic, const size_t vert_logic_size, Mesh::MeshTypes meshType = Mesh::MeshTypes::Triangles) {
-    return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size, vertLogic, vert_logic_size, meshType);
+extern "C" std::unique_ptr<Mesh> createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size, Mesh::MeshTypes meshType = Mesh::MeshTypes::Triangles) {
+    return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size, meshType);
 }
 
 extern "C" std::unique_ptr<Image> createImageFromFile(const char *filePath) {
