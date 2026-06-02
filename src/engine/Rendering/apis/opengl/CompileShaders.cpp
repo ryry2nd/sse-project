@@ -28,7 +28,7 @@
 	" -line-directive-mode none" \
 	" -matrix-layout-column-major" \
 	" -target spirv" \
-	" -DVULKAN"
+	" -DGL"
 
 namespace fs = std::filesystem;
 

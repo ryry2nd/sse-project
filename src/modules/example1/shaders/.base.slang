@@ -4,7 +4,7 @@ typedef float2 vec2;
 typedef float3 vec3;
 typedef float4 vec4;
 
-#if defined(VULKAN)
+#if defined(VULKAN) || defined(GL)
 	#define BINDING_SRV(x)     [[vk::binding(x, 0)]]
 	#define BINDING_UAV(x)     [[vk::binding(x, 1)]]
 	#define BINDING_CBV(x)     [[vk::binding(x, 2)]]
