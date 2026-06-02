@@ -4,9 +4,7 @@ typedef Input VSInput;
 typedef Output VSOutput;
 
 BINDING_IMG(0)
-Texture2D diffuseTexture;
-BINDING_SAMPLER(0)
-SamplerState diffuseSampler;
+Sampler2D diffuseTexture;
 
 BINDING_CBV(0)
 ConstantBuffer<Model> model;
@@ -30,6 +28,15 @@ VSOutput vertMain(VSInput input)
 [shader("fragment")]
 vec4 fragMain(VSOutput input) : SV_Target
 {
-	vec4 texColor = diffuseTexture.Sample(diffuseSampler, input.TexCoord);
-	return texColor;
+	float2 uv = input.TexCoord;
+
+	int2 size;
+	diffuseTexture.GetDimensions(size.x, size.y);
+
+	int2 pixel = int2(uv * size);
+
+	float4 texture = diffuseTexture.Load(int3(pixel, 0));
+
+	float edgeFactor = edgeDarken(uv, 0.2f, 0.5f, 0.15f);
+	return edgeFactor * texture;
 }
