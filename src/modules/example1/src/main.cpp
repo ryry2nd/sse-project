@@ -106,6 +106,7 @@ extern "C" {
 		inMat.ssbo[0] = cubeInstanceBuff;
 
 		debugMat.shader = debugVectorShader;
+		debugMat.meshType = InternalParams::MeshTypes::Lines;
 		debugMat.ubo[0] = camBuff;
 	}
 

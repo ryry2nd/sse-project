@@ -37,5 +37,5 @@ vec4 fragMain(VSOutput input) : SV_Target
 	vec3 color = texRaw.xyz * edgeFactor;
 	vec3 fogColor = Color::GRAY_FOG;
 
-	return vec4(applyFog(color, fogColor, input.ViewPos, 0.006), texRaw.a);
+	return vec4(applyFog(color, fogColor, input.ViewPos, 0.006), 1);
 }

@@ -8,6 +8,15 @@ using namespace OpenGl;
 
 using namespace Engine::Rendering;
 
+inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
+	switch (meshType)
+	{
+		case InternalParams::MeshTypes::Points:     return GL_POINTS;
+		case InternalParams::MeshTypes::Lines:      return GL_LINES;
+		case InternalParams::MeshTypes::Triangles:  return GL_TRIANGLES;
+	}
+}
+
 #define MAX_BINDINGS_PER_SET (1 << 7)
 
 #define DRAW_CALL(mesh, params) \
@@ -15,7 +24,7 @@ using namespace Engine::Rendering;
 	if (params.useArray || !mesh) \
 	{ \
 		glDrawArrays( \
-			GlMesh::convertMeshType(params.arrayType), \
+			convertMeshType(params.meshType), \
 			params.arrayFirst, params.arrayCount \
 		); \
 	} \
@@ -23,7 +32,7 @@ using namespace Engine::Rendering;
 	{ \
 		if (params.instanceCount) \
 			glDrawElementsInstanced( \
-				mesh->getMeshType(), \
+				convertMeshType(params.meshType), \
 				(GLsizei)mesh->getInd(), \
 				GL_UNSIGNED_INT, \
 				nullptr, \
@@ -31,7 +40,7 @@ using namespace Engine::Rendering;
 			); \
 		else \
 			glDrawElements( \
-				mesh->getMeshType(), \
+				convertMeshType(params.meshType), \
 				(GLsizei)mesh->getInd(), \
 				GL_UNSIGNED_INT, \
 				nullptr \
@@ -78,7 +87,6 @@ using namespace Engine::Rendering;
         if (p.fieldMask & InternalParams::HasUseArray) out.useArray = p.useArray; \
         if (p.fieldMask & InternalParams::HasArrayData) \
         { \
-            out.arrayType  = p.arrayType; \
             out.arrayFirst = p.arrayFirst; \
             out.arrayCount = p.arrayCount; \
         } \
@@ -126,6 +134,22 @@ void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	// -------------------------
 	loadBuffer(glshdr, params.ubo, GL_UNIFORM_BUFFER);
 	loadBuffer(glshdr, params.ssbo, GL_SHADER_STORAGE_BUFFER);
+
+
+	if (params.settings & InternalParams::EnableClear)
+		glEnable(GL_BLEND);
+	else
+		glDisable(GL_BLEND);
+
+	if (params.settings & InternalParams::DisableCulling)
+		glDisable(GL_CULL_FACE);
+	else
+		glEnable(GL_CULL_FACE);
+
+	if (params.settings & InternalParams::DisableDepth)
+		glDisable(GL_DEPTH_TEST);
+	else
+		glEnable(GL_DEPTH_TEST);
 
 
 	// -------------------------

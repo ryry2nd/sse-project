@@ -19,12 +19,6 @@ namespace Engine::Rendering
 		virtual void setWindow() = 0;
 		static const bool *getKeystates(int &numKeys);
 
-		virtual void enableDepthTest() = 0;
-		virtual void disableDepthTest() = 0;
-		virtual void enableBackfaceCull() = 0;
-		virtual void disableBackfaceCull() = 0;
-
-
 		static Uint64 getTime() {return now;}
 
 		float getDeltaTime() {return deltaTime;}

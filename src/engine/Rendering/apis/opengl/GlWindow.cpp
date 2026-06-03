@@ -68,7 +68,6 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
-	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_MULTISAMPLE);
 	glEnable(GL_STENCIL_TEST);
@@ -82,22 +81,6 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 
 void GlWindow::setBackgroundColor(glm::vec4 color) {
 	glClearColor(color.r, color.g, color.b, color.a);
-}
-
-void GlWindow::disableDepthTest() {
-	glDisable(GL_DEPTH_TEST);
-
-}
-void GlWindow::enableDepthTest() {
-	glEnable(GL_DEPTH_TEST);
-}
-
-void GlWindow::enableBackfaceCull() {
-	glEnable(GL_CULL_FACE);
-}
-
-void GlWindow::disableBackfaceCull() {
-	glDisable(GL_CULL_FACE);
 }
 
 void GlWindow::clearBackground()

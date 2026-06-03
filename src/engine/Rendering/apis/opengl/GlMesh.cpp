@@ -17,8 +17,7 @@ GlMesh::~GlMesh()
 }
 
 GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
-				const Ind *indices, const size_t ind_size,
-				Mesh::MeshTypes meshType
+				const Ind *indices, const size_t ind_size
 			) : VAO(0), VBO(0), EBO(0)
 {
 	spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
@@ -30,13 +29,12 @@ GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 
 	spdlog::debug("VAO has id: 0x{:x}", VAO);
 
-	updateVerts(verts, vert_size, indices, ind_size, meshType);
+	updateVerts(verts, vert_size, indices, ind_size);
 }
 
 void GlMesh::updateVerts(
 	const Vert *verts, const size_t vert_size,
-	const Ind *indices, const size_t ind_size,
-	Mesh::MeshTypes meshType
+	const Ind *indices, const size_t ind_size
 )
 {
 	glBindVertexArray(VAO);
@@ -67,8 +65,6 @@ void GlMesh::updateVerts(
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, nor));
 	glEnableVertexAttribArray(2);
 
-	this->glMeshType = convertMeshType(meshType);
-	this->meshType = meshType;
 	this->ind_size = ind_size;
 	this->vert_size = vert_size;
 

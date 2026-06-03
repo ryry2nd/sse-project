@@ -36,8 +36,8 @@ void CreationFunctions::removeWindow(Window *win) {
 	}
 }
 
-Mesh *CreationFunctions::createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size, Mesh::MeshTypes meshType) {
-	auto mesh = InternalFunctions::createMesh(vertices, vert_size, indices, ind_size, meshType);
+Mesh *CreationFunctions::createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {
+	auto mesh = InternalFunctions::createMesh(vertices, vert_size, indices, ind_size);
 	auto ret = mesh.get();
 	meshes.push_back(std::move(mesh));
 	return ret;

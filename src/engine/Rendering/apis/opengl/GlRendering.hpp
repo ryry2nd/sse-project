@@ -42,10 +42,6 @@ namespace OpenGl
 		void swapBuffer();
 		void updateScreenRes();
 		void setBackgroundColor(glm::vec4 color);
-		void disableDepthTest();
-		void enableDepthTest();
-		void enableBackfaceCull();
-		void disableBackfaceCull();
 		void setWindow();
 		~GlWindow();
 
@@ -116,35 +112,21 @@ namespace OpenGl
 	class GlMesh : public Engine::Rendering::Mesh
 	{
 	public:
-		GlMesh(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
+		GlMesh(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size);
 		~GlMesh();
 
-		void updateVerts(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size, Engine::Rendering::Mesh::MeshTypes meshType = Engine::Rendering::Mesh::MeshTypes::Triangles);
+		void updateVerts(const Engine::Rendering::Vert *verts, const size_t vert_size, const Engine::Rendering::Ind *indices, const size_t ind_size);
 
 		GLuint getVAO() {return VAO;}
 		GLuint getVBO() {return VBO;}
 		GLuint getEBO() {return EBO;}
-		GLenum getMeshType() {return glMeshType;}
-		GLsizei getSize() {return size;}
-
-		static GLenum convertMeshType(MeshTypes meshType) {
-			switch (meshType)
-			{
-				case MeshTypes::Points:     return GL_POINTS;
-				case MeshTypes::Lines:      return GL_LINES;
-				case MeshTypes::Triangles:  return GL_TRIANGLES;
-			}
-		}
 
 		size_t getInd() {return ind_size;}
 		size_t getVert() {return vert_size;}
 	private:
-		glm::vec3 meshSize;
 		size_t ind_size;
 		size_t vert_size;
 		GLuint VAO, VBO, EBO;
-		GLenum glMeshType;
-		GLsizei size;
 	};
 
 	void draw(Engine::Rendering::Window *win, Engine::Rendering::Mesh *mesh, Engine::Rendering::InternalParams *params, size_t size);

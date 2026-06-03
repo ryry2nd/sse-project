@@ -19,23 +19,38 @@ namespace Engine::Rendering
 			HasArrayData    	= 1 << 3,
 		};
 
-		enum Settings : uint32_t {
-			DisableScreen = 1 << 0,
-			EnableFBO = 1 << 1,
-		};
-
 		uint32_t fieldMask = 0;
 
-		size_t instanceCount = 0;
+		enum Settings : uint32_t {
+			DisableScreen		= 1 << 0,
+			EnableFBO			= 1 << 1,
+			EnableClear			= 1 << 2,
+			DisableCulling		= 1 << 3,
+			DisableDepth		= 1 << 4,
+		};
+
 		uint32_t settings = 0;
+
+		enum class MeshTypes
+		{
+			Points,
+			Lines,
+			Triangles
+		};
+
+		MeshTypes meshType = MeshTypes::Triangles;
+
+
+
+		size_t instanceCount = 0;
+
 
 		FrameBuffer* fbo = nullptr;
 		Shader* shader = nullptr;
 
 		bool useArray = false;
-		Mesh::MeshTypes arrayType = Mesh::MeshTypes::Lines;
-		int arrayFirst = 0;
-		int arrayCount = 6;
+			int arrayFirst = 0;
+			int arrayCount = 6;
 
 		std::unordered_map<uint32_t, Image*> images;
 		std::unordered_map<uint32_t, Buff*> ubo;
@@ -51,7 +66,7 @@ namespace Engine::Rendering
 		void draw(Window *win, Mesh *mesh = nullptr, DrawParams *params = nullptr, size_t size = 0);
 		Shader *createShader(const char *path);
 		void removeShader(Shader *shader);
-		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size, Rendering::Mesh::MeshTypes meshType = Rendering::Mesh::MeshTypes::Triangles);
+		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size);
 		void removeMesh(Mesh *mesh);
 		Image *createImage(const char *filePath);
 		Image *createImage(SDL_Surface *surface);
