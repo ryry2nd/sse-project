@@ -10,16 +10,6 @@
 
 using namespace Engine::Rendering;
 
-SDL_Color Engine::Rendering::Vec4ToSDLColor(const glm::vec4& color) {
-	return SDL_Color{
-		static_cast<Uint8>(color.r),
-		static_cast<Uint8>(color.g),
-		static_cast<Uint8>(color.b),
-		static_cast<Uint8>(color.a)
-	};
-}
-
-
 Uint64 Window::now = SDL_GetTicks();
 
 extern "C" void hostShutDownAll();

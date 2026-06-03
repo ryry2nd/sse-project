@@ -3,10 +3,6 @@
 #include <SDL3/SDL_video.h>
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_init.h>
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-using namespace Engine::Rendering;
 
 #define MAJOR_VERSION 4
 #define MINOR_VERSION 6

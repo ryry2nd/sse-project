@@ -1,5 +1,4 @@
 #include "GlRendering.hpp"
-#include <spdlog/spdlog.h>
 #include <filesystem>
 
 #define COMPILED_OUT_PATH "cache/compiled_shaders/OpenGl"
@@ -54,7 +53,7 @@ std::string compileShaderCode(const std::string& arguments) {
 	return output;
 }
 
-void OpenGl::GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
+void GlShader::compileShaders(std::string prePath, std::string &vertPath, std::string &fragPath) {
 	std::string possibleVert;
 	std::string possibleFrag;
 

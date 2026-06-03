@@ -1,9 +1,5 @@
 #include "GlRendering.hpp"
 
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-
 GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 {
 	spdlog::debug("Creating frame buffer with size: {},{}", size.x, size.y);
@@ -160,4 +156,8 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void GlFrameBuffer::updateRes() {
+	glViewport(0, 0, (GLsizei)size.x, (GLsizei)size.y);
 }

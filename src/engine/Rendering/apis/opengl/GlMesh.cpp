@@ -1,8 +1,4 @@
 #include "GlRendering.hpp"
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-using namespace Engine::Rendering;
 
 GlMesh::~GlMesh()
 {

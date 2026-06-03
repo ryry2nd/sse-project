@@ -17,10 +17,7 @@ namespace Engine::Rendering
 		};
 
 		virtual ~Buff() = default;
-
-		Buff(const Buff&) = delete;
 		Buff& operator=(const Buff&) = delete;
-		Buff(Buff&&) noexcept = default;
 		Buff& operator=(Buff&&) noexcept = default;
 
 		std::size_t getSize() {return allocSize;}
@@ -31,11 +28,6 @@ namespace Engine::Rendering
 		virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
 
 	protected:
-		Buff(Type type, Frequency freq, std::size_t size) {
-			this->buffType = type;
-			this->freq = freq;
-			this->allocSize = size;
-		}
 		Type buffType;
 		Frequency freq;
 		std::size_t allocSize;

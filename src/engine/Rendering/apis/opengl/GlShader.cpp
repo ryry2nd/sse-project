@@ -2,10 +2,6 @@
 
 #include <fstream>
 #include <filesystem>
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-using namespace Engine::Rendering;
 
 void compileSpirV(const char *path, GLuint shader, const char* entryPoint) {
 	std::ifstream file(path, std::ios::binary | std::ios::ate);
@@ -43,36 +39,37 @@ void compileSpirV(const char *path, GLuint shader, const char* entryPoint) {
 	}
 }
 
-void compileGlSl(const char *path, GLuint shader)
-{
-    std::ifstream file(path, std::ios::binary | std::ios::ate);
+// Disabled glsl compile. May need it some day
+// void compileGlSl(const char *path, GLuint shader)
+// {
+//     std::ifstream file(path, std::ios::binary | std::ios::ate);
 
-    if (!file.is_open()) {
-        spdlog::critical("Failed to open shader file: {}", path);
-        std::exit(1);
-    }
+//     if (!file.is_open()) {
+//         spdlog::critical("Failed to open shader file: {}", path);
+//         std::exit(1);
+//     }
 
-    size_t size = file.tellg();
-    file.seekg(0);
+//     size_t size = file.tellg();
+//     file.seekg(0);
 
-    std::string source(size, '\0');
-    file.read(source.data(), size);
+//     std::string source(size, '\0');
+//     file.read(source.data(), size);
 
-    const char* src = source.c_str();
+//     const char* src = source.c_str();
 
-    glShaderSource(shader, 1, &src, nullptr);
-    glCompileShader(shader);
+//     glShaderSource(shader, 1, &src, nullptr);
+//     glCompileShader(shader);
 
-    GLint success = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+//     GLint success = 0;
+//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-    if (!success) {
-        char log[1024];
-        glGetShaderInfoLog(shader, 1024, nullptr, log);
-        spdlog::critical("Shader compile failed ({}): {}", path, log);
-		std::exit(1);
-    }
-}
+//     if (!success) {
+//         char log[1024];
+//         glGetShaderInfoLog(shader, 1024, nullptr, log);
+//         spdlog::critical("Shader compile failed ({}): {}", path, log);
+// 		std::exit(1);
+//     }
+// }
 
 GlShader::GlShader(std::string path)
 {
@@ -91,12 +88,12 @@ GlShader::GlShader(std::string path)
 
 	if (vertext == ".spv")
 		compileSpirV(vertexPath.c_str(), vertex, "main");
-	else if (vertext == ".glsl")
-		compileGlSl(vertexPath.c_str(), vertex);
+	// else if (vertext == ".glsl")
+	// 	compileGlSl(vertexPath.c_str(), vertex);
 	if (fragext == ".spv")
 		compileSpirV(fragmentPath.c_str(), fragment, "main");
-	else if (fragext == ".glsl")
-		compileGlSl(fragmentPath.c_str(), fragment);
+	// else if (fragext == ".glsl")
+	// 	compileGlSl(fragmentPath.c_str(), fragment);
 
 	// ---- link program ----
 	id = glCreateProgram();

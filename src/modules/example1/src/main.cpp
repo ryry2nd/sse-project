@@ -67,8 +67,7 @@ extern "C" {
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
-		ModelStruct bigModel = glm::mat4(1.0f);
-		bigModel = glm::translate(bigModel, {0, -102, 0});
+		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
 
 		megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
 
@@ -203,10 +202,6 @@ extern "C" {
 		if (type == SDL_EVENT_MOUSE_MOTION)
 		{
 			rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
-		}
-		if (type == SDL_EVENT_WINDOW_RESIZED)
-		{
-			win->updateScreenRes();
 		}
 	}
 }

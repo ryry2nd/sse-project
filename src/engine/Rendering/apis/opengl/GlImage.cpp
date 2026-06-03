@@ -3,12 +3,6 @@
 #include <filesystem>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-using namespace Engine::Rendering;
-
-bool GlImage::hasInit = false;
 
 GlImage::GlImage(const char *filePath)
 {
@@ -65,17 +59,17 @@ void GlImage::setupObject(SDL_Surface *surface_old)
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-		glTexImage2D(
-			GL_TEXTURE_2D,
-			0,
-			GL_RGBA8,
-			surface->w,
-			surface->h,
-			0,
-			GL_RGBA,
-			GL_UNSIGNED_BYTE,
-			surface->pixels
-		);
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RGBA8,
+		surface->w,
+		surface->h,
+		0,
+		GL_RGBA,
+		GL_UNSIGNED_BYTE,
+		surface->pixels
+	);
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 

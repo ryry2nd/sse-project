@@ -2,11 +2,6 @@
 
 #include <engine/Rendering/Rendering.hpp>
 #include <SDL3/SDL_video.h>
-#include <spdlog/spdlog.h>
-
-using namespace OpenGl;
-
-using namespace Engine::Rendering;
 
 inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	switch (meshType)
@@ -96,13 +91,15 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
     } \
 }
 
-void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
-	if (!pms) return;
+void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
+	if (!pms || !win) return;
 
 	InternalParams params;
 	combineParams(params, pms, size);
 
 	if (!params.shader) return;
+
+	win->setWindow();
 
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(params.shader);
@@ -158,13 +155,8 @@ void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	if (useFBO && hasFBO) {
 		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
-
-		glViewport(0, 0, (GLsizei)fbo->getSize().x, (GLsizei)fbo->getSize().y);
-
+		glFBO->updateRes();
 		DRAW_CALL(glmesh, params);
-
-		auto res = glwin->getRes();
-		glViewport(0, 0, res.x, res.y);
 	}
 
 	// -------------------------
@@ -173,7 +165,7 @@ void OpenGl::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	if (!disableScreen)
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+		win->updateScreenRes();
 		DRAW_CALL(glmesh, params);
 	}
 

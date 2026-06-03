@@ -1,30 +1,28 @@
 #include "GlRendering.hpp"
 
-#include <spdlog/spdlog.h>
-
-using namespace Engine::Rendering;
-using namespace OpenGl;
-
-GLenum GlBuff::toGLTarget(Type type) {
+GLenum toGLTarget(Buff::Type type) {
 	switch (type) {
-		case Type::Uniform:      return GL_UNIFORM_BUFFER;
-		case Type::Storage:      return GL_SHADER_STORAGE_BUFFER;
+		case Buff::Type::Uniform:      return GL_UNIFORM_BUFFER;
+		case Buff::Type::Storage:      return GL_SHADER_STORAGE_BUFFER;
 	}
 	return GL_SHADER_STORAGE_BUFFER;
 }
 
-GLenum GlBuff::toGLUsage(Frequency freq) {
+GLenum toGLUsage(Buff::Frequency freq) {
 	switch (freq) {
-		case Frequency::Static:  return GL_STATIC_DRAW;
-		case Frequency::Dynamic: return GL_DYNAMIC_DRAW;
-		case Frequency::Stream:  return GL_STREAM_DRAW;
+		case Buff::Frequency::Static:  return GL_STATIC_DRAW;
+		case Buff::Frequency::Dynamic: return GL_DYNAMIC_DRAW;
+		case Buff::Frequency::Stream:  return GL_STREAM_DRAW;
 	}
 	return GL_DYNAMIC_DRAW;
 }
 
 GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
-	: Buff(type, freq, size)
 {
+	this->buffType = type;
+	this->freq = freq;
+	this->allocSize = size;
+
 	spdlog::debug("Creating buffer with {} bytes", size);
 	target = toGLTarget(type);
 	usage  = toGLUsage(freq);
