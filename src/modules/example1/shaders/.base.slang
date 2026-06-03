@@ -23,9 +23,9 @@ typedef float4 vec4;
 	#define BINDING_UAV(x)
 	// Constant buffers
 	#define BINDING_CBV(x)
-
-	// Textures/Samplers
+	// Textures
 	#define BINDING_IMG(x)
+	/// Samplers
 	#define BINDING_SAMPLER(x)
 #endif
 
