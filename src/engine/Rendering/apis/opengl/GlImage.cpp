@@ -49,6 +49,7 @@ void GlImage::setupObject(SDL_Surface *surface_old)
     if (!surface)
     {
 		spdlog::critical("Convert failed: {}", SDL_GetError());
+		SDL_DestroySurface(surface);
 		std::exit(1);
     }
 
