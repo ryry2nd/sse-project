@@ -24,7 +24,6 @@ if (SSE_MINIMAL)
 		-flto
 		-fdata-sections
 		-ffunction-sections
-		-fno-omit-frame-pointer
 	)
 
 	add_link_options(
@@ -38,7 +37,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 		-flto
 		-fdata-sections
 		-ffunction-sections
-		-fno-omit-frame-pointer
 	)
 
 	add_link_options(
@@ -55,7 +53,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	)
 
 	add_link_options(
-		# keep linking simple/fast
 	)
 endif()
 

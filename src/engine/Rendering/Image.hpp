@@ -13,6 +13,8 @@ namespace Engine::Rendering
 		virtual ~Image() = default;
 		static SDL_Surface *loadFile(const char *filePath);
 		glm::vec2 getSizes() {return imageSizes;}
+		float getWidth() {return imageSizes.x;}
+		float getHeight() {return imageSizes.y;}
 		virtual void clearTransparent() = 0;
 	protected:
 		glm::vec2 imageSizes;

@@ -7,6 +7,8 @@
 #include <SDL3/SDL_loadso.h>
 #include <SDL3/SDL_error.h>
 
+#include <spdlog/spdlog.h>
+
 using namespace ScriptingHeaders;
 
 
@@ -17,15 +19,14 @@ extern "C" {
 	long initModuleJIT(const char* path);
 	void setupJIT(long id);
 	long loopJIT(long id);
-	long eventJIT(long id, SDL_Event *e, bool *running);
+	long eventJIT(long id, SDL_Event *e);
 	void shutdownJIT(long id);
 	void removeJIT(long id);
 	bool JITRunnable(long id);
 }
 
-std::vector<EnginePackage *> EnginePackage::packages;
-
 static bool shouldShutDown = true;
+
 bool EnginePackage::ShouldStop() {
 	if (shouldShutDown) {
 		spdlog::info("No loop or event functions implemented. Shutting down");
@@ -34,30 +35,12 @@ bool EnginePackage::ShouldStop() {
 	return false;
 }
 
-
-void EnginePackage::LoopFunctions() {
-	for (EnginePackage * pkg : packages) {
-		pkg->runLoopFunction();
-	}
-}
-
-void EnginePackage::EventFunctions(bool *running) {
-	SDL_Event event;
-	while (SDL_PollEvent(&event)) {
-		for (EnginePackage * pkg : packages) {
-			pkg->runEventFunction(&event, running);
-		}
-	}
-}
-
 EnginePackage::EnginePackage(const std::string &path)
 {
 	if (!std::filesystem::exists(path)) {
 		spdlog::error("Path does not exist");
 		return;
 	}
-
-	packages.push_back(this);
 	if (!std::filesystem::exists(path + CONFIG_NAME)) {
 		spdlog::error("Path does not have a: {}", CONFIG_NAME);
 		return;
@@ -107,7 +90,7 @@ EnginePackage::EnginePackage(const std::string &path)
 }
 
 
-void EnginePackage::runLoopFunction() {
+void EnginePackage::LoopFunction() {
 	try {
 		loopJIT(llvmLocation);
 	}
@@ -119,9 +102,9 @@ void EnginePackage::runLoopFunction() {
 	}
 }
 
-void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
+void EnginePackage::EventFunction(SDL_Event *e) {
 	try {
-		eventJIT(llvmLocation, e, running);
+		eventJIT(llvmLocation, e);
 	}
 	catch (const std::exception& e) {
 		spdlog::error(e.what());
@@ -134,10 +117,6 @@ void EnginePackage::runEventFunction(SDL_Event *e, bool *running) {
 
 EnginePackage::~EnginePackage()
 {
-	auto it = std::find(packages.begin(), packages.end(), this);
-	if (it != packages.end())
-		packages.erase(it);
-
 	try {
 		shutdownJIT(llvmLocation);
 	}

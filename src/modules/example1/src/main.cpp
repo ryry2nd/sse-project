@@ -19,6 +19,7 @@ Material mat;
 Material inMat;
 Material bigMat;
 Material debugMat;
+Material frameImageMat;
 CameraStruct cam;
 ModelStruct model;
 
@@ -36,6 +37,8 @@ Buff *camBuff;
 Buff *modelBuff;
 Buff *megaBuff;
 Buff *cubeInstanceBuff;
+Buff *fboBuff;
+FrameBuffer *fbo;
 
 extern "C" {
 	void setup() {
@@ -63,6 +66,7 @@ extern "C" {
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
 		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
 		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
+		// fbo = CreationFunctions::createFrameBuffer(res, FrameBuffer::Settings::Color);
 
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
@@ -84,32 +88,41 @@ extern "C" {
 		inMat.shader = cubeInstanceShader;
 		inMat.ubo[0] = camBuff;
 
-		glm::vec3 gridSize(50,50,50);
-		std::vector<glm::mat4> models;
+		glm::vec3 gridSize(32,32,32);
+		std::vector<ModelStruct> models;
         models.reserve(gridSize.x * gridSize.y * gridSize.z);
 
         for (int x = 0; x < gridSize.x; x++) {
             for (int y = 0; y < gridSize.y; y++) {
                 for (int z = 0; z < gridSize.z; z++) {
-                    glm::mat4 mat(1.0f);
-                    mat = glm::translate(mat, {(x * 3) - ((gridSize.x * 3) / 2), (y * 3) + 10, ((z * 3) - (gridSize.z * 3)) - 20});
-                    models.push_back(mat);
+					models.push_back(glm::translate(glm::mat4(1.0f), {(x * 3) - ((gridSize.x * 3) / 2), (y * 3) + 10, ((z * 3) - (gridSize.z * 3)) - 20}));
                 }
             }
         }
 
-		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4)*models.size(), models.data());
+		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
 
 		inMat.instanceCount = models.size();
-
 		inMat.ssbo[0] = cubeInstanceBuff;
+		// inMat.settings |= InternalParams::Settings::EnableFBO;
+		// inMat.fbo = fbo;
 
 		debugMat.shader = debugVectorShader;
 		debugMat.meshType = InternalParams::MeshTypes::Lines;
 		debugMat.ubo[0] = camBuff;
+
+
+		ModelStruct fboPosition = glm::translate(glm::mat4(1.0f), {-10, 0, 0});
+		fboBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
+		// frameImageMat.shader = cubeShader;
+		// frameImageMat.ubo[0] = fboBuff;
+		// frameImageMat.ubo[1] = camBuff;
+		// frameImageMat.images[0] = fbo->getColorImage();
 	}
 
 	void loop() {
+		win->update();
+		win->clearBackground();
 		float deltaTime = win->getDeltaTime();
 		static float timer = 0.0f;
 		static float t = 0.0f;
@@ -180,28 +193,26 @@ extern "C" {
 		CreationFunctions::draw(win, cube, &inMat);
 		CreationFunctions::draw(win, megaCube, &bigMat);
 		CreationFunctions::draw(win, nullptr, &debugMat);
+		// CreationFunctions::draw(win, cube, &frameImageMat);
+		// fbo->getColorImage()->clearTransparent();
+		win->swapBuffer();
 	}
 
-	void event(SDL_Event *event, bool *running) {
+	void event(SDL_Event *event) {
 		auto dt = win->getDeltaTime();
 
 		auto type = event->type;
 		if (type == SDL_EVENT_QUIT)
-			*running = false;
+			Engine::shutdown();
 		if (type == SDL_EVENT_KEY_DOWN)
 		{
 			auto key = event->key.key;
 			if (key == SDLK_ESCAPE)
-			{
-				*running = false;
-			}
-			if (key == SDLK_F3) {
+				Engine::shutdown();
+			if (key == SDLK_F3)
 				outputFPS = !outputFPS;
-			}
 		}
 		if (type == SDL_EVENT_MOUSE_MOTION)
-		{
 			rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
-		}
 	}
 }

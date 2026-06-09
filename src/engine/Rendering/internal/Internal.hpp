@@ -3,7 +3,7 @@
 #include "../Rendering.hpp"
 #include <memory>
 
-namespace InternalFunctions {
+namespace Internal::Functions {
 	void initAPI(const char *);
 
 	void draw(Engine::Rendering::Window*, Engine::Rendering::Mesh*, Engine::Rendering::DrawParams*, size_t);

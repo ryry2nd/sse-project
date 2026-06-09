@@ -99,16 +99,16 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 
 	if (!params.shader) return;
 
-	win->setWindow();
-
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(params.shader);
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
+	glwin->setWindow();
+
 	FrameBuffer *fbo	= params.fbo;
-	bool disableScreen	= params.settings & InternalParams::DisableScreen;
-	bool useFBO       	= params.settings & InternalParams::EnableFBO;
-	bool hasFBO       	= (fbo != nullptr);
+	bool renderScreen	= !(params.settings & InternalParams::DisableScreen);
+	bool renderFBO		= (params.settings & InternalParams::EnableFBO) && (fbo != nullptr);
+
 
 	glUseProgram(glshdr->getID());
 
@@ -149,10 +149,12 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 		glEnable(GL_DEPTH_TEST);
 
 
+	// render stage
+
 	// -------------------------
 	// 3. Render To FBO
 	// -------------------------
-	if (useFBO && hasFBO) {
+	if (renderFBO) {
 		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
 		glFBO->updateRes();
@@ -162,10 +164,22 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	// -------------------------
 	// 4. RENDER TO SCREEN
 	// -------------------------
-	if (!disableScreen)
-	{
+	if (renderFBO && renderScreen) {
+		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, glFBO->getID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+		glBlitFramebuffer(
+			0, 0, glFBO->getWidth(), glFBO->getHeight(),
+			0, 0, glwin->getWidth(), glwin->getHeight(),
+			GL_COLOR_BUFFER_BIT,
+			GL_NEAREST
+		);
+	}
+	else if (renderScreen) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		win->updateScreenRes();
+		glwin->updateScreenRes();
 		DRAW_CALL(glmesh, params);
 	}
 

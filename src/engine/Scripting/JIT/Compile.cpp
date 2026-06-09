@@ -12,7 +12,7 @@ extern "C" {
 long initModuleJITMax(const char* path);
 void setupJITMax(long id);
 bool loopJITMax(long id);
-bool eventJITMax(long id, SDL_Event *e, bool *running);
+bool eventJITMax(long id, SDL_Event *e);
 void shutdownJITMax(long id);
 void removeJITMax(long id);
 bool JITRunnableMax(long id);
@@ -21,7 +21,7 @@ bool JITRunnableMax(long id);
 long initModuleJITMin(const char* path);
 void setupJITMin(long id);
 bool loopJITMin(long id);
-bool eventJITMin(long id, SDL_Event *e, bool *running);
+bool eventJITMin(long id, SDL_Event *e);
 void shutdownJITMin(long id);
 void removeJITMin(long id);
 bool JITRunnableMin(long id);
@@ -63,14 +63,14 @@ bool loopJIT(long id) {
 	return loopJITMax(id);
 	#endif
 }
-bool eventJIT(long id, SDL_Event *e, bool *running) {
+bool eventJIT(long id, SDL_Event *e) {
 	#ifdef MINIMAL
-	return eventJITMin(id, e, running);
+	return eventJITMin(id, e);
 	#else
 	if (std::ranges::find(minlist, id) != minlist.end()) {
-		return eventJITMin(id, e, running);
+		return eventJITMin(id, e);
 	}
-	return eventJITMax(id, e, running);
+	return eventJITMax(id, e);
 	#endif
 }
 void shutdownJIT(long id) {

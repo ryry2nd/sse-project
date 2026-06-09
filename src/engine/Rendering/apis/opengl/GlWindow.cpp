@@ -8,8 +8,8 @@
 #define MINOR_VERSION 6
 
 GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
-	: Window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse)
 {
+	sdl_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse);
 	spdlog::debug("Creating window with resolution: {} by {}", res.x, res.y);
 	// this does what it says
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MAJOR_VERSION);

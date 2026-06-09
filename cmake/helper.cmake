@@ -72,14 +72,14 @@ function(compile_module MAKE_SO)
 		endif()
 
 		if(CMAKE_BUILD_TYPE STREQUAL "Release")
-			set(MODULE_FLAGS -shared -O2 -fPIC -fdata-sections -ffunction-sections -fno-omit-frame-pointer -Wl,--gc-sections)
+			set(MODULE_FLAGS -shared -Oz -fPIC -fdata-sections -ffunction-sections)
 		elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 			set(MODULE_FLAGS -shared -fPIC -DDEBUG -O0 -g3 -fno-omit-frame-pointer)
 		endif()
 	else()
 		if(CMAKE_BUILD_TYPE STREQUAL "Release")
 			set(MODULE_FILE ${MODULE_OUT_DIR}/module.bc)
-			set(MODULE_FLAGS -emit-llvm -c -O2 -fdata-sections -ffunction-sections -fno-omit-frame-pointer)
+			set(MODULE_FLAGS -emit-llvm -c -O3 -fdata-sections -ffunction-sections)
 		elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 			set(MODULE_FILE ${MODULE_OUT_DIR}/module.ll)
 			set(MODULE_FLAGS -emit-llvm -S -DDEBUG -O0 -g3 -fno-omit-frame-pointer)
@@ -146,8 +146,6 @@ function(copy_assets)
 		COMMENT "---- Copying assets ----"
 	)
 
-	if (SSE_MINIMAL)
-
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	else()
@@ -162,7 +160,7 @@ function(copy_assets)
 
 	add_custom_target(compile_slang_shaders ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
-			"${MODULE_OUT_DIR}/shaders"
+			"${MODULE_OUT_DIR}/shaders/gl"
 	)
 
 	foreach(SHADER ${SLANG_SHADERS})
@@ -177,7 +175,7 @@ function(copy_assets)
 				-target spirv -stage vertex
 				-DGL
 				-entry vertMain
-				-o "${MODULE_OUT_DIR}/shaders/${NAME}.vert.spv"
+				-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.vert.spv"
 
 			COMMAND ${SLANGC_CMD}
 				"${SHADER}"
@@ -185,7 +183,7 @@ function(copy_assets)
 				-target spirv -stage fragment
 				-DGL
 				-entry fragMain
-				-o "${MODULE_OUT_DIR}/shaders/${NAME}.frag.spv"
+				-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.frag.spv"
 
 			COMMENT "Compiling ${NAME}"
 		)
@@ -193,14 +191,4 @@ function(copy_assets)
 	endforeach()
 
 	add_dependencies(compile_slang_shaders copy_assets_target)
-	else()
-	add_custom_target(copy_shaders ALL
-		COMMAND ${CMAKE_COMMAND} -E make_directory
-			"${MODULE_OUT_DIR}/shaders"
-		COMMAND ${CMAKE_COMMAND} -E copy_directory
-			${MODULE}/shaders
-			${MODULE_OUT_DIR}/shaders
-		COMMENT "---- Copying Shaders ----"
-	)
-	endif()
 endfunction()

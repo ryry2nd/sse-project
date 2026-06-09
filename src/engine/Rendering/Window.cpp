@@ -10,32 +10,39 @@
 
 using namespace Engine::Rendering;
 
-Uint64 Window::now = SDL_GetTicks();
-
 extern "C" void hostShutDownAll();
 
-void Window::shutdown() {
-	hostShutDownAll();
-	SDL_Quit();
-	spdlog::info("Quit out of sdl");
-	spdlog::warn("Note that you should only run this once per program and not per window");
+static Uint64 now;
+
+Uint64 Window::getTime() {
+	return now;
 }
 
-void Window::init() {
-	if (!SDL_Init(SDL_INIT_VIDEO))
-	{
-		spdlog::critical("SDL_Init Error: {}", SDL_GetError());
-		std::exit(1);
+extern "C" {
+	void Shutdown() {
+		hostShutDownAll();
+		SDL_Quit();
+		spdlog::info("Quit out of sdl");
+		spdlog::warn("Note that you should only run this once per program and not per window");
 	}
-	spdlog::info("Initalized sdl");
-	spdlog::warn("Note that you should only run this once per program and not per window");
-}
 
-void Window::Update()
-{
-	SDL_PumpEvents();
-	now = SDL_GetTicks();
+	void Init() {
+		now = SDL_GetTicks();
+		if (!SDL_Init(SDL_INIT_VIDEO))
+		{
+			spdlog::critical("SDL_Init Error: {}", SDL_GetError());
+			std::exit(1);
+		}
+		spdlog::info("Initalized sdl");
+		spdlog::warn("Note that you should only run this once per program and not per window");
+	}
 
+	void Update()
+	{
+		SDL_PumpEvents();
+		now = SDL_GetTicks();
+
+	}
 }
 
 void Window::update() {
@@ -67,7 +74,7 @@ const bool *Window::getKeystates(int &numKeys) {
 	return SDL_GetKeyboardState(&numKeys);
 }
 
-Window::Window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
+void Window::sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
 	lastCounter = SDL_GetPerformanceCounter();
 

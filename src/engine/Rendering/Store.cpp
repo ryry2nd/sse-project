@@ -13,16 +13,16 @@ std::vector<std::unique_ptr<FrameBuffer>> fbos;
 
 
 void CreationFunctions::draw(Window *win, Mesh *mesh, DrawParams *params, size_t size) {
-	InternalFunctions::draw(win, mesh, params, size);
+	Internal::Functions::draw(win, mesh, params, size);
 }
 
 
 void CreationFunctions::initAPI(const char* api) {
-	InternalFunctions::initAPI(api);
+	Internal::Functions::initAPI(api);
 }
 
 Window *CreationFunctions::createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
-	auto win = InternalFunctions::createWindow(res, winName, flags, aa, fullscreen, vsync, hideMouse);
+	auto win = Internal::Functions::createWindow(res, winName, flags, aa, fullscreen, vsync, hideMouse);
 	auto ret = win.get();
 	wins.push_back(std::move(win));
 	return ret;
@@ -37,7 +37,7 @@ void CreationFunctions::removeWindow(Window *win) {
 }
 
 Mesh *CreationFunctions::createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {
-	auto mesh = InternalFunctions::createMesh(vertices, vert_size, indices, ind_size);
+	auto mesh = Internal::Functions::createMesh(vertices, vert_size, indices, ind_size);
 	auto ret = mesh.get();
 	meshes.push_back(std::move(mesh));
 	return ret;
@@ -52,7 +52,7 @@ void CreationFunctions::removeMesh(Mesh *mesh) {
 }
 
 Shader *CreationFunctions::createShader(const char *path) {
-	auto shdr = InternalFunctions::createShader(path);
+	auto shdr = Internal::Functions::createShader(path);
 	auto ret = shdr.get();
 	shaders.push_back(std::move(shdr));
 	return ret;
@@ -67,13 +67,13 @@ void CreationFunctions::removeShader(Shader *shdr) {
 }
 
 Image *CreationFunctions::createImage(const char *filePath) {
-	auto img = InternalFunctions::createImage(filePath);
+	auto img = Internal::Functions::createImage(filePath);
 	auto ret = img.get();
 	images.push_back(std::move(img));
 	return ret;
 }
 Image *CreationFunctions::createImage(SDL_Surface *surface) {
-	auto img = InternalFunctions::createImage(surface);
+	auto img = Internal::Functions::createImage(surface);
 	auto ret = img.get();
 	images.push_back(std::move(img));
 	return ret;
@@ -88,7 +88,7 @@ void CreationFunctions::removeImage(Image *image) {
 }
 
 Buff *CreationFunctions::createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data) {
-	auto buff = InternalFunctions::createBuff(type, freq, size, data);
+	auto buff = Internal::Functions::createBuff(type, freq, size, data);
 	auto ret = buff.get();
 	buffers.push_back(std::move(buff));
 	return ret;
@@ -103,7 +103,7 @@ void CreationFunctions::removeBuff(Buff *buff) {
 }
 
 FrameBuffer *CreationFunctions::createFrameBuffer(glm::vec2 size, uint32_t settings) {
-	auto fbo = InternalFunctions::createFrameBuffer(size, settings);
+	auto fbo = Internal::Functions::createFrameBuffer(size, settings);
 	auto ret = fbo.get();
 	fbos.push_back(std::move(fbo));
 	return ret;
@@ -120,24 +120,10 @@ void CreationFunctions::removeFrameBuffer(FrameBuffer *fbo) {
 extern "C" {
 	void hostShutDownAll() {
 		meshes.clear();
+		fbos.clear();
 		images.clear();
 		buffers.clear();
 		shaders.clear();
 		wins.clear();
-	}
-	void hostWindowClearBackground() {
-		for (auto &win : wins) {
-			win->clearBackground();
-		}
-	}
-	void hostWindowSwapBuffers() {
-		for (auto &win : wins) {
-			win->swapBuffer();
-		}
-	}
-	void hostUpdateWindows() {
-		for (auto &win : wins) {
-			win->update();
-		}
 	}
 }

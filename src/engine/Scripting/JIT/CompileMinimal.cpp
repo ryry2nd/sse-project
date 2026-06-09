@@ -30,7 +30,7 @@ struct MyModule {
 	SDLSharedPtr runtime;
 	void (*setup)();
 	void (*loop)();
-	void (*event)(SDL_Event*, bool*);
+	void (*event)(SDL_Event*);
 	void (*shutdown)();
 };
 
@@ -65,7 +65,7 @@ long initModuleJITMin(const char* path) {
 	mod.runtime = std::move(lib);
 	mod.setup = reinterpret_cast<void(*)()>(setup);
 	mod.loop = reinterpret_cast<void(*)()>(loop);
-	mod.event = reinterpret_cast<void(*)(SDL_Event*, bool*)>(event);
+	mod.event = reinterpret_cast<void(*)(SDL_Event*)>(event);
 	mod.shutdown = reinterpret_cast<void(*)()>(shutdown);
 
 	modsMin[currID] = std::move(mod);
@@ -88,14 +88,14 @@ bool loopJITMin(long id) {
 	modsMin[id].loop();
 	return 0;
 }
-bool eventJITMin(long id, SDL_Event *e, bool *running) {
+bool eventJITMin(long id, SDL_Event *e) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return 1;
 
 	if (!modsMin[id].event) {
 		return 1;
 	}
-	modsMin[id].event(e, running);
+	modsMin[id].event(e);
 	return 0;
 }
 void shutdownJITMin(long id) {

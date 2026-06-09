@@ -1,13 +1,13 @@
 #include "GlRendering.hpp"
 
-GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
+GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 {
-	spdlog::debug("Creating frame buffer with size: {},{}", size.x, size.y);
-	this->size = size;
+	spdlog::debug("Creating frame buffer with res: {},{}", res.x, res.y);
+	this->res = res;
 	this->settings = settings;
 
-	int width  = (int)size.x;
-	int height = (int)size.y;
+	int width  = (int)res.x;
+	int height = (int)res.y;
 
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
@@ -39,7 +39,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 		GLenum drawBuf = GL_COLOR_ATTACHMENT0;
 		glDrawBuffers(1, &drawBuf);
 
-		colorImage = new GlImage(colorTex, size);
+		colorImage = new GlImage(colorTex, res);
 	}
 	else
 	{
@@ -67,7 +67,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 							   depthTex,
 							   0);
 
-		depthImage = new GlImage(depthTex, size);
+		depthImage = new GlImage(depthTex, res);
 		stencilImage = depthImage;
 	}
 	else
@@ -89,7 +89,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 								   depthTex,
 								   0);
 
-			depthImage = new GlImage(depthTex, size);
+			depthImage = new GlImage(depthTex, res);
 		}
 
 		if (settings & Settings::Stencil)
@@ -109,7 +109,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 size, uint32_t settings)
 								   stencilTex,
 								   0);
 
-			stencilImage = new GlImage(stencilTex, size);
+			stencilImage = new GlImage(stencilTex, res);
 		}
 	}
 
@@ -132,12 +132,12 @@ GlFrameBuffer::~GlFrameBuffer()
 
 void GlFrameBuffer::setSize(glm::vec2 newSize)
 {
-	size = newSize;
+	res = newSize;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
-	int width  = (int)size.x;
-	int height = (int)size.y;
+	int width  = (int)res.x;
+	int height = (int)res.y;
 
 	if (colorImage)
 	{
@@ -159,5 +159,5 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 }
 
 void GlFrameBuffer::updateRes() {
-	glViewport(0, 0, (GLsizei)size.x, (GLsizei)size.y);
+	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }

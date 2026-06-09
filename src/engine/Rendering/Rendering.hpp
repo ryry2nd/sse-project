@@ -19,7 +19,9 @@ namespace Engine::Rendering
 			HasArrayData    	= 1 << 3,
 		};
 
-		uint32_t fieldMask = 0;
+		static const uint32_t ENABLE_ALL = ~ uint32_t(0); // all 1s
+
+		uint32_t fieldMask = ENABLE_ALL;
 
 		enum Settings : uint32_t {
 			DisableScreen		= 1 << 0,

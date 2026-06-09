@@ -16,4 +16,5 @@ extern "C" {
 	void hostLogCritical(const char* str) {
 		spdlog::critical("{}", str);
 	}
+	void engineShutdown() {}
 }

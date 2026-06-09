@@ -31,6 +31,12 @@ public:
 		);
 	}
 
+	~LLVMRuntime() {
+		if (m_jit) {
+			m_jit.reset();
+		}
+	}
+
 	bool loadModule(const std::string& path) {
 		auto context = std::make_unique<LLVMContext>();
 
@@ -67,14 +73,11 @@ public:
 		auto symbol = m_jit->lookup(name);
 
 		if (!symbol) {
+			logAllUnhandledErrors(symbol.takeError(), errs());
 			return nullptr;
 		}
 
 		return symbol->toPtr<T>();
-	}
-
-	void reset() {
-		m_jit.reset();
 	}
 
 private:
@@ -82,10 +85,10 @@ private:
 };
 
 struct MyModule {
-	std::unique_ptr<LLVMRuntime> runtime;
+	LLVMRuntime *runtime;
 	void (*setup)();
 	void (*loop)();
-	void (*event)(SDL_Event*, bool*);
+	void (*event)(SDL_Event*);
 	void (*shutdown)();
 };
 
@@ -95,7 +98,7 @@ extern "C" {
 long initModuleJITMax(const char* path) {
 	static long currID = 0;
 
-	auto runtime = std::make_unique<LLVMRuntime>();
+	auto runtime = new LLVMRuntime();
 
 	if (!runtime->loadModule(path)) {
 		return -1;
@@ -103,12 +106,12 @@ long initModuleJITMax(const char* path) {
 
 	auto setup = runtime->getFunction<void(*)()>("setup");
 	auto loop = runtime->getFunction<void(*)()>("loop");
-	auto event = runtime->getFunction<void(*)(SDL_Event *, bool *)>("event");
+	auto event = runtime->getFunction<void(*)(SDL_Event *)>("event");
 	auto shutdown = runtime->getFunction<void(*)()>("shutdown");
 
 	MyModule mod;
 
-	mod.runtime = std::move(runtime);
+	mod.runtime = runtime;
 	mod.setup = setup;
 	mod.loop = loop;
 	mod.event = event;
@@ -135,14 +138,14 @@ bool loopJITMax(long id) {
 	modsMax[id].loop();
 	return 0;
 }
-bool eventJITMax(long id, SDL_Event *e, bool *running) {
+bool eventJITMax(long id, SDL_Event *e) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return 1;
 
 	if (!modsMax[id].event) {
 		return 1;
 	}
-	modsMax[id].event(e, running);
+	modsMax[id].event(e);
 	return 0;
 }
 void shutdownJITMax(long id) {
@@ -158,12 +161,15 @@ void removeJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return;
 
-	modsMax[id].setup = nullptr;
-	modsMax[id].loop = nullptr;
-	modsMax[id].event = nullptr;
-	modsMax[id].shutdown = nullptr;
+	auto &mod = modsMax[id];
 
-	modsMax[id].runtime.reset();
+	mod.setup = nullptr;
+	mod.loop = nullptr;
+	mod.event = nullptr;
+	mod.shutdown = nullptr;
+
+	delete mod.runtime;
+
 	modsMax.erase(id);
 }
 bool JITRunnableMax(long id) {

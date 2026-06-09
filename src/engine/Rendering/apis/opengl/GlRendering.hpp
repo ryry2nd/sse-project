@@ -66,10 +66,10 @@ private:
 
 class GlFrameBuffer : public FrameBuffer {
 public:
-	GlFrameBuffer(glm::vec2 size, uint32_t settings);
+	GlFrameBuffer(glm::vec2 res, uint32_t settings);
 	~GlFrameBuffer();
 
-	void setSize(glm::vec2 size);
+	void setSize(glm::vec2 res);
 
 	Image* getColorImage() {return colorImage;}
 	Image* getDepthImage() {return depthImage;}
@@ -78,7 +78,6 @@ public:
 	void updateRes();
 
 	GLuint getID() {return id;}
-
 private:
 	GLuint id = 0;
 
@@ -97,7 +96,6 @@ public:
 
 private:
 	GLuint id;
-	void compileShaders(std::string path, std::string &vertPath, std::string &fragPath);
 };
 
 class GlMesh : public Mesh

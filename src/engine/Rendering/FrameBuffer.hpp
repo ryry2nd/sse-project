@@ -13,8 +13,10 @@ namespace Engine::Rendering
 		};
 
 		virtual ~FrameBuffer() = default;
-		glm::vec2 getSize() const {return size;}
-		uint32_t getSettings() const {return settings;}
+		glm::vec2 getRes() {return res;}
+		float getWidth() {return res.x;}
+		float getHeight() {return res.y;}
+		uint32_t getSettings() {return settings;}
 		virtual void setSize(glm::vec2 size) = 0;
 
 		virtual Image* getColorImage() = 0;
@@ -22,7 +24,7 @@ namespace Engine::Rendering
 		virtual Image* getStencilImage() = 0;
 
 	protected:
-		glm::vec2 size;
+		glm::vec2 res;
 		uint32_t settings;
 	};
 }

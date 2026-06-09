@@ -3,79 +3,58 @@
 #include <fstream>
 #include <filesystem>
 
-void compileSpirV(const char *path, GLuint shader, const char* entryPoint) {
-	std::ifstream file(path, std::ios::binary | std::ios::ate);
+#define SHADERS_PATH "/gl/"
+#define VERT_EXT ".vert.spv"
+#define FRAG_EXT ".frag.spv"
+#define ENTRY_POINT "main"
 
-	size_t size = file.tellg();
-	file.seekg(0);
+namespace fs = std::filesystem;
 
-	std::vector<uint32_t> data(size / sizeof(uint32_t));
-	file.read(reinterpret_cast<char*>(data.data()), size);
-
-	glShaderBinary(
-		1,
-		&shader,
-		GL_SHADER_BINARY_FORMAT_SPIR_V_ARB,
-		data.data(),
-		data.size() * sizeof(uint32_t)
-	);
-
-	glSpecializeShaderARB(
-		shader,
-		entryPoint,
-		0,
-		nullptr,
-		nullptr
-	);
-
-	GLint success = 0;
-	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-	if (!success) {
-		char log[1024];
-		glGetShaderInfoLog(shader, 1024, nullptr, log);
-		spdlog::critical("SPIR-V shader failed: {}", log);
-		std::exit(1);
-	}
+#define compileSpirV(path, shader) \
+{ \
+	std::ifstream file(path, std::ios::binary | std::ios::ate); \
+	size_t size = file.tellg(); \
+	file.seekg(0); \
+	std::vector<uint32_t> data(size / sizeof(uint32_t)); \
+	file.read(reinterpret_cast<char*>(data.data()), size); \
+	\
+	glShaderBinary( \
+		1, \
+		&shader, \
+		GL_SHADER_BINARY_FORMAT_SPIR_V_ARB, \
+		data.data(), \
+		data.size() * sizeof(uint32_t) \
+	); \
+	\
+	glSpecializeShaderARB( \
+		shader, \
+		ENTRY_POINT, \
+		0, \
+		nullptr, \
+		nullptr \
+	); \
+	\
+	GLint success = 0; \
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success); \
+	if (!success) { \
+		char log[1024]; \
+		glGetShaderInfoLog(shader, 1024, nullptr, log); \
+		spdlog::critical("SPIR-V shader failed: {}", log); \
+		std::exit(1); \
+	} \
 }
 
-// Disabled glsl compile. May need it some day
-// void compileGlSl(const char *path, GLuint shader)
-// {
-//     std::ifstream file(path, std::ios::binary | std::ios::ate);
-
-//     if (!file.is_open()) {
-//         spdlog::critical("Failed to open shader file: {}", path);
-//         std::exit(1);
-//     }
-
-//     size_t size = file.tellg();
-//     file.seekg(0);
-
-//     std::string source(size, '\0');
-//     file.read(source.data(), size);
-
-//     const char* src = source.c_str();
-
-//     glShaderSource(shader, 1, &src, nullptr);
-//     glCompileShader(shader);
-
-//     GLint success = 0;
-//     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-//     if (!success) {
-//         char log[1024];
-//         glGetShaderInfoLog(shader, 1024, nullptr, log);
-//         spdlog::critical("Shader compile failed ({}): {}", path, log);
-// 		std::exit(1);
-//     }
-// }
-
-GlShader::GlShader(std::string path)
+GlShader::GlShader(std::string prePath)
 {
-	std::string vertexPath;
-	std::string fragmentPath;
-	compileShaders(path, vertexPath, fragmentPath);
+	fs::path fsPath = prePath;
+	std::string path = fsPath.parent_path().string() + SHADERS_PATH + fsPath.stem().string();
+	std::string vertexPath = path + VERT_EXT;
+	std::string fragmentPath = path + FRAG_EXT;
+
+	if (!(fs::exists(vertexPath) && fs::exists(fragmentPath))) {
+		spdlog::critical("Shader path {} does not exist.", path);
+		std::exit(1);
+	}
 
 	spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
 
@@ -83,17 +62,8 @@ GlShader::GlShader(std::string path)
 	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
 	// ---- load binary files ----
-	std::string vertext = std::filesystem::path(vertexPath).extension().string();
-	std::string fragext = std::filesystem::path(fragmentPath).extension().string();
-
-	if (vertext == ".spv")
-		compileSpirV(vertexPath.c_str(), vertex, "main");
-	// else if (vertext == ".glsl")
-	// 	compileGlSl(vertexPath.c_str(), vertex);
-	if (fragext == ".spv")
-		compileSpirV(fragmentPath.c_str(), fragment, "main");
-	// else if (fragext == ".glsl")
-	// 	compileGlSl(fragmentPath.c_str(), fragment);
+	compileSpirV(vertexPath.c_str(), vertex);
+	compileSpirV(fragmentPath.c_str(), fragment);
 
 	// ---- link program ----
 	id = glCreateProgram();
