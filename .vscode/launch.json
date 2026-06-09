@@ -1,41 +1,22 @@
-// {
-// 	"configurations": [
-// 	{
-// 		"name": "C/C++ Debug (gdb Launch)",
-// 		"type": "cppdbg",
-// 		"request": "launch",
-// 		"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
-// 		"args": [],
-// 		"stopAtEntry": true,
-// 		"cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
-// 		"environment": [],
-// 		"MIMode": "gdb",
-// 		"setupCommands": [
-// 			{
-// 				"description": "Enable pretty-printing for gdb",
-// 				"text": "-enable-pretty-printing",
-// 				"ignoreFailures": false
-// 			}
-// 		]
-// 	}
-// 	]
-// }
 {
-    "version": "0.2.0",
-    "configurations": [
-		{
-			"type": "lldb",
-			"request": "launch",
-			"name": "Launch",
-			"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
-			"preLaunchTask": "Run build.sh",
-			"args": [],
-			"cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
-			"console": "integratedTerminal",
-			"env": {
-				"FORCE_COLOR": "1",
-				"TERM": "xterm-256color"
+	"configurations": [
+	{
+		"name": "C/C++ Debug (gdb Launch)",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
+		"environment": [],
+		"MIMode": "gdb",
+		"setupCommands": [
+			{
+				"description": "Enable pretty-printing for gdb",
+				"text": "-enable-pretty-printing",
+				"ignoreFailures": false
 			}
-		}
-    ]
+		]
+	}
+	]
 }

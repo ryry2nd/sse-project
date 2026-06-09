@@ -28,6 +28,4 @@ namespace ScriptingHeaders
 
 		long llvmLocation;
 	};
-
-	void loginit();
 }

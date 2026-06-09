@@ -14,11 +14,12 @@ extern "C" {
 	void Init();
 	void Update();
 	void Shutdown();
+	void loginit();
 }
 
 int main(int argc, char *argv[])
 {
-	ScriptingHeaders::loginit();
+	loginit();
 	Init();
 	ScriptingHeaders::EnginePackage *example_package = new ScriptingHeaders::EnginePackage(std::string(DEFAULT_MODULE));
 

@@ -1,5 +1,3 @@
-#include "ScriptingHeaders.hpp"
-
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -34,7 +32,7 @@ std::string makeLogFile()
 	);
 }
 
-void ScriptingHeaders::loginit() {
+extern "C" void loginit() {
 	auto file = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
 		makeLogFile(),
 		true
