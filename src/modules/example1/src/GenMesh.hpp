@@ -9,12 +9,21 @@ void buildVoxelGrid(std::vector<Vert>& vertices,
                     std::vector<Ind>& indices,
                     glm::vec3 size)
 {
+	size_t surfaceApprox =
+		2 * (
+			size_t(size.x * size.y) +
+			size_t(size.x * size.z) +
+			size_t(size.y * size.z)
+		);
+
+	vertices.reserve(surfaceApprox * 4);
+	indices.reserve(surfaceApprox * 6);
+
     auto isSolid = [&](int x, int y, int z) -> bool
     {
         if (x < 0 || y < 0 || z < 0 ||
             x >= size.x || y >= size.y || z >= size.z)
             return false;
-
         return true; // replace later with real voxel data
     };
 

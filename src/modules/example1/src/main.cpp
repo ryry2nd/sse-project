@@ -57,7 +57,6 @@ extern "C" {
 
 		buildVoxelGrid(vert, ind, {100, 100, 100});
 
-
 		CreationFunctions::initAPI("OpenGl4.6");
 		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");

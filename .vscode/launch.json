@@ -4,6 +4,7 @@
 		"name": "C/C++ Debug (gdb Launch)",
 		"type": "cppdbg",
 		"request": "launch",
+		"preLaunchTask": "Run build.sh",
 		"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
 		"args": [],
 		"stopAtEntry": false,
