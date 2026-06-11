@@ -27,7 +27,10 @@ RUN apt install -y \
 	libxss-dev \
 	libgl1-mesa-dev \
 	libxtst-dev \
-	zlib1g-dev
+	zlib1g-dev \
+	libwayland-dev \
+	wayland-protocols \
+	libxkbcommon-dev
 
 RUN rm -rf /var/lib/apt/lists/*
 
