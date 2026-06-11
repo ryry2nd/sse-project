@@ -30,7 +30,11 @@ RUN apt install -y \
 	zlib1g-dev \
 	libwayland-dev \
 	wayland-protocols \
-	libxkbcommon-dev
+	libxkbcommon-dev \
+	libegl1-mesa-dev \
+	libgles2-mesa-dev \
+	libdecor-0-dev \
+	pkg-config
 
 RUN rm -rf /var/lib/apt/lists/*
 
