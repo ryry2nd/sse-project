@@ -8,8 +8,8 @@ RUN apt install -y \
 	ninja-build \
 	python3 \
 	python3-venv \
-	clang-18 \
-	llvm-18 \
+	clang-20 \
+	llvm-20 \
 	ccache \
 	build-essential \
 	nasm \
@@ -27,6 +27,7 @@ RUN apt install -y \
 	libxss-dev \
 	libgl1-mesa-dev \
 	libxtst-dev \
+	libzstd-dev \
 	zlib1g-dev \
 	libwayland-dev \
 	wayland-protocols \
