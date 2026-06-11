@@ -86,7 +86,7 @@ target_link_libraries(ScriptingJIT PRIVATE SDL3::SDL3 spdlog::spdlog RenderingBa
 if (SSE_MINIMAL)
 target_compile_definitions(ScriptingJIT PRIVATE MINIMAL)
 else()
-target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG)
+# target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

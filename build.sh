@@ -1,5 +1,4 @@
-#!/bin/bash
-export PATH="$HOME/.local/bin:$PATH"
+#!/usr/bin/env bash
 
 BUILD_TYPE="Release"
 OS="linux"
@@ -36,18 +35,23 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-TOOLCHAIN_FILE="cmake/toolchains/${OS}.cmake"
+set -e
 
-if [ "$MINIMAL" -eq 1 ]; then
-BUILD_DIR="./build/$OS-$BUILD_TYPE-minimal"
-else
-BUILD_DIR="./build/$OS-$BUILD_TYPE"
-fi
+mkdir -p build .ccache
 
-mkdir -p "$BUILD_DIR"
-
-if [ "$NOCONFIG" -eq 0 ]; then
-  cmake -B "$BUILD_DIR" -G Ninja -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE=$TOOLCHAIN_FILE -DSSE_MINIMAL=$MINIMAL
-fi
-
-cmake --build "$BUILD_DIR" -- -j"$CORES"
+docker run --rm \
+	-u $(id -u):$(id -g) \
+	-e HOME=/tmp \
+	-v "$(pwd)/src:/src" \
+	-v "$(pwd)/build:/build" \
+	-v "$(pwd)/docker:/docker" \
+	-v "$(pwd)/cmake:/cmake" \
+	-v "$(pwd)/.ccache:/ccache" \
+	-v "$(pwd)/CMakeLists.txt:/CMakeLists.txt" \
+	-e BUILD_TYPE=${BUILD_TYPE} \
+	-e OS=${OS} \
+	-e CORES=${CORES} \
+	-e NOCONFIG=${NOCONFIG} \
+	-e MINIMAL=${MINIMAL} \
+	-e CCACHE_DIR=/ccache \
+	sse-builder

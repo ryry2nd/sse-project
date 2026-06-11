@@ -17,7 +17,7 @@ bool outputFPS = false;
 
 Material mat;
 Material inMat;
-Material bigMat;
+// Material bigMat;
 Material debugMat;
 Material frameImageMat;
 CameraStruct cam;
@@ -31,11 +31,11 @@ Shader *cubeShader;
 Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Mesh *cube;
-Mesh *megaCube;
+// Mesh *megaCube;
 Image *img;
 Buff *camBuff;
 Buff *modelBuff;
-Buff *megaBuff;
+// Buff *megaBuff;
 Buff *cubeInstanceBuff;
 Buff *fboBuff;
 FrameBuffer *fbo;
@@ -63,26 +63,26 @@ extern "C" {
 		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
 		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
+		// megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
 		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
 		// fbo = CreationFunctions::createFrameBuffer(res, FrameBuffer::Settings::Color);
 
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
-		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
+		// ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
 
-		megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+		// megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
 
 		mat.images[0] = img;
 		mat.shader = cubeShader;
 		mat.ubo[0] = modelBuff;
 		mat.ubo[1] = camBuff;
 
-		bigMat.images[0] = img;
-		bigMat.shader = cubeShader;
-		bigMat.ubo[0] = megaBuff;
-		bigMat.ubo[1] = camBuff;
+		// bigMat.images[0] = img;
+		// bigMat.shader = cubeShader;
+		// bigMat.ubo[0] = megaBuff;
+		// bigMat.ubo[1] = camBuff;
 
 		inMat.shader = cubeInstanceShader;
 		inMat.ubo[0] = camBuff;
@@ -190,7 +190,7 @@ extern "C" {
 
 		CreationFunctions::draw(win, cube, &mat);
 		CreationFunctions::draw(win, cube, &inMat);
-		CreationFunctions::draw(win, megaCube, &bigMat);
+		// CreationFunctions::draw(win, megaCube, &bigMat);
 		CreationFunctions::draw(win, nullptr, &debugMat);
 		// CreationFunctions::draw(win, cube, &frameImageMat);
 		// fbo->getColorImage()->clearTransparent();

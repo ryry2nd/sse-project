@@ -1,5 +1,6 @@
 #include <SDL3/SDL_events.h>
 
+#define MINIMAL
 
 #ifndef MINIMAL
 #include <vector>
