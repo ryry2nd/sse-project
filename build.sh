@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 BUILD_TYPE="Release"
 OS="linux"
 CORES=$(nproc)
@@ -34,8 +36,6 @@ while [[ $# -gt 0 ]]; do
 	  ;;
   esac
 done
-
-set -e
 
 mkdir -p build .ccache
 
