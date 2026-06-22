@@ -62,10 +62,12 @@ namespace Engine::Rendering
 		CompareFunc compareFunc = CompareFunc::LessEqual;
 
 		// Mip
+		bool useMip = true;
 		int baseLevel = 0;
 		int maxLevel = 4;
 
 		// LOD
+		bool useLOD = false;
 		float minLOD = -1000.0f;
 		float maxLOD = 1000.0f;
 		float lodBias = 0.0f;

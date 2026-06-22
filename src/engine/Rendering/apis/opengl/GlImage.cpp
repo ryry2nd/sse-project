@@ -104,14 +104,19 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 		surface->pixels
 	);
 
-	glGenerateMipmap(GL_TEXTURE_2D);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, settings.baseLevel);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, settings.maxLevel);
+	if (settings.useMip) {
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	glSamplerParameterf(samplerID, GL_TEXTURE_MIN_LOD, settings.minLOD);
-	glSamplerParameterf(samplerID, GL_TEXTURE_MAX_LOD, settings.maxLOD);
-	glSamplerParameterf(samplerID, GL_TEXTURE_LOD_BIAS, settings.lodBias);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, settings.baseLevel);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, settings.maxLevel);
+	}
+
+	if (settings.useLOD) {
+		glSamplerParameterf(samplerID, GL_TEXTURE_MIN_LOD, settings.minLOD);
+		glSamplerParameterf(samplerID, GL_TEXTURE_MAX_LOD, settings.maxLOD);
+		glSamplerParameterf(samplerID, GL_TEXTURE_LOD_BIAS, settings.lodBias);
+	}
 
 	glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, toGL(settings.minFilter));
 	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, toGLMag(settings.magFilter));
@@ -167,6 +172,7 @@ GlImage::GlImage(const char *filePath, ImageSettings settings)
 		spdlog::error("Image path: {} does not exist", filePath);
 		surf = Image::getErrorTex();
 		settings = ImageSettings();
+		settings.useMip = false;
 		settings.minFilter = ImageSettings::Filter::Nearest;
 		settings.magFilter = ImageSettings::Filter::Nearest;
 	}
@@ -177,6 +183,7 @@ GlImage::GlImage(const char *filePath, ImageSettings settings)
 			spdlog::error("Failed to load image: {}", filePath);
 			surf = Image::getErrorTex();
 			settings = ImageSettings();
+			settings.useMip = false;
 			settings.minFilter = ImageSettings::Filter::Nearest;
 			settings.magFilter = ImageSettings::Filter::Nearest;
 		}
