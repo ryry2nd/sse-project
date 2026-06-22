@@ -38,10 +38,10 @@ using CreateMeshFn =
 	);
 
 using CreateImageFromFileFn =
-	std::unique_ptr<Image>(*)(const char*);
+	std::unique_ptr<Image>(*)(const char*, ImageSettings);
 
 using CreateImageFromSurfaceFn =
-	std::unique_ptr<Image>(*)(SDL_Surface*);
+	std::unique_ptr<Image>(*)(SDL_Surface*, ImageSettings);
 
 using CreateWindowFn =
 	std::unique_ptr<Window>(*)(
@@ -176,11 +176,11 @@ std::unique_ptr<Shader> Internal::Functions::createShader(const char *path) {
 std::unique_ptr<Mesh> Internal::Functions::createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {
 	return apiFunctions.createMeshFunc(vertices, vert_size, indices, ind_size);
 }
-std::unique_ptr<Image> Internal::Functions::createImage(const char *filePath) {
-	return apiFunctions.createImageFromFileFunc(filePath);
+std::unique_ptr<Image> Internal::Functions::createImage(const char *filePath, ImageSettings settings) {
+	return apiFunctions.createImageFromFileFunc(filePath, settings);
 }
-std::unique_ptr<Image> Internal::Functions::createImage(SDL_Surface *surface) {
-	return apiFunctions.createImageFromSurfaceFunc(surface);
+std::unique_ptr<Image> Internal::Functions::createImage(SDL_Surface *surface, ImageSettings settings) {
+	return apiFunctions.createImageFromSurfaceFunc(surface, settings);
 }
 std::unique_ptr<Window> Internal::Functions::createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
 	return apiFunctions.createWindowFunc(res, name, flags, aa, fullscreen, vsync, hideMouse);

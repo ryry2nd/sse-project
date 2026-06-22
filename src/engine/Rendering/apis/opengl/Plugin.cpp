@@ -12,12 +12,12 @@ extern "C" std::unique_ptr<Mesh> createMesh(const Vert *vertices, const size_t v
     return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size);
 }
 
-extern "C" std::unique_ptr<Image> createImageFromFile(const char *filePath) {
-    return std::make_unique<GlImage>(filePath);
+extern "C" std::unique_ptr<Image> createImageFromFile(const char *filePath, ImageSettings settings) {
+    return std::make_unique<GlImage>(filePath, settings);
 }
 
-extern "C" std::unique_ptr<Image> createImageFromSurface(SDL_Surface *surface) {
-    return std::make_unique<GlImage>(surface);
+extern "C" std::unique_ptr<Image> createImageFromSurface(SDL_Surface *surface, ImageSettings settings) {
+    return std::make_unique<GlImage>(surface, settings);
 }
 
 extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {

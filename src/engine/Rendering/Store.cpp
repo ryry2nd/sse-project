@@ -1,5 +1,6 @@
 #include "Rendering.hpp"
 #include "internal/Internal.hpp"
+#include <vector>
 
 using namespace Engine::Rendering;
 
@@ -66,14 +67,14 @@ void CreationFunctions::removeShader(Shader *shdr) {
 	}
 }
 
-Image *CreationFunctions::createImage(const char *filePath) {
-	auto img = Internal::Functions::createImage(filePath);
+Image *CreationFunctions::createImage(const char *filePath, ImageSettings settings) {
+	auto img = Internal::Functions::createImage(filePath, settings);
 	auto ret = img.get();
 	images.push_back(std::move(img));
 	return ret;
 }
-Image *CreationFunctions::createImage(SDL_Surface *surface) {
-	auto img = Internal::Functions::createImage(surface);
+Image *CreationFunctions::createImage(SDL_Surface *surface, ImageSettings settings) {
+	auto img = Internal::Functions::createImage(surface, settings);
 	auto ret = img.get();
 	images.push_back(std::move(img));
 	return ret;

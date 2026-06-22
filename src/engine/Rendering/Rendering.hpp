@@ -9,6 +9,73 @@
 
 namespace Engine::Rendering
 {
+	struct ImageSettings
+	{
+		enum class Filter : Uint8
+		{
+			Nearest,
+			Linear,
+
+			NearestMipmapNearest,
+			LinearMipmapNearest,
+			NearestMipmapLinear,
+			LinearMipmapLinear
+		};
+
+		enum class WrapMode : Uint8
+		{
+			Repeat,
+			ClampToEdge,
+			ClampToBorder,
+			MirroredRepeat
+		};
+
+		enum class CompareMode : Uint8
+		{
+			None,
+			CompareRefToTexture
+		};
+
+		enum class CompareFunc : Uint8
+		{
+			LessEqual,
+			GreaterEqual,
+			Less,
+			Greater,
+			Equal,
+			NotEqual,
+			Always,
+			Never
+		};
+		// Filtering
+		Filter minFilter = Filter::LinearMipmapLinear;
+		Filter magFilter = Filter::Linear;
+
+		// Wrapping
+		WrapMode wrapS = WrapMode::Repeat;
+		WrapMode wrapT = WrapMode::Repeat;
+		WrapMode wrapR = WrapMode::Repeat;
+
+		// Mip
+		int baseLevel = 0;
+		int maxLevel = 4;
+
+		// LOD
+		float minLOD = -1000.0f;
+		float maxLOD = 1000.0f;
+		float lodBias = 0.0f;
+
+		// Border color
+		float borderColor[4] = {0.f, 0.f, 0.f, 0.f};
+
+		// Anisotropy
+		float maxAnisotropy = 1.0f;
+
+		// Depth compare
+		CompareMode compareMode = CompareMode::None;
+		CompareFunc compareFunc = CompareFunc::LessEqual;
+	};
+
 	struct InternalParams
 	{
 		enum Fields : uint32_t
@@ -70,8 +137,8 @@ namespace Engine::Rendering
 		void removeShader(Shader *shader);
 		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size);
 		void removeMesh(Mesh *mesh);
-		Image *createImage(const char *filePath);
-		Image *createImage(SDL_Surface *surface);
+		Image *createImage(const char *filePath, ImageSettings settings = ImageSettings());
+		Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings());
 		void removeImage(Image *image);
 		Window *createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
 		void removeWindow(Window *window);
