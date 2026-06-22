@@ -4,44 +4,7 @@
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
 
-GlImage::GlImage(const char *filePath)
-{
-	spdlog::debug("Creating image at path {}", filePath);
-
-	if (!std::filesystem::exists(filePath)) {
-		spdlog::error("Image path: {} does not exist", filePath);
-		std::exit(1);
-	}
-	SDL_Surface *surf = loadFile(filePath);
-	if (!surf)
-	{
-		spdlog::error("Failed to load image: {}", filePath);
-		std::exit(1);
-	}
-	setupObject(surf);
-	SDL_DestroySurface(surf);
-}
-
-GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
-{
-	spdlog::debug("Creating image with pre existing texture id: 0x{:x} with size {},{}", existingTexture, size.x, size.y);
-	if (existingTexture == 0)
-	{
-		spdlog::error("GlImage: trying to wrap invalid texture (0)");
-		std::exit(1);
-	}
-
-	textureID = existingTexture;
-	imageSizes = size;
-}
-
-GlImage::GlImage(SDL_Surface *surface)
-{
-	spdlog::debug("Creating image from surface memory address 0x{:x}", reinterpret_cast<uintptr_t>(surface));
-	setupObject(surface);
-}
-
-void GlImage::setupObject(SDL_Surface *surface_old)
+void GlImage::setupObject(SDL_Surface *surface_old, bool isPixel)
 {
 	SDL_Surface* surface =
 		SDL_ConvertSurface(surface_old, SDL_PIXELFORMAT_RGBA32);
@@ -86,14 +49,27 @@ void GlImage::setupObject(SDL_Surface *surface_old)
 		GL_LINEAR
 	);
 
-	glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (isPixel) {
+		glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	}
+	else {
+		glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
+
 	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	imageSizes = glm::vec2(surface->w, surface->h);
 
 	SDL_DestroySurface(surface);
+}
+
+GlImage::GlImage(SDL_Surface *surface, bool isPixel)
+{
+	spdlog::debug("Creating image from surface memory address 0x{:x}", reinterpret_cast<uintptr_t>(surface));
+	setupObject(surface);
 }
 
 GlImage::~GlImage()
@@ -112,4 +88,42 @@ void GlImage::clearTransparent()
 	GLubyte clearColor[4] = {0,0,0,0};
 
 	glClearTexImage(textureID, 0, GL_RGBA, GL_UNSIGNED_BYTE, clearColor);
+}
+
+
+GlImage::GlImage(const char *filePath, bool isPixel)
+{
+	spdlog::debug("Creating image at path {}", filePath);
+
+	SDL_Surface *surf;
+
+	if (!std::filesystem::exists(filePath)) {
+		spdlog::error("Image path: {} does not exist", filePath);
+		surf = Image::getErrorTex();
+		isPixel = true;
+	}
+	else {
+		surf = loadFile(filePath);
+		if (!surf)
+		{
+			spdlog::error("Failed to load image: {}", filePath);
+			surf = Image::getErrorTex();
+			isPixel = true;
+		}
+	}
+	setupObject(surf, isPixel);
+	SDL_DestroySurface(surf);
+}
+
+GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
+{
+	spdlog::debug("Creating image with pre existing texture id: 0x{:x} with size {},{}", existingTexture, size.x, size.y);
+	if (existingTexture == 0)
+	{
+		spdlog::error("GlImage: trying to wrap invalid texture (0)");
+		std::exit(1);
+	}
+
+	textureID = existingTexture;
+	imageSizes = size;
 }

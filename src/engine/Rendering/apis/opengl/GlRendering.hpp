@@ -49,9 +49,9 @@ private:
 class GlImage : public Image
 {
 public:
-	GlImage(const char *filePath);
+	GlImage(const char *filePath, bool isPixel = false);
 	GlImage(GLuint id, glm::vec2 size);
-	GlImage(SDL_Surface *surface);
+	GlImage(SDL_Surface *surface, bool isPixel = false);
 	~GlImage();
 	GLuint getID() const {return textureID;}
 	GLuint getSID() const {return samplerID;}
@@ -59,7 +59,7 @@ public:
 	void clearTransparent();
 
 private:
-	void setupObject(SDL_Surface *surface);
+	void setupObject(SDL_Surface *surface, bool isPixel = false);
 	GLuint textureID = 0;
 	GLuint samplerID = 0;
 };

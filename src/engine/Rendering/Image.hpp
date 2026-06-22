@@ -12,6 +12,7 @@ namespace Engine::Rendering
 
 		virtual ~Image() = default;
 		static SDL_Surface *loadFile(const char *filePath);
+		static SDL_Surface *getErrorTex();
 		glm::vec2 getSizes() {return imageSizes;}
 		float getWidth() {return imageSizes.x;}
 		float getHeight() {return imageSizes.y;}

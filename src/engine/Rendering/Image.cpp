@@ -127,3 +127,19 @@ SDL_Surface *Image::loadFile(const char *filePath)
 	}
 	return surface;
 }
+
+SDL_Surface *Image::getErrorTex() {
+	unsigned char purple[4] = {255, 0, 255, 255};
+	unsigned char black[4]  = {0, 0, 0, 255};
+
+	unsigned char pixels[4*4];
+
+	memcpy(pixels + 0, black, 4);
+	memcpy(pixels + 4, purple, 4);
+	memcpy(pixels + 8, purple, 4);
+	memcpy(pixels + 12, black, 4);
+
+	SDL_Surface *surface = MakeSurfaceFromRGBA(&pixels[0], 2, 2);
+
+	return surface;
+}
