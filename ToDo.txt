@@ -28,7 +28,6 @@ put sqlite into a module
 add default assets to a module
 put networking into a module
 make a base helper module to have stuff like a character creator and a rigid body object
-remove fish penis texture
 make example module more interesting
 add reload function to modules (may or may not be a good idea)
 get module versioning and library modules working

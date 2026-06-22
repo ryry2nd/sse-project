@@ -64,7 +64,7 @@ extern "C" {
 		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
 		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
 		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
-		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/FISH.png");
+		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/debug.png");
 		// fbo = CreationFunctions::createFrameBuffer(res, FrameBuffer::Settings::Color);
 
 		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);

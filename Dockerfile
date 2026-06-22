@@ -15,7 +15,7 @@ RUN apt install -y \
 	nasm \
 	git
 
-# sdl-stuff
+# sdl stuff
 RUN apt install -y \
 	libx11-dev \
 	libxext-dev \
@@ -36,6 +36,16 @@ RUN apt install -y \
 	libgles2-mesa-dev \
 	libdecor-0-dev \
 	pkg-config
+
+#Windows stuff
+RUN apt install -y \
+	mingw-w64 \
+	libz-mingw-w64-dev \
+	gcc-mingw-w64-x86-64 \
+	g++-mingw-w64-x86-64
+
+RUN apt install -y libclang-rt-20-dev-wasm32
+RUN apt install -y gcc-mingw-w64
 
 RUN rm -rf /var/lib/apt/lists/*
 
