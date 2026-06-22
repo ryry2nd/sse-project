@@ -19,7 +19,7 @@ GLenum toGL(ImageSettings::Filter f)
     return GL_LINEAR;
 }
 
-GLenum toGLMag(ImageSettings::Filter f)
+GLenum toGLNoMip(ImageSettings::Filter f)
 {
     switch (f)
     {
@@ -110,6 +110,11 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, settings.baseLevel);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, settings.maxLevel);
+
+		glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, toGL(settings.minFilter));
+	}
+	else {
+		glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, toGLNoMip(settings.minFilter));
 	}
 
 	if (settings.useLOD) {
@@ -118,8 +123,8 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 		glSamplerParameterf(samplerID, GL_TEXTURE_LOD_BIAS, settings.lodBias);
 	}
 
-	glSamplerParameteri(samplerID, GL_TEXTURE_MIN_FILTER, toGL(settings.minFilter));
-	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, toGLMag(settings.magFilter));
+
+	glSamplerParameteri(samplerID, GL_TEXTURE_MAG_FILTER, toGLNoMip(settings.magFilter));
 
 	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_S, toGL(settings.wrapS));
 	glSamplerParameteri(samplerID, GL_TEXTURE_WRAP_T, toGL(settings.wrapT));
