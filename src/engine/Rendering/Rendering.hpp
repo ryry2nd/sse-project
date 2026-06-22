@@ -47,6 +47,7 @@ namespace Engine::Rendering
 			Always,
 			Never
 		};
+
 		// Filtering
 		Filter minFilter = Filter::LinearMipmapLinear;
 		Filter magFilter = Filter::Linear;
@@ -55,6 +56,10 @@ namespace Engine::Rendering
 		WrapMode wrapS = WrapMode::Repeat;
 		WrapMode wrapT = WrapMode::Repeat;
 		WrapMode wrapR = WrapMode::Repeat;
+
+		// Depth compare
+		CompareMode compareMode = CompareMode::None;
+		CompareFunc compareFunc = CompareFunc::LessEqual;
 
 		// Mip
 		int baseLevel = 0;
@@ -70,10 +75,6 @@ namespace Engine::Rendering
 
 		// Anisotropy
 		float maxAnisotropy = 1.0f;
-
-		// Depth compare
-		CompareMode compareMode = CompareMode::None;
-		CompareFunc compareFunc = CompareFunc::LessEqual;
 	};
 
 	struct InternalParams

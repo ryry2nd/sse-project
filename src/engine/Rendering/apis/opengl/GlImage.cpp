@@ -136,6 +136,10 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 	glSamplerParameteri(samplerID, GL_TEXTURE_COMPARE_MODE, toGL(settings.compareMode));
 	glSamplerParameteri(samplerID, GL_TEXTURE_COMPARE_FUNC, toGL(settings.compareFunc));
 
+	glSamplerParameterf(samplerID, GL_TEXTURE_MAX_ANISOTROPY_EXT, settings.maxAnisotropy);
+
+	glSamplerParameterfv(samplerID, GL_TEXTURE_BORDER_COLOR, settings.borderColor);
+
 	imageSizes = glm::vec2(surface->w, surface->h);
 
 	SDL_DestroySurface(surface);
