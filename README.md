@@ -1,29 +1,30 @@
 # SSE Project - SSE is a Small Engine
 
 ## Overview
-It's a rendering engine with module support to allow for object spaces or physics engines or whatever your heart desires. Currently using OpenGL 4 but I'm planning to add more backends in the future, like vulkan. My coding schedule is a little bit inconsistent right now because of school so be aware of that when you look at the massive gaps in my push history.
+This project is a rendering engine with module support to allow for object scenes, physics engines or whatever your heart desires. Currently the engine is using OpenGL 4.6 but I'm planning to add more backends in the future, like vulkan. My coding schedule is a little bit inconsistent right now because of school so be aware of that when you look at the massive gaps in my push history.
 
 
 ## Disclaimer
 The engine architecture is in its early stages so the README could be completely wrong in some parts
 
-## Building
+## Build
 I tried my best to make building as easy as possible. All of the libraries get pulled during the cmake configure step.
 
 ### Linux
-Run setup.sh to install all of the required packages and run build.sh to compile<br>
+Run setup.sh to install docker and all of the required packages inside docker and run build.sh to compile<br>
 Check the script flags for more options. Please note that by default the script uses all possible cores on your machine, just use --cores to specify the amount of cores you want if you don't want your machine firing on all cylinders.<br>
 TL;DR if you just want it to work just run setup.sh and then build.sh with no flags <br>
 
 ### Windows
-Windows is a little rough, I suggest you just install wsl and use the --os windows flag to make it compile.
+Windows is a little rough, I suggest you just install wsl and use the --os windows flag to cross compile.
 
 ### MacOS
-Install a VM, thats your best bet right now and for a while. Apple is the worst. Opengl 4 isn't allowed on MacOS, they only do metal. There is a plugin for Vulkan so it converts the protocols to metal so I'll look into it when I get to it but I don't have a mac device to test on so I'll have to figure something out. None of this is a promise.
+MacOS isn't going to be supported in a while. Don't even bother using a VM. VMs don't work with this project unless you are using gpu passthrough because I am using OpenGL 4.6
 
-## Loading Custom Programs
-### Yaml
-A lot of the module configuration is going to be surrounded by the config.yaml file in the base of your program.
+## Module Development
+### Configuration
+A lot of the runtime side module configuration is going to be surrounded by the config.yaml file in the base of your program.
+All build time configuration will be in cmake format.
 
 ### Scripting
 To do scripting I suggest you just copy the example module and rewrite it. To compile you have to put in a CMakeLists.txt file in the base of the module. Then all you have to do is put your cpp file in src.<br>
