@@ -37,18 +37,19 @@ function(merge_compile_commands OUTPUT_FILE)
 	endif()
 
 	message(STATUS "${OUT}")
-	message(STATUS "Merged compile_commands → ${OUTPUT_FILE}")
+	message(STATUS "Merged compile_commands -> ${OUTPUT_FILE}")
 endfunction()
 
 function(compile_executable EXE_NAME)
-	add_executable(${EXE_NAME} ${CMAKE_SOURCE_DIR}/src/main.cpp)
+	add_executable(${MODULE_NAME}_exe ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
-	target_link_libraries(${EXE_NAME} PRIVATE
+	target_link_libraries(${MODULE_NAME}_exe PRIVATE
 		RenderingBase
 		Scripting
 		ScriptingJIT
 	)
-	target_compile_definitions(${EXE_NAME} PRIVATE DEFAULT_MODULE=\"${MOD_PATH}\")
+	target_compile_definitions(${MODULE_NAME}_exe PRIVATE DEFAULT_MODULE=\"${MOD_PATH}\")
+	set_target_properties(${MODULE_NAME}_exe PROPERTIES OUTPUT_NAME "${EXE_NAME}")
 endfunction()
 
 
@@ -62,6 +63,7 @@ function(compile_module MAKE_SO)
 		"-I${CMAKE_BINARY_DIR}/include/Rendering"
 		"-I${glm_SOURCE_DIR}"
 		"-I${sdl_SOURCE_DIR}/include"
+		"-I${CMAKE_CURRENT_SOURCE_DIR}/include"
 	)
 
 	if (SSE_MINIMAL OR MAKE_SO)
@@ -106,12 +108,12 @@ function(compile_module MAKE_SO)
 			copy_src_headers
 	)
 
-	add_custom_target(MyModule_build DEPENDS ${MODULE_FILE})
+	add_custom_target(${MODULE_NAME}_build DEPENDS ${MODULE_FILE})
 
-	add_dependencies(MyModule_build copy_src_headers)
+	add_dependencies(${MODULE_NAME}_build copy_src_headers)
 
-	add_custom_target(MyModule ALL
-		DEPENDS MyModule_build
+	add_custom_target(${MODULE_NAME}_target ALL
+		DEPENDS ${MODULE_NAME}_build
 	)
 
 	string(JOIN " " MODULE_FLAGS_STR ${MODULE_FLAGS})
@@ -137,7 +139,8 @@ function(compile_module MAKE_SO)
 endfunction()
 
 function(copy_assets)
-	add_custom_target(copy_assets_target ALL
+	if(EXISTS "${MODULE}/assets")
+	add_custom_target(copy_assets_target_${MODULE_NAME} ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
 			"${MODULE_OUT_DIR}/assets"
 		COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -145,6 +148,7 @@ function(copy_assets)
 			${MODULE_OUT_DIR}/assets
 		COMMENT "---- Copying assets ----"
 	)
+	endif()
 
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
@@ -152,13 +156,14 @@ function(copy_assets)
 		set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	endif()
 
+	if(EXISTS "${MODULE}/shaders")
 	file(GLOB SLANG_SHADERS
 		"${CMAKE_SOURCE_DIR}/src/modules/example1/shaders/*.slang"
 	)
 
 	list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
 
-	add_custom_target(compile_slang_shaders ALL
+	add_custom_target(compile_slang_shaders_${MODULE_NAME} ALL
 		COMMAND ${CMAKE_COMMAND} -E make_directory
 			"${MODULE_OUT_DIR}/shaders/gl"
 	)
@@ -168,7 +173,7 @@ function(copy_assets)
 		get_filename_component(NAME ${SHADER} NAME_WE)
 
 		add_custom_command(
-			TARGET compile_slang_shaders
+			TARGET compile_slang_shaders_${MODULE_NAME}
 			COMMAND ${SLANGC_CMD}
 				"${SHADER}"
 				-O3 -line-directive-mode none -matrix-layout-column-major
@@ -189,6 +194,9 @@ function(copy_assets)
 		)
 
 	endforeach()
+	endif()
 
-	add_dependencies(compile_slang_shaders copy_assets_target)
+	if(EXISTS "${MODULE}/assets" AND EXISTS "${MODULE}/shaders")
+	add_dependencies(compile_slang_shaders_${MODULE_NAME} copy_assets_target_${MODULE_NAME})
+	endif()
 endfunction()

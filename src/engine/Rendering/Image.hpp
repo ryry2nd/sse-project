@@ -59,7 +59,7 @@ namespace Engine::Rendering
 		// Mip
 		bool useMip = true;
 		int baseLevel = 0;
-		int maxLevel = 4;
+		int maxLevel = 9;
 
 		// LOD
 		bool useLOD = false;

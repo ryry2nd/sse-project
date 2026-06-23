@@ -4,8 +4,8 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-#include "Objects.hpp"
-#include "GenMesh.hpp"
+#include <Objects.hpp>
+#include <GenMesh.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;

@@ -7,8 +7,3 @@ version: 0.0.1
 # requires:
 #   - id: com.ryan.example1
 #     compatible_range: 0.0.0-0.0.1 #inclusive
-
-include:
-  BigObjects: false
-  Rendering: true
-  SDL3: false

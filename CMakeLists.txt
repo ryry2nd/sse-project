@@ -104,7 +104,7 @@ foreach(MODULE ${MODULE_DIRS})
 		if(EXISTS "${MODULE}/CMakeLists.txt")
 			add_subdirectory(${MODULE})
 		elseif(EXISTS "${MODULE}/assets")
-			add_custom_target(copy_assets ALL
+			add_custom_target(copy_assets_${MODULE_NAME} ALL
 				COMMAND ${CMAKE_COMMAND} -E make_directory
 					"${MODULE_OUT_DIR}"
 				COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -114,7 +114,7 @@ foreach(MODULE ${MODULE_DIRS})
 			)
 		endif()
 		if(EXISTS "${MODULE}/config.yaml")
-			add_custom_target(copy_config ALL
+			add_custom_target(copy_config_${MODULE_NAME} ALL
 				COMMAND ${CMAKE_COMMAND} -E make_directory
 					"${MODULE_OUT_DIR}"
 				COMMAND ${CMAKE_COMMAND} -E copy_if_different
