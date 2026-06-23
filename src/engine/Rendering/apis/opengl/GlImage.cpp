@@ -173,26 +173,7 @@ GlImage::GlImage(const char *filePath, ImageSettings settings)
 
 	SDL_Surface *surf;
 
-	if (!std::filesystem::exists(filePath)) {
-		spdlog::error("Image path: {} does not exist", filePath);
-		surf = Image::getErrorTex();
-		settings = ImageSettings();
-		settings.useMip = false;
-		settings.minFilter = ImageSettings::Filter::Nearest;
-		settings.magFilter = ImageSettings::Filter::Nearest;
-	}
-	else {
-		surf = loadFile(filePath);
-		if (!surf)
-		{
-			spdlog::error("Failed to load image: {}", filePath);
-			surf = Image::getErrorTex();
-			settings = ImageSettings();
-			settings.useMip = false;
-			settings.minFilter = ImageSettings::Filter::Nearest;
-			settings.magFilter = ImageSettings::Filter::Nearest;
-		}
-	}
+	loadFile(filePath, surf, &settings);
 	setupObject(surf, settings);
 	SDL_DestroySurface(surf);
 }
