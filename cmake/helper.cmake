@@ -119,13 +119,15 @@ function(compile_module MAKE_SO)
 	string(JOIN " " MODULE_FLAGS_STR ${MODULE_FLAGS})
 	string(JOIN " " ALL_ITEMS_STR ${ALL_ITEMS})
 
-	string(JOIN " " CC_ENTRY
-	"{"
-	"\"directory\":\"${CMAKE_SOURCE_DIR}\","
-	"\"file\":\"${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp\","
-	"\"command\":\"${CMAKE_CXX_COMPILER} -std=c++20 ${MODULE_FLAGS_STR} ${ALL_ITEMS_STR} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp -target ${CMAKE_CXX_COMPILER_TARGET} -DMODULE_PATH=\\\"${MOD_PATH}\\\" -o ${MODULE_FILE}\""
-	"}"
-	)
+	foreach(FILE ${CPP_SOURCES})
+		string(JOIN " " CC_ENTRY
+		"{"
+		"\"directory\":\"${CMAKE_SOURCE_DIR}\","
+		"\"file\":\"${FILE}\","
+		"\"command\":\"${CMAKE_CXX_COMPILER} -std=c++20 ${MODULE_FLAGS_STR} ${ALL_ITEMS_STR} ${FILE} -target ${CMAKE_CXX_COMPILER_TARGET} -DMODULE_PATH=\\\"${MOD_PATH}\\\" -o ${MODULE_FILE}\""
+		"}"
+		)
+	endforeach()
 
 	file(WRITE
 		${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json

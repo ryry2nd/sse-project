@@ -3,7 +3,7 @@ id: com.ryan.example1
 version: 0.0.1
 
 # incompatible_modules: # if two mods are incompatible list the ids below
-#   - id: com.ryan.example1
+#   - id: com.ryan.std
 # requires:
-#   - id: com.ryan.example1
+#   - id: com.ryan.std
 #     compatible_range: 0.0.0-0.0.1 #inclusive
