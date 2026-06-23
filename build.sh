@@ -42,16 +42,17 @@ mkdir -p build .ccache
 docker run --rm \
 	-u $(id -u):$(id -g) \
 	-e HOME=/tmp \
-	-v "$(pwd)/src:/src:ro" \
-	-v "$(pwd)/docker:/docker:ro" \
-	-v "$(pwd)/cmake:/cmake:ro" \
-	-v "$(pwd)/CMakeLists.txt:/CMakeLists.txt:ro" \
-	-v "$(pwd)/build:/build" \
-	-v "$(pwd)/.ccache:/ccache" \
+	-v "$(pwd)/src:$(pwd)/src:ro" \
+	-v "$(pwd)/docker:$(pwd)/docker:ro" \
+	-v "$(pwd)/cmake:$(pwd)/cmake:ro" \
+	-v "$(pwd)/CMakeLists.txt:$(pwd)/CMakeLists.txt:ro" \
+	-v "$(pwd)/build:$(pwd)/build" \
+	-v "$(pwd)/.ccache:$(pwd)/.ccache" \
 	-e BUILD_TYPE=${BUILD_TYPE} \
 	-e OS=${OS} \
 	-e CORES=${CORES} \
 	-e NOCONFIG=${NOCONFIG} \
 	-e MINIMAL=${MINIMAL} \
-	-e CCACHE_DIR=/ccache \
+	-e CCACHE_DIR=$(pwd)/.ccache \
+	--workdir $(pwd) \
 	sse-builder
