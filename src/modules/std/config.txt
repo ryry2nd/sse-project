@@ -1,0 +1,3 @@
+ID=com.ryan.std
+SHORT_NAME=std
+VERSION=0.0.1

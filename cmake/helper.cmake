@@ -40,6 +40,23 @@ function(merge_compile_commands OUTPUT_FILE)
 	message(STATUS "Merged compile_commands -> ${OUTPUT_FILE}")
 endfunction()
 
+function(get_module_order OUT_VAR)
+    set(oneValueArgs)
+    set(multiValueArgs MODULE_FILES)
+
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+    execute_process(
+        COMMAND python3
+            ${CMAKE_SOURCE_DIR}/cmake/modOrder.py
+            ${ARG_MODULE_FILES}
+        OUTPUT_VARIABLE RAW_OUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    set(${OUT_VAR} "${RAW_OUT}" PARENT_SCOPE)
+endfunction()
+
 function(compile_executable EXE_NAME)
 	add_executable(${MODULE_NAME}_exe ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
@@ -163,6 +180,13 @@ function(copy_assets)
 		set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	endif()
 
+	add_custom_target(conf_copy_${MODULE_NAME} ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${MODULE}/config.txt
+			${MODULE_OUT_DIR}/config.txt
+		COMMENT "---- Copying config ----"
+	)
+
 	if(EXISTS "${MODULE}/shaders")
 	file(GLOB SLANG_SHADERS
 		"${MODULE}/shaders/*.slang"
@@ -206,19 +230,4 @@ function(copy_assets)
 	if(EXISTS "${MODULE}/assets" AND EXISTS "${MODULE}/shaders")
 	add_dependencies(compile_slang_shaders_${MODULE_NAME} copy_assets_target_${MODULE_NAME})
 	endif()
-endfunction()
-
-function(generate_conf)
-	set(oneValueArgs ID SHORT_NAME VERSION)
-    set(multiValueArgs DEPS)
-    set(options)
-
-    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-	file(WRITE ${MODULE_OUT_DIR}/config.txt
-        "ID=${ARG_ID}\n"
-        "SHORT_NAME=${ARG_SHORT_NAME}\n"
-        "VERSION=${ARG_VERSION}\n"
-        "DEPS=${ARG_DEPS}\n"
-    )
 endfunction()

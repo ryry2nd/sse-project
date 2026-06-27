@@ -1,0 +1,4 @@
+ID=com.ryan.example1
+SHORT_NAME=example1
+VERSION=0.0.1
+DEPS=com.ryan.std

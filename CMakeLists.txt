@@ -97,30 +97,33 @@ include(${CMAKE_SOURCE_DIR}/cmake/helper.cmake)
 #ToDo just store all of the info and use a python script to do the order
 #ToDo add a way to only depend on specific versions of programs and have a way to deny copies of the same program
 
-foreach(MODULE ${MODULE_DIRS})
-    if(IS_DIRECTORY ${MODULE} AND NOT EXISTS "${MODULE}/.ignore" AND EXISTS "${MODULE}/CMakeLists.txt")
-		get_filename_component(MODULE_NAME ${MODULE} NAME)
-		set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
-		set(MOD_PATH "modules/${MODULE_NAME}")
-		set(ID "")
-		set(SHORT_NAME "")
-		set(VERSION "")
-		set(DEPS "")
-		set(GENERATE_EXE OFF)
-		set(MAKE_SO ON)
+file(GLOB CONFIG_FILES "${CMAKE_SOURCE_DIR}/src/modules/*/config.txt")
 
+get_module_order(MODULE_ORDER
+    MODULE_FILES ${CONFIG_FILES}
+)
+
+foreach(mod IN LISTS MODULE_ORDER)
+    message(STATUS "module: ${mod}")
+endforeach()
+
+foreach(MODULE IN LISTS MODULE_ORDER)
+	get_filename_component(MODULE_NAME ${MODULE} NAME)
+	set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
+	set(MOD_PATH "modules/${MODULE_NAME}")
+	set(GENERATE_EXE OFF)
+	set(MAKE_SO OFF)
+
+
+	if (EXISTS "${MODULE}/CMakeLists.txt")
 		add_subdirectory(${MODULE})
+	endif()
 
-		compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
+	compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
 
-		copy_assets()
+	copy_assets()
 
-		if (${GENERATE_EXE})
-		compile_executable(${SHORT_NAME})
-		endif()
-
-		generate_conf(ID ${ID} SHORT_NAME ${SHORT_NAME} VERSION ${VERSION} DEPS ${DEPS})
-
-		message(STATUS "Module: ${MODULE_NAME}")
+	if (${GENERATE_EXE})
+		compile_executable(${MODULE_NAME})
 	endif()
 endforeach()

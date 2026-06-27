@@ -1,7 +1,2 @@
-set(ID "com.ryan.example1" PARENT_SCOPE)
-set(SHORT_NAME "example1" PARENT_SCOPE)
-set(VERSION "0.0.1" PARENT_SCOPE)
-set(DEPS "com.ryan.std" PARENT_SCOPE)
-
 set(GENERATE_EXE ON PARENT_SCOPE)
 set(MAKE_SO ON PARENT_SCOPE)
