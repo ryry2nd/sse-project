@@ -44,18 +44,23 @@ function(compile_executable EXE_NAME)
 	add_executable(${MODULE_NAME}_exe ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
 	target_link_libraries(${MODULE_NAME}_exe PRIVATE
-		RenderingBase
 		Scripting
-		ScriptingJIT
+		RenderingBase
 	)
 	target_compile_definitions(${MODULE_NAME}_exe PRIVATE DEFAULT_MODULE=\"${MOD_PATH}\")
 	set_target_properties(${MODULE_NAME}_exe PROPERTIES OUTPUT_NAME "${EXE_NAME}")
 endfunction()
 
 
-function(compile_module MAKE_SO)
+function(compile_module)
+	set(oneValueArgs MAKE_SO)
+    set(multiValueArgs DEPS)
+    set(options)
+
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
 	file(GLOB CPP_SOURCES CONFIGURE_DEPENDS
-		"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+		"${MODULE}/src/*.cpp"
 	)
 
 	set(ALL_ITEMS
@@ -63,10 +68,10 @@ function(compile_module MAKE_SO)
 		"-I${CMAKE_BINARY_DIR}/include/Rendering"
 		"-I${glm_SOURCE_DIR}"
 		"-I${sdl_SOURCE_DIR}/include"
-		"-I${CMAKE_CURRENT_SOURCE_DIR}/include"
+		"-I${MODULE}/include"
 	)
 
-	if (SSE_MINIMAL OR MAKE_SO)
+	if (SSE_MINIMAL OR ARG_MAKE_SO)
 		if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		set(MODULE_FILE ${MODULE_OUT_DIR}/module.dll)
 		else()
@@ -130,12 +135,12 @@ function(compile_module MAKE_SO)
 	endforeach()
 
 	file(WRITE
-		${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+		${MODULE_OUT_DIR}/compile_commands.json
 		"[${CC_ENTRY}]"
 	)
 	merge_compile_commands(
 		${CMAKE_BINARY_DIR}/../compile_commands.json
-		${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+		${MODULE_OUT_DIR}/compile_commands.json
 		${CMAKE_BINARY_DIR}/compile_commands.json
 	)
 endfunction()
@@ -160,7 +165,7 @@ function(copy_assets)
 
 	if(EXISTS "${MODULE}/shaders")
 	file(GLOB SLANG_SHADERS
-		"${CMAKE_SOURCE_DIR}/src/modules/example1/shaders/*.slang"
+		"${MODULE}/shaders/*.slang"
 	)
 
 	list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
@@ -201,4 +206,19 @@ function(copy_assets)
 	if(EXISTS "${MODULE}/assets" AND EXISTS "${MODULE}/shaders")
 	add_dependencies(compile_slang_shaders_${MODULE_NAME} copy_assets_target_${MODULE_NAME})
 	endif()
+endfunction()
+
+function(generate_conf)
+	set(oneValueArgs ID SHORT_NAME VERSION)
+    set(multiValueArgs DEPS)
+    set(options)
+
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+	file(WRITE ${MODULE_OUT_DIR}/config.txt
+        "ID=${ARG_ID}\n"
+        "SHORT_NAME=${ARG_SHORT_NAME}\n"
+        "VERSION=${ARG_VERSION}\n"
+        "DEPS=${ARG_DEPS}\n"
+    )
 endfunction()

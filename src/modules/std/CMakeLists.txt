@@ -1,3 +1,7 @@
-compile_module(ON)
+set(ID "com.ryan.std" PARENT_SCOPE)
+set(SHORT_NAME "std" PARENT_SCOPE)
+set(VERSION "0.0.1" PARENT_SCOPE)
+set(DEPS "" PARENT_SCOPE)
 
-copy_assets()
+set(GENERATE_EXE OFF PARENT_SCOPE)
+set(MAKE_SO ON PARENT_SCOPE)

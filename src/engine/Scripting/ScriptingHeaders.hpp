@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 union SDL_Event;
 
@@ -25,6 +26,7 @@ namespace ScriptingHeaders
 		std::string id;
 		std::string version;
 		std::string path;
+		std::vector<std::string> deps;
 
 		long llvmLocation;
 	};

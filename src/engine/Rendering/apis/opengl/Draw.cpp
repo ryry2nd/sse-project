@@ -144,6 +144,8 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	// -------------------------
 	// 4. RENDER TO SCREEN
 	// -------------------------
+
+	// ToDo: have another draw function to just render the fbo to the screen and not do any of this crazy stuff
 	if (renderFBO && renderScreen) {
 		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
 

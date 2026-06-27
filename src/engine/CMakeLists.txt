@@ -73,43 +73,30 @@ endif()
 
 # Scripting Section
 file(GLOB scriptingJIT_SOURCES "Scripting/JIT/*.cpp")
-
-add_library(ScriptingJIT SHARED ${scriptingJIT_SOURCES})
-add_dependencies(ScriptingJIT copy_src_headers)
-
-set_target_properties(ScriptingJIT PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
-)
-
-target_link_libraries(ScriptingJIT PRIVATE SDL3::SDL3 spdlog::spdlog RenderingBase yaml-cpp::yaml-cpp)
-
-if (SSE_MINIMAL)
-target_compile_definitions(ScriptingJIT PRIVATE MINIMAL)
-else()
-target_link_libraries(ScriptingJIT PRIVATE CLANG::CLANG)
-endif()
-
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-add_custom_command(
-	TARGET ScriptingJIT POST_BUILD
-	COMMAND ${CMAKE_STRIP} $<TARGET_FILE:ScriptingJIT>
-	COMMENT "---- Stripping JIT ----"
-)
-endif()
-
-
 file(GLOB scripting_SOURCES "Scripting/*.cpp")
 
-add_library(Scripting SHARED ${scripting_SOURCES})
+add_library(Scripting SHARED ${scriptingJIT_SOURCES} ${scripting_SOURCES})
 add_dependencies(Scripting copy_src_headers)
-target_include_directories(Scripting PUBLIC
-	${CMAKE_BINARY_DIR}/include/Scripting)
 
 set_target_properties(Scripting PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(Scripting PRIVATE ScriptingJIT yaml-cpp::yaml-cpp PUBLIC glm::glm SDL3::SDL3 spdlog::spdlog)
+target_link_libraries(Scripting PRIVATE RenderingBase PUBLIC SDL3::SDL3 spdlog::spdlog)
+
+target_include_directories(Scripting PUBLIC
+	${CMAKE_BINARY_DIR}/include/Scripting)
+
+if (SSE_MINIMAL)
+target_compile_definitions(Scripting PRIVATE MINIMAL)
+add_custom_command(
+	TARGET Scripting POST_BUILD
+	COMMAND ${CMAKE_STRIP} $<TARGET_FILE:Scripting>
+	COMMENT "---- Stripping JIT ----"
+)
+else()
+target_link_libraries(Scripting PRIVATE CLANG::CLANG)
+endif()
 
 
 add_library(EngineABI INTERFACE)

@@ -8,9 +8,14 @@ set(SDL_VIDEO ON)
 set(SDL_PTHREADS ON)
 set(SDL_LIBC ON)
 
-# --- WINDOW BACKENDS (keep both for safety) ---
-set(SDL_WAYLAND ON)
+# --- WINDOW BACKENDS  ---
 set(SDL_X11 ON)
+
+if (SSE_MINIMAL)
+set(SDL_WAYLAND OFF)
+else()
+set(SDL_WAYLAND ON)
+endif()
 
 # --- EVERYTHING ELSE OFF ---
 set(SDL_AUDIO OFF)
@@ -23,7 +28,7 @@ set(SDL_DIALOG OFF)
 set(SDL_POWER OFF)
 set(SDL_GPU OFF)
 
-# --- RENDERING OFF (you use GL/Vulkan directly) ---
+# --- RENDERING OFF ---
 set(SDL_RENDER_D3D OFF)
 set(SDL_RENDER_D3D11 OFF)
 set(SDL_RENDER_D3D12 OFF)
@@ -45,7 +50,7 @@ set(SDL_LIBUDEV OFF)
 set(SDL_DBUS OFF)
 set(SDL_IBUS OFF)
 
-# --- GRAPHICS API SUPPORT (only keep what you need) ---
+# --- GRAPHICS API SUPPORT ---
 set(SDL_OPENGL ON)
 set(SDL_OPENGLES OFF)
 set(SDL_VULKAN OFF)

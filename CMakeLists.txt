@@ -73,7 +73,6 @@ endif()
 find_package(sdl CONFIG REQUIRED)
 find_package(images CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(yaml-cpp CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
@@ -95,34 +94,33 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
 
 include(${CMAKE_SOURCE_DIR}/cmake/helper.cmake)
 
+#ToDo just store all of the info and use a python script to do the order
+#ToDo add a way to only depend on specific versions of programs and have a way to deny copies of the same program
 
 foreach(MODULE ${MODULE_DIRS})
-    if(IS_DIRECTORY ${MODULE} AND NOT EXISTS "${MODULE}/.ignore")
+    if(IS_DIRECTORY ${MODULE} AND NOT EXISTS "${MODULE}/.ignore" AND EXISTS "${MODULE}/CMakeLists.txt")
 		get_filename_component(MODULE_NAME ${MODULE} NAME)
 		set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
 		set(MOD_PATH "modules/${MODULE_NAME}")
-		if(EXISTS "${MODULE}/CMakeLists.txt")
-			add_subdirectory(${MODULE})
-		elseif(EXISTS "${MODULE}/assets")
-			add_custom_target(copy_assets_${MODULE_NAME} ALL
-				COMMAND ${CMAKE_COMMAND} -E make_directory
-					"${MODULE_OUT_DIR}"
-				COMMAND ${CMAKE_COMMAND} -E copy_directory
-					${MODULE}/assets
-					${MODULE_OUT_DIR}/assets
-				COMMENT "---- Copying assets ----"
-			)
+		set(ID "")
+		set(SHORT_NAME "")
+		set(VERSION "")
+		set(DEPS "")
+		set(GENERATE_EXE OFF)
+		set(MAKE_SO ON)
+
+		add_subdirectory(${MODULE})
+
+		compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
+
+		copy_assets()
+
+		if (${GENERATE_EXE})
+		compile_executable(${SHORT_NAME})
 		endif()
-		if(EXISTS "${MODULE}/config.yaml")
-			add_custom_target(copy_config_${MODULE_NAME} ALL
-				COMMAND ${CMAKE_COMMAND} -E make_directory
-					"${MODULE_OUT_DIR}"
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different
-					${MODULE}/config.yaml
-					${MODULE_OUT_DIR}
-				COMMENT "---- Copying yaml ----"
-			)
-		endif()
+
+		generate_conf(ID ${ID} SHORT_NAME ${SHORT_NAME} VERSION ${VERSION} DEPS ${DEPS})
+
 		message(STATUS "Module: ${MODULE_NAME}")
 	endif()
 endforeach()

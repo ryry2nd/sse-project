@@ -1,7 +1,7 @@
 #include "ScriptingHeaders.hpp"
-#include <yaml-cpp/yaml.h>
 #include <filesystem>
 #include <string>
+#include <fstream>
 
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_loadso.h>
@@ -13,7 +13,7 @@ using namespace ScriptingHeaders;
 
 
 #define LIBRARY_PATH "lib"
-#define CONFIG_NAME "/config.yaml"
+#define CONFIG_NAME "config.txt"
 
 extern "C" {
 	long initModuleJIT(const char* path);
@@ -35,24 +35,63 @@ bool EnginePackage::ShouldStop() {
 	return false;
 }
 
+static inline std::vector<std::string> split(const std::string& s, char delim)
+{
+    std::vector<std::string> out;
+    std::stringstream ss(s);
+    std::string item;
+
+    while (std::getline(ss, item, delim))
+    {
+        if (!item.empty())
+            out.push_back(item);
+    }
+    return out;
+}
+
+
 EnginePackage::EnginePackage(const std::string &path)
 {
 	if (!std::filesystem::exists(path)) {
-		spdlog::error("Path does not exist");
+		spdlog::error("Module, {} does not exist", path);
 		return;
 	}
-	if (!std::filesystem::exists(path + CONFIG_NAME)) {
-		spdlog::error("Path does not have a: {}", CONFIG_NAME);
+	if (!std::filesystem::exists(path + "/" + CONFIG_NAME)) {
+		spdlog::error("Module, {} does not have a {}", path, CONFIG_NAME);
 		return;
 	}
 
-	YAML::Node config = YAML::LoadFile(path + CONFIG_NAME);
+	std::ifstream ifs(path + "/" + CONFIG_NAME);
 
-	name = config["name"].as<std::string>();
-	id = config["id"].as<std::string>();
-	version = config["version"].as<std::string>();
+	if (!ifs.is_open()) {
+        spdlog::error("Module, {} could not open {}", path, CONFIG_NAME);
+		return;
+	}
+
+
+    std::string line;
+    while (std::getline(ifs, line))
+    {
+        if (line.empty() || line[0] == '#')
+            continue;
+
+        auto eq = line.find('=');
+        if (eq == std::string::npos)
+            continue;
+
+        std::string key = line.substr(0, eq);
+        std::string value = line.substr(eq + 1);
+
+        if (key == "ID")
+            id = value;
+        else if (key == "SHORT_NAME")
+            name = value;
+        else if (key == "VERSION")
+            version = value;
+        else if (key == "DEPS")
+            deps = split(value, ';');
+    }
 	this->path = path;
-	std::string module_filename = std::filesystem::path(path).filename().string();
 
 	std::string codeFile;
 	bool hasCode = false;
