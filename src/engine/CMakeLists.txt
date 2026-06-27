@@ -50,8 +50,8 @@ add_custom_command(
 
 add_custom_target(copy_src_headers DEPENDS ${HEADER_STAMP})
 
-#Rendering Section
 
+#Rendering Section
 file(GLOB rendering_SOURCES "Rendering/*.cpp")
 
 add_library(RenderingBase SHARED ${rendering_SOURCES})
@@ -99,6 +99,7 @@ target_link_libraries(Scripting PRIVATE CLANG::CLANG)
 endif()
 
 
+#Engine section
 add_library(EngineABI INTERFACE)
 
 target_include_directories(EngineABI INTERFACE
