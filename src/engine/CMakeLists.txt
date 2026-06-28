@@ -21,16 +21,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include
 
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Engine/engine
 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${RENDERING_HEADERS}
         ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
-
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${SCRIPTING_HEADERS}
-        ${CMAKE_BINARY_DIR}/include/Scripting/engine/Scripting
 
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${MODULE_STD_HEADERS}
@@ -83,9 +78,6 @@ set_target_properties(Scripting PROPERTIES
 )
 
 target_link_libraries(Scripting PRIVATE RenderingBase PUBLIC SDL3::SDL3 spdlog::spdlog)
-
-target_include_directories(Scripting PUBLIC
-	${CMAKE_BINARY_DIR}/include/Scripting)
 
 if (SSE_MINIMAL)
 target_compile_definitions(Scripting PRIVATE MINIMAL)

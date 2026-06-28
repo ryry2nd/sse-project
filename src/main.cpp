@@ -1,6 +1,3 @@
-#include <engine/Scripting/ScriptingHeaders.hpp>
-#include <SDL3/SDL_events.h>
-
 #ifndef DEFAULT_MODULE
 #define DEFAULT_MODULE "modules/example1"
 #endif
@@ -15,28 +12,29 @@ extern "C" {
 	void Update();
 	void Shutdown();
 	void loginit();
+	bool ScriptingShouldStop();
+	void ScriptingCreate(const char *path);
+	void ScriptingRunLoop();
+	void ScriptingRunEvent();
+	void ScriptingDestroy();
 }
 
 int main(int argc, char *argv[])
 {
 	loginit();
 	Init();
-	ScriptingHeaders::EnginePackage *example_package = new ScriptingHeaders::EnginePackage(std::string(DEFAULT_MODULE));
+	ScriptingCreate(DEFAULT_MODULE);
 
 	// starts running the game loop
-	running = !ScriptingHeaders::EnginePackage::ShouldStop();
+	running = !ScriptingShouldStop();
 
 	while (running)
 	{
 		Update();
-		SDL_Event e;
-		while (SDL_PollEvent(&e)) {
-			example_package->EventFunction(&e);
-		}
-		example_package->LoopFunction();
+		ScriptingRunEvent();
+		ScriptingRunLoop();
 	}
-
-	delete example_package;
+	ScriptingDestroy();
 	Shutdown();
 }
 
