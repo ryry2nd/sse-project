@@ -2,6 +2,7 @@
 
 #include "Logging.hpp"
 #include "Helper.hpp"
+#include "Module.hpp"
 #include <engine/Rendering/Rendering.hpp>
 
 extern "C" {

@@ -42,6 +42,9 @@ FrameBuffer *fbo;
 
 extern "C" {
 	void setup() {
+		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+			return;
+		}
 		glm::vec2 res({900.0f, 500.0f});
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -120,6 +123,9 @@ extern "C" {
 	}
 
 	void loop() {
+		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+			return;
+		}
 		win->update();
 		win->clearBackground();
 		float deltaTime = win->getDeltaTime();
@@ -198,6 +204,9 @@ extern "C" {
 	}
 
 	void event(SDL_Event *event) {
+		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+			return;
+		}
 		auto dt = win->getDeltaTime();
 
 		auto type = event->type;

@@ -1,3 +1,4 @@
+#include <cstring>
 #include <filesystem>
 #include <queue>
 #include <string>
@@ -49,6 +50,8 @@ struct EnginePackage
 };
 
 std::vector<EnginePackage> pkgs;
+static EnginePackage *mainpkg;
+static EnginePackage *currpkg;
 
 void topoSort() {
     std::unordered_map<std::string, int> index;
@@ -100,13 +103,28 @@ void topoSort() {
         std::exit(1);
     }
 
-    // overwrite input vector in-place
+	for (auto &pkg : ordered)
+		if (pkg.id == mainpkg->id)
+			mainpkg = &pkg;
+
     pkgs = std::move(ordered);
 }
 
 static bool shouldShutDown = true;
 
 extern "C" {
+	const char *hostGetExe() {
+		if (mainpkg)
+			return mainpkg->id.c_str();
+		return "no exe detected";
+	}
+
+	const char *hostGetCurrent() {
+		if (currpkg)
+			return currpkg->id.c_str();
+		return "no current detected";
+	}
+
 	bool ScriptingShouldStop() {
 		if (shouldShutDown) {
 			spdlog::info("No loop or event functions implemented. Shutting down");
@@ -170,7 +188,6 @@ extern "C" {
 					}
 				}
 
-
 				if (!hasCode) return;
 
 				long llvmLocation = initModuleJIT(codeFile.c_str());
@@ -183,13 +200,18 @@ extern "C" {
 				}
 
 				pkgs.push_back(std::move(pkg));
+
+				if (strcmp(path, mod_path.c_str()) == 0) {
+					mainpkg = &pkgs.back();
+				}
 			}
 		}
 
-		topoSort(); // ToDo important, change it so this instead takes in the path and only loads the dependents and dependencies
+		topoSort();
 
 		for (auto &pkg : pkgs) {
 			try {
+				currpkg = &pkg;
 				setupJIT(pkg.llvmLocation);
 			}
 			catch (const std::exception& e) {
@@ -206,6 +228,7 @@ extern "C" {
 	void ScriptingRunLoop() {
 		for (auto &pkg : pkgs) {
 			try {
+				currpkg = &pkg;
 				loopJIT(pkg.llvmLocation);
 			}
 			catch (const std::exception& e) {
@@ -222,6 +245,7 @@ extern "C" {
 		while (SDL_PollEvent(&e)) {
 			for (auto &pkg : pkgs) {
 				try {
+					currpkg = &pkg;
 					eventJIT(pkg.llvmLocation, &e);
 				}
 				catch (const std::exception& e) {
@@ -238,6 +262,7 @@ extern "C" {
 	{
 		for (auto &pkg : pkgs) {
 			try {
+				currpkg = &pkg;
 				shutdownJIT(pkg.llvmLocation);
 			}
 			catch (const std::exception& e) {
