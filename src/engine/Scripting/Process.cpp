@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <queue>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -11,6 +12,9 @@
 
 #define LIBRARY_PATH "lib"
 #define CONFIG_NAME "config.txt"
+#define MODULES_PATH "modules"
+
+namespace fs = std::filesystem;
 
 extern "C" {
 	long initModuleJIT(const char* path);
@@ -44,9 +48,63 @@ struct EnginePackage
 	long llvmLocation;
 };
 
-static bool shouldShutDown = true;
-
 std::vector<EnginePackage> pkgs;
+
+void topoSort() {
+    std::unordered_map<std::string, int> index;
+    std::unordered_map<std::string, int> indegree;
+    std::unordered_map<std::string, std::vector<std::string>> graph;
+
+    // map id -> index in vector
+    for (int i = 0; i < (int)pkgs.size(); ++i) {
+        index[pkgs[i].id] = i;
+        indegree[pkgs[i].id] = 0;
+    }
+
+    // build graph
+    for (const auto& m : pkgs) {
+        for (const auto& dep : m.deps) {
+            if (!index.contains(dep)) {
+                spdlog::error("missing dependency {} for module {}", m.id, dep);
+                std::exit(1);
+            }
+
+            graph[dep].push_back(m.id);
+            indegree[m.id]++;
+        }
+    }
+
+    std::queue<std::string> q;
+
+    for (const auto& [id, deg] : indegree) {
+        if (deg == 0) q.push(id);
+    }
+
+    std::vector<EnginePackage> ordered;
+    ordered.reserve(pkgs.size());
+
+    while (!q.empty()) {
+        std::string cur = q.front();
+        q.pop();
+
+        ordered.push_back(pkgs[index[cur]]);
+
+        for (const auto& nxt : graph[cur]) {
+            if (--indegree[nxt] == 0)
+                q.push(nxt);
+        }
+    }
+
+    if (ordered.size() != pkgs.size()) {
+        spdlog::error("cyclic dependency detected");
+        std::exit(1);
+    }
+
+    // overwrite input vector in-place
+    pkgs = std::move(ordered);
+}
+
+static bool shouldShutDown = true;
 
 extern "C" {
 	bool ScriptingShouldStop() {
@@ -59,88 +117,91 @@ extern "C" {
 
 	void ScriptingCreate(const char *path)
 	{
-		if (!std::filesystem::exists(path)) {
-			spdlog::error("Module, {} does not exist", path);
-			return;
-		}
+		for (const auto& entry : fs::directory_iterator(MODULES_PATH)) {
+			if (entry.is_directory()) {
+				std::string mod_path = entry.path().string();
+				std::filesystem::path confPath = std::filesystem::path(mod_path) / CONFIG_NAME;
 
-		std::filesystem::path confPath = std::filesystem::path(path) / CONFIG_NAME;
+				if (!std::filesystem::exists(confPath)) {
+					continue;
+				}
 
-		if (!std::filesystem::exists(confPath)) {
-			spdlog::error("Module, {} does not have a {}", path, CONFIG_NAME);
-			return;
-		}
+				std::ifstream ifs(confPath);
 
-		std::ifstream ifs(confPath);
+				if (!ifs.is_open()) {
+					spdlog::error("Module, {} could not open {}", mod_path, CONFIG_NAME);
+					continue;
+				}
 
-		if (!ifs.is_open()) {
-			spdlog::error("Module, {} could not open {}", path, CONFIG_NAME);
-			return;
-		}
+				auto pkg = EnginePackage();
 
-		auto pkg = EnginePackage();
+				std::string line;
+				while (std::getline(ifs, line))
+				{
+					if (line.empty() || line[0] == '#')
+						continue;
 
-		std::string line;
-		while (std::getline(ifs, line))
-		{
-			if (line.empty() || line[0] == '#')
-				continue;
+					auto eq = line.find('=');
+					if (eq == std::string::npos)
+						continue;
 
-			auto eq = line.find('=');
-			if (eq == std::string::npos)
-				continue;
+					std::string key = line.substr(0, eq);
+					std::string value = line.substr(eq + 1);
 
-			std::string key = line.substr(0, eq);
-			std::string value = line.substr(eq + 1);
+					if (key == "ID")
+						pkg.id = value;
+					else if (key == "SHORT_NAME")
+						pkg.name = value;
+					else if (key == "VERSION")
+						pkg.version = value;
+					else if (key == "DEPS")
+						pkg.deps = split(value, ';');
+				}
+				pkg.path = mod_path;
 
-			if (key == "ID")
-				pkg.id = value;
-			else if (key == "SHORT_NAME")
-				pkg.name = value;
-			else if (key == "VERSION")
-				pkg.version = value;
-			else if (key == "DEPS")
-				pkg.deps = split(value, ';');
-		}
-		pkg.path = path;
+				std::string codeFile;
+				bool hasCode = false;
+				for (const auto &entry : std::filesystem::directory_iterator(mod_path)) {
+					std::string ext = entry.path().extension().string();
+					if (ext == ".bc" || ext == ".ll" || ext == ".o" || ext == ".obj" || ext == ".so" || ext == ".dll") {
+						hasCode = true;
+						codeFile = entry.path().string();
+						break;
+					}
+				}
 
-		std::string codeFile;
-		bool hasCode = false;
-		for (const auto &entry : std::filesystem::directory_iterator(path)) {
-			std::string ext = entry.path().extension().string();
-			if (ext == ".bc" || ext == ".ll" || ext == ".o" || ext == ".obj" || ext == ".so" || ext == ".dll") {
-				hasCode = true;
-				codeFile = entry.path().string();
-				break;
+
+				if (!hasCode) return;
+
+				long llvmLocation = initModuleJIT(codeFile.c_str());
+				pkg.llvmLocation = llvmLocation;
+
+				if (llvmLocation < 0) return;
+
+				if (!JITRunnable(llvmLocation)) {
+					shouldShutDown = false;
+				}
+
+				pkgs.push_back(std::move(pkg));
 			}
 		}
 
+		topoSort(); // ToDo important, change it so this instead takes in the path and only loads the dependents and dependencies
 
-		if (!hasCode) return;
+		for (auto &pkg : pkgs) {
+			try {
+				setupJIT(pkg.llvmLocation);
+			}
+			catch (const std::exception& e) {
+				spdlog::error(e.what());
+				#ifdef DEBUG
+				throw e;
+				#endif
+			}
 
-		long llvmLocation = initModuleJIT(codeFile.c_str());
-		pkg.llvmLocation = llvmLocation;
-
-		if (llvmLocation < 0) return;
-
-		if (!JITRunnable(llvmLocation)) {
-			shouldShutDown = false;
+			spdlog::info("Successfully started {}", pkg.id);
 		}
-
-		try {
-			setupJIT(llvmLocation);
-		}
-		catch (const std::exception& e) {
-			spdlog::error(e.what());
-			#ifdef DEBUG
-			throw e;
-			#endif
-		}
-
-		spdlog::info("Successfully started {}", pkg.id);
-		pkgs.push_back(std::move(pkg));
 	}
-
 
 	void ScriptingRunLoop() {
 		for (auto &pkg : pkgs) {
@@ -172,7 +233,6 @@ extern "C" {
 			}
 		}
 	}
-
 
 	void ScriptingDestroy()
 	{

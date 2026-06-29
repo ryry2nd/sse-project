@@ -12,6 +12,7 @@ extern "C" {
 	void Update();
 	void Shutdown();
 	void loginit();
+
 	bool ScriptingShouldStop();
 	void ScriptingCreate(const char *path);
 	void ScriptingRunLoop();
