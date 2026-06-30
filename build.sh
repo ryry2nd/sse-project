@@ -56,3 +56,11 @@ docker run --rm \
 	-e CCACHE_DIR=$(pwd)/.ccache \
 	--workdir $(pwd) \
 	sse-builder
+
+if [ "$MINIMAL" -eq 1 ]; then
+BUILD_DIR="$OS-$BUILD_TYPE-minimal"
+else
+BUILD_DIR="$OS-$BUILD_TYPE"
+fi
+
+cp build/${BUILD_DIR}/compile_commands.json build/compile_commands.json

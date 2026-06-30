@@ -152,12 +152,12 @@ function(compile_module)
 	endforeach()
 
 	file(WRITE
-		${MODULE_OUT_DIR}/compile_commands.json
+		${CMAKE_BINARY_DIR}/compile_commands_${MODULE_NAME}.json
 		"[${CC_ENTRY}]"
 	)
 	merge_compile_commands(
-		${CMAKE_BINARY_DIR}/../compile_commands.json
-		${MODULE_OUT_DIR}/compile_commands.json
+		${CMAKE_BINARY_DIR}/compile_commands.json
+		${CMAKE_BINARY_DIR}/compile_commands_${MODULE_NAME}.json
 		${CMAKE_BINARY_DIR}/compile_commands.json
 	)
 endfunction()
