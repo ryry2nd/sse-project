@@ -103,27 +103,30 @@ get_module_order(MODULE_ORDER
     MODULE_FILES ${CONFIG_FILES}
 )
 
-foreach(mod IN LISTS MODULE_ORDER)
-    message(STATUS "module: ${mod}")
-endforeach()
-
 foreach(MODULE IN LISTS MODULE_ORDER)
 	get_filename_component(MODULE_NAME ${MODULE} NAME)
+	message(STATUS "module: ${MODULE_NAME}")
 	set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
 	set(MOD_PATH "modules/${MODULE_NAME}")
 	set(GENERATE_EXE OFF)
 	set(MAKE_SO OFF)
+	set(AUTO_COMP ON)
+	set(AUTO_COPY ON)
 
 
 	if (EXISTS "${MODULE}/CMakeLists.txt")
-		add_subdirectory(${MODULE})
+	add_subdirectory(${MODULE})
 	endif()
 
+	if(${AUTO_COMP})
 	compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
+	endif()
 
+	if(${AUTO_COPY})
 	copy_assets()
+	endif()
 
 	if (${GENERATE_EXE})
-		compile_executable(${MODULE_NAME})
+	compile_executable(${MODULE_NAME})
 	endif()
 endforeach()
