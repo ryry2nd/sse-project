@@ -63,4 +63,4 @@ else
 BUILD_DIR="$OS-$BUILD_TYPE"
 fi
 
-cp build/${BUILD_DIR}/compile_commands.json build/compile_commands.json
+cp $(pwd)/build/${BUILD_DIR}/compile_commands.json $(pwd)/build/compile_commands.json
