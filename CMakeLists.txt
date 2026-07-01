@@ -94,7 +94,6 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
 
 include(${CMAKE_SOURCE_DIR}/cmake/helper.cmake)
 
-#ToDo just store all of the info and use a python script to do the order
 #ToDo add a way to only depend on specific versions of programs and have a way to deny copies of the same program
 
 file(GLOB CONFIG_FILES "${CMAKE_SOURCE_DIR}/src/modules/*/config.txt")
@@ -112,18 +111,29 @@ foreach(MODULE IN LISTS MODULE_ORDER)
 	set(MAKE_SO OFF)
 	set(AUTO_COMP ON)
 	set(AUTO_COPY ON)
+	set(COMPILE_SHADERS ON)
 
+	add_custom_target(conf_copy_${MODULE_NAME} ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${MODULE}/config.txt
+			${MODULE_OUT_DIR}/config.txt
+		COMMENT "---- Copying config ----"
+	)
 
 	if (EXISTS "${MODULE}/CMakeLists.txt")
 	add_subdirectory(${MODULE})
 	endif()
 
 	if(${AUTO_COMP})
-	compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
+	compile_module(MAKE_SO ${MAKE_SO})
 	endif()
 
 	if(${AUTO_COPY})
 	copy_assets()
+	endif()
+
+	if(${COMPILE_SHADERS})
+	compile_shaders()
 	endif()
 
 	if (${GENERATE_EXE})

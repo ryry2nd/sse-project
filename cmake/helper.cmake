@@ -1,10 +1,6 @@
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 function(merge_compile_commands OUTPUT_FILE)
-	if(NOT ARGN)
-		message(FATAL_ERROR "merge_compile_commands: no input files provided")
-	endif()
-
 	set(CMD
 		${Python3_EXECUTABLE}
 		${CMAKE_SOURCE_DIR}/cmake/merge.py
@@ -23,18 +19,8 @@ function(merge_compile_commands OUTPUT_FILE)
 	execute_process(
 		COMMAND ${CMD}
 		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-		RESULT_VARIABLE RES
 		OUTPUT_VARIABLE OUT
-		ERROR_VARIABLE ERR
 	)
-
-	if(NOT RES EQUAL 0)
-		message(FATAL_ERROR
-			"Failed to merge compile_commands.json files\n"
-			"Output:\n${OUT}\n"
-			"Error:\n${ERR}"
-		)
-	endif()
 
 	message(STATUS "${OUT}")
 	message(STATUS "Merged compile_commands -> ${OUTPUT_FILE}")
@@ -57,6 +43,26 @@ function(get_module_order OUT_VAR)
     set(${OUT_VAR} "${RAW_OUT}" PARENT_SCOPE)
 endfunction()
 
+function(get_module_deps)
+    set(oneValueArgs OUT_VAR MODULE_FILE)
+    set(multiValueArgs)
+
+    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+	file(GLOB CONFIG_FILES "${CMAKE_SOURCE_DIR}/src/modules/*/config.txt")
+
+	execute_process(
+		COMMAND
+			python3
+			${CMAKE_SOURCE_DIR}/cmake/listDeps.py
+			${ARG_MODULE_FILE}
+			${CONFIG_FILES}
+		OUTPUT_VARIABLE RAW_OUT
+	)
+
+    set(${ARG_OUT_VAR} "${RAW_OUT}" PARENT_SCOPE)
+endfunction()
+
 function(compile_executable EXE_NAME)
 	add_executable(${MODULE_NAME}_exe ${CMAKE_SOURCE_DIR}/src/main.cpp)
 
@@ -71,7 +77,7 @@ endfunction()
 
 function(compile_module)
 	set(oneValueArgs MAKE_SO)
-    set(multiValueArgs DEPS)
+    set(multiValueArgs)
     set(options)
 
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -87,6 +93,14 @@ function(compile_module)
 		"-I${sdl_SOURCE_DIR}/include"
 		"-I${MODULE}/include"
 	)
+
+	get_module_deps(OUT_VAR DEPS MODULE_FILE "${MODULE}/config.txt")
+
+	foreach(dep IN LISTS DEPS)
+		if (NOT "${dep}" STREQUAL "")
+        list(APPEND ALL_ITEMS "-I${dep}/include")
+		endif()
+    endforeach()
 
 	if (SSE_MINIMAL OR ARG_MAKE_SO)
 		if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -173,61 +187,50 @@ function(copy_assets)
 		COMMENT "---- Copying assets ----"
 	)
 	endif()
+endfunction()
 
+function(compile_shaders)
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	else()
 		set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
 	endif()
 
-	add_custom_target(conf_copy_${MODULE_NAME} ALL
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			${MODULE}/config.txt
-			${MODULE_OUT_DIR}/config.txt
-		COMMENT "---- Copying config ----"
-	)
-
 	if(EXISTS "${MODULE}/shaders")
-	file(GLOB SLANG_SHADERS
-		"${MODULE}/shaders/*.slang"
-	)
-
-	list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
-
-	add_custom_target(compile_slang_shaders_${MODULE_NAME} ALL
-		COMMAND ${CMAKE_COMMAND} -E make_directory
-			"${MODULE_OUT_DIR}/shaders/gl"
-	)
-
-	foreach(SHADER ${SLANG_SHADERS})
-
-		get_filename_component(NAME ${SHADER} NAME_WE)
-
-		add_custom_command(
-			TARGET compile_slang_shaders_${MODULE_NAME}
-			COMMAND ${SLANGC_CMD}
-				"${SHADER}"
-				-O3 -line-directive-mode none -matrix-layout-column-major
-				-target spirv -stage vertex
-				-DGL
-				-entry vertMain
-				-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.vert.spv"
-
-			COMMAND ${SLANGC_CMD}
-				"${SHADER}"
-				-O3 -line-directive-mode none -matrix-layout-column-major
-				-target spirv -stage fragment
-				-DGL
-				-entry fragMain
-				-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.frag.spv"
-
-			COMMENT "Compiling ${NAME}"
+		file(GLOB SLANG_SHADERS
+			"${MODULE}/shaders/*.slang"
 		)
 
-	endforeach()
-	endif()
+		list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
 
-	if(EXISTS "${MODULE}/assets" AND EXISTS "${MODULE}/shaders")
-	add_dependencies(compile_slang_shaders_${MODULE_NAME} copy_assets_target_${MODULE_NAME})
+		add_custom_target(compile_slang_shaders_${MODULE_NAME} ALL
+			COMMAND ${CMAKE_COMMAND} -E make_directory
+				"${MODULE_OUT_DIR}/shaders/gl"
+		)
+
+		foreach(SHADER ${SLANG_SHADERS})
+			get_filename_component(NAME ${SHADER} NAME_WE)
+
+			add_custom_command(
+				TARGET compile_slang_shaders_${MODULE_NAME}
+				COMMAND ${SLANGC_CMD}
+					"${SHADER}"
+					-O3 -line-directive-mode none -matrix-layout-column-major
+					-target spirv -stage vertex
+					-DGL
+					-entry vertMain
+					-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.vert.spv"
+
+				COMMAND ${SLANGC_CMD}
+					"${SHADER}"
+					-O3 -line-directive-mode none -matrix-layout-column-major
+					-target spirv -stage fragment
+					-DGL
+					-entry fragMain
+					-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.frag.spv"
+
+				COMMENT "Compiling ${NAME}"
+			)
+		endforeach()
 	endif()
 endfunction()
