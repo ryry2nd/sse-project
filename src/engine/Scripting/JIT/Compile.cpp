@@ -1,3 +1,5 @@
+#define MINIMAL
+
 #include <SDL3/SDL_events.h>
 
 #ifndef MINIMAL
