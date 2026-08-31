@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This file is just a random line counter file to count the ammount of lines in the program. The program does not need this to run but I just think it's cool.
+
 dir="src/engine"
 
 engine_cpp_lines=$(find "$dir" -type f \( -name "*.cpp" -o -name "*.cc" -o -name "*.cxx" \) -print0 \
