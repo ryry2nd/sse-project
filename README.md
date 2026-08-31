@@ -1,14 +1,14 @@
 # SSE Project - SSE is a Small Engine
 
 ## Overview
-This project is a rendering engine with module support to allow for object scenes, physics engines or whatever your heart desires. Currently the engine is using OpenGL 4.6 but I'm planning to add more backends in the future, like vulkan. My coding schedule is a little bit inconsistent right now because of school so be aware of that when you look at the massive gaps in my push history.
+This project is a rendering engine with module support to allow for object scenes, physics engines or whatever your heart desires. Currently the engine is using OpenGL 4.6 but I'm planning to add more backends in the future, like vulkan. My coding schedule is a little bit inconsistent right now because of school and work so be aware of that when you look at the massive gaps in my push history.
 
 
 ## Disclaimer
-The engine architecture is in its early stages so the README could be completely wrong in some parts
+The engine architecture is in its early stages so the README could be completely wrong in some parts or not yet be implemented.
 
 ## Build
-I tried my best to make building as easy as possible. All of the libraries get pulled during the cmake configure step.
+I tried my best to make building as easy as possible.
 
 ### Linux
 Run setup.sh to install docker and all of the required packages inside docker and run build.sh to compile<br>
@@ -16,14 +16,10 @@ Check the script flags for more options. Please note that by default the script 
 TL;DR if you just want it to work just run setup.sh and then build.sh with no flags <br>
 
 ### Windows
-Windows is a little rough, I suggest you just install wsl and use the --os windows flag to cross compile.
-
-### MacOS
-MacOS isn't going to be supported in a while. Don't even bother using a VM. VMs don't work with this project unless you are using gpu passthrough because I am using OpenGL 4.6
+To compile on Windows you just have to install WSL and use the -os windows flag to run it on windows. Sadly I have yet to implement cross compiling. Don't worry this project will not be feature complete until I get it fully working on windows
 
 ## Module Development
 ### Configuration
-A lot of the runtime side module configuration is going to be surrounded by the config.yaml file in the base of your program.
 All build time configuration will be in cmake format.
 
 ### Scripting
