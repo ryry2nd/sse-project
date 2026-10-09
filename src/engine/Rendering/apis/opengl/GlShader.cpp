@@ -32,7 +32,7 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 	}
 }
 
-GlShader::GlShader(std::string path)
+GlShader::GlShader(const char *path)
 {
 	auto [vertRaw, fragRaw] = getRaw(path);
 

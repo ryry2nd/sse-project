@@ -4,7 +4,7 @@
 
 #define NAME "OpenGl4.6"
 
-extern "C" std::unique_ptr<Shader> createShader(std::string path) {
+extern "C" std::unique_ptr<Shader> createShader(const char *path) {
     return std::make_unique<GlShader>(path);
 }
 
@@ -30,10 +30,6 @@ extern "C" std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency fre
 
 extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
     return std::make_unique<GlFrameBuffer>(size, settings);
-}
-
-extern "C" void draw(Window *win, Mesh* mesh, DrawParams* params, size_t size) {
-    OpenGL::draw(win, mesh, params, size);
 }
 
 extern "C" const char *getName() {return NAME;}

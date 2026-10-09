@@ -3,7 +3,7 @@
 #include "Logging.hpp"
 #include "Helper.hpp"
 #include "Module.hpp"
-#include <engine/Rendering/Rendering.hpp>
+#include "Rendering.hpp"
 
 extern "C" {
 	void engineShutdown();

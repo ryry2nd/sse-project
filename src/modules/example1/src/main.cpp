@@ -60,22 +60,22 @@ extern "C" {
 
 		buildVoxelGrid(vert, ind, {100, 100, 100});
 
-		CreationFunctions::initAPI("OpenGl4.6");
-		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
-		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
-		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
-		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
-		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/debug.png");
-		// fbo = CreationFunctions::createFrameBuffer(res, FrameBuffer::Settings::Color);
+		initAPI("OpenGl4.6");
+		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+		cubeShader = createShader(MODULE_PATH "/shaders/floatCube");
+		cubeInstanceShader = createShader(MODULE_PATH "/shaders/instanceCube");
+		debugVectorShader = createShader(MODULE_PATH "/shaders/debugVector");
+		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
+		megaCube = createMesh(vert.data(), vert.size(), ind.data(), ind.size());
+		img = createImage(MODULE_PATH "/assets/textures/debug.png");
+		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
 
-		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
-		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
+		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
+		modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
 		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
 
-		megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+		megaBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
 
 		mat.images[0] = img;
 		mat.shader = cubeShader;
@@ -102,7 +102,7 @@ extern "C" {
             }
         }
 
-		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
+		cubeInstanceBuff = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
 
 		inMat.instanceCount = models.size();
 		inMat.ssbo[0] = cubeInstanceBuff;
@@ -115,7 +115,7 @@ extern "C" {
 
 
 		ModelStruct fboPosition = glm::translate(glm::mat4(1.0f), {-10, 0, 0});
-		fboBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
+		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
 		// frameImageMat.shader = cubeShader;
 		// frameImageMat.ubo[0] = fboBuff;
 		// frameImageMat.ubo[1] = camBuff;
@@ -194,11 +194,11 @@ extern "C" {
 		modelBuff->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		CreationFunctions::draw(win, cube, &mat);
-		CreationFunctions::draw(win, cube, &inMat);
-		CreationFunctions::draw(win, megaCube, &bigMat);
-		CreationFunctions::draw(win, nullptr, &debugMat);
-		// CreationFunctions::draw(win, cube, &frameImageMat);
+		draw(win, cube, &mat);
+		draw(win, cube, &inMat);
+		draw(win, megaCube, &bigMat);
+		draw(win, nullptr, &debugMat);
+		// draw(win, cube, &frameImageMat);
 		// fbo->getColorImage()->clearTransparent();
 		win->swapBuffer();
 	}

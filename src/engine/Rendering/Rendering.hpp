@@ -63,23 +63,4 @@ namespace Engine::Rendering
 
 	typedef InternalParams DrawParams;
 	typedef InternalParams Material;
-
-	namespace CreationFunctions {
-		void initAPI(const char *apiName);
-
-		void draw(Window *win, Mesh *mesh = nullptr, DrawParams *params = nullptr, size_t size = 0);
-		Shader *createShader(const char *path);
-		void removeShader(Shader *shader);
-		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size);
-		void removeMesh(Mesh *mesh);
-		Image *createImage(const char *filePath, ImageSettings settings = ImageSettings());
-		Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings());
-		void removeImage(Image *image);
-		Window *createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-		void removeWindow(Window *window);
-		Buff *createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr);
-		void removeBuff(Buff *buff);
-		FrameBuffer *createFrameBuffer(glm::vec2 size, uint32_t settings);
-		void removeFrameBuffer(FrameBuffer *fbo);
-	}
 }

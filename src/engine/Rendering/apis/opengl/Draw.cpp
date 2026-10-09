@@ -3,7 +3,7 @@
 #include <engine/Rendering/Rendering.hpp>
 #include <SDL3/SDL_video.h>
 
-#include "../../internal/CombineParams.hpp"
+#include "../internal/CombineParams.hpp"
 
 inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	switch (meshType)
@@ -71,7 +71,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
-void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
+extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	if (!pms || !win) return;
 
 	InternalParams params;
