@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glad/gl.h>
-#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>

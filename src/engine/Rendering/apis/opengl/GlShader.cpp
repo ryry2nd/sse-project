@@ -2,8 +2,6 @@
 
 #define ENTRY_POINT "main"
 
-namespace fs = std::filesystem;
-
 void compileShader(std::vector<Uint32> data, GLuint shader)
 {
 	glShaderBinary(

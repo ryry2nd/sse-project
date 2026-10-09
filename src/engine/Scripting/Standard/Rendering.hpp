@@ -21,10 +21,10 @@ namespace Engine::Rendering {
 		void removeFrameBuffer(FrameBuffer *fbo);
 		void hostShutDownAll();
 	}
-	Image *createImage(const char *filePath, ImageSettings settings = ImageSettings{}) {
+	inline Image *createImage(const char *filePath, ImageSettings settings = ImageSettings{}) {
 		return createImageFromFile(filePath, settings);
 	}
-	Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings{}) {
+	inline Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings{}) {
 		return createImageFromSurf(surface, settings);
 	}
 }
