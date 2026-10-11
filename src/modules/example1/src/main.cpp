@@ -115,7 +115,7 @@ extern "C" {
 
 
 		ModelStruct fboPosition = glm::translate(glm::mat4(1.0f), {-10, 0, 0});
-		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
+		// fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
 		// frameImageMat.shader = cubeShader;
 		// frameImageMat.ubo[0] = fboBuff;
 		// frameImageMat.ubo[1] = camBuff;

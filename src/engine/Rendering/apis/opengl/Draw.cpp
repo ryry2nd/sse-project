@@ -145,21 +145,18 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	// 4. RENDER TO SCREEN
 	// -------------------------
 
-	// ToDo: have another draw function to just render the fbo to the screen and not do any of this crazy stuff
-	if (renderFBO && renderScreen) {
-		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, glFBO->getID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-		glBlitFramebuffer(
-			0, 0, glFBO->getWidth(), glFBO->getHeight(),
-			0, 0, glwin->getWidth(), glwin->getHeight(),
-			GL_COLOR_BUFFER_BIT,
-			GL_NEAREST
-		);
-	}
-	else if (renderScreen) {
+	if (renderScreen) {
+		if (renderFBO) {
+			static bool isWarned = false;
+			if (!isWarned) {
+				spdlog::warn(
+					"Rendering to an fbo and a screen at the same time is not supported.\n"
+					"\t\tThis forces the engine to render the draw call twice.\n"
+					"\t\tIf you want to do this then render to FBO only and then render it as a new draw call as a new image."
+				);
+				isWarned = true;
+			}
+		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glwin->updateScreenRes();
 		DRAW_CALL(glmesh, params);
