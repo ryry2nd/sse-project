@@ -5,7 +5,6 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include <Objects.hpp>
-#include <GenMesh.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -63,6 +62,10 @@ extern "C" {
 
 		std::vector<Vert> vert;
 		std::vector<Ind> ind;
+
+		auto buildVoxelGrid = (void (*) (std::vector<Vert>& vertices,
+						std::vector<Ind>& indices,
+						glm::vec3 size)) Module::getFunction("com.ryan.std", "buildVoxelGrid");
 
 		buildVoxelGrid(vert, ind, {100, 100, 100});
 
