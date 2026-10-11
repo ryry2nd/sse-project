@@ -5,6 +5,7 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include <Objects.hpp>
+#include <ClassTest.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -46,6 +47,10 @@ extern "C" {
 		#define ad2 2
 		((void (*)(int, int, int &))(Module::getFunction("com.ryan.std", "add")))(ad1, ad2, result);
 		debug("{} + {} = {}", ad1, ad2, result);
+
+		ClassTest *cltest = reinterpret_cast<ClassTest *(*)()>(Module::getFunction("com.ryan.std", "createClassTest"))();
+
+		debug("{}", cltest->foo(100, 2));
 
 		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
 			return;
