@@ -161,3 +161,7 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 void GlFrameBuffer::updateRes() {
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }
+
+extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
+    return std::make_unique<GlFrameBuffer>(size, settings);
+}

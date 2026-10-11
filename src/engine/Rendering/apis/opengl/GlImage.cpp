@@ -189,3 +189,11 @@ GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 	textureID = existingTexture;
 	imageSizes = size;
 }
+
+extern "C" std::unique_ptr<Image> createImageFromFile(const char *filePath, ImageSettings settings) {
+    return std::make_unique<GlImage>(filePath, settings);
+}
+
+extern "C" std::unique_ptr<Image> createImageFromSurface(SDL_Surface *surface, ImageSettings settings) {
+    return std::make_unique<GlImage>(surface, settings);
+}

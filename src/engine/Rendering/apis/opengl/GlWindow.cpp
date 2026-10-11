@@ -106,3 +106,7 @@ GlWindow::~GlWindow()
 	spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 	SDL_GL_DestroyContext(glContext);
 }
+
+extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {
+    return std::make_unique<GlWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
+}

@@ -60,3 +60,7 @@ GlShader::~GlShader()
 	if (id != 0)
 		glDeleteProgram(id);
 }
+
+extern "C" std::unique_ptr<Shader> createShader(const char *path) {
+    return std::make_unique<GlShader>(path);
+}
