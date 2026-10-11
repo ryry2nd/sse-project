@@ -37,8 +37,11 @@ struct MyModule {
 std::unordered_map<long, MyModule> modsMin;
 
 
-extern "C" {
-long initModuleJITMin(const char* path) {
+#include "HeadJITUnusable.hpp"
+
+using namespace Engine::Scripting::Internal;
+
+long Unusable::initModuleJITMin(const char* path) {
 	static long currID = 0;
 	std::filesystem::path file = path;
 
@@ -71,7 +74,7 @@ long initModuleJITMin(const char* path) {
 	modsMin[currID] = std::move(mod);
 	return currID++;
 }
-void setupJITMin(long id) {
+void Unusable::setupJITMin(long id) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return;
 
@@ -79,7 +82,7 @@ void setupJITMin(long id) {
 
 	modsMin[id].setup();
 }
-bool loopJITMin(long id) {
+bool Unusable::loopJITMin(long id) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return 1;
 
@@ -88,7 +91,7 @@ bool loopJITMin(long id) {
 	modsMin[id].loop();
 	return 0;
 }
-bool eventJITMin(long id, SDL_Event *e) {
+bool Unusable::eventJITMin(long id, SDL_Event *e) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return 1;
 
@@ -98,7 +101,7 @@ bool eventJITMin(long id, SDL_Event *e) {
 	modsMin[id].event(e);
 	return 0;
 }
-void shutdownJITMin(long id) {
+void Unusable::shutdownJITMin(long id) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return;
 
@@ -107,7 +110,7 @@ void shutdownJITMin(long id) {
 	}
 	modsMin[id].shutdown();
 }
-void removeJITMin(long id) {
+void Unusable::removeJITMin(long id) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return;
 
@@ -119,10 +122,13 @@ void removeJITMin(long id) {
 	modsMin.erase(id);
 }
 
-bool JITRunnableMin(long id) {
+bool Unusable::JITRunnableMin(long id) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return 0;
 
 	return !(modsMin[id].loop || modsMin[id].event);
 }
+
+void (*Unusable::getFunctionJITMin(long id, const char *funcname))() {
+	return SDL_LoadFunction(modsMin[id].runtime.get(), funcname);
 }

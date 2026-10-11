@@ -42,6 +42,9 @@ FrameBuffer *fbo;
 
 extern "C" {
 	void setup() {
+		int result;
+		((void (*)(int, int, int &))(Module::getFunction("com.ryan.std", "add")))(1, 2, result);
+		info("{}", result);
 		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
 			return;
 		}

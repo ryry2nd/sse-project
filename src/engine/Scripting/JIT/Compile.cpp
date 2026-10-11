@@ -1,35 +1,20 @@
-#define MINIMAL
+// #define MINIMAL
+
+#include "HeadJIT.hpp"
+#include "HeadJITUnusable.hpp"
 
 #include <SDL3/SDL_events.h>
 
 #ifndef MINIMAL
-#include <vector>
 #include <cstring>
-std::vector<long> minlist;
+#include <unordered_map>
+std::unordered_map<long, bool> isMin;
 #endif
 
-extern "C" {
-#ifndef MINIMAL
-long initModuleJITMax(const char* path);
-void setupJITMax(long id);
-bool loopJITMax(long id);
-bool eventJITMax(long id, SDL_Event *e);
-void shutdownJITMax(long id);
-void removeJITMax(long id);
-bool JITRunnableMax(long id);
-#endif
+using namespace Engine::Scripting::Internal::Unusable;
+using namespace Engine::Scripting::Internal;
 
-long initModuleJITMin(const char* path);
-void setupJITMin(long id);
-bool loopJITMin(long id);
-bool eventJITMin(long id, SDL_Event *e);
-void shutdownJITMin(long id);
-void removeJITMin(long id);
-bool JITRunnableMin(long id);
-
-
-
-long initModuleJIT(const char* path) {
+long Useable::initModuleJIT(const char* path) {
 	#ifdef MINIMAL
 	return initModuleJITMin(path);
 	#else
@@ -37,75 +22,86 @@ long initModuleJIT(const char* path) {
 	if (ext && std::strcmp(ext, ".so") == 0) {
 		long ret = initModuleJITMin(path);
 		if (ret == -1) return -1;
-		minlist.push_back(ret);
+		isMin[ret] = true;
 		return ret;
 	}
-	return initModuleJITMax(path);
+	long ret = initModuleJITMax(path);
+	isMin[ret] = false;
+	return ret;
 	#endif
 }
-void setupJIT(long id) {
+void Useable::setupJIT(long id) {
 	#ifdef MINIMAL
 	setupJITMin(id);
 	#else
-	if (std::ranges::find(minlist, id) != minlist.end()) {
+	if (isMin[id]) {
 		setupJITMin(id);
 		return;
 	}
 	setupJITMax(id);
 	#endif
 }
-bool loopJIT(long id) {
+void (*Useable::getFunctionJIT(long id, const char *funcname))() {
+	#ifdef MINIMAL
+	return getFunctionJITMin(id, funcname);
+	#else
+	if (isMin[id]) {
+		return getFunctionJITMin(id, funcname);
+	}
+	return getFunctionJITMax(id, funcname);
+	#endif
+}
+bool Useable::loopJIT(long id) {
 	#ifdef MINIMAL
 	return loopJITMin(id);
 	#else
-	if (std::ranges::find(minlist, id) != minlist.end()) {
+	if (isMin[id]) {
 		return loopJITMin(id);
 	}
 	return loopJITMax(id);
 	#endif
 }
-bool eventJIT(long id, SDL_Event *e) {
+bool Useable::eventJIT(long id, SDL_Event *e) {
 	#ifdef MINIMAL
 	return eventJITMin(id, e);
 	#else
-	if (std::ranges::find(minlist, id) != minlist.end()) {
+	if (isMin[id]) {
 		return eventJITMin(id, e);
 	}
 	return eventJITMax(id, e);
 	#endif
 }
-void shutdownJIT(long id) {
+void Useable::shutdownJIT(long id) {
 	#ifdef MINIMAL
 	shutdownJITMin(id);
 	#else
-	if (std::ranges::find(minlist, id) != minlist.end()) {
+	if (isMin[id]) {
 		shutdownJITMin(id);
 		return;
 	}
 	shutdownJITMax(id);
 	#endif
 }
-void removeJIT(long id) {
+void Useable::removeJIT(long id) {
 	#ifdef MINIMAL
 	removeJITMin(id);
 	#else
-	auto pos = std::ranges::find(minlist, id);
-	if (pos != minlist.end()) {
+	auto pos = isMin.find(id);
+	if (pos != isMin.end()) {
 		removeJITMin(id);
-		minlist.erase(pos);
+		isMin.erase(pos);
 		return;
 	}
 	removeJITMax(id);
 	#endif
 }
-bool JITRunnable(long id) {
+bool Useable::JITRunnable(long id) {
 	#ifdef MINIMAL
 	return JITRunnableMin(id);
 	#else
-	if (std::ranges::find(minlist, id) != minlist.end()) {
+	if (isMin.find(id) != isMin.end()) {
 		return JITRunnableMin(id);
 	}
 	return JITRunnableMax(id);
 	#endif
-}
 }

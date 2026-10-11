@@ -17,15 +17,10 @@
 
 namespace fs = std::filesystem;
 
-extern "C" {
-	long initModuleJIT(const char* path);
-	void setupJIT(long id);
-	long loopJIT(long id);
-	long eventJIT(long id, SDL_Event *e);
-	void shutdownJIT(long id);
-	void removeJIT(long id);
-	bool JITRunnable(long id);
-}
+#include "JIT/HeadJIT.hpp"
+
+using namespace Engine::Scripting::Internal::Useable;
+using namespace Engine::Scripting::Internal;
 
 static inline std::vector<std::string> split(const std::string& s, char delim)
 {
@@ -50,6 +45,7 @@ struct EnginePackage
 };
 
 std::vector<EnginePackage> pkgs;
+std::unordered_map<std::string, long> llvm_locations;
 static EnginePackage *mainpkg;
 static EnginePackage *currpkg;
 
@@ -204,6 +200,8 @@ extern "C" {
 				if (strcmp(path, mod_path.c_str()) == 0) {
 					mainpkg = &pkgs.back();
 				}
+
+				llvm_locations[pkg.id] = llvmLocation;
 			}
 		}
 
@@ -213,6 +211,7 @@ extern "C" {
 			try {
 				currpkg = &pkg;
 				setupJIT(pkg.llvmLocation);
+				spdlog::info("Successfully started {}", pkg.id);
 			}
 			catch (const std::exception& e) {
 				spdlog::error(e.what());
@@ -220,8 +219,6 @@ extern "C" {
 				throw e;
 				#endif
 			}
-
-			spdlog::info("Successfully started {}", pkg.id);
 		}
 	}
 
@@ -279,4 +276,8 @@ extern "C" {
 
 		pkgs.clear();
 	}
+}
+
+long Useable::idTollvm(const char *idname) {
+	return llvm_locations[idname];
 }
