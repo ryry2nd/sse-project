@@ -3,7 +3,7 @@
 #include <engine/Rendering/Rendering.hpp>
 #include <SDL3/SDL_video.h>
 
-#include "../internal/CombineParams.hpp"
+#include "../internal/DrawAgnostic.hpp"
 
 inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	switch (meshType)
@@ -13,8 +13,6 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		case InternalParams::MeshTypes::Triangles:  return GL_TRIANGLES;
 	}
 }
-
-#define MAX_BINDINGS_PER_SET (1 << 7)
 
 #define DRAW_CALL(mesh, params) \
 { \
@@ -72,23 +70,19 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 }
 
 extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
-	if (!pms || !win) return;
-
 	InternalParams params;
-	combineParams(params, pms, size);
 
-	if (!params.shader) return;
+	bool renderScreen;
+	bool renderFBO;
+	FrameBuffer *fbo;
+
+	drawinit(win, pms, size, params, fbo, renderScreen, renderFBO);
 
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(params.shader);
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
 	glwin->setWindow();
-
-	FrameBuffer *fbo	= params.fbo;
-	bool renderScreen	= !(params.settings & InternalParams::DisableScreen);
-	bool renderFBO		= (params.settings & InternalParams::EnableFBO) && (fbo != nullptr);
-
 
 	glUseProgram(glshdr->getID());
 
@@ -129,8 +123,6 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 		glEnable(GL_DEPTH_TEST);
 
 
-	// render stage
-
 	// -------------------------
 	// 3. Render To FBO
 	// -------------------------
@@ -146,17 +138,6 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	// -------------------------
 
 	if (renderScreen) {
-		if (renderFBO) {
-			static bool isWarned = false;
-			if (!isWarned) {
-				spdlog::warn(
-					"Rendering to an fbo and a screen at the same time is not supported.\n"
-					"\t\tThis forces the engine to render the draw call twice.\n"
-					"\t\tIf you want to do this then render to FBO only and then render it as a new draw call as a new image."
-				);
-				isWarned = true;
-			}
-		}
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glwin->updateScreenRes();
 		DRAW_CALL(glmesh, params);
