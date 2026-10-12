@@ -18,6 +18,8 @@ extern "C" {
 	void ScriptingRunLoop();
 	void ScriptingRunEvent();
 	void ScriptingDestroy();
+
+	void deinitAPI();
 }
 
 int main(int argc, char *argv[])
@@ -37,6 +39,7 @@ int main(int argc, char *argv[])
 	}
 	ScriptingDestroy();
 	Shutdown();
+	deinitAPI();
 }
 
 #ifdef _WIN32

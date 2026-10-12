@@ -48,9 +48,9 @@ extern "C" {
 		((void (*)(int, int, int &))(Module::getFunction("com.ryan.std", "add")))(ad1, ad2, result);
 		debug("{} + {} = {}", ad1, ad2, result);
 
-		ClassTest *cltest = reinterpret_cast<ClassTest *(*)()>(Module::getFunction("com.ryan.std", "createClassTest"))();
+		ClassTest cltest = reinterpret_cast<ClassTest (*)()>(Module::getFunction("com.ryan.std", "createClassTest"))();
 
-		debug("16 << 2 = {}", cltest->foo(16, 2));
+		debug("16 << 2 = {}", cltest.foo(16, 2));
 
 		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
 			return;

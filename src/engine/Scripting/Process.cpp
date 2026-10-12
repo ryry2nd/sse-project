@@ -6,8 +6,6 @@
 #include <vector>
 
 #include <SDL3/SDL_events.h>
-#include <SDL3/SDL_loadso.h>
-#include <SDL3/SDL_error.h>
 
 #include <spdlog/spdlog.h>
 

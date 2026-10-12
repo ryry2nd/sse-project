@@ -4,6 +4,6 @@ int ClassTest::foo(int x, int y) {
 	return x << y;
 }
 
-extern "C" ClassTest *createClassTest() {
-	return new ClassTest();
+extern "C" ClassTest createClassTest() {
+	return ClassTest();
 }

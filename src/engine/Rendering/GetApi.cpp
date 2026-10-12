@@ -1,7 +1,6 @@
-#include <memory>
 #include <filesystem>
 #include <unordered_map>
-#include <SDL3/SDL_loadso.h>
+#include "apis/internal/dlopen.hpp"
 #include <spdlog/spdlog.h>
 
 #include "ApiFunction.hpp"
@@ -9,53 +8,31 @@
 
 #define COMPILED_OUT_PATH "lib/Rendering"
 
-#ifdef _WIN32
-#define POPEN _popen
-#define PCLOSE _pclose
-#define EXE_EXT ".exe"
-#define BIN_PREFIX ""
-#define LIBRARY_SUFFIX ".dll"
-#else
-#define POPEN popen
-#define PCLOSE pclose
-#define EXE_EXT ""
-#define BIN_PREFIX "./"
-#define LIBRARY_SUFFIX ".so"
-#endif
-
 using namespace Engine::Rendering;
 
 using namespace NApiFunctions;
 
 APIFunctions apiFunctions;
 
-auto sdlDeleter = [](SDL_SharedObject* obj) {
-	if (obj) SDL_UnloadObject(obj);
-};
-
-using SDLSharedPtr = std::unique_ptr<SDL_SharedObject, decltype(sdlDeleter)>;
-
-std::unordered_map<std::string, SDLSharedPtr> libs;
+std::unordered_map<std::string, void *> libs;
 
 void createLibs() {
 	namespace fs = std::filesystem;
 
 	for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
 		if (entry.path().extension() == LIBRARY_SUFFIX) {
-			SDL_SharedObject* raw = SDL_LoadObject(entry.path().string().c_str());
+			void* handle = initruntime(entry.path().string().c_str());
 
-			if (!raw)
+			if (!handle)
 			{
-				spdlog::warn("Failed to load {}: {}", entry.path().string(), SDL_GetError());
+				spdlog::warn("Failed to load {}", entry.path().string());
 				continue;
 			}
 
-			SDLSharedPtr lib(raw, sdlDeleter);
-
-			auto getName = reinterpret_cast<GetNameFn>(SDL_LoadFunction(lib.get(), "getName"));
+			auto getName = reinterpret_cast<GetNameFn>(getFunction(handle, "getName"));
 			if (!getName) continue;
 
-			libs[getName()] = std::move(lib);
+			libs[getName()] = handle;
 		}
 	}
 
@@ -84,16 +61,16 @@ extern "C" {
 			std::exit(1);
 		}
 
-		SDL_SharedObject *lib = it->second.get();
+		void *lib = it->second;
 
-		apiFunctions.createShaderFunc = (CreateShaderFn)SDL_LoadFunction(lib, "createShader");
-		apiFunctions.createMeshFunc = (CreateMeshFn)SDL_LoadFunction(lib, "createMesh");
-		apiFunctions.createImageFromFileFunc = (CreateImageFromFileFn)SDL_LoadFunction(lib, "createImageFromFile");
-		apiFunctions.createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)SDL_LoadFunction(lib, "createImageFromSurface");
-		apiFunctions.createWindowFunc = (CreateWindowFn)SDL_LoadFunction(lib, "createWindow");
-		apiFunctions.createBuffFunc = (CreateBuffFn)SDL_LoadFunction(lib, "createBuff");
-		apiFunctions.createDrawFunc = (CreateDrawFn)SDL_LoadFunction(lib, "draw");
-		apiFunctions.createFboFunc = (CreateFBOFn)SDL_LoadFunction(lib, "createFrameBuffer");
+		apiFunctions.createShaderFunc = (CreateShaderFn)getFunction(lib, "createShader");
+		apiFunctions.createMeshFunc = (CreateMeshFn)getFunction(lib, "createMesh");
+		apiFunctions.createImageFromFileFunc = (CreateImageFromFileFn)getFunction(lib, "createImageFromFile");
+		apiFunctions.createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)getFunction(lib, "createImageFromSurface");
+		apiFunctions.createWindowFunc = (CreateWindowFn)getFunction(lib, "createWindow");
+		apiFunctions.createBuffFunc = (CreateBuffFn)getFunction(lib, "createBuff");
+		apiFunctions.createDrawFunc = (CreateDrawFn)getFunction(lib, "draw");
+		apiFunctions.createFboFunc = (CreateFBOFn)getFunction(lib, "createFrameBuffer");
 
 		if (!apiFunctions.createShaderFunc ||
 			!apiFunctions.createMeshFunc ||
@@ -108,6 +85,12 @@ extern "C" {
 		}
 
 		spdlog::info("Successfully set API to {}", apiName);
+	}
+	void deinitAPI() {
+		for (auto &lib : libs) {
+			rmruntime(lib.second);
+		}
+		libs.clear();
 	}
 }
 

@@ -2,54 +2,7 @@
 #include <unordered_map>
 #include <spdlog/spdlog.h>
 
-#if defined(_WIN32)
-#define EXE_EXT ".exe"
-#define BIN_PREFIX ""
-#define LIBRARY_SUFFIX ".dll"
-#include <windows.h>
-
-void* initruntime(const char* path) {
-    std::string libraryPath = std::string(BIN_PREFIX) + path;
-    return reinterpret_cast<void*>(LoadLibraryA(libraryPath.c_str()));
-}
-
-void (*getFunction(void* handle, const char* funcname))() {
-    return reinterpret_cast<void (*)()>(
-        GetProcAddress(reinterpret_cast<HMODULE>(handle), funcname)
-    );
-}
-
-int rmruntime(void* handle) {
-    return FreeLibrary(reinterpret_cast<HMODULE>(handle)) ? 0 : -1;
-}
-#elif defined(__linux__)
-#define EXE_EXT ""
-#define BIN_PREFIX "./"
-#define LIBRARY_SUFFIX ".so"
-#include <dlfcn.h>
-
-void *initruntime(const char *path) {
-	std::string libraryPath = std::string(BIN_PREFIX) + path;
-	return dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-}
-void (*getFunction(void *handle, const char *funcname))() {
-	auto function = reinterpret_cast<void (*)()>(
-		dlsym(handle, funcname)
-	);
-
-	return function;
-}
-int rmruntime(void *handle) {
-	return dlclose(handle);
-}
-#else
-#define EXE_EXT ""
-#define BIN_PREFIX ""
-#define LIBRARY_SUFFIX ""
-void *initruntime(const char *path) {}
-void (*getFunction(void *handle, const char *funcname))() {}
-int rmruntime(void *handle){}
-#endif
+#include "../../Rendering/apis/internal/dlopen.hpp"
 
 struct MyModule {
 	void *runtime;
