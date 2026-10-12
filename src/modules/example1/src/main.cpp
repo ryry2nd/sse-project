@@ -50,7 +50,7 @@ extern "C" {
 
 		ClassTest *cltest = reinterpret_cast<ClassTest *(*)()>(Module::getFunction("com.ryan.std", "createClassTest"))();
 
-		debug("{}", cltest->foo(16, 2));
+		debug("16 << 2 = {}", cltest->foo(16, 2));
 
 		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
 			return;

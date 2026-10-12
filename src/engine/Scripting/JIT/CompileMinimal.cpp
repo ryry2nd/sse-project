@@ -1,19 +1,33 @@
-#include <memory>
 #include <filesystem>
 #include <unordered_map>
 #include <spdlog/spdlog.h>
-#include <SDL3/SDL_events.h>
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #define EXE_EXT ".exe"
 #define BIN_PREFIX ""
 #define LIBRARY_SUFFIX ".dll"
-#endif
-#ifdef __linux__
+#include <windows.h>
+
+void* initruntime(const char* path) {
+    std::string libraryPath = std::string(BIN_PREFIX) + path;
+    return reinterpret_cast<void*>(LoadLibraryA(libraryPath.c_str()));
+}
+
+void (*getFunction(void* handle, const char* funcname))() {
+    return reinterpret_cast<void (*)()>(
+        GetProcAddress(reinterpret_cast<HMODULE>(handle), funcname)
+    );
+}
+
+int rmruntime(void* handle) {
+    return FreeLibrary(reinterpret_cast<HMODULE>(handle)) ? 0 : -1;
+}
+#elif defined(__linux__)
 #define EXE_EXT ""
 #define BIN_PREFIX "./"
 #define LIBRARY_SUFFIX ".so"
 #include <dlfcn.h>
+
 void *initruntime(const char *path) {
 	std::string libraryPath = std::string(BIN_PREFIX) + path;
 	return dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
@@ -28,13 +42,20 @@ void (*getFunction(void *handle, const char *funcname))() {
 int rmruntime(void *handle) {
 	return dlclose(handle);
 }
+#else
+#define EXE_EXT ""
+#define BIN_PREFIX ""
+#define LIBRARY_SUFFIX ""
+void *initruntime(const char *path) {}
+void (*getFunction(void *handle, const char *funcname))() {}
+int rmruntime(void *handle){}
 #endif
 
 struct MyModule {
 	void *runtime;
 	void (*setup)();
 	void (*loop)();
-	void (*event)(SDL_Event*);
+	void (*event)(void*);
 	void (*shutdown)();
 };
 
@@ -70,7 +91,7 @@ long Unusable::initModuleJITMin(const char* path) {
 	mod.runtime = handle;
 	mod.setup = reinterpret_cast<void(*)()>(setup);
 	mod.loop = reinterpret_cast<void(*)()>(loop);
-	mod.event = reinterpret_cast<void(*)(SDL_Event*)>(event);
+	mod.event = reinterpret_cast<void(*)(void*)>(event);
 	mod.shutdown = reinterpret_cast<void(*)()>(shutdown);
 
 	modsMin[currID] = std::move(mod);
@@ -93,7 +114,7 @@ bool Unusable::loopJITMin(long id) {
 	modsMin[id].loop();
 	return 0;
 }
-bool Unusable::eventJITMin(long id, SDL_Event *e) {
+bool Unusable::eventJITMin(long id, void *e) {
 	auto it = modsMin.find(id);
 	if (it == modsMin.end()) return 1;
 

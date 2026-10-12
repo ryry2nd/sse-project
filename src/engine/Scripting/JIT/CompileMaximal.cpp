@@ -1,7 +1,19 @@
 #define MINIMAL
 
+#include "HeadJITUnusable.hpp"
+
+using namespace Engine::Scripting::Internal;
+
+long Unusable::initModuleJITMax(const char* path) {return -1;}
+void Unusable::setupJITMax(long id) {}
+bool Unusable::loopJITMax(long id) {return false;}
+bool Unusable::eventJITMax(long id, void *e) {return false;}
+void Unusable::shutdownJITMax(long id) {}
+void Unusable::removeJITMax(long id) {}
+bool Unusable::JITRunnableMax(long id) {return false;}
+void (*Unusable::getFunctionJITMax(long id, const char *funcname))() {return nullptr;}
+
 #ifndef MINIMAL
-#include <SDL3/SDL_events.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -120,10 +132,6 @@ long initModuleJITMax(const char* path) {
 	modsMax[currID] = std::move(mod);
 	return currID++;
 }
-
-#include "HeadJITUnusable.hpp"
-
-using namespace Engine::Scripting::Internal;
 
 void Unusable::setupJITMax(long id) {
 	auto it = modsMax.find(id);

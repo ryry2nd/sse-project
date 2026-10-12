@@ -3,8 +3,6 @@
 #include "HeadJIT.hpp"
 #include "HeadJITUnusable.hpp"
 
-#include <SDL3/SDL_events.h>
-
 #ifndef MINIMAL
 #include <cstring>
 #include <unordered_map>
@@ -61,7 +59,7 @@ bool Useable::loopJIT(long id) {
 	return loopJITMax(id);
 	#endif
 }
-bool Useable::eventJIT(long id, SDL_Event *e) {
+bool Useable::eventJIT(long id, void *e) {
 	#ifdef MINIMAL
 	return eventJITMin(id, e);
 	#else
