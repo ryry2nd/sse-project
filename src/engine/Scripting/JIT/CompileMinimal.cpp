@@ -1,33 +1,37 @@
 #include <memory>
 #include <filesystem>
 #include <unordered_map>
-#include <SDL3/SDL_loadso.h>
-#include <SDL3/SDL_events.h>
 #include <spdlog/spdlog.h>
+#include <SDL3/SDL_events.h>
 
 #ifdef _WIN32
-#define POPEN _popen
-#define PCLOSE _pclose
 #define EXE_EXT ".exe"
 #define BIN_PREFIX ""
 #define LIBRARY_SUFFIX ".dll"
-#else
-#define POPEN popen
-#define PCLOSE pclose
+#endif
+#ifdef __linux__
 #define EXE_EXT ""
 #define BIN_PREFIX "./"
 #define LIBRARY_SUFFIX ".so"
+#include <dlfcn.h>
+void *initruntime(const char *path) {
+	std::string libraryPath = std::string(BIN_PREFIX) + path;
+	return dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+}
+void (*getFunction(void *handle, const char *funcname))() {
+	auto function = reinterpret_cast<void (*)()>(
+		dlsym(handle, funcname)
+	);
+
+	return function;
+}
+int rmruntime(void *handle) {
+	return dlclose(handle);
+}
 #endif
 
-
-auto sdlDeleter = [](SDL_SharedObject* obj) {
-	if (obj) SDL_UnloadObject(obj);
-};
-
-using SDLSharedPtr = std::unique_ptr<SDL_SharedObject, decltype(sdlDeleter)>;
-
 struct MyModule {
-	SDLSharedPtr runtime;
+	void *runtime;
 	void (*setup)();
 	void (*loop)();
 	void (*event)(SDL_Event*);
@@ -47,25 +51,23 @@ long Unusable::initModuleJITMin(const char* path) {
 
 	if (file.extension() != LIBRARY_SUFFIX) return -1;
 
-	SDL_SharedObject* raw = SDL_LoadObject(file.string().c_str());
+	void *handle = initruntime(path);
 
-	if (!raw)
+	if (!handle)
 	{
-		spdlog::error("Failed to load {}: {}", file.string(), SDL_GetError());
+		spdlog::error("Failed to load {}", file.string());
 		return -1;
 	}
 
-	SDLSharedPtr lib(raw, sdlDeleter);
-
 	MyModule mod;
 
-	auto setup = SDL_LoadFunction(lib.get(), "setup");
-	auto loop = SDL_LoadFunction(lib.get(), "loop");
-	auto event = SDL_LoadFunction(lib.get(), "event");
-	auto shutdown = SDL_LoadFunction(lib.get(), "shutdown");
+	auto setup = getFunction(handle, "setup");
+	auto loop = getFunction(handle, "loop");
+	auto event = getFunction(handle, "event");
+	auto shutdown = getFunction(handle, "shutdown");
 
 
-	mod.runtime = std::move(lib);
+	mod.runtime = handle;
 	mod.setup = reinterpret_cast<void(*)()>(setup);
 	mod.loop = reinterpret_cast<void(*)()>(loop);
 	mod.event = reinterpret_cast<void(*)(SDL_Event*)>(event);
@@ -118,7 +120,7 @@ void Unusable::removeJITMin(long id) {
 	modsMin[id].loop = nullptr;
 	modsMin[id].event = nullptr;
 	modsMin[id].shutdown = nullptr;
-	modsMin[id].runtime.reset();
+	rmruntime(modsMin[id].runtime);
 	modsMin.erase(id);
 }
 
@@ -130,5 +132,5 @@ bool Unusable::JITRunnableMin(long id) {
 }
 
 void (*Unusable::getFunctionJITMin(long id, const char *funcname))() {
-	return SDL_LoadFunction(modsMin[id].runtime.get(), funcname);
+	return getFunction(modsMin[id].runtime, funcname);
 }
