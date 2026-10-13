@@ -39,7 +39,7 @@ void Useable::setupJIT(long id) {
 	setupJITMax(id);
 	#endif
 }
-void (*Useable::getFunctionJIT(long id, const char *funcname))() {
+void *Useable::getFunctionJIT(long id, const char *funcname) {
 	#ifdef MINIMAL
 	return getFunctionJITMin(id, funcname);
 	#else

@@ -43,26 +43,26 @@ struct EnginePackage
 };
 
 std::vector<EnginePackage> pkgs;
-std::unordered_map<std::string, long> llvm_locations;
+std::unordered_map<std::string, EnginePackage*> idTopkg;
+std::unordered_map<std::string, EnginePackage*> pathTopkg;
 static EnginePackage *mainpkg;
 static EnginePackage *currpkg;
+
 
 void topoSort() {
     std::unordered_map<std::string, int> index;
     std::unordered_map<std::string, int> indegree;
     std::unordered_map<std::string, std::vector<std::string>> graph;
 
-    // map id -> index in vector
     for (int i = 0; i < (int)pkgs.size(); ++i) {
         index[pkgs[i].id] = i;
         indegree[pkgs[i].id] = 0;
     }
 
-    // build graph
     for (const auto& m : pkgs) {
         for (const auto& dep : m.deps) {
             if (!index.contains(dep)) {
-                spdlog::error("missing dependency {} for module {}", m.id, dep);
+                spdlog::error("missing dependency {} for module {}", dep, m.id);
                 std::exit(1);
             }
 
@@ -74,7 +74,8 @@ void topoSort() {
     std::queue<std::string> q;
 
     for (const auto& [id, deg] : indegree) {
-        if (deg == 0) q.push(id);
+        if (deg == 0)
+            q.push(id);
     }
 
     std::vector<EnginePackage> ordered;
@@ -97,12 +98,26 @@ void topoSort() {
         std::exit(1);
     }
 
-	for (auto &pkg : ordered)
-		if (pkg.id == mainpkg->id)
-			mainpkg = &pkg;
+    std::string mainId;
+    if (mainpkg)
+        mainId = mainpkg->id;
 
     pkgs = std::move(ordered);
+
+    idTopkg.clear();
+    pathTopkg.clear();
+    mainpkg = nullptr;
+	currpkg = nullptr;
+
+    for (auto& pkg : pkgs) {
+        idTopkg[pkg.id] = &pkg;
+        pathTopkg[pkg.path] = &pkg;
+
+        if (pkg.id == mainId)
+            mainpkg = &pkg;
+    }
 }
+
 
 static bool shouldShutDown = true;
 
@@ -113,10 +128,20 @@ extern "C" {
 		return "no exe detected";
 	}
 
-	const char *hostGetCurrent() {
+	const char *hostGetCurrentRunning() {
 		if (currpkg)
 			return currpkg->id.c_str();
 		return "no current detected";
+	}
+
+	const char *hostGetID(const char *path) {
+		auto ret = pathTopkg.find(std::string(path));
+		if (ret == pathTopkg.end()) {
+			spdlog::error("error: id not found");
+			return "";
+		}
+
+		return ret->second->id.c_str();
 	}
 
 	bool ScriptingShouldStop() {
@@ -193,13 +218,17 @@ extern "C" {
 					shouldShutDown = false;
 				}
 
+
 				pkgs.push_back(std::move(pkg));
+
+				auto pk = pkgs.data() + pkgs.size() - 1;
+
+				idTopkg[pk->id] = pk;
+				pathTopkg[pk->path] = pk;
 
 				if (strcmp(path, mod_path.c_str()) == 0) {
 					mainpkg = &pkgs.back();
 				}
-
-				llvm_locations[pkg.id] = llvmLocation;
 			}
 		}
 
@@ -273,9 +302,25 @@ extern "C" {
 		}
 
 		pkgs.clear();
+		idTopkg.clear();
+		pathTopkg.clear();
 	}
 }
 
 long Useable::idTollvm(const char *idname) {
-	return llvm_locations[idname];
+	auto ret = idTopkg.find(idname);
+	if (ret == idTopkg.end()) {
+		spdlog::error("Id Not found");
+		return -1;
+	}
+	return ret->second->llvmLocation;
+}
+
+const char *Useable::idToPath(const char *idname) {
+	auto ret = idTopkg.find(idname);
+	if (ret == idTopkg.end()) {
+		spdlog::error("Id Not found");
+		return "";
+	}
+	return ret->second->path.c_str();
 }

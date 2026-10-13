@@ -113,6 +113,28 @@ foreach(MODULE IN LISTS MODULE_ORDER)
 	set(AUTO_COPY ON)
 	set(COMPILE_SHADERS ON)
 
+	execute_process(
+        COMMAND python3
+            ${CMAKE_SOURCE_DIR}/cmake/parse.py
+            ${MODULE}
+			id
+        OUTPUT_VARIABLE RAW_OUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+	set(MOD_ID "${RAW_OUT}")
+
+	execute_process(
+        COMMAND python3
+            ${CMAKE_SOURCE_DIR}/cmake/parse.py
+            ${MODULE}
+			version
+        OUTPUT_VARIABLE RAW_OUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+	set(MOD_VERSION "${RAW_OUT}")
+
 	add_custom_target(conf_copy_${MODULE_NAME} ALL
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different
 			${MODULE}/config.txt

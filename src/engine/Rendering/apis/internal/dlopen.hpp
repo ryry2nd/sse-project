@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <string>
+
 #if defined(_WIN32)
 #define EXE_EXT ".exe"
 #define BIN_PREFIX ""
@@ -14,11 +16,9 @@ inline void* initruntime(const char* path) {
     return reinterpret_cast<void*>(LoadLibraryA(libraryPath.c_str()));
 }
 
-inline void (*getFunction(void* handle, const char* funcname))() {
+inline void *getFunction(void* handle, const char* funcname) {
 	if (!handle || !funcname) return nullptr;
-    return reinterpret_cast<void (*)()>(
-        GetProcAddress(reinterpret_cast<HMODULE>(handle), funcname)
-    );
+    return GetProcAddress(reinterpret_cast<HMODULE>(handle), funcname);
 }
 
 inline int rmruntime(void* handle) {
@@ -41,13 +41,10 @@ inline void *initruntime(const char *path) {
 	std::string libraryPath = std::string(BIN_PREFIX) + path;
 	return dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
 }
-inline void (*getFunction(void *handle, const char *funcname))() {
+inline void *getFunction(void *handle, const char *funcname) {
 	if (!handle || !funcname) return nullptr;
-	auto function = reinterpret_cast<void (*)()>(
-		dlsym(handle, funcname)
-	);
 
-	return function;
+	return dlsym(handle, funcname);
 }
 inline int rmruntime(void *handle) {
 	if (!handle) return 0;

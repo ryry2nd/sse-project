@@ -8,7 +8,9 @@ namespace Engine::Scripting::Internal::Useable {
 	void shutdownJIT(long id);
 	void removeJIT(long id);
 	bool JITRunnable(long id);
-	void (*getFunctionJIT(long id, const char *funcname))();
+	void *getFunctionJIT(long id, const char *funcname);
 
 	long idTollvm(const char *);
+
+	const char *idToPath(const char *);
 }

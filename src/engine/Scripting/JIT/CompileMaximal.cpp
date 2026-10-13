@@ -11,7 +11,7 @@ bool Unusable::eventJITMax(long id, void *e) {return false;}
 void Unusable::shutdownJITMax(long id) {}
 void Unusable::removeJITMax(long id) {}
 bool Unusable::JITRunnableMax(long id) {return false;}
-void (*Unusable::getFunctionJITMax(long id, const char *funcname))() {return nullptr;}
+void *Unusable::getFunctionJITMax(long id, const char *funcname) {return nullptr;}
 
 #ifndef MINIMAL
 #include <memory>
@@ -191,7 +191,7 @@ bool Unusable::JITRunnableMax(long id) {
 	return !(modsMax[id].loop || modsMax[id].event);
 }
 
-void (*Unusable::getFunctionJITMax(long id, const char *funcname))() {
-	return modsMax[id].runtime->getFunction(funcname);
+void *Unusable::getFunctionJITMax(long id, const char *funcname) {
+	return (void *) modsMax[id].runtime->getFunction(funcname);
 }
 #endif

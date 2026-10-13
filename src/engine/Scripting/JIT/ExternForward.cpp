@@ -20,8 +20,15 @@ extern "C" {
 	}
 	void engineShutdown() {}
 
-	void (*hostGetFunction(const char *libname, const char *funcname))() {
+	void *hostGetFunction(const char *libname, const char *funcname) {
 		using namespace Engine::Scripting::Internal::Useable;
-		return getFunctionJIT(idTollvm(libname), funcname);
+		auto func = getFunctionJIT(idTollvm(libname), funcname);
+		return func;
+	}
+
+	const char *hostIdToPath(const char *id) {
+		using namespace Engine::Scripting::Internal::Useable;
+		auto ret = idToPath(id);
+		return ret;
 	}
 }

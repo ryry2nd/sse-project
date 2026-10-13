@@ -136,7 +136,6 @@ function(compile_module)
 			${ALL_ITEMS}
 			${CPP_SOURCES}
 			${TARGET}
-			"-DMODULE_PATH=\\\"${MOD_PATH}\\\""
 			-o ${MODULE_FILE}
 
 		DEPENDS

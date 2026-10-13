@@ -105,6 +105,6 @@ bool Unusable::JITRunnableMin(long id) {
 	return !(modsMin[id].loop || modsMin[id].event);
 }
 
-void (*Unusable::getFunctionJITMin(long id, const char *funcname))() {
+void *Unusable::getFunctionJITMin(long id, const char *funcname) {
 	return getFunction(modsMin[id].runtime, funcname);
 }

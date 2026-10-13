@@ -8,7 +8,7 @@ namespace Engine::Scripting::Internal::Unusable {
 	void shutdownJITMax(long id);
 	void removeJITMax(long id);
 	bool JITRunnableMax(long id);
-	void (*getFunctionJITMax(long id, const char *funcname))();
+	void *getFunctionJITMax(long id, const char *funcname);
 
 	long initModuleJITMin(const char* path);
 	void setupJITMin(long id);
@@ -17,5 +17,5 @@ namespace Engine::Scripting::Internal::Unusable {
 	void shutdownJITMin(long id);
 	void removeJITMin(long id);
 	bool JITRunnableMin(long id);
-	void (*getFunctionJITMin(long id, const char *funcname))();
+	void *getFunctionJITMin(long id, const char *funcname);
 }

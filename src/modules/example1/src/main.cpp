@@ -3,9 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <cstring>
 
 #include <Objects.hpp>
-#include <ClassTest.hpp>
+#include <MathTest.hpp>
+#include <FooTest.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -40,21 +42,26 @@ Buff *cubeInstanceBuff;
 Buff *fboBuff;
 FrameBuffer *fbo;
 
+std::string MODULE_PATH;
+std::string MODULE_ID;
+
 extern "C" {
 	void setup() {
-		int result;
-		#define ad1 1
-		#define ad2 2
-		((void (*)(int, int, int &))(Module::getFunction("com.ryan.std", "add")))(ad1, ad2, result);
-		debug("{} + {} = {}", ad1, ad2, result);
+		MODULE_ID = Engine::Module::getCurrentRunning();
+		MODULE_PATH = Engine::Module::idToPath(MODULE_ID.c_str());
 
-		ClassTest cltest = reinterpret_cast<ClassTest (*)()>(Module::getFunction("com.ryan.std", "createClassTest"))();
-
-		debug("16 << 2 = {}", cltest.foo(16, 2));
-
-		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
 			return;
 		}
+
+		int result;
+		#define ad1 3
+		#define ad2 2
+		MathTest mathTest = MathTest();
+		debug("{} + {} = {}", ad1, ad2, mathTest.add(ad1, ad2));
+
+		foo();
+
 		glm::vec2 res({900.0f, 500.0f});
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -76,12 +83,12 @@ extern "C" {
 
 		initAPI("OpenGl4.6");
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-		cubeShader = createShader(MODULE_PATH "/shaders/floatCube");
-		cubeInstanceShader = createShader(MODULE_PATH "/shaders/instanceCube");
-		debugVectorShader = createShader(MODULE_PATH "/shaders/debugVector");
+		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
+		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
+		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
 		megaCube = createMesh(vert.data(), vert.size(), ind.data(), ind.size());
-		img = createImage(MODULE_PATH "/assets/textures/debug.png");
+		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
 
 		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
@@ -137,7 +144,7 @@ extern "C" {
 	}
 
 	void loop() {
-		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
 			return;
 		}
 		win->update();
@@ -218,7 +225,7 @@ extern "C" {
 	}
 
 	void event(SDL_Event *event) {
-		if (strcmp(Engine::Module::getExe(), Engine::Module::getCurrent()) != 0) {
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
 			return;
 		}
 		auto dt = win->getDeltaTime();
