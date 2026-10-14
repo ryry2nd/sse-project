@@ -76,11 +76,11 @@ GLenum toGL(ImageSettings::CompareFunc f)
 void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 {
 	SDL_Surface* surface = SDL_ConvertSurface(surface_old, SDL_PIXELFORMAT_RGBA32);
+	// SDL_Surface *surface = surface_old;
 
     if (!surface)
     {
 		spdlog::critical("Convert failed: {}", SDL_GetError());
-		SDL_DestroySurface(surface);
 		std::exit(1);
     }
 

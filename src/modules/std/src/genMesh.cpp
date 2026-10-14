@@ -2,99 +2,126 @@
 
 using namespace Engine::Rendering;
 
-inline bool isSolid (int x, int y, int z, glm::vec3 size) {
-	if (x < 0 || y < 0 || z < 0 ||
-		x >= size.x || y >= size.y || z >= size.z)
-		return false;
-	return true;
-}
+inline void face(
+    glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d,
+    glm::vec3 n,
+    glm::vec2 uvA, glm::vec2 uvB,
+    glm::vec2 uvC, glm::vec2 uvD,
+    std::vector<Vert>& vertices,
+    std::vector<Ind>& indices)
+{
+    Ind start = (Ind)vertices.size();
 
-inline void face(glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d, glm::vec3 n, std::vector<Vert>& vertices, std::vector<Ind>& indices) {
-	Ind start = (Ind)vertices.size();
+    vertices.push_back({a, uvA, n});
+    vertices.push_back({b, uvB, n});
+    vertices.push_back({c, uvC, n});
+    vertices.push_back({d, uvD, n});
 
-	vertices.push_back({a, {0,0}, n});
-	vertices.push_back({b, {1,0}, n});
-	vertices.push_back({c, {1,1}, n});
-	vertices.push_back({d, {0,1}, n});
-
-	indices.insert(indices.end(), {
-		start+0, start+1, start+2,
-		start+2, start+3, start+0
-	});
+    indices.insert(indices.end(), {
+        start + 0, start + 1, start + 2,
+        start + 2, start + 3, start + 0
+    });
 }
 
 extern "C" {
-	void buildVoxelGrid(std::vector<Vert>& vertices,
-						std::vector<Ind>& indices,
-						glm::vec3 size)
+    void buildVoxelGrid(
+        std::vector<Vert>& vertices,
+        std::vector<Ind>& indices,
+        glm::vec3 size)
+    {
+        glm::vec3 p(0, 0, 0);
+        glm::vec3 s = size;
+
+        // +X: UV axes Y and Z
+        face(
+            p + glm::vec3(s.x, 0, 0),
+            p + glm::vec3(s.x, s.y, 0),
+            p + glm::vec3(s.x, s.y, s.z),
+            p + glm::vec3(s.x, 0, s.z),
+            {1, 0, 0},
+            {0, 0}, {s.y, 0}, {s.y, s.z}, {0, s.z},
+            vertices, indices
+        );
+
+        // -X
+        face(
+            p,
+            p + glm::vec3(0, 0, s.z),
+            p + glm::vec3(0, s.y, s.z),
+            p + glm::vec3(0, s.y, 0),
+            {-1, 0, 0},
+            {0, 0}, {s.z, 0}, {s.z, s.y}, {0, s.y},
+            vertices, indices
+        );
+
+        // +Y: UV axes X and Z
+        face(
+            p + glm::vec3(0, s.y, 0),
+            p + glm::vec3(0, s.y, s.z),
+            p + glm::vec3(s.x, s.y, s.z),
+            p + glm::vec3(s.x, s.y, 0),
+            {0, 1, 0},
+            {0, 0}, {s.z, 0}, {s.z, s.x}, {0, s.x},
+            vertices, indices
+        );
+
+        // -Y
+        face(
+            p,
+            p + glm::vec3(s.x, 0, 0),
+            p + glm::vec3(s.x, 0, s.z),
+            p + glm::vec3(0, 0, s.z),
+            {0, -1, 0},
+            {0, 0}, {s.x, 0}, {s.x, s.z}, {0, s.z},
+            vertices, indices
+        );
+
+        // +Z: UV axes X and Y
+        face(
+            p + glm::vec3(0, 0, s.z),
+            p + glm::vec3(s.x, 0, s.z),
+            p + glm::vec3(s.x, s.y, s.z),
+            p + glm::vec3(0, s.y, s.z),
+            {0, 0, 1},
+            {0, 0}, {s.x, 0}, {s.x, s.y}, {0, s.y},
+            vertices, indices
+        );
+
+        // -Z
+        face(
+            p,
+            p + glm::vec3(0, s.y, 0),
+            p + glm::vec3(s.x, s.y, 0),
+            p + glm::vec3(s.x, 0, 0),
+            {0, 0, -1},
+            {0, 0}, {0, s.y}, {s.x, s.y}, {s.x, 0},
+            vertices, indices
+        );
+    }
+
+	void build2DFace(
+		std::vector<Vert>& vertices,
+		std::vector<Ind>& indices,
+		glm::vec2 size,
+		glm::vec3 position,
+		glm::vec2 uvMin,
+		glm::vec2 uvMax)
 	{
-		for (int x = 0; x < size.x; x++)
-		for (int y = 0; y < size.y; y++)
-		for (int z = 0; z < size.z; z++)
-		{
-			if (!isSolid(x,y,z, size)) continue;
+		float w = size.x;
+		float h = size.y;
 
-			glm::vec3 p(x,y,z);
-
-			if (!isSolid(x+1,y,z, size))
-				face(
-					p+glm::vec3(1,0,0),
-					p+glm::vec3(1,1,0),
-					p+glm::vec3(1,1,1),
-					p+glm::vec3(1,0,1),
-					glm::vec3(1,0,0),
-					vertices, indices
-				);
-
-			if (!isSolid(x-1,y,z, size))
-				face(
-					p,
-					p+glm::vec3(0,0,1),
-					p+glm::vec3(0,1,1),
-					p+glm::vec3(0,1,0),
-					glm::vec3(-1,0,0),
-					vertices, indices
-				);
-
-			if (!isSolid(x,y+1,z, size))
-				face(
-					p+glm::vec3(0,1,0),
-					p+glm::vec3(0,1,1),
-					p+glm::vec3(1,1,1),
-					p+glm::vec3(1,1,0),
-					glm::vec3(0,1,0),
-					vertices, indices
-				);
-
-			if (!isSolid(x,y-1,z, size))
-				face(
-					p,
-					p+glm::vec3(1,0,0),
-					p+glm::vec3(1,0,1),
-					p+glm::vec3(0,0,1),
-					glm::vec3(0,-1,0),
-					vertices, indices
-				);
-
-			if (!isSolid(x,y,z+1, size))
-				face(
-					p+glm::vec3(0,0,1),
-					p+glm::vec3(1,0,1),
-					p+glm::vec3(1,1,1),
-					p+glm::vec3(0,1,1),
-					glm::vec3(0,0,1),
-					vertices, indices
-				);
-
-			if (!isSolid(x,y,z-1, size))
-				face(
-					p,
-					p+glm::vec3(0,1,0),
-					p+glm::vec3(1,1,0),
-					p+glm::vec3(1,0,0),
-					glm::vec3(0,0,-1),
-					vertices, indices
-				);
-		}
+		face(
+			position,
+			position + glm::vec3(w, 0, 0),
+			position + glm::vec3(w, h, 0),
+			position + glm::vec3(0, h, 0),
+			{0, 0, 1},
+			uvMin,
+			{uvMax.x, uvMin.y},
+			uvMax,
+			{uvMin.x, uvMax.y},
+			vertices,
+			indices
+		);
 	}
 }

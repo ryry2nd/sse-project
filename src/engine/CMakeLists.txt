@@ -58,7 +58,7 @@ set_target_properties(RenderingBase PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(RenderingBase PRIVATE PNG::PNG JPEG::JPEG PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
+target_link_libraries(RenderingBase PRIVATE PNG::PNG JPEG::JPEG PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog ttf::ttf)
 
 
 if(USE_OPENGL)
@@ -87,7 +87,7 @@ add_custom_command(
 	COMMENT "---- Stripping JIT ----"
 )
 else()
-target_link_libraries(Scripting PRIVATE CLANG::CLANG)
+# target_link_libraries(Scripting PRIVATE CLANG::CLANG)
 endif()
 
 

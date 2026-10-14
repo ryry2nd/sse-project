@@ -75,6 +75,7 @@ find_package(images CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(ttf CONFIG REQUIRED)
 
 find_package(slang CONFIG REQUIRED)
 find_package(compiler CONFIG REQUIRED)

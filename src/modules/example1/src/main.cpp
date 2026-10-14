@@ -17,6 +17,7 @@ using namespace Engine::Logging;
 bool outputFPS = false;
 
 
+Material mattex;
 Material mat;
 Material inMat;
 Material bigMat;
@@ -34,12 +35,16 @@ Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Mesh *cube;
 Mesh *megaCube;
+Mesh *texplane;
 Image *img;
+Image *fontimg;
 Buff *camBuff;
 Buff *modelBuff;
 Buff *megaBuff;
 Buff *cubeInstanceBuff;
 Buff *fboBuff;
+Buff *modelTexBuff;
+Font *font;
 FrameBuffer *fbo;
 
 std::string MODULE_PATH;
@@ -72,14 +77,26 @@ extern "C" {
 
 		model = glm::mat4(1.0f);
 
-		std::vector<Vert> vert;
-		std::vector<Ind> ind;
+		auto buildVoxelGrid = (void (*) (
+			std::vector<Vert>& vertices,
+			std::vector<Ind>& indices,
+			glm::vec3 size
+		)) Module::getFunction("com.ryan.std", "buildVoxelGrid");
 
-		auto buildVoxelGrid = (void (*) (std::vector<Vert>& vertices,
-						std::vector<Ind>& indices,
-						glm::vec3 size)) Module::getFunction("com.ryan.std", "buildVoxelGrid");
+		auto build2DFace = (void (*) (
+			std::vector<Vert>& vertices,
+			std::vector<Ind>& indices,
+			glm::vec2 size,
+			glm::vec3 position,
+			glm::vec2 uvMin,
+			glm::vec2 uvMax
+		)) Module::getFunction("com.ryan.std", "build2DFace");
 
-		buildVoxelGrid(vert, ind, {100, 100, 100});
+
+		std::vector<Vert> vertsbox;
+		std::vector<Ind> indsbox;
+		buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000));
+
 
 		initAPI("OpenGl4.6");
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
@@ -87,16 +104,42 @@ extern "C" {
 		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
 		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-		megaCube = createMesh(vert.data(), vert.size(), ind.data(), ind.size());
+		megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
 		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
+
+		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 256);
+		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		fontimg = createImage(texsurf, ImageSettings::noMip());
+		delete font;
 		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
+
+		std::vector<Vert> vertsflat;
+		std::vector<Ind> indsflat;
+
+		#define TEX_SCALE 1.0f
+		const float TEX_RATIO = fontimg->getWidth() / fontimg->getHeight();
+
+		build2DFace(vertsflat, indsflat, {TEX_RATIO * TEX_SCALE, TEX_SCALE}, {0, 0, 0}, {0, 1}, {1, 0});
+		texplane = createMesh(vertsflat.data(), vertsflat.size(), indsflat.data(), indsflat.size());
 
 		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
 		modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
-		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
+		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -1002, 0});
 
 		megaBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+
+		ModelStruct texmodel = glm::translate(glm::mat4(1.0f), {3, 5, 0});
+
+		modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
+
+		mattex.images[0] = fontimg;
+		mattex.shader = cubeShader;
+		mattex.ubo[0] = modelTexBuff;
+		mattex.ubo[1] = camBuff;
+		mattex.settings |= Material::EnableClear;
+		mattex.settings |= Material::DisableCulling;
 
 		mat.images[0] = img;
 		mat.shader = cubeShader;
@@ -218,6 +261,7 @@ extern "C" {
 		draw(win, cube, &mat);
 		draw(win, cube, &inMat);
 		draw(win, megaCube, &bigMat);
+		draw(win, texplane, &mattex);
 		draw(win, nullptr, &debugMat);
 		// draw(win, cube, &frameImageMat);
 		// fbo->getColorImage()->clearTransparent();

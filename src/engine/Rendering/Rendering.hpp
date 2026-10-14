@@ -6,6 +6,7 @@
 #include "FrameBuffer.hpp"
 #include "Mesh.hpp"
 #include "Window.hpp"
+#include "Font.hpp"
 
 #include <unordered_map>
 
