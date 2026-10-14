@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from typing import List, Dict, Set
-import os
+import os, sys
 
 
 @dataclass
@@ -15,32 +15,48 @@ class ModuleConfig:
 
 
 def parse_config(path: str):
-    cfg = ModuleConfig(path=os.path.dirname(path), deps=[])
+	cfg = ModuleConfig(path=os.path.dirname(path), deps=[])
 
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
+	if not os.path.exists(path):
+		print("file not found")
+		return cfg
 
-            if not line or line.startswith("#"):
-                continue
+	with open(path, "r", encoding="utf-8") as f:
+		for line in f:
+			line = line.strip()
 
-            if "=" not in line:
-                continue
+			if not line or line.startswith("#"):
+				continue
 
-            key, value = line.split("=", 1)
-            key = key.strip()
-            value = value.strip()
+			if "=" not in line:
+				continue
 
-            if key == "ID":
-                cfg.id = value
+			key, value = line.split("=", 1)
+			key = key.strip()
+			value = value.strip()
 
-            elif key == "SHORT_NAME":
-                cfg.short_name = value
+			if key == "ID":
+				cfg.id = value
 
-            elif key == "VERSION":
-                cfg.version = value
+			elif key == "SHORT_NAME":
+				cfg.short_name = value
 
-            elif key == "DEPS":
-                cfg.deps = [d for d in value.split(";") if d]
+			elif key == "VERSION":
+				cfg.version = value
 
-    return cfg
+			elif key == "DEPS":
+				cfg.deps = [d for d in value.split(";") if d]
+
+	return cfg
+
+if __name__ == "__main__":
+	first_arg = sys.argv[1]
+	conf = parse_config(os.path.join(first_arg, "config.txt"))
+	second_arg = sys.argv[2]
+
+	if (second_arg == "id"):
+		print(conf.id)
+	elif (second_arg == "version"):
+		print(conf.version)
+	else:
+		print("error: call not found")

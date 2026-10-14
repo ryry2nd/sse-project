@@ -2,8 +2,6 @@
 
 #define ENTRY_POINT "main"
 
-namespace fs = std::filesystem;
-
 void compileShader(std::vector<Uint32> data, GLuint shader)
 {
 	glShaderBinary(
@@ -32,7 +30,7 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 	}
 }
 
-GlShader::GlShader(std::string path)
+GlShader::GlShader(const char *path)
 {
 	auto [vertRaw, fragRaw] = getRaw(path);
 
@@ -61,4 +59,8 @@ GlShader::~GlShader()
 	spdlog::debug("Deleting shader with id: 0x{:x}", id);
 	if (id != 0)
 		glDeleteProgram(id);
+}
+
+extern "C" std::unique_ptr<Shader> createShader(const char *path) {
+    return std::make_unique<GlShader>(path);
 }

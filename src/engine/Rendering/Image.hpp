@@ -72,7 +72,21 @@ namespace Engine::Rendering
 
 		// Anisotropy
 		float maxAnisotropy = 1.0f;
+
+		static inline ImageSettings noMip() {
+			ImageSettings s;
+			s.minFilter = Filter::Nearest;
+			s.magFilter = Filter::Nearest;
+			s.useMip = false;
+
+			s.wrapS = WrapMode::ClampToEdge;
+			s.wrapT = WrapMode::ClampToEdge;
+			s.wrapR = WrapMode::ClampToEdge;
+
+			return s;
+		}
 	};
+
 	class Image
 	{
 	public:
@@ -85,6 +99,8 @@ namespace Engine::Rendering
 		float getWidth() {return imageSizes.x;}
 		float getHeight() {return imageSizes.y;}
 		virtual void clearTransparent() = 0;
+
+		static void saveToBmp(SDL_Surface *surface, const char *path);
 	protected:
 		glm::vec2 imageSizes;
 	};

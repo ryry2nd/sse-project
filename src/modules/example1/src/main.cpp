@@ -3,9 +3,11 @@
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <cstring>
 
 #include <Objects.hpp>
-#include <GenMesh.hpp>
+#include <MathTest.hpp>
+#include <FooTest.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -15,6 +17,7 @@ using namespace Engine::Logging;
 bool outputFPS = false;
 
 
+Material mattex;
 Material mat;
 Material inMat;
 Material bigMat;
@@ -32,16 +35,38 @@ Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Mesh *cube;
 Mesh *megaCube;
+Mesh *texplane;
 Image *img;
+Image *fontimg;
 Buff *camBuff;
 Buff *modelBuff;
 Buff *megaBuff;
 Buff *cubeInstanceBuff;
 Buff *fboBuff;
+Buff *modelTexBuff;
+Font *font;
 FrameBuffer *fbo;
+
+std::string MODULE_PATH;
+std::string MODULE_ID;
 
 extern "C" {
 	void setup() {
+		MODULE_ID = Engine::Module::getCurrentRunning();
+		MODULE_PATH = Engine::Module::idToPath(MODULE_ID.c_str());
+
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
+			return;
+		}
+
+		int result;
+		#define ad1 3
+		#define ad2 2
+		MathTest mathTest = MathTest();
+		debug("{} + {} = {}", ad1, ad2, mathTest.add(ad1, ad2));
+
+		foo();
+
 		glm::vec2 res({900.0f, 500.0f});
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -52,27 +77,69 @@ extern "C" {
 
 		model = glm::mat4(1.0f);
 
-		std::vector<Vert> vert;
-		std::vector<Ind> ind;
+		auto buildVoxelGrid = (void (*) (
+			std::vector<Vert>& vertices,
+			std::vector<Ind>& indices,
+			glm::vec3 size
+		)) Module::getFunction("com.ryan.std", "buildVoxelGrid");
 
-		buildVoxelGrid(vert, ind, {100, 100, 100});
+		auto build2DFace = (void (*) (
+			std::vector<Vert>& vertices,
+			std::vector<Ind>& indices,
+			glm::vec2 size,
+			glm::vec3 position,
+			glm::vec2 uvMin,
+			glm::vec2 uvMax
+		)) Module::getFunction("com.ryan.std", "build2DFace");
 
-		CreationFunctions::initAPI("OpenGl4.6");
-		win = CreationFunctions::createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
-		cubeShader = CreationFunctions::createShader(MODULE_PATH "/shaders/floatCube");
-		cubeInstanceShader = CreationFunctions::createShader(MODULE_PATH "/shaders/instanceCube");
-		debugVectorShader = CreationFunctions::createShader(MODULE_PATH "/shaders/debugVector");
-		cube = CreationFunctions::createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-		megaCube = CreationFunctions::createMesh(vert.data(), vert.size(), ind.data(), ind.size());
-		img = CreationFunctions::createImage(MODULE_PATH "/assets/textures/debug.png");
-		// fbo = CreationFunctions::createFrameBuffer(res, FrameBuffer::Settings::Color);
 
-		camBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
-		modelBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
+		std::vector<Vert> vertsbox;
+		std::vector<Ind> indsbox;
+		buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000));
 
-		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -102, 0});
 
-		megaBuff = CreationFunctions::createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+		initAPI("OpenGl4.6");
+		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
+		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
+		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
+		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
+		megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
+		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
+
+		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 256);
+		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+		fontimg = createImage(texsurf, ImageSettings::noMip());
+		delete font;
+		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
+
+		std::vector<Vert> vertsflat;
+		std::vector<Ind> indsflat;
+
+		#define TEX_SCALE 1.0f
+		const float TEX_RATIO = fontimg->getWidth() / fontimg->getHeight();
+
+		build2DFace(vertsflat, indsflat, {TEX_RATIO * TEX_SCALE, TEX_SCALE}, {0, 0, 0}, {0, 1}, {1, 0});
+		texplane = createMesh(vertsflat.data(), vertsflat.size(), indsflat.data(), indsflat.size());
+
+		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
+		modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
+
+		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -1002, 0});
+
+		megaBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+
+		ModelStruct texmodel = glm::translate(glm::mat4(1.0f), {3, 5, 0});
+
+		modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
+
+		mattex.images[0] = fontimg;
+		mattex.shader = cubeShader;
+		mattex.ubo[0] = modelTexBuff;
+		mattex.ubo[1] = camBuff;
+		mattex.settings |= Material::EnableClear;
+		mattex.settings |= Material::DisableCulling;
 
 		mat.images[0] = img;
 		mat.shader = cubeShader;
@@ -99,7 +166,7 @@ extern "C" {
             }
         }
 
-		cubeInstanceBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
+		cubeInstanceBuff = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
 
 		inMat.instanceCount = models.size();
 		inMat.ssbo[0] = cubeInstanceBuff;
@@ -112,7 +179,7 @@ extern "C" {
 
 
 		ModelStruct fboPosition = glm::translate(glm::mat4(1.0f), {-10, 0, 0});
-		fboBuff = CreationFunctions::createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
+		// fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
 		// frameImageMat.shader = cubeShader;
 		// frameImageMat.ubo[0] = fboBuff;
 		// frameImageMat.ubo[1] = camBuff;
@@ -120,6 +187,9 @@ extern "C" {
 	}
 
 	void loop() {
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
+			return;
+		}
 		win->update();
 		win->clearBackground();
 		float deltaTime = win->getDeltaTime();
@@ -188,16 +258,20 @@ extern "C" {
 		modelBuff->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		CreationFunctions::draw(win, cube, &mat);
-		CreationFunctions::draw(win, cube, &inMat);
-		CreationFunctions::draw(win, megaCube, &bigMat);
-		CreationFunctions::draw(win, nullptr, &debugMat);
-		// CreationFunctions::draw(win, cube, &frameImageMat);
+		draw(win, cube, &mat);
+		draw(win, cube, &inMat);
+		draw(win, megaCube, &bigMat);
+		draw(win, texplane, &mattex);
+		draw(win, nullptr, &debugMat);
+		// draw(win, cube, &frameImageMat);
 		// fbo->getColorImage()->clearTransparent();
 		win->swapBuffer();
 	}
 
 	void event(SDL_Event *event) {
+		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
+			return;
+		}
 		auto dt = win->getDeltaTime();
 
 		auto type = event->type;

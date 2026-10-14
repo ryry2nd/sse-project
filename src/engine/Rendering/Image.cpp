@@ -109,92 +109,26 @@ SDL_Surface* LoadJPG(const char* path)
 
 SDL_Surface* LoadBMP(const char* path)
 {
-	return nullptr;
-    // FILE* f = fopen(path, "rb");
-    // if (!f) return nullptr;
+    SDL_Surface* surface = SDL_LoadBMP(path);
 
-    // uint16_t type;
-    // fread(&type, sizeof(type), 1, f);
+    if (!surface)
+    {
+        spdlog::error("Failed to load BMP {}", path);
+        return nullptr;
+    }
 
-    // if (type != 0x4D42)
-    // {
-    //     fclose(f);
-    //     return nullptr;
-    // }
+    SDL_Surface* rgba = SDL_ConvertSurface(
+        surface, SDL_PIXELFORMAT_RGBA32);
 
-    // uint32_t fileSize;
-    // uint16_t reserved1, reserved2;
-    // uint32_t offset;
+    SDL_DestroySurface(surface);
 
-    // fread(&fileSize, sizeof(fileSize), 1, f);
-    // fread(&reserved1, sizeof(reserved1), 1, f);
-    // fread(&reserved2, sizeof(reserved2), 1, f);
-    // fread(&offset, sizeof(offset), 1, f);
+    if (!rgba)
+    {
+        spdlog::error("Failed to convert BMP {}", path);
+        return nullptr;
+    }
 
-    // uint32_t dibSize;
-    // fread(&dibSize, sizeof(dibSize), 1, f);
-
-    // int32_t width, height;
-    // uint16_t planes, bpp;
-    // uint32_t compression;
-
-    // fread(&width, sizeof(width), 1, f);
-    // fread(&height, sizeof(height), 1, f);
-    // fread(&planes, sizeof(planes), 1, f);
-    // fread(&bpp, sizeof(bpp), 1, f);
-    // fread(&compression, sizeof(compression), 1, f);
-
-    // if (compression != 0 || (bpp != 24 && bpp != 32))
-    // {
-    //     fclose(f);
-    //     return nullptr;
-    // }
-
-    // fseek(f, offset, SEEK_SET);
-
-    // int srcBpp = bpp / 8;
-    // int rowSize = ((width * srcBpp + 3) / 4) * 4;
-
-    // uint8_t* src = (uint8_t*)malloc(rowSize * height);
-    // fread(src, rowSize * height, 1, f);
-    // fclose(f);
-
-    // // ✅ SDL3 FIX: use SDL_CreateSurfaceFrom-style safe creation pattern
-    // SDL_Surface* surface = SDL_CreateSurface(
-    //     width,
-    //     height,
-    //     SDL_PIXELFORMAT_RGBA32
-    // );
-
-    // if (!surface)
-    // {
-    //     free(src);
-    //     return nullptr;
-    // }
-
-    // uint8_t* dst = (uint8_t*)surface->pixels;
-
-    // for (int y = 0; y < height; y++)
-    // {
-    //     uint8_t* srcRow = src + (height - 1 - y) * rowSize;
-    //     uint8_t* dstRow = dst + y * surface->pitch;
-
-    //     for (int x = 0; x < width; x++)
-    //     {
-    //         uint8_t b = srcRow[x * srcBpp + 0];
-    //         uint8_t g = srcRow[x * srcBpp + 1];
-    //         uint8_t r = srcRow[x * srcBpp + 2];
-    //         uint8_t a = (bpp == 32) ? srcRow[x * srcBpp + 3] : 255;
-
-    //         dstRow[x * 4 + 0] = r;
-    //         dstRow[x * 4 + 1] = g;
-    //         dstRow[x * 4 + 2] = b;
-    //         dstRow[x * 4 + 3] = a;
-    //     }
-    // }
-
-    // free(src);
-    // return surface;
+    return rgba;
 }
 
 SDL_Surface *getErrorTex() {
@@ -236,4 +170,8 @@ void Image::loadFile(const char *filePath, SDL_Surface *& surface, ImageSettings
 		settings->minFilter = ImageSettings::Filter::Nearest;
 		settings->magFilter = ImageSettings::Filter::Nearest;
 	}
+}
+
+void Image::saveToBmp(SDL_Surface *surface, const char *path) {
+	SDL_SaveBMP(surface, path);
 }

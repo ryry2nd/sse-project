@@ -14,6 +14,7 @@ def main():
 	if not os.path.exists(in1):
 		print(f"Missing file: {in1}")
 		sys.exit(1)
+		return
 
 	module1 = parse_config(in1)
 
@@ -24,7 +25,7 @@ def main():
 		if (mod.id in module1.deps):
 			modules.append(mod.path)
 
-	print(";".join(m for m in modules))
+	print(";".join(m for m in modules), end="")
 
 
 if __name__ == "__main__":

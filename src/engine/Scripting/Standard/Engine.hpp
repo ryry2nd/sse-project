@@ -2,7 +2,8 @@
 
 #include "Logging.hpp"
 #include "Helper.hpp"
-#include <engine/Rendering/Rendering.hpp>
+#include "Module.hpp"
+#include "Rendering.hpp"
 
 extern "C" {
 	void engineShutdown();

@@ -75,6 +75,7 @@ find_package(images CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(ttf CONFIG REQUIRED)
 
 find_package(slang CONFIG REQUIRED)
 find_package(compiler CONFIG REQUIRED)
@@ -94,7 +95,6 @@ file(GLOB MODULE_DIRS LIST_DIRECTORIES true
 
 include(${CMAKE_SOURCE_DIR}/cmake/helper.cmake)
 
-#ToDo just store all of the info and use a python script to do the order
 #ToDo add a way to only depend on specific versions of programs and have a way to deny copies of the same program
 
 file(GLOB CONFIG_FILES "${CMAKE_SOURCE_DIR}/src/modules/*/config.txt")
@@ -103,27 +103,63 @@ get_module_order(MODULE_ORDER
     MODULE_FILES ${CONFIG_FILES}
 )
 
-foreach(mod IN LISTS MODULE_ORDER)
-    message(STATUS "module: ${mod}")
-endforeach()
-
 foreach(MODULE IN LISTS MODULE_ORDER)
 	get_filename_component(MODULE_NAME ${MODULE} NAME)
+	message(STATUS "module: ${MODULE_NAME}")
 	set(MODULE_OUT_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/modules/${MODULE_NAME}")
 	set(MOD_PATH "modules/${MODULE_NAME}")
 	set(GENERATE_EXE OFF)
 	set(MAKE_SO OFF)
+	set(AUTO_COMP ON)
+	set(AUTO_COPY ON)
+	set(COMPILE_SHADERS ON)
 
+	execute_process(
+        COMMAND python3
+            ${CMAKE_SOURCE_DIR}/cmake/parse.py
+            ${MODULE}
+			id
+        OUTPUT_VARIABLE RAW_OUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+	set(MOD_ID "${RAW_OUT}")
+
+	execute_process(
+        COMMAND python3
+            ${CMAKE_SOURCE_DIR}/cmake/parse.py
+            ${MODULE}
+			version
+        OUTPUT_VARIABLE RAW_OUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+	set(MOD_VERSION "${RAW_OUT}")
+
+	add_custom_target(conf_copy_${MODULE_NAME} ALL
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+			${MODULE}/config.txt
+			${MODULE_OUT_DIR}/config.txt
+		COMMENT "---- Copying config ----"
+	)
 
 	if (EXISTS "${MODULE}/CMakeLists.txt")
-		add_subdirectory(${MODULE})
+	add_subdirectory(${MODULE})
 	endif()
 
-	compile_module(MAKE_SO ${MAKE_SO} DEPS ${DEPS})
+	if(${AUTO_COMP})
+	compile_module(MAKE_SO ${MAKE_SO})
+	endif()
 
+	if(${AUTO_COPY})
 	copy_assets()
+	endif()
+
+	if(${COMPILE_SHADERS})
+	compile_shaders()
+	endif()
 
 	if (${GENERATE_EXE})
-		compile_executable(${MODULE_NAME})
+	compile_executable(${MODULE_NAME})
 	endif()
 endforeach()

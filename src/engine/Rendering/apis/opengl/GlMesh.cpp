@@ -67,3 +67,7 @@ void GlMesh::updateVerts(
 	// IMPORTANT: unbind VAO LAST
 	glBindVertexArray(0);
 }
+
+extern "C" std::unique_ptr<Mesh> createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {
+    return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size);
+}

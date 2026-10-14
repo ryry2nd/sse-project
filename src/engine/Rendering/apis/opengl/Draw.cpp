@@ -3,7 +3,7 @@
 #include <engine/Rendering/Rendering.hpp>
 #include <SDL3/SDL_video.h>
 
-#include "../../internal/CombineParams.hpp"
+#include "../internal/DrawAgnostic.hpp"
 
 inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	switch (meshType)
@@ -13,8 +13,6 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		case InternalParams::MeshTypes::Triangles:  return GL_TRIANGLES;
 	}
 }
-
-#define MAX_BINDINGS_PER_SET (1 << 7)
 
 #define DRAW_CALL(mesh, params) \
 { \
@@ -71,24 +69,20 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
-void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
-	if (!pms || !win) return;
-
+extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	InternalParams params;
-	combineParams(params, pms, size);
 
-	if (!params.shader) return;
+	bool renderScreen;
+	bool renderFBO;
+	FrameBuffer *fbo;
+
+	drawinit(win, pms, size, params, fbo, renderScreen, renderFBO);
 
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(params.shader);
 	auto *glmesh = static_cast<GlMesh*>(mesh);
 
 	glwin->setWindow();
-
-	FrameBuffer *fbo	= params.fbo;
-	bool renderScreen	= !(params.settings & InternalParams::DisableScreen);
-	bool renderFBO		= (params.settings & InternalParams::EnableFBO) && (fbo != nullptr);
-
 
 	glUseProgram(glshdr->getID());
 
@@ -129,8 +123,6 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 		glEnable(GL_DEPTH_TEST);
 
 
-	// render stage
-
 	// -------------------------
 	// 3. Render To FBO
 	// -------------------------
@@ -145,21 +137,7 @@ void OpenGL::draw(Window *win, Mesh *mesh, InternalParams *pms, size_t size) {
 	// 4. RENDER TO SCREEN
 	// -------------------------
 
-	// ToDo: have another draw function to just render the fbo to the screen and not do any of this crazy stuff
-	if (renderFBO && renderScreen) {
-		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, glFBO->getID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-		glBlitFramebuffer(
-			0, 0, glFBO->getWidth(), glFBO->getHeight(),
-			0, 0, glwin->getWidth(), glwin->getHeight(),
-			GL_COLOR_BUFFER_BIT,
-			GL_NEAREST
-		);
-	}
-	else if (renderScreen) {
+	if (renderScreen) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glwin->updateScreenRes();
 		DRAW_CALL(glmesh, params);

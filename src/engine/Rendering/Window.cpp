@@ -23,7 +23,6 @@ extern "C" {
 		hostShutDownAll();
 		SDL_Quit();
 		spdlog::info("Quit out of sdl");
-		spdlog::warn("Note that you should only run this once per program and not per window");
 	}
 
 	void Init() {
@@ -34,7 +33,6 @@ extern "C" {
 			std::exit(1);
 		}
 		spdlog::info("Initalized sdl");
-		spdlog::warn("Note that you should only run this once per program and not per window");
 	}
 
 	void Update()

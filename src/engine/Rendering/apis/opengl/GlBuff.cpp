@@ -72,3 +72,7 @@ void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
 	glBindBuffer(target, id);
 	glGetBufferSubData(target, offset, size, outData);
 }
+
+extern "C" std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr) {
+    return std::make_unique<GlBuff>(type, freq, size, data);
+}

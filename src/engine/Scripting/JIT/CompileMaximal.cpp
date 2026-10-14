@@ -1,5 +1,19 @@
+#define MINIMAL
+
+#include "HeadJITUnusable.hpp"
+
+using namespace Engine::Scripting::Internal;
+
+long Unusable::initModuleJITMax(const char* path) {return -1;}
+void Unusable::setupJITMax(long id) {}
+bool Unusable::loopJITMax(long id) {return false;}
+bool Unusable::eventJITMax(long id, void *e) {return false;}
+void Unusable::shutdownJITMax(long id) {}
+void Unusable::removeJITMax(long id) {}
+bool Unusable::JITRunnableMax(long id) {return false;}
+void *Unusable::getFunctionJITMax(long id, const char *funcname) {return nullptr;}
+
 #ifndef MINIMAL
-#include <SDL3/SDL_events.h>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -68,8 +82,7 @@ public:
 		return false;
 	}
 
-	template<typename T>
-	T getFunction(const std::string& name) {
+	void (*getFunction(const std::string& name))() {
 		auto symbol = m_jit->lookup(name);
 
 		if (!symbol) {
@@ -77,7 +90,7 @@ public:
 			return nullptr;
 		}
 
-		return symbol->toPtr<T>();
+		return symbol->toPtr<void (*)()>;
 	}
 
 private:
@@ -94,7 +107,6 @@ struct MyModule {
 
 std::unordered_map<long, MyModule> modsMax;
 
-extern "C" {
 long initModuleJITMax(const char* path) {
 	static long currID = 0;
 
@@ -104,24 +116,24 @@ long initModuleJITMax(const char* path) {
 		return -1;
 	}
 
-	auto setup = runtime->getFunction<void(*)()>("setup");
-	auto loop = runtime->getFunction<void(*)()>("loop");
-	auto event = runtime->getFunction<void(*)(SDL_Event *)>("event");
-	auto shutdown = runtime->getFunction<void(*)()>("shutdown");
+	auto setup = runtime->getFunction("setup");
+	auto loop = runtime->getFunction("loop");
+	auto event = runtime->getFunction("event");
+	auto shutdown = runtime->getFunction("shutdown");
 
 	MyModule mod;
 
 	mod.runtime = runtime;
 	mod.setup = setup;
 	mod.loop = loop;
-	mod.event = event;
+	mod.event = (void (*)(SDL_Event *)) event;
 	mod.shutdown = shutdown;
 
 	modsMax[currID] = std::move(mod);
 	return currID++;
 }
 
-void setupJITMax(long id) {
+void Unusable::setupJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return;
 
@@ -129,7 +141,7 @@ void setupJITMax(long id) {
 
 	modsMax[id].setup();
 }
-bool loopJITMax(long id) {
+bool Unusable::loopJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return 1;
 
@@ -138,7 +150,7 @@ bool loopJITMax(long id) {
 	modsMax[id].loop();
 	return 0;
 }
-bool eventJITMax(long id, SDL_Event *e) {
+bool Unusable::eventJITMax(long id, SDL_Event *e) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return 1;
 
@@ -148,7 +160,7 @@ bool eventJITMax(long id, SDL_Event *e) {
 	modsMax[id].event(e);
 	return 0;
 }
-void shutdownJITMax(long id) {
+void Unusable::shutdownJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return;
 
@@ -157,7 +169,7 @@ void shutdownJITMax(long id) {
 	}
 	modsMax[id].shutdown();
 }
-void removeJITMax(long id) {
+void Unusable::removeJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return;
 
@@ -172,11 +184,14 @@ void removeJITMax(long id) {
 
 	modsMax.erase(id);
 }
-bool JITRunnableMax(long id) {
+bool Unusable::JITRunnableMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return 0;
 
 	return !(modsMax[id].loop || modsMax[id].event);
 }
+
+void *Unusable::getFunctionJITMax(long id, const char *funcname) {
+	return (void *) modsMax[id].runtime->getFunction(funcname);
 }
 #endif

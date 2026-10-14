@@ -1,7 +1,6 @@
 #pragma once
 
 #include <glad/gl.h>
-#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <spdlog/spdlog.h>
@@ -89,7 +88,7 @@ private:
 class GlShader : public Shader
 {
 public:
-	GlShader(std::string path);
+	GlShader(const char *path);
 	~GlShader();
 
 	GLuint getID() {return id;}
@@ -117,8 +116,6 @@ private:
 	size_t vert_size;
 	GLuint VAO, VBO, EBO;
 };
-
-void draw(Window *win, Mesh *mesh, InternalParams *params, size_t size);
 }
 
 using namespace OpenGL;
