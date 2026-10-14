@@ -11,66 +11,41 @@ https://github.com/lsalzman/enet.git
 
 
 
-PHASE 1 - CORE ENGINE
+CORE ENGINE
 Finish ABI
-make module interaction work
+make module interaction work good
+add vulkan
+fix llvm
+get working on as many platforms as possible
+change working directory to module path durring module
+add a function to change working directory
+add an alternate way to call class functions using extern.
+	ex: void runModel(Model *, const char *funcname, ...);
 
 
 
-PHASE 3 - MODULE SYSTEM
+MODULE SYSTEM
 
-add cache to bigints and make it relationship
-make it so bigint math module has a floating decimal point instead of just hardcoded at 5
-make it so bigint objects are just particles you make normal objects a parent to
-put the camera in base rendering and remove bigint references
-make normal float objects
-put sqlite into a module
-add default assets to a module
-put networking into a module
-make a base helper module to have stuff like a character creator and a rigid body object
-make example module more interesting
-add reload function to modules (may or may not be a good idea)
-get module versioning and library modules working
-make it so modules have there own stack memory using stack switching (use boost?)
-add module threading so modules can make and use and manage there own threads
-add basic modding module to make adding video game mod support easy
-add some sort of way to make it so mods can get pointers if they want to (idk how id do this, maybe id let other modules take a peak at the other modules ram)
-make it so other modules can override commands
-add default asset for error textures and error models (make it the purple black texture and make it engraved in the code as a generator texture so there is no texture file)
-add generator texture feature in helper module
-add 2d textures and fonts and make them able to be clickable
-add materials and model file format in default module
-add fun text to 3d model thing
+add bigints
+	make bigints have floating precision
+add objects
+add sqlite module
+add default assets
+add networking
+add filehelpers for models
+add module version checker
+add threading
+add error model
+add 2d logic module
 make a physics engine
 
 
 
-PHASE 4 - RUNTIME SYSTEMS
-
-make code cleaner
-make all consents definitions instead of variables
-remove all magic numbers
-remove all bad practices
-
-
-
-PHASE 5 - PLATFORM + RENDERING
-
-add vulkan and other apis
-
-
-
-PHASE 6 - CLEANUP
+CLEANUP
 
 update readme
 documentation
 do a full git rebase (suck in the belly fat and don't remove history)
-
-
-
-PHASE 7 - FUN
-
-get working on as many platforms as possible
 
 
 
