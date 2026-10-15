@@ -1,177 +1,149 @@
+
 #include "Image.hpp"
+
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_surface.h>
 #include <spdlog/spdlog.h>
-#include <cstring>
+
 #include <filesystem>
-#include <png.h>
-#include <jpeglib.h>
-#include <cstdio>
+#include <cstring>
+#include <cstdlib>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 using namespace Engine::Rendering;
 
-SDL_Surface* MakeSurfaceFromRGBA(unsigned char* pixels, int w, int h)
+SDL_Surface* MakeSurfaceFromRGBA(
+    const unsigned char* pixels,
+    int w,
+    int h)
 {
-	SDL_Surface* surface = SDL_CreateSurface(
-		w,
-		h,
-		SDL_PIXELFORMAT_RGBA32
-	);
+    SDL_Surface* surface = SDL_CreateSurface(
+        w,
+        h,
+        SDL_PIXELFORMAT_RGBA32
+    );
 
-	if (!surface) return nullptr;
+    if (!surface)
+        return nullptr;
 
-	std::memcpy(surface->pixels, pixels, w * h * 4);
-	return surface;
+    // Copy row by row to respect SDL's surface pitch.
+    const size_t rowSize = static_cast<size_t>(w) * 4;
+
+    for (int y = 0; y < h; ++y)
+    {
+        auto* dst = static_cast<unsigned char*>(surface->pixels)
+                  + static_cast<size_t>(y) * surface->pitch;
+
+        const auto* src = pixels + static_cast<size_t>(y) * rowSize;
+
+        std::memcpy(dst, src, rowSize);
+    }
+
+    return surface;
 }
 
-SDL_Surface* LoadPNG(const char* path)
+SDL_Surface* LoadImage(const char* path)
 {
-	FILE* fp = fopen(path, "rb");
-	if (!fp) return nullptr;
+    int width = 0;
+    int height = 0;
+    int channels = 0;
 
-	png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
-	png_infop info = png_create_info_struct(png);
+    // Force RGBA output, regardless of the source image format.
+    unsigned char* pixels = stbi_load(
+        path,
+        &width,
+        &height,
+        &channels,
+        STBI_rgb_alpha
+    );
 
-	png_init_io(png, fp);
-	png_read_info(png, info);
+    if (!pixels)
+    {
+        spdlog::error(
+            "Failed to load image '{}': {}",
+            path,
+            stbi_failure_reason()
+                ? stbi_failure_reason()
+                : "Unknown stb_image error"
+        );
 
-	int width = png_get_image_width(png, info);
-	int height = png_get_image_height(png, info);
+        return nullptr;
+    }
 
-	png_set_expand(png);
-	png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-	png_read_update_info(png, info);
+    SDL_Surface* surface = MakeSurfaceFromRGBA(
+        pixels,
+        width,
+        height
+    );
 
-	unsigned char* pixels = new unsigned char[width * height * 4];
-
-	png_bytep rows[height];
-	for (int y = 0; y < height; y++)
-		rows[y] = pixels + y * width * 4;
-
-	png_read_image(png, rows);
-
-	png_destroy_read_struct(&png, &info, nullptr);
-	fclose(fp);
-
-	SDL_Surface* surf = MakeSurfaceFromRGBA(pixels, width, height);
-
-	delete[] pixels; // SDL copy already done
-	return surf;
-}
-
-SDL_Surface* LoadJPG(const char* path)
-{
-	FILE* fp = fopen(path, "rb");
-	if (!fp) return nullptr;
-
-	jpeg_decompress_struct cinfo;
-	jpeg_error_mgr jerr;
-
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_decompress(&cinfo);
-
-	jpeg_stdio_src(&cinfo, fp);
-	jpeg_read_header(&cinfo, TRUE);
-	jpeg_start_decompress(&cinfo);
-
-	int width = cinfo.output_width;
-	int height = cinfo.output_height;
-	int channels = cinfo.output_components;
-
-	unsigned char* pixels = new unsigned char[width * height * channels];
-
-	while (cinfo.output_scanline < height)
-	{
-		unsigned char* row = pixels + cinfo.output_scanline * width * channels;
-		jpeg_read_scanlines(&cinfo, &row, 1);
-	}
-
-	jpeg_finish_decompress(&cinfo);
-	jpeg_destroy_decompress(&cinfo);
-	fclose(fp);
-
-	SDL_Surface* surf;
-
-	if (channels == 3)
-	{
-		surf = SDL_CreateSurface(width, height, SDL_PIXELFORMAT_RGB24);
-		std::memcpy(surf->pixels, pixels, width * height * 3);
-	}
-	else
-	{
-		surf = MakeSurfaceFromRGBA(pixels, width, height);
-	}
-
-	delete[] pixels;
-	return surf;
-}
-
-SDL_Surface* LoadBMP(const char* path)
-{
-    SDL_Surface* surface = SDL_LoadBMP(path);
+    stbi_image_free(pixels);
 
     if (!surface)
     {
-        spdlog::error("Failed to load BMP {}", path);
-        return nullptr;
+        spdlog::error(
+            "Failed to create SDL surface for '{}': {}",
+            path,
+            SDL_GetError()
+        );
     }
 
-    SDL_Surface* rgba = SDL_ConvertSurface(
-        surface, SDL_PIXELFORMAT_RGBA32);
-
-    SDL_DestroySurface(surface);
-
-    if (!rgba)
-    {
-        spdlog::error("Failed to convert BMP {}", path);
-        return nullptr;
-    }
-
-    return rgba;
+    return surface;
 }
 
-SDL_Surface *getErrorTex() {
-	unsigned char purple[4] = {255, 0, 255, 255};
-	unsigned char black[4]  = {0, 0, 0, 255};
-
-	unsigned char pixels[4*4];
-
-	memcpy(pixels + 0, black, 4);
-	memcpy(pixels + 4, purple, 4);
-	memcpy(pixels + 8, purple, 4);
-	memcpy(pixels + 12, black, 4);
-
-	SDL_Surface *surface = MakeSurfaceFromRGBA(&pixels[0], 2, 2);
-
-	return surface;
-}
-
-void Image::loadFile(const char *filePath, SDL_Surface *& surface, ImageSettings *settings)
+SDL_Surface* getErrorTex()
 {
-	std::filesystem::path file = filePath;
+    unsigned char pixels[] = {
+        0,   0,   0,   255,  // Black
+        255, 0,   255, 255,  // Purple
+        255, 0,   255, 255,  // Purple
+        0,   0,   0,   255   // Black
+    };
 
-	if (std::filesystem::exists(file)) {
-		if (file.extension() == ".jpg" || file.extension() == ".jpeg") surface = LoadJPG(filePath);
-		else if (file.extension() == ".png") surface = LoadPNG(filePath);
-		else surface = LoadBMP(filePath);
-
-		if (!surface)
-		{
-			spdlog::error("Image load fail: {}", SDL_GetError());
-			std::exit(1);
-		}
-	}
-	else {
-		spdlog::error("Image path: {} does not exist, falling back", filePath);
-		surface = getErrorTex();
-		*settings = ImageSettings{};
-		settings->useMip = false;
-		settings->minFilter = ImageSettings::Filter::Nearest;
-		settings->magFilter = ImageSettings::Filter::Nearest;
-	}
+    return MakeSurfaceFromRGBA(pixels, 2, 2);
 }
 
-void Image::saveToBmp(SDL_Surface *surface, const char *path) {
-	SDL_SaveBMP(surface, path);
+void Image::loadFile(
+    const char* filePath,
+    SDL_Surface*& surface,
+    ImageSettings* settings)
+{
+    std::filesystem::path file = filePath;
+
+    if (std::filesystem::exists(file))
+    {
+        // stb_image detects the image format itself.
+        surface = LoadImage(filePath);
+
+        if (!surface)
+            std::exit(1);
+    }
+    else
+    {
+        spdlog::error(
+            "Image path '{}' does not exist, falling back",
+            filePath
+        );
+
+        surface = getErrorTex();
+
+        *settings = ImageSettings{};
+        settings->useMip = false;
+        settings->minFilter = ImageSettings::Filter::Nearest;
+        settings->magFilter = ImageSettings::Filter::Nearest;
+    }
+}
+
+void Image::saveToBmp(SDL_Surface* surface, const char* path)
+{
+    if (!SDL_SaveBMP(surface, path))
+    {
+        spdlog::error(
+            "Failed to save BMP '{}': {}",
+            path,
+            SDL_GetError()
+        );
+    }
 }

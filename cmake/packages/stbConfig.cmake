@@ -1,3 +1,5 @@
+# “Do I look like I know what a JPEG is? I just want a picture of a god-dang hot dog!” - Hank Hill
+
 include(FetchContent)
 
 FetchContent_Declare(
@@ -13,7 +15,7 @@ if(NOT stb_POPULATED)
 endif()
 
 add_library(stb_truetype INTERFACE)
-add_library(ttf::ttf ALIAS stb_truetype)
+add_library(stb::stb ALIAS stb_truetype)
 
 target_include_directories(stb_truetype INTERFACE
     "${stb_SOURCE_DIR}"

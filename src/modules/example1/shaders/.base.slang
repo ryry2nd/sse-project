@@ -61,7 +61,7 @@ vec3 transformNormal(vec3 normal, mat4 model)
 
 float edgeDarken(vec2 texCoord, float inner, float outer, float strength)
 {
-	vec2 uv = texCoord - 0.5f;
+	vec2 uv = vec2(frac(texCoord.x), frac(texCoord.y)) - 0.5f;
     float edge = length(uv);
     float dark = smoothstep(inner, outer, edge);
     return 1.0 - dark * strength;

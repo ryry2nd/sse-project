@@ -33,6 +33,7 @@ Window *win;
 Shader *cubeShader;
 Shader *cubeInstanceShader;
 Shader *debugVectorShader;
+Shader *textShader;
 Mesh *cube;
 Mesh *megaCube;
 Mesh *texplane;
@@ -103,11 +104,13 @@ extern "C" {
 		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
 		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
 		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
+		textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
 		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
 		megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
 		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
-		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 256);
+
+		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 64);
 		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 		fontimg = createImage(texsurf, ImageSettings::noMip());
@@ -135,7 +138,7 @@ extern "C" {
 		modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
 
 		mattex.images[0] = fontimg;
-		mattex.shader = cubeShader;
+		mattex.shader = textShader;
 		mattex.ubo[0] = modelTexBuff;
 		mattex.ubo[1] = camBuff;
 		mattex.settings |= Material::EnableClear;
