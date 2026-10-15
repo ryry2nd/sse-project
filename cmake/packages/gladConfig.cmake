@@ -49,6 +49,9 @@ if(USE_OPENGL)
 	add_library(gl_library STATIC ${gl_sources})
 	target_compile_options(gl_library INTERFACE -w)
 	target_include_directories(gl_library PUBLIC ${GLAD_OUT}/OpenGL/include)
+	set_target_properties(gl_library PROPERTIES
+		POSITION_INDEPENDENT_CODE ON
+	)
 	add_library(OPENGL::OPENGL ALIAS gl_library)
 endif()
 
@@ -57,5 +60,8 @@ if(USE_VULKAN)
 	add_library(vulkan_library STATIC ${vulkan_sources})
 	target_compile_options(vulkan_library INTERFACE -w)
 	target_include_directories(vulkan_library PUBLIC ${GLAD_OUT}/vulkan/include)
+	set_target_properties(vulkan_library PROPERTIES
+		POSITION_INDEPENDENT_CODE ON
+	)
 	add_library(VULKAN::VULKAN ALIAS vulkan_library)
 endif()
