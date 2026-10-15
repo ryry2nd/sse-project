@@ -23,11 +23,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
     COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/include/Engine/engine
 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    COMMAND ${CMAKE_COMMAND} -E copy
         ${RENDERING_HEADERS}
         ${CMAKE_BINARY_DIR}/include/Rendering/engine/Rendering
 
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    COMMAND ${CMAKE_COMMAND} -E copy
         ${MODULE_STD_HEADERS}
         ${CMAKE_BINARY_DIR}/include/Engine/engine
 

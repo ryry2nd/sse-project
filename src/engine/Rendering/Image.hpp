@@ -73,7 +73,7 @@ namespace Engine::Rendering
 		// Anisotropy
 		float maxAnisotropy = 1.0f;
 
-		static inline ImageSettings noMip() {
+		static inline ImageSettings err() {
 			ImageSettings s;
 			s.minFilter = Filter::Nearest;
 			s.magFilter = Filter::Nearest;

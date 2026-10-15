@@ -102,7 +102,7 @@ void Image::loadFile(
 	if (!filePath) {
 		surface = getErrorTex();
 
-        *settings = ImageSettings::noMip();
+        *settings = ImageSettings::err();
 		return;
 	}
 
@@ -125,7 +125,7 @@ void Image::loadFile(
 
         surface = getErrorTex();
 
-        *settings = ImageSettings::noMip();
+        *settings = ImageSettings::err();
     }
 }
 

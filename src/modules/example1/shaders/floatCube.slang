@@ -31,11 +31,11 @@ vec4 fragMain(VSOutput input) : SV_Target
 {
 	vec4 texRaw = diffuseTexture.Sample(input.TexCoord);
 
-	float edgeFactor = edgeDarken(input.TexCoord, 0.2f, 0.5f, 0.15f);
+	float edgeFactor = edgeDarken(input.TexCoord, DEFAULT_EDGE_INNER, DEFAULT_EDGE_OUTER, DEFAULT_EDGE_STRENGTH);
 
 
 	vec3 color = texRaw.xyz * edgeFactor;
 	vec3 fogColor = Color::GRAY_FOG;
 
-	return vec4(applyFog(color, fogColor, input.ViewPos, 0.006), texRaw.a);
+	return vec4(applyFog(color, fogColor, input.ViewPos, DEFAULT_FOG), texRaw.a);
 }

@@ -28,11 +28,11 @@ VSOutput vertMain(VSInput input, uint instanceID : SV_InstanceID)
 [shader("fragment")]
 vec4 fragMain(VSOutput input) : SV_Target
 {
-	float edgeFactor = edgeDarken(input.TexCoord, 0.2f, 0.5f, 0.15f);
+	float edgeFactor = edgeDarken(input.TexCoord, DEFAULT_EDGE_INNER, DEFAULT_EDGE_OUTER, DEFAULT_EDGE_STRENGTH);
 
 
 	vec3 color = Color::GREEN * edgeFactor;
 	vec3 fogColor = Color::GRAY_FOG;
 
-	return vec4(applyFog(color, fogColor, input.ViewPos, 0.006), 1.0f);
+	return vec4(applyFog(color, fogColor, input.ViewPos, DEFAULT_FOG), 1.0f);
 }

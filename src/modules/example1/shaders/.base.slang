@@ -29,6 +29,12 @@ typedef float4 vec4;
 	#define BINDING_SAMPLER(x)
 #endif
 
+#define DEFAULT_FOG 0.006
+
+#define DEFAULT_EDGE_INNER 0.2f
+#define DEFAULT_EDGE_OUTER 0.5f
+#define DEFAULT_EDGE_STRENGTH 0.15f
+
 
 struct Input
 {
