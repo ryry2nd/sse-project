@@ -168,10 +168,13 @@ void GlImage::clearTransparent()
 
 GlImage::GlImage(const char *filePath, ImageSettings settings)
 {
-	spdlog::debug("Creating image at path {}", filePath);
-
+	if (!filePath) {
+		spdlog::warn("Creating image with fallback texture");
+	}
+	else {
+		spdlog::debug("Creating image at path {}", filePath);
+	}
 	SDL_Surface *surf;
-
 	loadFile(filePath, surf, &settings);
 	setupObject(surf, settings);
 	SDL_DestroySurface(surf);

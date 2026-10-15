@@ -27,4 +27,7 @@ namespace Engine::Rendering {
 	inline Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings{}) {
 		return createImageFromSurf(surface, settings);
 	}
+	inline Image *createImage(std::nullptr_t, ImageSettings settings = ImageSettings{}) {
+		return createImageFromFile(nullptr, settings);
+	}
 }

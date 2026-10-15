@@ -29,18 +29,7 @@ SDL_Surface* MakeSurfaceFromRGBA(
     if (!surface)
         return nullptr;
 
-    // Copy row by row to respect SDL's surface pitch.
-    const size_t rowSize = static_cast<size_t>(w) * 4;
-
-    for (int y = 0; y < h; ++y)
-    {
-        auto* dst = static_cast<unsigned char*>(surface->pixels)
-                  + static_cast<size_t>(y) * surface->pitch;
-
-        const auto* src = pixels + static_cast<size_t>(y) * rowSize;
-
-        std::memcpy(dst, src, rowSize);
-    }
+    std::memcpy(surface->pixels, pixels, w*h*4);
 
     return surface;
 }
@@ -110,6 +99,13 @@ void Image::loadFile(
     SDL_Surface*& surface,
     ImageSettings* settings)
 {
+	if (!filePath) {
+		surface = getErrorTex();
+
+        *settings = ImageSettings::noMip();
+		return;
+	}
+
     std::filesystem::path file = filePath;
 
     if (std::filesystem::exists(file))
@@ -129,10 +125,7 @@ void Image::loadFile(
 
         surface = getErrorTex();
 
-        *settings = ImageSettings{};
-        settings->useMip = false;
-        settings->minFilter = ImageSettings::Filter::Nearest;
-        settings->magFilter = ImageSettings::Filter::Nearest;
+        *settings = ImageSettings::noMip();
     }
 }
 

@@ -79,6 +79,14 @@ namespace Engine::Rendering
 			s.magFilter = Filter::Nearest;
 			s.useMip = false;
 
+			return s;
+		}
+		static inline ImageSettings tex() {
+			ImageSettings s;
+			s.minFilter = Filter::Nearest;
+			s.magFilter = Filter::Nearest;
+			s.useMip = false;
+
 			s.wrapS = WrapMode::ClampToEdge;
 			s.wrapT = WrapMode::ClampToEdge;
 			s.wrapR = WrapMode::ClampToEdge;
