@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SDL3/SDL_stdinc.h"
 #include "Shader.hpp"
 #include "Buff.hpp"
 #include "Image.hpp"
@@ -60,6 +61,25 @@ namespace Engine::Rendering
 		std::unordered_map<Uint32, Image*> images;
 		std::unordered_map<Uint32, Buff*> ubo;
 		std::unordered_map<Uint32, Buff*> ssbo;
+	};
+
+	struct ComputeParams
+	{
+		Shader* shader = nullptr;
+
+		glm::vec3 groups;
+
+		std::unordered_map<Uint32, Image*> images;
+		std::unordered_map<Uint32, Buff*> ubo;
+		std::unordered_map<Uint32, Buff*> ssbo;
+
+		enum Outputs : Uint8
+		{
+			SSBO	= 1 << 0,
+			IMAGE	= 1 << 1,
+		};
+
+		Uint8 output = Outputs::SSBO;
 	};
 
 	typedef InternalParams DrawParams;

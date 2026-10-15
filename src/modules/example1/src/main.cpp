@@ -4,6 +4,7 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <cstring>
+#include <string>
 
 #include <Objects.hpp>
 #include <MathTest.hpp>
@@ -115,6 +116,26 @@ extern "C" {
 		fontimg = createImage(texsurf, ImageSettings::tex());
 		delete font;
 		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
+
+		Shader *testCompute = createShader((MODULE_PATH + "/shaders/computeTest").c_str(), true);
+		std::vector<int> testComputeVec(200);
+		for (int i = 0; i < testComputeVec.size(); i++) {
+			testComputeVec[i] = i;
+		}
+		Buff *testComputeBuff = createBuff(Buff::Type::Storage, Buff::Frequency::Dynamic, sizeof(int) * testComputeVec.size(), testComputeVec.data());
+		ComputeParams cparams;
+		cparams.shader = testCompute;
+		cparams.groups = glm::vec3(4, 1, 1);
+		cparams.ssbo[0] = testComputeBuff;
+		computeCall(&cparams);
+		testComputeBuff->read(0, testComputeVec.size(), testComputeVec.data());
+		removeBuff(testComputeBuff);
+		removeShader(testCompute);
+		std::string out;
+		for (int &n : testComputeVec) {
+			out += std::to_string(n) + " ";
+		}
+		debug("{}", out);
 
 		std::vector<Vert> vertsflat;
 		std::vector<Ind> indsflat;

@@ -30,27 +30,47 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 	}
 }
 
-GlShader::GlShader(const char *path)
+GlShader::GlShader(const char *path, bool isCompute)
 {
-	auto [vertRaw, fragRaw] = getRaw(path);
+	this->bisCompute = isCompute;
 
-	GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// ---- load binary files ----
-	compileShader(vertRaw, vertex);
-	compileShader(fragRaw, fragment);
-
-	// ---- link program ----
 	id = glCreateProgram();
-	glAttachShader(id, vertex);
-	glAttachShader(id, fragment);
-	glLinkProgram(id);
+	if (isCompute) {
+		auto compRaw = getRawCompute(path);
 
-	// Delete shaders; linked into program now and no longer needed
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
+		GLuint compute = glCreateShader(GL_COMPUTE_SHADER);
 
+		// ---- load binary files ----
+		compileShader(compRaw, compute);
+
+		// ---- link program ----
+
+		glAttachShader(id, compute);
+		glLinkProgram(id);
+
+		// Delete shaders; linked into program now and no longer needed
+		glDeleteShader(compute);
+	}
+	else {
+		auto [vertRaw, fragRaw] = getRaw(path);
+
+		GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
+		GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+
+		// ---- load binary files ----
+		compileShader(vertRaw, vertex);
+		compileShader(fragRaw, fragment);
+
+		// ---- link program ----
+
+		glAttachShader(id, vertex);
+		glAttachShader(id, fragment);
+		glLinkProgram(id);
+
+		// Delete shaders; linked into program now and no longer needed
+		glDeleteShader(vertex);
+		glDeleteShader(fragment);
+	}
 	spdlog::debug("Set shader id to: 0x{:x}", id);
 }
 
@@ -61,6 +81,6 @@ GlShader::~GlShader()
 		glDeleteProgram(id);
 }
 
-extern "C" std::unique_ptr<Shader> createShader(const char *path) {
-    return std::make_unique<GlShader>(path);
+extern "C" std::unique_ptr<Shader> createShader(const char *path, bool isCompute) {
+    return std::make_unique<GlShader>(path, isCompute);
 }

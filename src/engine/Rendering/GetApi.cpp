@@ -3,7 +3,7 @@
 #include "apis/internal/dlopen.hpp"
 #include <spdlog/spdlog.h>
 
-#include "ApiFunction.hpp"
+#include "apis/internal/ApiFunction.hpp"
 
 
 #define COMPILED_OUT_PATH "lib/Rendering"
@@ -21,7 +21,7 @@ void createLibs() {
 
 	for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
 		if (entry.path().extension() == LIBRARY_SUFFIX) {
-			void* handle = initruntime(entry.path().string().c_str());
+			void* handle = initruntime(entry.path().string().c_str(), false);
 
 			if (!handle)
 			{
@@ -70,6 +70,7 @@ extern "C" {
 		apiFunctions.createWindowFunc = (CreateWindowFn)getFunction(lib, "createWindow");
 		apiFunctions.createBuffFunc = (CreateBuffFn)getFunction(lib, "createBuff");
 		apiFunctions.createDrawFunc = (CreateDrawFn)getFunction(lib, "draw");
+		apiFunctions.createDrawCompFunc = (CreateDrawCompFn)getFunction(lib, "computeCall");
 		apiFunctions.createFboFunc = (CreateFBOFn)getFunction(lib, "createFrameBuffer");
 
 		if (!apiFunctions.createShaderFunc ||
@@ -78,7 +79,8 @@ extern "C" {
 			!apiFunctions.createWindowFunc ||
 			!apiFunctions.createBuffFunc ||
 			!apiFunctions.createDrawFunc ||
-			!apiFunctions.createFboFunc
+			!apiFunctions.createFboFunc ||
+			!apiFunctions.createDrawCompFunc
 		)
 		{
 			spdlog::warn("One of the creation functions in the {} api. If you call it you will segfault", apiName);

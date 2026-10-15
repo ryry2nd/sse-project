@@ -88,7 +88,7 @@ private:
 class GlShader : public Shader
 {
 public:
-	GlShader(const char *path);
+	GlShader(const char *path, bool isCompute);
 	~GlShader();
 
 	GLuint getID() {return id;}

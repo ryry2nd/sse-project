@@ -43,7 +43,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	} \
 }
 
-#define loadBuffer(glshdr, buffs, type) \
+#define loadBuffer(buffs, type) \
 { \
 	if (!buffs.empty()) \
 		for (auto &[binding, buf] : buffs) \
@@ -55,7 +55,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		} \
 }
 
-#define setImages(glshdr, images) \
+#define setImages(images) \
 { \
     if (!images.empty()) \
         for (auto &[binding, img] : images) \
@@ -69,6 +69,21 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
+#define setComputeImages(images) \
+{ \
+    if (!images.empty()) \
+        for (auto &[binding, img] : images) \
+        { \
+            if (!img) continue; \
+            auto *glimg = static_cast<GlImage*>(img); \
+            GLuint unit = static_cast<GLuint>(binding); \
+            glBindImageTexture( \
+                unit, glimg->getID(), 0, GL_FALSE, 0, \
+                GL_READ_WRITE, GL_RGBA8 \
+            ); \
+        } \
+}
+
 extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	InternalParams params;
 
@@ -77,6 +92,11 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	FrameBuffer *fbo;
 
 	drawinit(win, pms, size, params, fbo, renderScreen, renderFBO);
+
+	if (params.shader->isCompute()) {
+		spdlog::error("Shader given is a compute shader. Please do not put compute shaders into draw calls");
+		return;
+	}
 
 	auto *glwin = static_cast<GlWindow*>(win);
 	auto *glshdr = static_cast<GlShader*>(params.shader);
@@ -97,14 +117,14 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
-	setImages(glshdr, params.images);
+	setImages(params.images);
 
 
 	// -------------------------
 	// 2. BUFFERS Global
 	// -------------------------
-	loadBuffer(glshdr, params.ubo, GL_UNIFORM_BUFFER);
-	loadBuffer(glshdr, params.ssbo, GL_SHADER_STORAGE_BUFFER);
+	loadBuffer(params.ubo, GL_UNIFORM_BUFFER);
+	loadBuffer(params.ssbo, GL_SHADER_STORAGE_BUFFER);
 
 
 	if (params.settings & InternalParams::EnableClear)
@@ -144,4 +164,48 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 	}
 
 	glBindVertexArray(0);
+}
+
+extern "C" void computeCall(ComputeParams *params) {
+
+	bool renderScreen;
+	bool renderFBO;
+	FrameBuffer *fbo;
+
+	if (!params->shader->isCompute()) {
+		spdlog::error("Shader given is not a compute shader. Please do not put regular shaders into compute calls");
+		return;
+	}
+
+	auto *glshdr = static_cast<GlShader*>(params->shader);
+
+	glUseProgram(glshdr->getID());
+
+	// -------------------------
+	// 1. TEXTURES
+	// -------------------------
+	setComputeImages(params->images);
+
+	// -------------------------
+	// 2. BUFFERS Global
+	// -------------------------
+	loadBuffer(params->ubo, GL_UNIFORM_BUFFER);
+	loadBuffer(params->ssbo, GL_SHADER_STORAGE_BUFFER);
+
+	glm::vec3 groups = params->groups;
+
+	glDispatchCompute(groups.x, groups.y, groups.z);
+
+	enum Outputs : Uint8
+	{
+		SSBO	= 1 << 0,
+		IMAGE	= 1 << 1,
+	};
+
+	if ((params->output & Outputs::SSBO) && (params->output & Outputs::IMAGE))
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
+	else if (params->output & Outputs::SSBO)
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	else if(params->output & Outputs::IMAGE)
+		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
 }

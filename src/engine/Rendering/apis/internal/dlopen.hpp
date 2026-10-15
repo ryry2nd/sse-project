@@ -10,7 +10,7 @@
 #define LIBRARY_SUFFIX ".dll"
 #include <windows.h>
 
-inline void* initruntime(const char* path) {
+inline void* initruntime(const char* path, bool global=true) {
 	if (!path) return nullptr;
     std::string libraryPath = std::string(BIN_PREFIX) + path;
     return reinterpret_cast<void*>(LoadLibraryA(libraryPath.c_str()));
@@ -36,10 +36,10 @@ inline int rmruntime(void* handle) {
 #endif
 #include <dlfcn.h>
 
-inline void *initruntime(const char *path) {
+inline void *initruntime(const char *path, bool global=true) {
 	if (!path) return nullptr;
 	std::string libraryPath = std::string(BIN_PREFIX) + path;
-	return dlopen(libraryPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
+	return dlopen(libraryPath.c_str(), RTLD_NOW | (global ? RTLD_GLOBAL : RTLD_LOCAL));
 }
 inline void *getFunction(void *handle, const char *funcname) {
 	if (!handle || !funcname) return nullptr;

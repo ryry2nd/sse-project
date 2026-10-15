@@ -1,12 +1,12 @@
 #pragma once
 
 #include <memory>
-#include "Window.hpp"
-#include "Shader.hpp"
-#include "Mesh.hpp"
-#include "Image.hpp"
-#include "Buff.hpp"
-#include "FrameBuffer.hpp"
+#include "../../Window.hpp"
+#include "../../Shader.hpp"
+#include "../../Mesh.hpp"
+#include "../../Image.hpp"
+#include "../../Buff.hpp"
+#include "../../FrameBuffer.hpp"
 
 namespace NApiFunctions {
 	using namespace Engine::Rendering;
@@ -32,6 +32,9 @@ namespace NApiFunctions {
 	using CreateDrawFn =
 		void(*)(...);
 
+	using CreateDrawCompFn =
+		void(*)(...);
+
 	using CreateFBOFn =
 		std::unique_ptr<FrameBuffer>(*)(...);
 
@@ -45,6 +48,7 @@ namespace NApiFunctions {
 		CreateWindowFn createWindowFunc = nullptr;
 		CreateBuffFn createBuffFunc = nullptr;
 		CreateDrawFn createDrawFunc = nullptr;
+		CreateDrawCompFn createDrawCompFunc = nullptr;
 		CreateFBOFn createFboFunc = nullptr;
 	};
 	APIFunctions *getApiFunctions();

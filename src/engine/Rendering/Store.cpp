@@ -1,7 +1,7 @@
 #include "Rendering.hpp"
 #include <memory>
 #include <vector>
-#include "ApiFunction.hpp"
+#include "apis/internal/ApiFunction.hpp"
 
 using namespace Engine::Rendering;
 using namespace NApiFunctions;
@@ -16,6 +16,10 @@ std::vector<std::unique_ptr<FrameBuffer>> fbos;
 extern "C" {
 	void draw(Window *win, Mesh *mesh, DrawParams *params, size_t size) {
 		getApiFunctions()->createDrawFunc(win, mesh, params, size);
+	}
+
+	void computeCall(ComputeParams *params) {
+		getApiFunctions()->createDrawCompFunc(params);
 	}
 
 	Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
@@ -48,8 +52,8 @@ extern "C" {
 		}
 	}
 
-	Shader *createShader(const char *path) {
-		auto shdr = getApiFunctions()->createShaderFunc(path);
+	Shader *createShader(const char *path, bool isCompute) {
+		auto shdr = getApiFunctions()->createShaderFunc(path, isCompute);
 		auto ret = shdr.get();
 		shaders.push_back(std::move(shdr));
 		return ret;
