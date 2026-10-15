@@ -188,48 +188,94 @@ function(copy_assets)
 	endif()
 endfunction()
 
+
 function(compile_shaders)
-	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-		set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
-	else()
-		set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
-	endif()
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
+    else()
+        set(SLANGC_CMD "${slang_SOURCE_DIR}/${SLANGC_BIN}")
+    endif()
 
-	if(EXISTS "${MODULE}/shaders")
-		file(GLOB SLANG_SHADERS
-			"${MODULE}/shaders/*.slang"
-		)
+    if(EXISTS "${MODULE}/shaders")
+        file(GLOB SLANG_SHADERS
+            "${MODULE}/shaders/*.slang"
+        )
 
-		list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
+        list(FILTER SLANG_SHADERS EXCLUDE REGEX "/\\.[^/]*$")
 
-		add_custom_target(compile_slang_shaders_${MODULE_NAME} ALL
-			COMMAND ${CMAKE_COMMAND} -E make_directory
-				"${MODULE_OUT_DIR}/shaders/gl"
-		)
+        add_custom_target(compile_slang_shaders_${MODULE_NAME} ALL
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                "${MODULE_OUT_DIR}/shaders/gl"
+        )
 
-		foreach(SHADER ${SLANG_SHADERS})
-			get_filename_component(NAME ${SHADER} NAME_WE)
+        foreach(SHADER IN LISTS SLANG_SHADERS)
+            get_filename_component(NAME "${SHADER}" NAME_WE)
+            file(READ "${SHADER}" SHADER_SOURCE)
 
-			add_custom_command(
-				TARGET compile_slang_shaders_${MODULE_NAME}
-				COMMAND ${SLANGC_CMD}
-					"${SHADER}"
-					-O3 -line-directive-mode none -matrix-layout-column-major
-					-target spirv -stage vertex
-					-DGL
-					-entry vertMain
-					-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.vert.spv"
+            set(HAS_ENTRY_POINT FALSE)
 
-				COMMAND ${SLANGC_CMD}
-					"${SHADER}"
-					-O3 -line-directive-mode none -matrix-layout-column-major
-					-target spirv -stage fragment
-					-DGL
-					-entry fragMain
-					-o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.frag.spv"
+            # Compile vertex stage if vertMain exists.
+            if(SHADER_SOURCE MATCHES "(^|[^A-Za-z0-9_])vertMain[ \t\r\n]*\\(")
+                set(HAS_ENTRY_POINT TRUE)
 
-				COMMENT "Compiling ${NAME}"
-			)
-		endforeach()
-	endif()
+                add_custom_command(
+                    TARGET compile_slang_shaders_${MODULE_NAME}
+                    POST_BUILD
+                    COMMAND ${SLANGC_CMD}
+                        "${SHADER}"
+                        -O3 -line-directive-mode none -matrix-layout-column-major
+                        -target spirv -stage vertex
+                        -DGL
+                        -entry vertMain
+                        -o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.vert.spv"
+                    COMMENT "Compiling ${NAME} vertex shader"
+                    VERBATIM
+                )
+            endif()
+
+            # Compile fragment stage if fragMain exists.
+            if(SHADER_SOURCE MATCHES "(^|[^A-Za-z0-9_])fragMain[ \t\r\n]*\\(")
+                set(HAS_ENTRY_POINT TRUE)
+
+                add_custom_command(
+                    TARGET compile_slang_shaders_${MODULE_NAME}
+                    POST_BUILD
+                    COMMAND ${SLANGC_CMD}
+                        "${SHADER}"
+                        -O3 -line-directive-mode none -matrix-layout-column-major
+                        -target spirv -stage fragment
+                        -DGL
+                        -entry fragMain
+                        -o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.frag.spv"
+                    COMMENT "Compiling ${NAME} fragment shader"
+                    VERBATIM
+                )
+            endif()
+
+            # Compile compute stage if computeMain exists.
+            if(SHADER_SOURCE MATCHES "(^|[^A-Za-z0-9_])computeMain[ \t\r\n]*\\(")
+                set(HAS_ENTRY_POINT TRUE)
+
+                add_custom_command(
+                    TARGET compile_slang_shaders_${MODULE_NAME}
+                    POST_BUILD
+                    COMMAND ${SLANGC_CMD}
+                        "${SHADER}"
+                        -O3 -line-directive-mode none -matrix-layout-column-major
+                        -target spirv -stage compute
+                        -DGL
+                        -entry computeMain
+                        -o "${MODULE_OUT_DIR}/shaders/gl/${NAME}.comp.spv"
+                    COMMENT "Compiling ${NAME} compute shader"
+                    VERBATIM
+                )
+            endif()
+
+            if(NOT HAS_ENTRY_POINT)
+                message(WARNING
+                    "No recognized shader entry point found in ${SHADER}"
+                )
+            endif()
+        endforeach()
+    endif()
 endfunction()
