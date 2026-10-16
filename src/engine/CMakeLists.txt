@@ -91,6 +91,28 @@ else()
 endif()
 
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+function(enable_debug_sanitizers target)
+    target_compile_options(${target} PRIVATE
+        -fsanitize=address
+        -fno-omit-frame-pointer
+    )
+
+    target_link_options(${target} PRIVATE
+        -fsanitize=address
+    )
+endfunction()
+
+# Apply to all relevant targets
+foreach(target IN ITEMS
+    Scripting
+    RenderingBase
+)
+    enable_debug_sanitizers(${target})
+endforeach()
+endif()
+
+
 #Engine section
 add_library(EngineABI INTERFACE)
 

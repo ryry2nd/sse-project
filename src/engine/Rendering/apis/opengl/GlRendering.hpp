@@ -37,7 +37,7 @@ public:
 	void updateScreenRes();
 	void setBackgroundColor(glm::vec4 color);
 	void setWindow();
-	~GlWindow();
+	virtual ~GlWindow();
 
 	SDL_Window *getWindow() {return window;}
 	SDL_GLContext getContext() {return glContext;}

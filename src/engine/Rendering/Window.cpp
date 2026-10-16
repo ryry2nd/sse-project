@@ -10,72 +10,10 @@
 
 using namespace Engine::Rendering;
 
-extern "C" void hostShutDownAll();
-
-static Uint64 now;
-
-Uint64 Window::getTime() {
-	return now;
-}
-
-extern "C" {
-	void Shutdown() {
-		hostShutDownAll();
-		SDL_Quit();
-		spdlog::info("Quit out of sdl");
-	}
-
-	void Init() {
-		now = SDL_GetTicks();
-		if (!SDL_Init(SDL_INIT_VIDEO))
-		{
-			spdlog::critical("SDL_Init Error: {}", SDL_GetError());
-			std::exit(1);
-		}
-		spdlog::info("Initalized sdl");
-	}
-
-	void Update()
-	{
-		SDL_PumpEvents();
-		now = SDL_GetTicks();
-
-	}
-}
-
-void Window::update() {
-	static Uint64 fpsStart = SDL_GetPerformanceCounter();
-    static float frameCount = 0;
-    static float fpsSum = 0;
-
-    Uint64 currentCounter = SDL_GetPerformanceCounter();
-    Uint64 freq = SDL_GetPerformanceFrequency();
-
-    deltaTime = (currentCounter - lastCounter) / (float)freq;
-
-    fpsSum += 1.0f / deltaTime;
-    frameCount++;
-
-    double elapsed = (currentCounter - fpsStart) / (double)freq;
-
-    if (elapsed >= 0.1) {
-        fps = fpsSum / frameCount;
-        fpsSum = 0;
-        frameCount = 0;
-        fpsStart = currentCounter;
-    }
-
-    lastCounter = currentCounter;
-}
-
-const bool *Window::getKeystates(int &numKeys) {
-	return SDL_GetKeyboardState(&numKeys);
-}
 
 void Window::sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
-	lastCounter = SDL_GetPerformanceCounter();
-
+	startLastCounter();
 	if (aa > 0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);

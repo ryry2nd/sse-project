@@ -72,6 +72,17 @@ function(compile_executable EXE_NAME)
 	)
 	target_compile_definitions(${MODULE_NAME}_exe PRIVATE DEFAULT_MODULE=\"${MOD_PATH}\")
 	set_target_properties(${MODULE_NAME}_exe PROPERTIES OUTPUT_NAME "${EXE_NAME}")
+
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_compile_options(${MODULE_NAME}_exe PRIVATE
+        -fsanitize=address
+        -fno-omit-frame-pointer
+    )
+
+    target_link_options(${MODULE_NAME}_exe PRIVATE
+        -fsanitize=address
+    )
+	endif()
 endfunction()
 
 

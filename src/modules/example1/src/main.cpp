@@ -61,14 +61,6 @@ extern "C" {
 			return;
 		}
 
-		int result;
-		#define ad1 3
-		#define ad2 2
-		MathTest mathTest = MathTest();
-		debug("{} + {} = {}", ad1, ad2, mathTest.add(ad1, ad2));
-
-		foo();
-
 		glm::vec2 res({900.0f, 500.0f});
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
@@ -112,30 +104,8 @@ extern "C" {
 
 		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 64);
 		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-
 		fontimg = createImage(texsurf, ImageSettings::tex());
 		delete font;
-		// fbo = createFrameBuffer(res, FrameBuffer::Settings::Color);
-
-		Shader *testCompute = createShader((MODULE_PATH + "/shaders/computeTest").c_str(), true);
-		std::vector<int> testComputeVec(200);
-		for (int i = 0; i < testComputeVec.size(); i++) {
-			testComputeVec[i] = i;
-		}
-		Buff *testComputeBuff = createBuff(Buff::Type::Storage, Buff::Frequency::Dynamic, sizeof(int) * testComputeVec.size(), testComputeVec.data());
-		ComputeParams cparams;
-		cparams.shader = testCompute;
-		cparams.groups = glm::vec3(4, 1, 1);
-		cparams.ssbo[0] = testComputeBuff;
-		computeCall(&cparams);
-		testComputeBuff->read(0, testComputeVec.size(), testComputeVec.data());
-		removeBuff(testComputeBuff);
-		removeShader(testCompute);
-		std::string out;
-		for (int &n : testComputeVec) {
-			out += std::to_string(n) + " ";
-		}
-		debug("{}", out);
 
 		std::vector<Vert> vertsflat;
 		std::vector<Ind> indsflat;
@@ -193,20 +163,10 @@ extern "C" {
 
 		inMat.instanceCount = models.size();
 		inMat.ssbo[0] = cubeInstanceBuff;
-		// inMat.settings |= InternalParams::Settings::EnableFBO;
-		// inMat.fbo = fbo;
 
 		debugMat.shader = debugVectorShader;
 		debugMat.meshType = InternalParams::MeshTypes::Lines;
 		debugMat.ubo[0] = camBuff;
-
-
-		ModelStruct fboPosition = glm::translate(glm::mat4(1.0f), {-10, 0, 0});
-		// fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct), &fboPosition);
-		// frameImageMat.shader = cubeShader;
-		// frameImageMat.ubo[0] = fboBuff;
-		// frameImageMat.ubo[1] = camBuff;
-		// frameImageMat.images[0] = fbo->getColorImage();
 	}
 
 	void loop() {
@@ -286,8 +246,6 @@ extern "C" {
 		draw(win, megaCube, &bigMat);
 		draw(win, texplane, &mattex);
 		draw(win, nullptr, &debugMat);
-		// draw(win, cube, &frameImageMat);
-		// fbo->getColorImage()->clearTransparent();
 		win->swapBuffer();
 	}
 
