@@ -32,10 +32,10 @@ class GlWindow : public Window
 {
 public:
 	GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-	void clearBackground();
-	void swapBuffer();
+	virtual void clearBackground();
+	virtual void swapBuffer();
+	virtual void setBackgroundColor(glm::vec4 color);
 	void updateScreenRes();
-	void setBackgroundColor(glm::vec4 color);
 	void setWindow();
 	virtual ~GlWindow();
 
@@ -66,9 +66,12 @@ private:
 class GlFrameBuffer : public FrameBuffer {
 public:
 	GlFrameBuffer(glm::vec2 res, uint32_t settings);
-	~GlFrameBuffer();
+	virtual ~GlFrameBuffer();
 
 	void setSize(glm::vec2 res);
+
+	virtual void setBackgroundColor(glm::vec4 color);
+	virtual void clearBackground();
 
 	Image* getColorImage() {return colorImage;}
 	Image* getDepthImage() {return depthImage;}

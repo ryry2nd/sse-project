@@ -162,6 +162,28 @@ void GlFrameBuffer::updateRes() {
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }
 
+void GlFrameBuffer::setBackgroundColor(glm::vec4 color) {
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+	glClearColor(color.r, color.g, color.b, color.a);
+}
+
+void GlFrameBuffer::clearBackground() {
+	glBindFramebuffer(GL_FRAMEBUFFER, id);
+
+	GLbitfield clearMask = 0;
+
+	if (settings & Settings::Color)
+		clearMask |= GL_COLOR_BUFFER_BIT;
+
+	if (settings & Settings::Depth)
+		clearMask |= GL_DEPTH_BUFFER_BIT;
+
+	if (settings & Settings::Stencil)
+		clearMask |= GL_STENCIL_BUFFER_BIT;
+
+	glClear(clearMask);
+}
+
 extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
     return std::make_unique<GlFrameBuffer>(size, settings);
 }
