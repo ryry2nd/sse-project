@@ -5,7 +5,7 @@
 namespace Engine::Rendering {
 	extern "C" {
 		void initAPI(const char *apiName);
-		void draw(Window *win, Mesh *mesh, DrawParams *params, size_t size = 1);
+		void draw(RenderTarget *target, Mesh *mesh, DrawParams *params, size_t size = 1);
 		void computeCall(ComputeParams *params);
 		Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse);
 		void removeWindow(Window *win);
@@ -21,6 +21,8 @@ namespace Engine::Rendering {
 		FrameBuffer *createFrameBuffer(glm::vec2 size, uint32_t settings);
 		void removeFrameBuffer(FrameBuffer *fbo);
 		void hostShutDownAll();
+		Font *createFont(const char* path, size_t size);
+		void removeFont(Font *font);
 	}
 	inline Image *createImage(const char *filePath, ImageSettings settings = ImageSettings{}) {
 		return createImageFromFile(filePath, settings);

@@ -102,10 +102,10 @@ extern "C" {
 		megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
 		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
-		font = new Font((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 64);
+		font = createFont((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 64);
 		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		fontimg = createImage(texsurf, ImageSettings::tex());
-		delete font;
+		Font::deleteSurf(texsurf);
 
 		std::vector<Vert> vertsflat;
 		std::vector<Ind> indsflat;

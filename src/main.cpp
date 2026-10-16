@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
 	ScriptingDestroy();
 	Shutdown();
 	deinitAPI();
+	return 0;
 }
 
 #ifdef _WIN32

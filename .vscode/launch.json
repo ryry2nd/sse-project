@@ -1,23 +1,21 @@
+
 {
-	"configurations": [
-	{
-		"name": "C/C++ Debug (gdb Launch)",
-		"type": "cppdbg",
-		"request": "launch",
-		"preLaunchTask": "Run build.sh",
-		"program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
-		"args": [],
-		"stopAtEntry": false,
-		"cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
-		"environment": [],
-		"MIMode": "gdb",
-		"setupCommands": [
-			{
-				"description": "Enable pretty-printing for gdb",
-				"text": "-enable-pretty-printing",
-				"ignoreFailures": false
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Example1 (CDT GDB)",
+            "type": "gdb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
+            "cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
+            "arguments": "",
+            "gdb": "/usr/bin/gdb",
+            "preLaunchTask": "Run build.sh",
+            "openGdbConsole": true,
+            "verbose": true,
+            "environment": {
+				"LSAN_OPTIONS": "verbosity=1:log_threads=1"
 			}
-		]
-	}
-	]
+        }
+    ]
 }

@@ -29,10 +29,9 @@ namespace Engine::Rendering
 
 		enum Settings : uint32_t {
 			DisableScreen		= 1 << 0,
-			EnableFBO			= 1 << 1,
-			EnableClear			= 1 << 2,
-			DisableCulling		= 1 << 3,
-			DisableDepth		= 1 << 4,
+			EnableClear			= 1 << 1,
+			DisableCulling		= 1 << 2,
+			DisableDepth		= 1 << 3,
 		};
 
 		uint32_t settings = 0;
@@ -51,7 +50,6 @@ namespace Engine::Rendering
 		size_t instanceCount = 0;
 
 
-		FrameBuffer* fbo = nullptr;
 		Shader* shader = nullptr;
 
 		bool useArray = false;

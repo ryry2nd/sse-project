@@ -12,10 +12,11 @@ std::vector<std::unique_ptr<Buff>> buffers;
 std::vector<std::unique_ptr<Mesh>> meshes;
 std::vector<std::unique_ptr<Image>> images;
 std::vector<std::unique_ptr<FrameBuffer>> fbos;
+std::vector<std::unique_ptr<Font>> fonts;
 
 extern "C" {
-	void draw(Window *win, Mesh *mesh, DrawParams *params, size_t size) {
-		getApiFunctions()->createDrawFunc(win, mesh, params, size);
+	void draw(RenderTarget *target, Mesh *mesh, DrawParams *params, size_t size) {
+		getApiFunctions()->createDrawFunc(target, mesh, params, size);
 	}
 
 	void computeCall(ComputeParams *params) {
@@ -117,7 +118,24 @@ extern "C" {
 			}
 		}
 	}
+
+	Font *createFont(const char* path, size_t size) {
+		auto font = std::make_unique<Font>(path, size);
+		auto ret = font.get();
+		fonts.push_back(std::move(font));
+		return ret;
+	}
+	void removeFont(Font *font) {
+		for (int i = 0; i < fonts.size(); i++) {
+			if (fonts[i].get() == font) {
+				fonts.erase(fonts.begin()+ i);
+				break;
+			}
+		}
+	}
+
 	void hostShutDownAll() {
+		fonts.clear();
 		meshes.clear();
 		fbos.clear();
 		images.clear();

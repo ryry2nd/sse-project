@@ -4,6 +4,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "../internal/DrawAgnostic.hpp"
+#include "engine/Rendering/FrameBuffer.hpp"
 
 inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	switch (meshType)
@@ -84,25 +85,30 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
-extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
+extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t size) {
 	InternalParams params;
+	combineParams(params, pms, size);
 
-	bool renderScreen;
-	bool renderFBO;
-	FrameBuffer *fbo;
+	bool isWindowTarget = false;
 
-	drawinit(win, pms, size, params, fbo, renderScreen, renderFBO);
+	GlWindow* glwin = dynamic_cast<GlWindow*>(target);
+	GlFrameBuffer* glFBO = dynamic_cast<GlFrameBuffer*>(target);
+	GlShader *glshdr = static_cast<GlShader*>(params.shader);
+	GlMesh *glmesh = static_cast<GlMesh*>(mesh);
+
+	if (glwin) {
+		isWindowTarget = true;
+		glwin->setWindow();
+	}
+	else if (!glFBO){
+		spdlog::error("Target is neither a window or an fbo");
+		return;
+	}
 
 	if (params.shader->isCompute()) {
 		spdlog::error("Shader given is a compute shader. Please do not put compute shaders into draw calls");
 		return;
 	}
-
-	auto *glwin = static_cast<GlWindow*>(win);
-	auto *glshdr = static_cast<GlShader*>(params.shader);
-	auto *glmesh = static_cast<GlMesh*>(mesh);
-
-	glwin->setWindow();
 
 	glUseProgram(glshdr->getID());
 
@@ -143,26 +149,26 @@ extern "C" void draw(Window *win, Mesh* mesh, DrawParams* pms, size_t size) {
 		glEnable(GL_DEPTH_TEST);
 
 
-	// -------------------------
-	// 3. Render To FBO
-	// -------------------------
-	if (renderFBO) {
-		auto glFBO = static_cast<GlFrameBuffer*>(fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
-		glFBO->updateRes();
-		DRAW_CALL(glmesh, params);
-	}
 
 	// -------------------------
 	// 4. RENDER TO SCREEN
 	// -------------------------
 
-	if (renderScreen) {
+	if (isWindowTarget) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glwin->updateScreenRes();
-		DRAW_CALL(glmesh, params);
 	}
 
+	// -------------------------
+	// 3. Render To FBO
+	// -------------------------
+
+	else {
+		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
+		glFBO->updateRes();
+	}
+
+	DRAW_CALL(glmesh, params);
 	glBindVertexArray(0);
 }
 

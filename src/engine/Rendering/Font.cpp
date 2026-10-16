@@ -53,6 +53,10 @@ Font::~Font() {
     delete static_cast<stbtt_fontinfo*>(fontInfo);
 }
 
+void Font::deleteSurf(SDL_Surface* surf) {
+	SDL_DestroySurface(surf);
+}
+
 SDL_Surface* Font::RenderText(const char* text, glm::vec4 color)
 {
     auto* info = static_cast<stbtt_fontinfo*>(fontInfo);
