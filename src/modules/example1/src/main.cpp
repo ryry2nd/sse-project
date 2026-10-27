@@ -97,7 +97,7 @@ extern "C" {
 
 		std::vector<Vert> vertsbox;
 		std::vector<Ind> indsbox;
-		buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000));
+		buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000.0f));
 
 
 		initAPI("OpenGl4.6");
@@ -123,7 +123,7 @@ extern "C" {
 		#define TEX_SCALE 1.0f
 		const float TEX_RATIO = fontimg->getWidth() / fontimg->getHeight();
 
-		build2DFace(vertsflat, indsflat, {TEX_RATIO * TEX_SCALE, TEX_SCALE}, {0, 0, 0}, {0, 1}, {1, 0});
+		build2DFace(vertsflat, indsflat, {TEX_RATIO * TEX_SCALE, TEX_SCALE}, {0, 0, 0}, {0, 0}, {1, 1});
 		texplane = createMesh(vertsflat.data(), vertsflat.size(), indsflat.data(), indsflat.size());
 
 		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
@@ -181,14 +181,14 @@ extern "C" {
 		std::vector<Vert> vertsfbo;
 		std::vector<Ind> indsfbo;
 
-		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 0}, {1, 1});
+		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 1}, {1, 0});
 
 		fboMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
 
 		vertsfbo.clear();
 		indsfbo.clear();
 
-		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 1}, {1, 0});
+		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 0}, {1, 1});
 
 		flatMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
 

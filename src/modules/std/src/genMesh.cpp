@@ -39,7 +39,7 @@ extern "C" {
             p + glm::vec3(s.x, s.y, s.z),
             p + glm::vec3(s.x, 0, s.z),
             {1, 0, 0},
-            {0, 0}, {s.y, 0}, {s.y, s.z}, {0, s.z},
+            {s.z, s.y}, {s.z, 0}, {0, 0}, {0, s.y},
             vertices, indices
         );
 
@@ -50,7 +50,7 @@ extern "C" {
             p + glm::vec3(0, s.y, s.z),
             p + glm::vec3(0, s.y, 0),
             {-1, 0, 0},
-            {0, 0}, {s.z, 0}, {s.z, s.y}, {0, s.y},
+            {0, s.y}, {s.z, s.y}, {s.z, 0}, {0, 0},
             vertices, indices
         );
 
@@ -61,7 +61,7 @@ extern "C" {
             p + glm::vec3(s.x, s.y, s.z),
             p + glm::vec3(s.x, s.y, 0),
             {0, 1, 0},
-            {0, 0}, {s.z, 0}, {s.z, s.x}, {0, s.x},
+            {0, 0}, {0, s.z}, {s.x, s.z}, {s.x, 0},
             vertices, indices
         );
 
@@ -72,7 +72,7 @@ extern "C" {
             p + glm::vec3(s.x, 0, s.z),
             p + glm::vec3(0, 0, s.z),
             {0, -1, 0},
-            {0, 0}, {s.x, 0}, {s.x, s.z}, {0, s.z},
+            {0, s.z}, {s.x, s.z}, {s.x, 0}, {0, 0},
             vertices, indices
         );
 
@@ -83,7 +83,7 @@ extern "C" {
             p + glm::vec3(s.x, s.y, s.z),
             p + glm::vec3(0, s.y, s.z),
             {0, 0, 1},
-            {0, 0}, {s.x, 0}, {s.x, s.y}, {0, s.y},
+            {0, s.y}, {s.x, s.y}, {s.x, 0}, {0, 0},
             vertices, indices
         );
 
@@ -94,7 +94,7 @@ extern "C" {
             p + glm::vec3(s.x, s.y, 0),
             p + glm::vec3(s.x, 0, 0),
             {0, 0, -1},
-            {0, 0}, {0, s.y}, {s.x, s.y}, {s.x, 0},
+            {s.x, s.y}, {s.x, 0}, {0, 0}, {0, s.y},
             vertices, indices
         );
     }
@@ -116,10 +116,10 @@ extern "C" {
 			position + glm::vec3(w, h, 0),
 			position + glm::vec3(0, h, 0),
 			{0, 0, 1},
-			uvMin,
-			{uvMax.x, uvMin.y},
-			uvMax,
 			{uvMin.x, uvMax.y},
+			{uvMax.x, uvMax.y},
+			{uvMax.x, uvMin.y},
+			{uvMin.x, uvMin.y},
 			vertices,
 			indices
 		);
