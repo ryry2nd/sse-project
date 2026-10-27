@@ -76,6 +76,7 @@ GLenum toGL(ImageSettings::CompareFunc f)
 
 void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 {
+	SCOPE("Rendering::OpenGL::Image::setupObject");
 	SDL_Surface* surface = SDL_ConvertSurface(surface_old, SDL_PIXELFORMAT_RGBA32);
 	// SDL_Surface *surface = surface_old;
 
@@ -145,11 +146,13 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 
 GlImage::GlImage(SDL_Surface *surface, ImageSettings settings)
 {
+	SCOPE("Rendering::OpenGL::Image::create");
 	spdlog::debug("Creating image from surface memory address 0x{:x}", reinterpret_cast<uintptr_t>(surface));
 	setupObject(surface, settings);
 }
 
 GlImage::GlImage(glm::vec2 size, ImageSettings settings) {
+	SCOPE("Rendering::OpenGL::Image::create");
 	spdlog::debug("Creating blank image {}x{}", size.x, size.y);
 
     SDL_Surface *blank = SDL_CreateSurface(size.x, size.y, SDL_PIXELFORMAT_RGBA32);
@@ -167,6 +170,7 @@ GlImage::GlImage(glm::vec2 size, ImageSettings settings) {
 
 GlImage::~GlImage()
 {
+	SCOPE("Rendering::OpenGL::Image::destroy");
 	spdlog::debug("Deleting image with id: 0x{:x}", textureID);
 	if (textureID != 0)
 		glDeleteTextures(1, &textureID);
@@ -176,6 +180,7 @@ GlImage::~GlImage()
 
 void GlImage::clearTransparent()
 {
+	SCOPE("Rendering::OpenGL::Image::clearTransparent");
 	if (textureID == 0) return;
 
     GLubyte clearColor[4] = {0, 0, 0, 0};
@@ -189,6 +194,7 @@ void GlImage::clearTransparent()
 
 void GlImage::updateImage(SDL_Surface *surface)
 {
+	SCOPE("Rendering::OpenGL::Image::update");
     if (!surface || textureID == 0) return;
 
     SDL_Surface *conv = surface;
@@ -223,6 +229,7 @@ void GlImage::updateImage(SDL_Surface *surface)
 
 GlImage::GlImage(const char *filePath, ImageSettings settings)
 {
+	SCOPE("Rendering::OpenGL::Image::create");
 	if (!filePath) {
 		spdlog::warn("Creating image with fallback texture");
 	}
@@ -237,6 +244,7 @@ GlImage::GlImage(const char *filePath, ImageSettings settings)
 
 GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 {
+	SCOPE("Rendering::OpenGL::Image::create");
 	spdlog::debug("Creating image with pre existing texture id: 0x{:x} with size {},{}", existingTexture, size.x, size.y);
 	if (existingTexture == 0)
 	{

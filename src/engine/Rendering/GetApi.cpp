@@ -81,7 +81,8 @@ extern "C" {
 			!apiFunctions.createBuffFunc ||
 			!apiFunctions.createDrawFunc ||
 			!apiFunctions.createFboFunc ||
-			!apiFunctions.createDrawCompFunc
+			!apiFunctions.createDrawCompFunc ||
+			!apiFunctions.createImageFromSizeFunc
 		)
 		{
 			spdlog::warn("One of the creation functions in the {} api. If you call it you will segfault", apiName);

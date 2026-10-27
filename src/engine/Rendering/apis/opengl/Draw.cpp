@@ -86,6 +86,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 }
 
 extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t size) {
+	SCOPE("Rendering::OpenGl::Draw");
 	InternalParams params;
 	combineParams(params, pms, size);
 
@@ -123,16 +124,24 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
+	{
+	GPUTRACE("Rendering::OpenGl::Draw::Images");
 	setImages(params.images);
+	}
 
 
 	// -------------------------
 	// 2. BUFFERS Global
 	// -------------------------
+	{
+	GPUTRACE("Rendering::OpenGl::Draw::Buff");
 	loadBuffer(params.ubo, GL_UNIFORM_BUFFER);
 	loadBuffer(params.ssbo, GL_SHADER_STORAGE_BUFFER);
+	}
 
 
+	{
+	GPUTRACE("Rendering::OpenGl::Draw::Settings");
 	if (params.settings & InternalParams::EnableClear)
 		glEnable(GL_BLEND);
 	else
@@ -147,6 +156,7 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 		glDisable(GL_DEPTH_TEST);
 	else
 		glEnable(GL_DEPTH_TEST);
+	}
 
 
 
@@ -155,6 +165,7 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	// -------------------------
 
 	if (isWindowTarget) {
+		GPUTRACE("Rendering::OpenGl::Draw::Screen");
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glwin->updateScreenRes();
 	}
@@ -164,16 +175,20 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	// -------------------------
 
 	else {
+		GPUTRACE("Rendering::OpenGl::Draw::FBO");
 		glBindFramebuffer(GL_FRAMEBUFFER, glFBO->getID());
 		glFBO->updateRes();
 	}
 
+	{
+	GPUTRACE("Rendering::OpenGl::Draw::FinalCall");
 	DRAW_CALL(glmesh, params);
 	glBindVertexArray(0);
+	}
 }
 
 extern "C" void computeCall(ComputeParams *params) {
-
+	SCOPE("Rendering::OpenGl::ComputeCall");
 	bool renderScreen;
 	bool renderFBO;
 	FrameBuffer *fbo;

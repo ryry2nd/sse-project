@@ -9,6 +9,7 @@
 
 GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
 {
+	SCOPE("Rendering::OpenGL::Window::create");
 	sdl_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse);
 	spdlog::debug("Creating window with resolution: {} by {}", res.x, res.y);
 	// this does what it says
@@ -41,6 +42,7 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 		std::exit(1);
 	}
 	#ifdef DEBUG
+	TracyGpuContext;
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
@@ -76,21 +78,36 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 }
 
 void GlWindow::setBackgroundColor(glm::vec4 color) {
+	SCOPE("Rendering::OpenGL::Window::setBackgroundColor");
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
 void GlWindow::clearBackground()
 {
+	SCOPE("Rendering::OpenGL::Window::clearBackground");
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+#ifdef DEBUG
+#include <tracy/TracyOpenGL.hpp>
+#define GPUCOLLECT TracyGpuCollect;
+#else
+#define GPUCOLLECT
+#endif
+
+
 void GlWindow::swapBuffer()
 {
+	GPUCOLLECT;
+	{
+	SCOPE("Rendering::OpenGL::Window::swapBuffer");
 	SDL_GL_SwapWindow(window);
+	}
 }
 
 void GlWindow::updateScreenRes()
 {
+	SCOPE("Rendering::OpenGL::Window::updateRes");
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	res = glm::vec2(width, height);
@@ -98,11 +115,13 @@ void GlWindow::updateScreenRes()
 }
 
 void GlWindow::setWindow() {
+	SCOPE("Rendering::OpenGL::Window::setWindow");
 	SDL_GL_MakeCurrent(window, glContext);
 }
 
 GlWindow::~GlWindow()
 {
+	SCOPE("Rendering::OpenGL::Window::delete");
 	spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 	SDL_GL_DestroyContext(glContext);
 }

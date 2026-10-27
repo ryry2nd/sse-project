@@ -12,10 +12,14 @@
 #include <string>
 #include <algorithm>
 
+#include "apis/internal/Scope.hpp"
+
 using namespace Engine::Rendering;
 
 Font::Font(const char* path, size_t size)
     : fontSize(size) {
+
+	SCOPE("Engine::Rendering::Font::create");
 
     if (!path || size == 0)
         return;
@@ -50,15 +54,18 @@ Font::Font(const char* path, size_t size)
 }
 
 Font::~Font() {
+	SCOPE("Engine::Rendering::Font::destroy");
     delete static_cast<stbtt_fontinfo*>(fontInfo);
 }
 
 void Font::deleteSurf(SDL_Surface* surf) {
+	SCOPE("Engine::Rendering::Font::deleteSurf");
 	SDL_DestroySurface(surf);
 }
 
 SDL_Surface* Font::RenderText(const char* text, glm::vec4 color)
 {
+	SCOPE("Engine::Rendering::Font::renderText");
     auto* info = static_cast<stbtt_fontinfo*>(fontInfo);
 
     if (!info || !text || !*text)

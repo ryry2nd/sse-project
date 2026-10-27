@@ -119,3 +119,8 @@ add_library(EngineABI INTERFACE)
 target_include_directories(EngineABI INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/include/Engine
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_link_libraries(RenderingBase PUBLIC TracyClient)
+target_link_libraries(Scripting PUBLIC TracyClient)
+endif()

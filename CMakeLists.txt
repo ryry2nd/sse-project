@@ -79,6 +79,10 @@ find_package(stb CONFIG REQUIRED)
 find_package(slang CONFIG REQUIRED)
 find_package(compiler CONFIG REQUIRED)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+find_package(tracy CONFIG REQUIRED)
+endif()
+
 # Add subdirectories
 add_subdirectory(src/engine)
 

@@ -2,6 +2,7 @@
 
 GlMesh::~GlMesh()
 {
+	SCOPE("Rendering::OpenGL::Mesh::destroy");
 	if (VAO != 0)
 		glDeleteVertexArrays(1, &VAO);
 	if (VBO != 0)
@@ -16,6 +17,7 @@ GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 				const Ind *indices, const size_t ind_size
 			) : VAO(0), VBO(0), EBO(0)
 {
+	SCOPE("Rendering::OpenGL::Mesh::create");
 	spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -33,6 +35,7 @@ void GlMesh::updateVerts(
 	const Ind *indices, const size_t ind_size
 )
 {
+	SCOPE("Rendering::OpenGL::Mesh::updateVerts");
 	glBindVertexArray(VAO);
 
 	// ---- VBO ----

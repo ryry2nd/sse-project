@@ -17,6 +17,8 @@ namespace fs = std::filesystem;
 
 #include "JIT/HeadJIT.hpp"
 
+#include "../Rendering/apis/internal/Scope.hpp"
+
 using namespace Engine::Scripting::Internal::Useable;
 using namespace Engine::Scripting::Internal;
 
@@ -50,6 +52,7 @@ static EnginePackage *currpkg;
 
 
 void topoSort() {
+	SCOPE("Scripting::topoSort");
     std::unordered_map<std::string, int> index;
     std::unordered_map<std::string, int> indegree;
     std::unordered_map<std::string, std::vector<std::string>> graph;
@@ -154,6 +157,7 @@ extern "C" {
 
 	void ScriptingCreate(const char *path)
 	{
+		SCOPE("Scripting::create");
 		for (const auto& entry : fs::directory_iterator(MODULES_PATH)) {
 			if (entry.is_directory()) {
 				std::string mod_path = entry.path().string();
@@ -236,6 +240,7 @@ extern "C" {
 
 		for (auto &pkg : pkgs) {
 			try {
+				SCOPE("Scripting::Modules::Setup");
 				currpkg = &pkg;
 				setupJIT(pkg.llvmLocation);
 				spdlog::info("Successfully started {}", pkg.id);
@@ -252,6 +257,7 @@ extern "C" {
 	void ScriptingRunLoop() {
 		for (auto &pkg : pkgs) {
 			try {
+				SCOPE("Scripting::Modules::Loop");
 				currpkg = &pkg;
 				loopJIT(pkg.llvmLocation);
 			}
@@ -269,6 +275,7 @@ extern "C" {
 		while (SDL_PollEvent(&e)) {
 			for (auto &pkg : pkgs) {
 				try {
+					SCOPE("Scripting::Modules::Event");
 					currpkg = &pkg;
 					eventJIT(pkg.llvmLocation, &e);
 				}
@@ -286,6 +293,7 @@ extern "C" {
 	{
 		for (auto &pkg : pkgs) {
 			try {
+				SCOPE("Scripting::Modules::Destroy");
 				currpkg = &pkg;
 				shutdownJIT(pkg.llvmLocation);
 			}

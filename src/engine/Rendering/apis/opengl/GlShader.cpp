@@ -32,6 +32,7 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 
 GlShader::GlShader(const char *path, bool isCompute)
 {
+	SCOPE("Rendering::OpenGL::Shader::create");
 	this->bisCompute = isCompute;
 
 	id = glCreateProgram();
@@ -76,6 +77,7 @@ GlShader::GlShader(const char *path, bool isCompute)
 
 GlShader::~GlShader()
 {
+	SCOPE("Rendering::OpenGL::Shader::destroy");
 	spdlog::debug("Deleting shader with id: 0x{:x}", id);
 	if (id != 0)
 		glDeleteProgram(id);

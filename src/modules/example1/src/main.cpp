@@ -157,7 +157,7 @@ extern "C" {
 		inMat.shader = cubeInstanceShader;
 		inMat.ubo[0] = camBuff;
 
-		glm::vec3 gridSize(32,32,32);
+		glm::vec3 gridSize(16,16,16);
 		std::vector<ModelStruct> models;
         models.reserve(gridSize.x * gridSize.y * gridSize.z);
 

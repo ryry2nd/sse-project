@@ -7,3 +7,7 @@ target_link_libraries(RenderingOpenGL PRIVATE SDL3::SDL3 glm::glm OPENGL::OPENGL
 set_target_properties(RenderingOpenGL PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_link_libraries(RenderingOpenGL PUBLIC TracyClient)
+endif()

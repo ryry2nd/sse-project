@@ -5,8 +5,9 @@
 #include <SDL3/SDL_timer.h>
 #include <spdlog/spdlog.h>
 
-using namespace Engine::Rendering;
+#include "apis/internal/Scope.hpp"
 
+using namespace Engine::Rendering;
 
 static Uint64 now;
 
@@ -29,8 +30,12 @@ extern "C" {
 
 	void Update()
 	{
+		FRAMEMARK
+		{
+		SCOPE("Rendering::Core::pumpEvents");
 		SDL_PumpEvents();
 		now = SDL_GetTicks();
+		}
 
 	}
 
@@ -43,6 +48,7 @@ extern "C" {
 
 
 void RenderTarget::update() {
+	SCOPE("Rendering::Core::updateTarget");
 	static Uint64 fpsStart = SDL_GetPerformanceCounter();
     static float frameCount = 0;
     static float fpsSum = 0;

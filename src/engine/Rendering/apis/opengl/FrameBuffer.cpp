@@ -2,6 +2,7 @@
 
 GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 {
+	SCOPE("Rendering::OpenGL::FBO::create");
 	spdlog::debug("Creating frame buffer with res: {},{}", res.x, res.y);
 	this->res = res;
 	this->settings = settings;
@@ -123,6 +124,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 
 GlFrameBuffer::~GlFrameBuffer()
 {
+	SCOPE("Rendering::OpenGL::FBO::Destroy");
 	if (colorImage)   delete colorImage;
 	if (depthImage && depthImage != stencilImage) delete depthImage;
 	if (stencilImage && stencilImage != depthImage) delete stencilImage;
@@ -132,6 +134,7 @@ GlFrameBuffer::~GlFrameBuffer()
 
 void GlFrameBuffer::setSize(glm::vec2 newSize)
 {
+	SCOPE("Rendering::OpenGL::FBO::setSize");
 	res = newSize;
 
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
@@ -159,15 +162,18 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 }
 
 void GlFrameBuffer::updateRes() {
+	SCOPE("Rendering::OpenGL::updateRes");
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }
 
 void GlFrameBuffer::setBackgroundColor(glm::vec4 color) {
+	SCOPE("Rendering::OpenGL::FBO::setBackgroundColor");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
 void GlFrameBuffer::clearBackground() {
+	SCOPE("Rendering::OpenGL::FBO::clearBackGround");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
 	GLbitfield clearMask = 0;

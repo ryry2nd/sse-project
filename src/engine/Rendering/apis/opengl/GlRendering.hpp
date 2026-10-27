@@ -7,6 +7,15 @@
 
 #include <engine/Rendering/Rendering.hpp>
 
+#include "../internal/Scope.hpp"
+
+#ifdef DEBUG
+#include <tracy/TracyOpenGL.hpp>
+#define GPUTRACE(name) TracyGpuZone(name);
+#else
+#define GPUTRACE(name)
+#endif
+
 typedef struct SDL_GLContextState *SDL_GLContext;
 
 using namespace Engine::Rendering;
