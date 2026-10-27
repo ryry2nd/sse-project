@@ -59,7 +59,8 @@ FrameBuffer *fbo;
 std::string MODULE_PATH;
 std::string MODULE_ID;
 
-glm::vec2 res;
+constexpr glm::vec2 res(900.0f, 500.0f);
+constexpr float ratio = res.x / res.y;
 
 extern "C" {
 	void setup() {
@@ -69,8 +70,6 @@ extern "C" {
 		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
 			return;
 		}
-
-		res = glm::vec2(900.0f, 500.0f);
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 		camRot = glm::vec3(0.0f, 0.0f, 0.0f);
