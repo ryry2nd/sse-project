@@ -59,6 +59,8 @@ FrameBuffer *fbo;
 std::string MODULE_PATH;
 std::string MODULE_ID;
 
+glm::vec2 res;
+
 extern "C" {
 	void setup() {
 		MODULE_ID = Engine::Module::getCurrentRunning();
@@ -68,7 +70,7 @@ extern "C" {
 			return;
 		}
 
-		glm::vec2 res({900.0f, 500.0f});
+		res = glm::vec2(900.0f, 500.0f);
 
 		camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 		camRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -232,6 +234,9 @@ extern "C" {
 		auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		fpsimg->clearTransparent();
 		fpsimg->updateImage(fpstexsurf);
+		#define fpsScale 40
+		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpstexsurf->w / fpstexsurf->h) * fpsScale, fpsScale});
+		fpsBuff->write(0, sizeof(glm::mat4), &fpsMpv);
 		Font::deleteSurf(fpstexsurf);
 
 		static float rotate = 0.0f;
