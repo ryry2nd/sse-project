@@ -66,6 +66,19 @@ namespace Engine::Helper {
 		return glm::perspective(glm::radians(fov), res.x / res.y, zNear, zFar);
 	}
 
+	inline glm::mat4 camera2dGetProj(glm::vec2 res) {
+		glm::mat4 proj  = glm::ortho(0.0f, res.x, 0.0f, res.y, -1000.0f, 1000.0f);
+		return proj;
+	}
+
+	inline glm::mat4 camera2dGetMpv(glm::vec2 res) {
+		glm::mat4 proj  = camera2dGetProj(res);
+		glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(res.x, res.y, 1.0f));
+
+		glm::mat4 mvp = proj * model;
+		return mvp;
+	}
+
 	inline void rotateCamera(float deltaTime, glm::vec3 *rot, glm::vec2 motion, float mouse_sensitivity) {
 		if (deltaTime == 0)
 		{

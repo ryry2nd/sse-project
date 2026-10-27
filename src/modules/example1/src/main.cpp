@@ -24,6 +24,7 @@ Material inMat;
 Material bigMat;
 Material debugMat;
 Material frameImageMat;
+Material fboMat;
 CameraStruct cam;
 ModelStruct model;
 
@@ -35,9 +36,11 @@ Shader *cubeShader;
 Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Shader *textShader;
+Shader *fboShader;
 Mesh *cube;
 Mesh *megaCube;
 Mesh *texplane;
+Mesh *fboMesh;
 Image *img;
 Image *fontimg;
 Buff *camBuff;
@@ -94,7 +97,9 @@ extern "C" {
 
 		initAPI("OpenGl4.6");
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
+		fbo = createFrameBuffer(res, FrameBuffer::Settings::Color | FrameBuffer::Settings::Depth);
 		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
+		fboShader = createShader((MODULE_PATH + "/shaders/fboRender").c_str());
 		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
 		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 		textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
@@ -167,6 +172,19 @@ extern "C" {
 		debugMat.shader = debugVectorShader;
 		debugMat.meshType = InternalParams::MeshTypes::Lines;
 		debugMat.ubo[0] = camBuff;
+
+		std::vector<Vert> vertsfbo;
+		std::vector<Ind> indsfbo;
+
+		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 0}, {1, 1});
+
+		glm::mat4 proj = camera2dGetMpv(res);
+		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &proj);
+		fboMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
+		fboMat.shader = fboShader;
+		fboMat.ubo[0] = fboBuff;
+		fboMat.images[0] = fbo->getColorImage();
+		fboMat.settings |= Material::EnableClear;
 	}
 
 	void loop() {
@@ -175,6 +193,8 @@ extern "C" {
 		}
 		win->update();
 		win->clearBackground();
+		fbo->update();
+		fbo->clearBackground();
 		float deltaTime = win->getDeltaTime();
 		static float timer = 0.0f;
 		static float t = 0.0f;
@@ -241,11 +261,12 @@ extern "C" {
 		modelBuff->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		draw(win, cube, &mat);
-		draw(win, cube, &inMat);
-		draw(win, megaCube, &bigMat);
-		draw(win, texplane, &mattex);
-		draw(win, nullptr, &debugMat);
+		draw(fbo, cube, &mat);
+		draw(fbo, cube, &inMat);
+		draw(fbo, megaCube, &bigMat);
+		draw(fbo, texplane, &mattex);
+		draw(fbo, nullptr, &debugMat);
+		draw(win, fboMesh, &fboMat);
 		win->swapBuffer();
 	}
 
