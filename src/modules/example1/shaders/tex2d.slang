@@ -1,4 +1,5 @@
 #include ".base.slang"
+#include ".colors.slang"
 
 typedef Input VSInput;
 typedef Output VSOutput;
@@ -10,8 +11,10 @@ BINDING_CBV(0)
 ConstantBuffer<mat4> proj;
 
 
+
+
 [shader("vertex")]
-VSOutput vertMain(VSInput input, uint vid : SV_VertexID)
+VSOutput vertMain(VSInput input)
 {
 	VSOutput o;
 	o.position = mul(proj, float4(input.aPos, 1.0f));
@@ -19,7 +22,7 @@ VSOutput vertMain(VSInput input, uint vid : SV_VertexID)
     o.Normal   = input.aNormal;
     o.WorldPos = input.aPos;
     o.ViewPos  = float4(input.aPos, 1.0);
-    return o;
+	return o;
 }
 
 

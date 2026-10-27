@@ -25,6 +25,7 @@ Material bigMat;
 Material debugMat;
 Material frameImageMat;
 Material fboMat;
+Material fpsMat;
 CameraStruct cam;
 ModelStruct model;
 
@@ -36,19 +37,22 @@ Shader *cubeShader;
 Shader *cubeInstanceShader;
 Shader *debugVectorShader;
 Shader *textShader;
-Shader *fboShader;
+Shader *tex2dShader;
 Mesh *cube;
 Mesh *megaCube;
 Mesh *texplane;
+Mesh *flatMesh;
 Mesh *fboMesh;
 Image *img;
 Image *fontimg;
+Image *fpsimg;
 Buff *camBuff;
 Buff *modelBuff;
 Buff *megaBuff;
 Buff *cubeInstanceBuff;
 Buff *fboBuff;
 Buff *modelTexBuff;
+Buff *fpsBuff;
 Font *font;
 FrameBuffer *fbo;
 
@@ -99,7 +103,7 @@ extern "C" {
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		fbo = createFrameBuffer(res, FrameBuffer::Settings::Color | FrameBuffer::Settings::Depth);
 		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
-		fboShader = createShader((MODULE_PATH + "/shaders/fboRender").c_str());
+		tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
 		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
 		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 		textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
@@ -178,13 +182,28 @@ extern "C" {
 
 		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 0}, {1, 1});
 
-		glm::mat4 proj = camera2dGetMpv(res);
-		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &proj);
 		fboMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
-		fboMat.shader = fboShader;
+
+		vertsfbo.clear();
+		indsfbo.clear();
+
+		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 1}, {1, 0});
+
+		flatMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
+
+
+		glm::mat4 fboMpv = fboMPV(res);
+		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fboMpv);
+		fboMat.shader = tex2dShader;
 		fboMat.ubo[0] = fboBuff;
 		fboMat.images[0] = fbo->getColorImage();
 		fboMat.settings |= Material::EnableClear;
+
+		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - 100, 0.5}, {100, 100});
+		fpsBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fpsMpv);
+		fpsMat.shader = tex2dShader;
+		fpsMat.ubo[0] = fpsBuff;
+		fpsMat.settings |= Material::EnableClear;
 	}
 
 	void loop() {
@@ -212,10 +231,17 @@ extern "C" {
 
 		if (timer >= 1.0f)
 		{
+			float fps = win->getFPS();
 			if (outputFPS) {
-				info("FPS: {:.2f}", win->getFPS());
+				info("FPS: {:.2f}", fps);
 			}
 			timer = 0.0f;
+
+			auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			removeImage(fpsimg);
+			fpsimg = createImage(fpstexsurf, ImageSettings::tex());
+			Font::deleteSurf(fpstexsurf);
+			fpsMat.images[0] = fpsimg;
 		}
 
 		static float rotate = 0.0f;
@@ -224,6 +250,7 @@ extern "C" {
 
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
 		model = glm::rotate(model, rotate, glm::vec3({0, 1, 0}));
+
 
 		int numKeys;
 		const bool *keystates = Rendering::Window::getKeystates(numKeys);
@@ -267,6 +294,7 @@ extern "C" {
 		draw(fbo, texplane, &mattex);
 		draw(fbo, nullptr, &debugMat);
 		draw(win, fboMesh, &fboMat);
+		draw(win, flatMesh, &fpsMat);
 		win->swapBuffer();
 	}
 
