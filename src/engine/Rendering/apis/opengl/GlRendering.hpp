@@ -50,17 +50,20 @@ class GlImage : public Image
 public:
 	GlImage(const char *filePath, ImageSettings settings);
 	GlImage(GLuint id, glm::vec2 size);
+	GlImage(glm::vec2 size, ImageSettings settings);
 	GlImage(SDL_Surface *surface, ImageSettings settings);
 	~GlImage();
 	GLuint getID() const {return textureID;}
 	GLuint getSID() const {return samplerID;}
 
+	void updateImage(SDL_Surface *surface);
 	void clearTransparent();
 
 private:
 	void setupObject(SDL_Surface *surface, ImageSettings settings);
 	GLuint textureID = 0;
 	GLuint samplerID = 0;
+	bool useMip = false;
 };
 
 class GlFrameBuffer : public FrameBuffer {

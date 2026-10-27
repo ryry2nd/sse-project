@@ -80,6 +80,13 @@ extern "C" {
 		images.push_back(std::move(img));
 		return ret;
 	}
+	Image *createImageFromSize(glm::vec2 size, ImageSettings settings) {
+		auto img = getApiFunctions()->createImageFromSizeFunc(size, settings);
+		auto ret = img.get();
+		images.push_back(std::move(img));
+		return ret;
+	}
+
 	void removeImage(Image *image) {
 		for (int i = 0; i < images.size(); i++) {
 			if (images[i].get() == image) {

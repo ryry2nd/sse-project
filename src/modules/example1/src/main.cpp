@@ -201,8 +201,10 @@ extern "C" {
 
 		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - 100, 0.5}, {100, 100});
 		fpsBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fpsMpv);
+		fpsimg = createImage(ImageSettings::tex());
 		fpsMat.shader = tex2dShader;
 		fpsMat.ubo[0] = fpsBuff;
+		fpsMat.images[0] = fpsimg;
 		fpsMat.settings |= Material::EnableClear;
 	}
 
@@ -215,7 +217,6 @@ extern "C" {
 		fbo->update();
 		fbo->clearBackground();
 		float deltaTime = win->getDeltaTime();
-		static float timer = 0.0f;
 		static float t = 0.0f;
 
 		t += deltaTime * 1.0f;
@@ -227,22 +228,11 @@ extern "C" {
 		// makes background look like a 70s disco rave while under 20 pounds of lsd
 		win->setBackgroundColor({r, g, b, 1.0f});
 
-		timer += deltaTime;
-
-		if (timer >= 1.0f)
-		{
-			float fps = win->getFPS();
-			if (outputFPS) {
-				info("FPS: {:.2f}", fps);
-			}
-			timer = 0.0f;
-
-			auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-			removeImage(fpsimg);
-			fpsimg = createImage(fpstexsurf, ImageSettings::tex());
-			Font::deleteSurf(fpstexsurf);
-			fpsMat.images[0] = fpsimg;
-		}
+		float fps = win->getFPS();
+		auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		fpsimg->clearTransparent();
+		fpsimg->updateImage(fpstexsurf);
+		Font::deleteSurf(fpstexsurf);
 
 		static float rotate = 0.0f;
 

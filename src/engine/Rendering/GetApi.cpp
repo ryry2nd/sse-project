@@ -67,6 +67,7 @@ extern "C" {
 		apiFunctions.createMeshFunc = (CreateMeshFn)getFunction(lib, "createMesh");
 		apiFunctions.createImageFromFileFunc = (CreateImageFromFileFn)getFunction(lib, "createImageFromFile");
 		apiFunctions.createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)getFunction(lib, "createImageFromSurface");
+		apiFunctions.createImageFromSizeFunc = (CreateImageFromSizeFn)getFunction(lib, "createImageFromSize");
 		apiFunctions.createWindowFunc = (CreateWindowFn)getFunction(lib, "createWindow");
 		apiFunctions.createBuffFunc = (CreateBuffFn)getFunction(lib, "createBuff");
 		apiFunctions.createDrawFunc = (CreateDrawFn)getFunction(lib, "draw");

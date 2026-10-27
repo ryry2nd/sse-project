@@ -107,6 +107,7 @@ namespace Engine::Rendering
 		float getWidth() {return imageSizes.x;}
 		float getHeight() {return imageSizes.y;}
 		virtual void clearTransparent() = 0;
+		virtual void updateImage(SDL_Surface *surface) = 0;
 
 		static void saveToBmp(SDL_Surface *surface, const char *path);
 	protected:

@@ -23,6 +23,9 @@ namespace NApiFunctions {
 	using CreateImageFromSurfaceFn =
 		std::unique_ptr<Image>(*)(...);
 
+	using CreateImageFromSizeFn =
+		std::unique_ptr<Image>(*)(...);
+
 	using CreateWindowFn =
 		std::unique_ptr<Window>(*)(...);
 
@@ -45,6 +48,7 @@ namespace NApiFunctions {
 		CreateMeshFn createMeshFunc = nullptr;
 		CreateImageFromFileFn createImageFromFileFunc = nullptr;
 		CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
+		CreateImageFromSizeFn createImageFromSizeFunc = nullptr;
 		CreateWindowFn createWindowFunc = nullptr;
 		CreateBuffFn createBuffFunc = nullptr;
 		CreateDrawFn createDrawFunc = nullptr;

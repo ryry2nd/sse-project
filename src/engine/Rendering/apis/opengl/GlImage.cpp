@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_pixels.h>
+#include <memory>
 
 GLenum toGL(ImageSettings::Filter f)
 {
@@ -105,6 +106,7 @@ void GlImage::setupObject(SDL_Surface *surface_old, ImageSettings settings)
 
 
 	if (settings.useMip) {
+		useMip = true;
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, settings.baseLevel);
@@ -147,6 +149,22 @@ GlImage::GlImage(SDL_Surface *surface, ImageSettings settings)
 	setupObject(surface, settings);
 }
 
+GlImage::GlImage(glm::vec2 size, ImageSettings settings) {
+	spdlog::debug("Creating blank image {}x{}", size.x, size.y);
+
+    SDL_Surface *blank = SDL_CreateSurface(size.x, size.y, SDL_PIXELFORMAT_RGBA32);
+    if (!blank)
+    {
+        spdlog::critical("Blank surface failed: {}", SDL_GetError());
+        std::exit(1);
+    }
+
+    SDL_ClearSurface(blank, 0.0f, 0.0f, 0.0f, 0.0f);   // fully transparent
+
+    setupObject(blank, settings);   // converts (no-op copy), uploads, sets up sampler
+    SDL_DestroySurface(blank);      // setupObject only frees its own converted copy
+}
+
 GlImage::~GlImage()
 {
 	spdlog::debug("Deleting image with id: 0x{:x}", textureID);
@@ -160,11 +178,48 @@ void GlImage::clearTransparent()
 {
 	if (textureID == 0) return;
 
-	GLubyte clearColor[4] = {0,0,0,0};
+    GLubyte clearColor[4] = {0, 0, 0, 0};
+    glClearTexImage(textureID, 0, GL_RGBA, GL_UNSIGNED_BYTE, clearColor);
 
-	glClearTexImage(textureID, 0, GL_RGBA, GL_UNSIGNED_BYTE, clearColor);
+    if (useMip) glGenerateTextureMipmap(textureID);
+
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) spdlog::error("clearTransparent GL error: 0x{:x}", err);
 }
 
+void GlImage::updateImage(SDL_Surface *surface)
+{
+    if (!surface || textureID == 0) return;
+
+    SDL_Surface *conv = surface;
+    if (surface->format != SDL_PIXELFORMAT_RGBA32) {
+        conv = SDL_ConvertSurface(surface, SDL_PIXELFORMAT_RGBA32);
+        if (!conv) {
+            spdlog::error("updateImage convert failed: {}", SDL_GetError());
+            return;
+        }
+    }
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, conv->pitch / 4);
+
+    if (conv->w != (int)imageSizes.x || conv->h != (int)imageSizes.y) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, conv->w, conv->h, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, conv->pixels);
+        imageSizes = glm::vec2(conv->w, conv->h);
+    } else {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, conv->w, conv->h,
+                        GL_RGBA, GL_UNSIGNED_BYTE, conv->pixels);
+    }
+
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+    if (useMip) glGenerateMipmap(GL_TEXTURE_2D);
+
+    if (conv != surface) SDL_DestroySurface(conv);
+}
 
 GlImage::GlImage(const char *filePath, ImageSettings settings)
 {
@@ -199,4 +254,8 @@ extern "C" std::unique_ptr<Image> createImageFromFile(const char *filePath, Imag
 
 extern "C" std::unique_ptr<Image> createImageFromSurface(SDL_Surface *surface, ImageSettings settings) {
     return std::make_unique<GlImage>(surface, settings);
+}
+
+extern "C" std::unique_ptr<Image> createImageFromSize(glm::vec2 size, ImageSettings settings) {
+	return std::make_unique<GlImage>(size, settings);
 }
