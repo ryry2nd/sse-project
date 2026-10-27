@@ -234,10 +234,11 @@ extern "C" {
 		auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		fpsimg->clearTransparent();
 		fpsimg->updateImage(fpstexsurf);
-		#define fpsScale 40
-		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpstexsurf->w / fpstexsurf->h) * fpsScale, fpsScale});
-		fpsBuff->write(0, sizeof(glm::mat4), &fpsMpv);
 		Font::deleteSurf(fpstexsurf);
+
+		#define fpsScale 40
+		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
+		fpsBuff->write(0, sizeof(glm::mat4), &fpsMpv);
 
 		static float rotate = 0.0f;
 
