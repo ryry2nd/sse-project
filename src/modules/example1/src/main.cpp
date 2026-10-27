@@ -241,7 +241,9 @@ extern "C" {
 
 		static float rotate = 0.0f;
 
-		rotate += 1.0f * deltaTime;
+		#define ROTATE_SPEED 1.0f
+
+		rotate += ROTATE_SPEED * deltaTime;
 
 		model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
 		model = glm::rotate(model, rotate, glm::vec3({0, 1, 0}));
