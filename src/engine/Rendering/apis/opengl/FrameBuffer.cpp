@@ -162,7 +162,7 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 }
 
 void GlFrameBuffer::updateRes() {
-	SCOPE("Rendering::OpenGL::updateRes");
+	SCOPE("Rendering::OpenGL::FBO::updateRes");
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }
 
