@@ -10,3 +10,7 @@ FetchContent_Declare(
 set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(Tracy)
+
+set_target_properties(TracyClient PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+)

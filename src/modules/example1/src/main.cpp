@@ -5,6 +5,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <cstring>
 #include <string>
+#include <chrono>
 
 #include <Objects.hpp>
 #include <MathTest.hpp>
@@ -17,44 +18,27 @@ using namespace Engine::Logging;
 
 bool outputFPS = false;
 
+Object mattex;
+Object mat;
+Object inMat;
+Object bigMat;
+Object debugMat;
+Object frameImageMat;
+Object fboMat;
+Object fpsMat;
+Object monkeyMat;
 
-Material mattex;
-Material mat;
-Material inMat;
-Material bigMat;
-Material debugMat;
-Material frameImageMat;
-Material fboMat;
-Material fpsMat;
 CameraStruct cam;
+Buff *camBuff;
+
 ModelStruct model;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
 
 Window *win;
-Shader *cubeShader;
-Shader *cubeInstanceShader;
-Shader *debugVectorShader;
-Shader *textShader;
-Shader *tex2dShader;
-Mesh *cube;
-Mesh *megaCube;
-Mesh *texplane;
-Mesh *flatMesh;
-Mesh *fboMesh;
-Image *img;
-Image *fontimg;
-Image *fpsimg;
-Buff *camBuff;
-Buff *modelBuff;
-Buff *megaBuff;
-Buff *cubeInstanceBuff;
-Buff *fboBuff;
-Buff *modelTexBuff;
-Buff *fpsBuff;
-Font *font;
 FrameBuffer *fbo;
+Font *font;
 
 std::string MODULE_PATH;
 std::string MODULE_ID;
@@ -103,18 +87,19 @@ extern "C" {
 		initAPI("OpenGl4.6");
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		fbo = createFrameBuffer(res, FrameBuffer::Settings::Color | FrameBuffer::Settings::Depth);
-		cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
-		tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
-		cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
-		debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
-		textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
-		cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-		megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
-		img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
+		Shader *cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
+		Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
+		Shader *cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
+		Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
+		Shader *textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
+		Shader *monkeyShader = createShader((MODULE_PATH + "/shaders/monkey").c_str());
+		Mesh *cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
+		Mesh *megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
+		Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
-		font = createFont((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 64);
+		font = createFont((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 32);
 		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		fontimg = createImage(texsurf, ImageSettings::tex());
+		Image *fontimg = createImage(texsurf, ImageSettings::tex());
 		Font::deleteSurf(texsurf);
 
 		std::vector<Vert> vertsflat;
@@ -124,40 +109,44 @@ extern "C" {
 		const float TEX_RATIO = fontimg->getWidth() / fontimg->getHeight();
 
 		build2DFace(vertsflat, indsflat, {TEX_RATIO * TEX_SCALE, TEX_SCALE}, {0, 0, 0}, {0, 0}, {1, 1});
-		texplane = createMesh(vertsflat.data(), vertsflat.size(), indsflat.data(), indsflat.size());
+		Mesh *texplane = createMesh(vertsflat.data(), vertsflat.size(), indsflat.data(), indsflat.size());
 
 		camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
-		modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
+		Buff *modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
 
 		ModelStruct bigModel = glm::translate(glm::mat4(1.0f), {0, -1002, 0});
 
-		megaBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
+		Buff *megaBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &bigModel);
 
 		ModelStruct texmodel = glm::translate(glm::mat4(1.0f), {3, 5, 0});
 
-		modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
+		Buff *modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
 
-		mattex.images[0] = fontimg;
-		mattex.shader = textShader;
-		mattex.ubo[0] = modelTexBuff;
-		mattex.ubo[1] = camBuff;
-		mattex.settings |= Material::EnableClear;
-		mattex.settings |= Material::DisableCulling;
+		mattex.mat.images[0] = fontimg;
+		mattex.mat.shader = textShader;
+		mattex.mat.ubo[0] = modelTexBuff;
+		mattex.mat.ubo[1] = camBuff;
+		mattex.mat.settings |= Material::EnableClear;
+		mattex.mat.settings |= Material::DisableCulling;
+		mattex.mesh = texplane;
 
-		mat.images[0] = img;
-		mat.shader = cubeShader;
-		mat.ubo[0] = modelBuff;
-		mat.ubo[1] = camBuff;
+		mat.mat.images[0] = img;
+		mat.mat.shader = cubeShader;
+		mat.mat.ubo[0] = modelBuff;
+		mat.mat.ubo[1] = camBuff;
+		mat.mesh = cube;
 
-		bigMat.images[0] = img;
-		bigMat.shader = cubeShader;
-		bigMat.ubo[0] = megaBuff;
-		bigMat.ubo[1] = camBuff;
+		bigMat.mat.images[0] = img;
+		bigMat.mat.shader = cubeShader;
+		bigMat.mat.ubo[0] = megaBuff;
+		bigMat.mat.ubo[1] = camBuff;
+		bigMat.mesh = megaCube;
 
-		inMat.shader = cubeInstanceShader;
-		inMat.ubo[0] = camBuff;
+		inMat.mat.shader = cubeInstanceShader;
+		inMat.mat.ubo[0] = camBuff;
+		inMat.mesh = cube;
 
-		glm::vec3 gridSize(16,16,16);
+		glm::vec3 gridSize(32);
 		std::vector<ModelStruct> models;
         models.reserve(gridSize.x * gridSize.y * gridSize.z);
 
@@ -169,44 +158,64 @@ extern "C" {
             }
         }
 
-		cubeInstanceBuff = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
+		Buff *cubeInstanceBuff = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
 
-		inMat.instanceCount = models.size();
-		inMat.ssbo[0] = cubeInstanceBuff;
+		inMat.mat.instanceCount = models.size();
+		inMat.mat.ssbo[0] = cubeInstanceBuff;
 
-		debugMat.shader = debugVectorShader;
-		debugMat.meshType = InternalParams::MeshTypes::Lines;
-		debugMat.ubo[0] = camBuff;
+		debugMat.mat.shader = debugVectorShader;
+		debugMat.mat.meshType = InternalParams::MeshTypes::Lines;
+		debugMat.mat.ubo[0] = camBuff;
+		debugMat.mesh = nullptr;
 
 		std::vector<Vert> vertsfbo;
 		std::vector<Ind> indsfbo;
 
 		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 1}, {1, 0});
 
-		fboMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
+		Mesh *fboMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
 
 		vertsfbo.clear();
 		indsfbo.clear();
 
 		build2DFace(vertsfbo, indsfbo, {1, 1}, {0, 0, 1}, {0, 0}, {1, 1});
 
-		flatMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
+		Mesh *flatMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
 
 
 		glm::mat4 fboMpv = fboMPV(res);
-		fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fboMpv);
-		fboMat.shader = tex2dShader;
-		fboMat.ubo[0] = fboBuff;
-		fboMat.images[0] = fbo->getColorImage();
-		fboMat.settings |= Material::EnableClear;
+		Buff *fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fboMpv);
+		fboMat.mat.shader = tex2dShader;
+		fboMat.mat.ubo[0] = fboBuff;
+		fboMat.mat.images[0] = fbo->getColorImage();
+		fboMat.mat.settings |= Material::EnableClear;
+		fboMat.mesh = fboMesh;
 
 		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - 100, 0.5}, {100, 100});
-		fpsBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fpsMpv);
-		fpsimg = createImage(ImageSettings::tex());
-		fpsMat.shader = tex2dShader;
-		fpsMat.ubo[0] = fpsBuff;
-		fpsMat.images[0] = fpsimg;
-		fpsMat.settings |= Material::EnableClear;
+		Buff *fpsBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fpsMpv);
+		Image *fpsimg = createImage(ImageSettings::tex());
+		fpsMat.mat.shader = tex2dShader;
+		fpsMat.mat.ubo[0] = fpsBuff;
+		fpsMat.mat.images[0] = fpsimg;
+		fpsMat.mat.settings |= Material::EnableClear;
+		fpsMat.mesh = flatMesh;
+
+
+		std::vector<Vert> monkeyVerts;
+		std::vector<Ind> monkeyInds;
+
+		Mesh::getObj((MODULE_PATH + "/assets/models/Monkey.obj").c_str(), monkeyVerts, monkeyInds);
+
+		Mesh *monkeyMesh = createMesh(monkeyVerts.data(), monkeyVerts.size(), monkeyInds.data(), monkeyInds.size());
+
+		glm::mat4 monkeyMod = glm::translate(glm::mat4(1.0f), {3, 0, -3});
+
+		Buff *monkeyModel = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &monkeyMod);
+
+		monkeyMat.mat.shader = monkeyShader;
+		monkeyMat.mat.ubo[0] = monkeyModel;
+		monkeyMat.mat.ubo[1] = camBuff;
+		monkeyMat.mesh = monkeyMesh;
 	}
 
 	void loop() {
@@ -229,15 +238,24 @@ extern "C" {
 		// makes background look like a 70s disco rave while under 20 pounds of lsd
 		win->setBackgroundColor({r, g, b, 1.0f});
 
-		float fps = win->getFPS();
-		auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		fpsimg->clearTransparent();
-		fpsimg->updateImage(fpstexsurf);
-		Font::deleteSurf(fpstexsurf);
+		static auto start = std::chrono::steady_clock::now();
 
-		#define fpsScale 40
-		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
-		fpsBuff->write(0, sizeof(glm::mat4), &fpsMpv);
+		auto end = std::chrono::steady_clock::now();
+
+		if (std::chrono::duration<float>(end - start).count() > .1f) {
+			float fps = win->getFPS();
+			auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			Image *fpsimg = fpsMat.mat.images[0];
+			fpsimg->clearTransparent();
+			fpsimg->updateImage(fpstexsurf);
+			Font::deleteSurf(fpstexsurf);
+
+			#define fpsScale 40
+			glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
+			fpsMat.mat.ubo[0]->write(0, sizeof(glm::mat4), &fpsMpv);
+
+			start = std::chrono::steady_clock::now();
+		}
 
 		static float rotate = 0.0f;
 
@@ -282,16 +300,17 @@ extern "C" {
 
 		cam.view = cameraGetView(camPos, camRot);
 
-		modelBuff->write(0, sizeof(ModelStruct), &model);
+		mat.mat.ubo[0]->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		draw(fbo, cube, &mat);
-		draw(fbo, cube, &inMat);
-		draw(fbo, megaCube, &bigMat);
-		draw(fbo, texplane, &mattex);
-		draw(fbo, nullptr, &debugMat);
-		draw(win, fboMesh, &fboMat);
-		draw(win, flatMesh, &fpsMat);
+		draw(fbo, mat.mesh, &mat.mat);
+		draw(fbo, inMat.mesh, &inMat.mat);
+		draw(fbo, bigMat.mesh, &bigMat.mat);
+		draw(fbo, mattex.mesh, &mattex.mat);
+		draw(fbo, monkeyMat.mesh, &monkeyMat.mat);
+		draw(fbo, debugMat.mesh, &debugMat.mat);
+		draw(win, fboMat.mesh, &fboMat.mat);
+		draw(win, fpsMat.mesh, &fpsMat.mat);
 		win->swapBuffer();
 	}
 

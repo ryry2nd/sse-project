@@ -34,8 +34,8 @@ std::vector<std::unique_ptr<Font>> fonts;
 	for (auto &p : vec) { TRACK_DEL(p.get(), pool); } \
 	vec.clear();
 #else
-#define TRACK_ADD(ptr, pool)
-#define TRACK_DEL(ptr, pool)
+#define TRACK_ADD(ptr, size, pool)
+#define TRACK_DEL(ptr, size, pool)
 
 // Find ptr in vec, report the free, then erase it.
 #define REMOVE_FROM(vec, ptr, pool)                 \

@@ -86,6 +86,12 @@ vec3 applyFog(vec3 inColor, vec3 fogColor, vec4 viewPos, float density) {
 	return lerp(fogColor, inColor, fog);
 }
 
+vec3 applyAO(vec3 normal, vec3 color) {
+	vec3 N = normalize(normal);
+    float shade = 0.65 + 0.35 * abs(N.y);
+	return clamp(color * shade, 0.0f, 1.0f);
+}
+
 Output getPosition(mat4 model, mat4 view, mat4 proj, Input input) {
 	Output output;
 

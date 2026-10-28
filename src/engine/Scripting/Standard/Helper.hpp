@@ -6,12 +6,18 @@
 #include "Logging.hpp"
 
 namespace Engine::Helper {
+	using namespace Engine::Rendering;
 	struct CameraStruct {
 		glm::mat4 view;
 		glm::mat4 proj;
 	};
 
 	typedef glm::mat4 ModelStruct;
+
+	struct Object {
+		Material mat;
+		Mesh *mesh;
+	};
 
 	inline void printMat4Flat(const glm::mat4& m)
 	{

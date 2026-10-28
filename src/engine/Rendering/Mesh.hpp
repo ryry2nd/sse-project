@@ -19,5 +19,7 @@ namespace Engine::Rendering
 
 		Mesh& operator=(const Mesh&) = delete;
 		Mesh& operator=(Mesh&&) noexcept = default;
+
+		static void getObj(const char *fname, std::vector<Vert> &verts, std::vector<Ind> &inds);
 	};
 }
