@@ -14,11 +14,6 @@ namespace Engine::Helper {
 
 	typedef glm::mat4 ModelStruct;
 
-	struct Object {
-		Material mat;
-		Mesh *mesh;
-	};
-
 	inline void printMat4Flat(const glm::mat4& m)
 	{
 		const float* p = glm::value_ptr(m);

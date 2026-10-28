@@ -7,16 +7,17 @@
 #include <string>
 #include <chrono>
 
-#include <Objects.hpp>
+#include <Meshes.hpp>
 #include <MathTest.hpp>
 #include <FooTest.hpp>
+#include <Object.hpp>
 
 using namespace Engine;
 using namespace Engine::Rendering;
 using namespace Engine::Helper;
 using namespace Engine::Logging;
 
-bool outputFPS = false;
+using namespace ObjectSpace;
 
 Object mattex;
 Object mat;
@@ -27,6 +28,7 @@ Object frameImageMat;
 Object fboMat;
 Object fpsMat;
 Object monkeyMat;
+Object teaMat;
 
 CameraStruct cam;
 Buff *camBuff;
@@ -216,6 +218,24 @@ extern "C" {
 		monkeyMat.mat.ubo[0] = monkeyModel;
 		monkeyMat.mat.ubo[1] = camBuff;
 		monkeyMat.mesh = monkeyMesh;
+
+
+		std::vector<Vert> teapotVerts;
+		std::vector<Ind> teapotInds;
+
+		Mesh::getObj((MODULE_PATH + "/assets/models/utah_teapot.obj").c_str(), teapotVerts, teapotInds);
+
+		Mesh *teaMesh = createMesh(teapotVerts.data(), teapotVerts.size(), teapotInds.data(), teapotInds.size());
+
+		glm::mat4 teaMod = glm::scale(glm::translate(glm::mat4(1.0f), {7, 0, -3}), glm::vec3(0.5f));
+
+		Buff *teaModel = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &teaMod);
+
+		teaMat.mat.shader = monkeyShader;
+		teaMat.mat.ubo[0] = teaModel;
+		teaMat.mat.ubo[1] = camBuff;
+		teaMat.mat.settings |= Material::DisableCulling;
+		teaMat.mesh = teaMesh;
 	}
 
 	void loop() {
@@ -303,14 +323,15 @@ extern "C" {
 		mat.mat.ubo[0]->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
-		draw(fbo, mat.mesh, &mat.mat);
-		draw(fbo, inMat.mesh, &inMat.mat);
-		draw(fbo, bigMat.mesh, &bigMat.mat);
-		draw(fbo, mattex.mesh, &mattex.mat);
-		draw(fbo, monkeyMat.mesh, &monkeyMat.mat);
-		draw(fbo, debugMat.mesh, &debugMat.mat);
-		draw(win, fboMat.mesh, &fboMat.mat);
-		draw(win, fpsMat.mesh, &fpsMat.mat);
+		mat.draw(fbo);
+		inMat.draw(fbo);
+		bigMat.draw(fbo);
+		mattex.draw(fbo);
+		monkeyMat.draw(fbo);
+		teaMat.draw(fbo);
+		debugMat.draw(fbo);
+		fboMat.draw(win);
+		fpsMat.draw(win);
 		win->swapBuffer();
 	}
 
@@ -328,8 +349,6 @@ extern "C" {
 			auto key = event->key.key;
 			if (key == SDLK_ESCAPE)
 				Engine::shutdown();
-			if (key == SDLK_F3)
-				outputFPS = !outputFPS;
 		}
 		if (type == SDL_EVENT_MOUSE_MOTION)
 			rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
