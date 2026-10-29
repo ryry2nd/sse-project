@@ -25,11 +25,12 @@ long Unusable::initModuleJITMin(const char* path) {
 
 	if (file.extension() != LIBRARY_SUFFIX) return -1;
 
-	void *handle = initruntime(path);
+	const char *err;
+	void *handle = initruntime(path, err);
 
 	if (!handle)
 	{
-		spdlog::error("Failed to load {}", file.string());
+		spdlog::error("Failed to load: {}", err);
 		return -1;
 	}
 

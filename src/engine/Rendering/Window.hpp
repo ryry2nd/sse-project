@@ -10,13 +10,13 @@ namespace Engine::Rendering
 	public:
 		Window& operator=(const Window&) = delete;
 		Window& operator=(Window&&) noexcept = default;
-		virtual ~Window() = 0;
+		virtual ~Window() = default;
 
 		virtual void setBackgroundColor(glm::vec4 color) = 0;
 		virtual void swapBuffer() = 0;
 		virtual void clearBackground() = 0;
 	protected:
-		void sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
-		SDL_Window *window;
+		void *_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, bool hideMouse = false);
+		void _destroyWindow(void *);
 	};
 }

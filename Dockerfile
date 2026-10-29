@@ -47,6 +47,8 @@ RUN apt install -y \
 RUN apt install -y libclang-rt-20-dev-wasm32
 RUN apt install -y gcc-mingw-w64
 
+RUN apt install -y libc6-dbg
+
 RUN rm -rf /var/lib/apt/lists/*
 
 # default build entry (you can override from build.sh)

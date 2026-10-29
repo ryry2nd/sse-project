@@ -21,11 +21,12 @@ void createLibs() {
 
 	for (const auto& entry : fs::directory_iterator(COMPILED_OUT_PATH)) {
 		if (entry.path().extension() == LIBRARY_SUFFIX) {
-			void* handle = initruntime(entry.path().string().c_str(), false);
+			const char *err;
+			void* handle = initruntime(entry.path().string().c_str(), err, false);
 
 			if (!handle)
 			{
-				spdlog::warn("Failed to load {}", entry.path().string());
+				spdlog::warn("Failed to load: {}", err);
 				continue;
 			}
 

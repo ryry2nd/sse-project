@@ -10,7 +10,7 @@
 using namespace Engine::Rendering;
 
 
-void Window::sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
+void *Window::_create_window(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, bool hideMouse)
 {
 	startLastCounter();
 	if (aa > 0)
@@ -19,7 +19,7 @@ void Window::sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Ui
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, aa);
 	}
 
-	window = SDL_CreateWindow(name, res.x, res.y, flags);
+	auto *window = SDL_CreateWindow(name, res.x, res.y, flags);
 	if (!window)
 	{
 		spdlog::critical("SDL_CreateWindow Error: {}", SDL_GetError());
@@ -37,12 +37,14 @@ void Window::sdl_create_window(glm::vec2 res, const char *name, Uint32 flags, Ui
 	}
 	this->res = res;
 	spdlog::info("Successfully opened window with name: {}", name);
+
+	return window;
 }
 
-Window::~Window()
+void Window::_destroyWindow(void* window)
 {
 	if (window != nullptr) {
-		SDL_DestroyWindow(window);
+		SDL_DestroyWindow(static_cast<SDL_Window *>(window));
 		window = nullptr;
 	}
 }

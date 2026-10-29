@@ -20,6 +20,8 @@ typedef struct SDL_GLContextState *SDL_GLContext;
 
 using namespace Engine::Rendering;
 
+struct SDL_Window;
+
 namespace OpenGL {
 class GlBuff : public Buff {
 public:
@@ -41,17 +43,18 @@ class GlWindow : public Window
 {
 public:
 	GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-	virtual void clearBackground();
-	virtual void swapBuffer();
-	virtual void setBackgroundColor(glm::vec4 color);
+	void clearBackground();
+	void swapBuffer();
+	void setBackgroundColor(glm::vec4 color);
 	void updateScreenRes();
 	void setWindow();
-	virtual ~GlWindow();
+	~GlWindow();
 
 	SDL_Window *getWindow() {return window;}
 	SDL_GLContext getContext() {return glContext;}
 private:
 	SDL_GLContext glContext;
+	SDL_Window *window;
 };
 
 class GlImage : public Image

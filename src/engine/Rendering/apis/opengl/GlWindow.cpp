@@ -10,7 +10,7 @@
 GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
 {
 	SCOPE("Rendering::OpenGL::Window::create");
-	sdl_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse);
+	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse));
 	spdlog::debug("Creating window with resolution: {} by {}", res.x, res.y);
 	// this does what it says
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MAJOR_VERSION);
@@ -124,6 +124,7 @@ GlWindow::~GlWindow()
 	SCOPE("Rendering::OpenGL::Window::delete");
 	spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 	SDL_GL_DestroyContext(glContext);
+	_destroyWindow(window);
 }
 
 extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {
