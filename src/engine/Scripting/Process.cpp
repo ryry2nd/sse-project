@@ -121,6 +121,69 @@ void topoSort() {
     }
 }
 
+#include <engine/Rendering/Event.hpp>
+
+using namespace Engine::Input;
+
+bool ConvertEvent(const SDL_Event& sdl, Event& event)
+{
+    switch (sdl.type)
+    {
+        case SDL_EVENT_QUIT:
+            event.type = EventType::Quit;
+            return true;
+
+        case SDL_EVENT_KEY_DOWN:
+            event.type = EventType::KeyDown;
+            event.key = static_cast<std::uint32_t>(sdl.key.key);
+            event.repeat = sdl.key.repeat;
+            return true;
+
+        case SDL_EVENT_KEY_UP:
+            event.type = EventType::KeyUp;
+            event.key = static_cast<std::uint32_t>(sdl.key.key);
+            return true;
+
+        case SDL_EVENT_MOUSE_MOTION:
+            event.type = EventType::MouseMove;
+            event.mouse.x = static_cast<int>(sdl.motion.x);
+            event.mouse.y = static_cast<int>(sdl.motion.y);
+			event.mouse.xrel = static_cast<int>(sdl.motion.xrel);
+            event.mouse.yrel = static_cast<int>(sdl.motion.yrel);
+            return true;
+
+        case SDL_EVENT_MOUSE_BUTTON_DOWN:
+            event.type = EventType::MouseButtonDown;
+            event.button = sdl.button.button;
+            return true;
+
+        case SDL_EVENT_MOUSE_BUTTON_UP:
+            event.type = EventType::MouseButtonUp;
+            event.button = sdl.button.button;
+            return true;
+
+        case SDL_EVENT_MOUSE_WHEEL:
+            event.type = EventType::MouseWheel;
+            event.mouse.x = static_cast<int>(sdl.wheel.x);
+            event.mouse.y = static_cast<int>(sdl.wheel.y);
+            return true;
+
+        case SDL_EVENT_WINDOW_RESIZED:
+            event.type = EventType::WindowResize;
+            event.window.width = sdl.window.data1;
+            event.window.height = sdl.window.data2;
+            return true;
+
+        case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+            event.type = EventType::WindowClose;
+            return true;
+
+        default:
+            event = {};
+            return false;
+    }
+}
+
 
 static bool shouldShutDown = true;
 
@@ -277,7 +340,9 @@ extern "C" {
 				try {
 					SCOPE("Scripting::Modules::Event");
 					currpkg = &pkg;
-					eventJIT(pkg.llvmLocation, &e);
+					Event rete;
+					ConvertEvent(e, rete);
+					eventJIT(pkg.llvmLocation, &rete);
 				}
 				catch (const std::exception& e) {
 					spdlog::error(e.what());

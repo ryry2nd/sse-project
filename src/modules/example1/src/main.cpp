@@ -1,11 +1,12 @@
 #include <engine/Engine.hpp>
-#include <SDL3/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <cstring>
 #include <string>
 #include <chrono>
+
+#include <SDL3/SDL_events.h>
 
 #include <Meshes.hpp>
 #include <MathTest.hpp>
@@ -16,6 +17,7 @@ using namespace Engine;
 using namespace Engine::Rendering;
 using namespace Engine::Helper;
 using namespace Engine::Logging;
+using namespace Engine::Input;
 
 using namespace ObjectSpace;
 
@@ -335,22 +337,22 @@ extern "C" {
 		win->swapBuffer();
 	}
 
-	void event(SDL_Event *event) {
+	void event(Event *event) {
 		if (strcmp(Engine::Module::getExe(), MODULE_ID.c_str()) != 0) {
 			return;
 		}
 		auto dt = win->getDeltaTime();
 
 		auto type = event->type;
-		if (type == SDL_EVENT_QUIT)
+		if (type == EventType::Quit)
 			Engine::shutdown();
-		if (type == SDL_EVENT_KEY_DOWN)
+		if (type == EventType::KeyDown)
 		{
-			auto key = event->key.key;
+			auto key = event->key;
 			if (key == SDLK_ESCAPE)
 				Engine::shutdown();
 		}
-		if (type == SDL_EVENT_MOUSE_MOTION)
-			rotateCamera(dt, &camRot, {event->motion.xrel, event->motion.yrel}, 0.1f);
+		if (type == EventType::MouseMove)
+			rotateCamera(dt, &camRot, {event->mouse.xrel, event->mouse.yrel}, 0.1f);
 	}
 }

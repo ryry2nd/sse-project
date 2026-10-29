@@ -9,6 +9,7 @@
 #include "Window.hpp"
 #include "Font.hpp"
 #include "Surface.hpp"
+#include "Event.hpp"
 
 #include <unordered_map>
 

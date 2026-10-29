@@ -101,7 +101,7 @@ struct MyModule {
 	LLVMRuntime *runtime;
 	void (*setup)();
 	void (*loop)();
-	void (*event)(SDL_Event*);
+	void (*event)(void*);
 	void (*shutdown)();
 };
 
@@ -126,7 +126,7 @@ long initModuleJITMax(const char* path) {
 	mod.runtime = runtime;
 	mod.setup = setup;
 	mod.loop = loop;
-	mod.event = (void (*)(SDL_Event *)) event;
+	mod.event = (void (*)(void *)) event;
 	mod.shutdown = shutdown;
 
 	modsMax[currID] = std::move(mod);
@@ -150,7 +150,7 @@ bool Unusable::loopJITMax(long id) {
 	modsMax[id].loop();
 	return 0;
 }
-bool Unusable::eventJITMax(long id, SDL_Event *e) {
+bool Unusable::eventJITMax(long id, void *e) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return 1;
 
