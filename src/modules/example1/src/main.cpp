@@ -205,12 +205,11 @@ extern "C" {
 		fpsMat.mesh = flatMesh;
 
 
-		std::vector<Vert> monkeyVerts;
-		std::vector<Ind> monkeyInds;
+		std::vector<Shape> monkeyShapes;
+		Mesh::getObj((MODULE_PATH + "/assets/models/Monkey.obj").c_str(), monkeyShapes);
+		const Shape &mshape = monkeyShapes[0];
 
-		Mesh::getObj((MODULE_PATH + "/assets/models/Monkey.obj").c_str(), monkeyVerts, monkeyInds);
-
-		Mesh *monkeyMesh = createMesh(monkeyVerts.data(), monkeyVerts.size(), monkeyInds.data(), monkeyInds.size());
+		Mesh *monkeyMesh = createMesh(mshape.verts.data(), mshape.verts.size(), mshape.inds.data(), mshape.inds.size());
 
 		glm::mat4 monkeyMod = glm::translate(glm::mat4(1.0f), {3, 0, -3});
 
@@ -222,12 +221,11 @@ extern "C" {
 		monkeyMat.mesh = monkeyMesh;
 
 
-		std::vector<Vert> teapotVerts;
-		std::vector<Ind> teapotInds;
+		std::vector<Shape> teaShapes;
+		Mesh::getObj((MODULE_PATH + "/assets/models/utah_teapot.obj").c_str(), teaShapes);
+		const Shape &tshape = teaShapes[0];
 
-		Mesh::getObj((MODULE_PATH + "/assets/models/utah_teapot.obj").c_str(), teapotVerts, teapotInds);
-
-		Mesh *teaMesh = createMesh(teapotVerts.data(), teapotVerts.size(), teapotInds.data(), teapotInds.size());
+		Mesh *teaMesh = createMesh(tshape.verts.data(), tshape.verts.size(), tshape.inds.data(), tshape.inds.size());
 
 		glm::mat4 teaMod = glm::scale(glm::translate(glm::mat4(1.0f), {7, 0, -3}), glm::vec3(0.5f));
 
