@@ -1,142 +1,129 @@
-
 #include "Image.hpp"
 
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_pixels.h>
-#include <SDL3/SDL_surface.h>
 #include <spdlog/spdlog.h>
 
 #include <filesystem>
-#include <cstring>
-#include <cstdlib>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 using namespace Engine::Rendering;
 
-SDL_Surface* MakeSurfaceFromRGBA(
-    const unsigned char* pixels,
-    int w,
-    int h)
+Surface* MakeSurfaceFromRGBA(
+	const unsigned char* pixels,
+	int w,
+	int h)
 {
-    SDL_Surface* surface = SDL_CreateSurface(
-        w,
-        h,
-        SDL_PIXELFORMAT_RGBA32
-    );
+	if (!pixels || w <= 0 || h <= 0)
+		return nullptr;
 
-    if (!surface)
-        return nullptr;
+	Surface* surface = new Surface(w, h);
 
-    std::memcpy(surface->pixels, pixels, w*h*4);
+	const std::size_t count =
+		static_cast<std::size_t>(w) * h;
 
-    return surface;
+	for (std::size_t i = 0; i < count; ++i)
+	{
+		surface->pixels[i] = Pixel{
+			pixels[i * 4 + 0], // R
+			pixels[i * 4 + 1], // G
+			pixels[i * 4 + 2], // B
+			pixels[i * 4 + 3]  // A
+		};
+	}
+
+	return surface;
 }
 
-SDL_Surface* LoadImage(const char* path)
+Surface* LoadImage(const char* path)
 {
-    int width = 0;
-    int height = 0;
-    int channels = 0;
+	int width = 0;
+	int height = 0;
+	int channels = 0;
 
-    // Force RGBA output, regardless of the source image format.
-    unsigned char* pixels = stbi_load(
-        path,
-        &width,
-        &height,
-        &channels,
-        STBI_rgb_alpha
-    );
+	unsigned char* pixels = stbi_load(
+		path,
+		&width,
+		&height,
+		&channels,
+		STBI_rgb_alpha
+	);
 
-    if (!pixels)
-    {
-        spdlog::error(
-            "Failed to load image '{}': {}",
-            path,
-            stbi_failure_reason()
-                ? stbi_failure_reason()
-                : "Unknown stb_image error"
-        );
+	if (!pixels)
+	{
+		spdlog::error(
+			"Failed to load image '{}': {}",
+			path,
+			stbi_failure_reason()
+				? stbi_failure_reason()
+				: "Unknown stb_image error"
+		);
 
-        return nullptr;
-    }
+		return nullptr;
+	}
 
-    SDL_Surface* surface = MakeSurfaceFromRGBA(
-        pixels,
-        width,
-        height
-    );
+	Surface* surface = MakeSurfaceFromRGBA(pixels, width, height);
 
-    stbi_image_free(pixels);
+	stbi_image_free(pixels);
 
-    if (!surface)
-    {
-        spdlog::error(
-            "Failed to create SDL surface for '{}': {}",
-            path,
-            SDL_GetError()
-        );
-    }
-
-    return surface;
+	return surface;
 }
 
-SDL_Surface* getErrorTex()
+Surface* getErrorTex()
 {
-    unsigned char pixels[] = {
-        0,   0,   0,   255,  // Black
-        255, 0,   255, 255,  // Purple
-        255, 0,   255, 255,  // Purple
-        0,   0,   0,   255   // Black
-    };
+	const Pixel pixels[] = {
+		{0,   0,   0,   255},
+		{255, 0,   255, 255},
+		{255, 0,   255, 255},
+		{0,   0,   0,   255}
+	};
 
-    return MakeSurfaceFromRGBA(pixels, 2, 2);
+	Surface* surface = new Surface(2, 2);
+
+	std::copy(
+		std::begin(pixels),
+		std::end(pixels),
+		surface->pixels.begin()
+	);
+
+	return surface;
 }
 
 void Image::loadFile(
-    const char* filePath,
-    SDL_Surface*& surface,
-    ImageSettings* settings)
+	const char* filePath,
+	Surface*& surface,
+	ImageSettings* settings)
 {
-	if (!filePath) {
+	if (!filePath)
+	{
 		surface = getErrorTex();
-
-        *settings = ImageSettings::err();
+		*settings = ImageSettings::err();
 		return;
 	}
 
-    std::filesystem::path file = filePath;
+	const std::filesystem::path file = filePath;
 
-    if (std::filesystem::exists(file))
-    {
-        // stb_image detects the image format itself.
-        surface = LoadImage(filePath);
+	if (std::filesystem::exists(file))
+	{
+		surface = LoadImage(filePath);
 
-        if (!surface)
-            std::exit(1);
-    }
-    else
-    {
-        spdlog::error(
-            "Image path '{}' does not exist, falling back",
-            filePath
-        );
+		if (!surface || surface->pixels.empty())
+		{
+			spdlog::error("Failed to load image '{}'", filePath);
 
-        surface = getErrorTex();
+			delete surface;
+			surface = getErrorTex();
+			*settings = ImageSettings::err();
+		}
+	}
+	else
+	{
+		spdlog::error(
+			"Image path '{}' does not exist, falling back",
+			filePath
+		);
 
-        *settings = ImageSettings::err();
-    }
-}
-
-void Image::saveToBmp(SDL_Surface* surface, const char* path)
-{
-    if (!SDL_SaveBMP(surface, path))
-    {
-        spdlog::error(
-            "Failed to save BMP '{}': {}",
-            path,
-            SDL_GetError()
-        );
-    }
+		surface = getErrorTex();
+		*settings = ImageSettings::err();
+	}
 }

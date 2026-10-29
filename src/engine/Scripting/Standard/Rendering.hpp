@@ -14,7 +14,7 @@ namespace Engine::Rendering {
 		Shader *createShader(const char *path, bool isCompute=false);
 		void removeShader(Shader *shdr);
 		Image *createImageFromFile(const char *filePath, ImageSettings settings);
-		Image *createImageFromSurf(SDL_Surface *surface, ImageSettings settings);
+		Image *createImageFromSurf(Surface *surface, ImageSettings settings);
 		Image *createImageFromSize(glm::vec2 size, ImageSettings settings);
 		void removeImage(Image *image);
 		Buff *createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data);
@@ -28,7 +28,7 @@ namespace Engine::Rendering {
 	inline Image *createImage(const char *filePath, ImageSettings settings = ImageSettings{}) {
 		return createImageFromFile(filePath, settings);
 	}
-	inline Image *createImage(SDL_Surface *surface, ImageSettings settings = ImageSettings{}) {
+	inline Image *createImage(Surface *surface, ImageSettings settings = ImageSettings{}) {
 		return createImageFromSurf(surface, settings);
 	}
 	inline Image *createImage(glm::vec2 size, ImageSettings settings = ImageSettings{}) {

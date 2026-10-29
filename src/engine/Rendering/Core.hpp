@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-struct SDL_Surface;
 struct SDL_Window;
 struct SDL_Color;
 

@@ -8,6 +8,7 @@
 #include "Mesh.hpp"
 #include "Window.hpp"
 #include "Font.hpp"
+#include "Surface.hpp"
 
 #include <unordered_map>
 

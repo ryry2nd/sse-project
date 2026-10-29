@@ -93,7 +93,7 @@ extern "C" {
 		images.push_back(std::move(img));
 		return ret;
 	}
-	Image *createImageFromSurf(SDL_Surface *surface, ImageSettings settings) {
+	Image *createImageFromSurf(Surface *surface, ImageSettings settings) {
 		auto img = getApiFunctions()->createImageFromSurfaceFunc(surface, settings);
 		auto ret = img.get();
 		TRACK_ADD(ret, sizeof(Image) + (ret->getWidth() * ret->getHeight() * 4), "Images");

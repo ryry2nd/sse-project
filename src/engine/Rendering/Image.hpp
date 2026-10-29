@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.hpp"
+#include "Surface.hpp"
 
 namespace Engine::Rendering
 {
@@ -102,14 +103,12 @@ namespace Engine::Rendering
 		Image& operator=(Image&&) noexcept = default;
 
 		virtual ~Image() = default;
-		static void loadFile(const char *filePath, SDL_Surface *& surface, ImageSettings *settings);
+		static void loadFile(const char *filePath, Surface *& surface, ImageSettings *settings);
 		glm::vec2 getSizes() {return imageSizes;}
 		float getWidth() {return imageSizes.x;}
 		float getHeight() {return imageSizes.y;}
 		virtual void clearTransparent() = 0;
-		virtual void updateImage(SDL_Surface *surface) = 0;
-
-		static void saveToBmp(SDL_Surface *surface, const char *path);
+		virtual void updateImage(const Surface *surface) = 0;
 	protected:
 		glm::vec2 imageSizes;
 	};

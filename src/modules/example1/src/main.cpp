@@ -100,9 +100,9 @@ extern "C" {
 		Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
 		font = createFont((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 32);
-		auto texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+		Surface *texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		Image *fontimg = createImage(texsurf, ImageSettings::tex());
-		Font::deleteSurf(texsurf);
+		Surface::deleteSurf(texsurf);
 
 		std::vector<Vert> vertsflat;
 		std::vector<Ind> indsflat;
@@ -264,11 +264,11 @@ extern "C" {
 
 		if (std::chrono::duration<float>(end - start).count() > .1f) {
 			float fps = win->getFPS();
-			auto fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			Surface *fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 			Image *fpsimg = fpsMat.mat.images[0];
 			fpsimg->clearTransparent();
 			fpsimg->updateImage(fpstexsurf);
-			Font::deleteSurf(fpstexsurf);
+			Surface::deleteSurf(fpstexsurf);
 
 			#define fpsScale 40
 			glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
@@ -326,10 +326,10 @@ extern "C" {
 		mat.draw(fbo);
 		inMat.draw(fbo);
 		bigMat.draw(fbo);
-		mattex.draw(fbo);
 		monkeyMat.draw(fbo);
 		teaMat.draw(fbo);
 		debugMat.draw(fbo);
+		mattex.draw(fbo);
 		fboMat.draw(win);
 		fpsMat.draw(win);
 		win->swapBuffer();
