@@ -85,19 +85,19 @@ void Useable::removeJIT(long id) {
 	removeJITMin(id);
 	#else
 	auto pos = isMin.find(id);
-	if (pos != isMin.end()) {
-		removeJITMin(id);
-		isMin.erase(pos);
-		return;
-	}
-	removeJITMax(id);
+	if (pos == isMin.end()) return;
+	if (pos->second) removeJITMin(id);
+	else removeJITMax(id);
+	isMin.erase(pos);
 	#endif
 }
+
 bool Useable::JITRunnable(long id) {
 	#ifdef MINIMAL
 	return JITRunnableMin(id);
 	#else
-	if (isMin.find(id) != isMin.end()) {
+	auto pos = isMin.find(id);
+	if (pos != isMin.end() && pos->second) {
 		return JITRunnableMin(id);
 	}
 	return JITRunnableMax(id);
