@@ -14,7 +14,7 @@ public:
 	Font(const Font&) = delete;
 	Font& operator=(const Font&) = delete;
 
-	Surface *RenderText(const char* text, glm::vec4 color);
+	void RenderText(const char* text, glm::vec4 color, Surface *surface);
 
 private:
 	std::vector<unsigned char> fontData;

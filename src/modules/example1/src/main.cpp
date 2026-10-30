@@ -4,7 +4,6 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <cstring>
 #include <string>
-#include <chrono>
 
 #include <SDL3/SDL_events.h>
 
@@ -102,9 +101,9 @@ extern "C" {
 		Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
 		font = createFont((MODULE_PATH + "/assets/fonts/Roboto-Black.ttf").c_str(), 32);
-		Surface *texsurf = font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		Image *fontimg = createImage(texsurf, ImageSettings::tex());
-		Surface::deleteSurf(texsurf);
+		Surface texsurf;
+		font->RenderText("The quick brown fox jumps over the lazy dog.", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), &texsurf);
+		Image *fontimg = createImage(&texsurf, ImageSettings::tex());
 
 		std::vector<Vert> vertsflat;
 		std::vector<Ind> indsflat;
@@ -258,23 +257,23 @@ extern "C" {
 		// makes background look like a 70s disco rave while under 20 pounds of lsd
 		win->setBackgroundColor({r, g, b, 1.0f});
 
-		static auto start = std::chrono::steady_clock::now();
+		static auto start = RenderTarget::getCurrTime();
 
-		auto end = std::chrono::steady_clock::now();
+		auto end = RenderTarget::getCurrTime();
 
-		if (std::chrono::duration<float>(end - start).count() > .1f) {
+		if (end - start > 100) {
 			float fps = win->getFPS();
-			Surface *fpstexsurf = font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+			Surface fpstexsurf;
+			font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), &fpstexsurf);
 			Image *fpsimg = fpsMat.mat.images[0];
 			fpsimg->clearTransparent();
-			fpsimg->updateImage(fpstexsurf);
-			Surface::deleteSurf(fpstexsurf);
+			fpsimg->updateImage(&fpstexsurf);
 
 			#define fpsScale 40
 			glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
 			fpsMat.mat.ubo[0]->write(0, sizeof(glm::mat4), &fpsMpv);
 
-			start = std::chrono::steady_clock::now();
+			start = RenderTarget::getCurrTime();
 		}
 
 		static float rotate = 0.0f;

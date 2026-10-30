@@ -17,9 +17,6 @@ namespace NApiFunctions {
 	using CreateMeshFn =
 		std::unique_ptr<Mesh>(*)(...);
 
-	using CreateImageFromFileFn =
-		std::unique_ptr<Image>(*)(...);
-
 	using CreateImageFromSurfaceFn =
 		std::unique_ptr<Image>(*)(...);
 
@@ -46,7 +43,6 @@ namespace NApiFunctions {
 	struct APIFunctions {
 		CreateShaderFn createShaderFunc = nullptr;
 		CreateMeshFn createMeshFunc = nullptr;
-		CreateImageFromFileFn createImageFromFileFunc = nullptr;
 		CreateImageFromSurfaceFn createImageFromSurfaceFunc = nullptr;
 		CreateImageFromSizeFn createImageFromSizeFunc = nullptr;
 		CreateWindowFn createWindowFunc = nullptr;

@@ -16,8 +16,6 @@ namespace Engine::Rendering
 		virtual void setBackgroundColor(glm::vec4 color) = 0;
 		static const bool *getKeystates(int &numKeys);
 
-		static Uint64 getTime();
-
 		float getDeltaTime() {return deltaTime;}
 		glm::vec2 getRes() {return res;}
 		float getWidth() {return res.x;}
@@ -26,6 +24,8 @@ namespace Engine::Rendering
 
 		void update();
 		virtual void clearBackground() = 0;
+
+		static Uint64 getCurrTime();
 	protected:
 		float fps = 0;
 		glm::vec2 res;

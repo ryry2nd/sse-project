@@ -86,13 +86,6 @@ extern "C" {
 	}
 	void removeShader(Shader *shdr) { REMOVE_FROM(shaders, shdr, "Shaders") }
 
-	Image *createImageFromFile(const char *filePath, ImageSettings settings) {
-		auto img = getApiFunctions()->createImageFromFileFunc(filePath, settings);
-		auto ret = img.get();
-		TRACK_ADD(ret, sizeof(Image) + (ret->getWidth() * ret->getHeight() * 4), "Images");
-		images.push_back(std::move(img));
-		return ret;
-	}
 	Image *createImageFromSurf(Surface *surface, ImageSettings settings) {
 		auto img = getApiFunctions()->createImageFromSurfaceFunc(surface, settings);
 		auto ret = img.get();

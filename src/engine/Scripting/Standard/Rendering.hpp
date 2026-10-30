@@ -13,7 +13,6 @@ namespace Engine::Rendering {
 		void removeMesh(Mesh *mesh);
 		Shader *createShader(const char *path, bool isCompute=false);
 		void removeShader(Shader *shdr);
-		Image *createImageFromFile(const char *filePath, ImageSettings settings);
 		Image *createImageFromSurf(Surface *surface, ImageSettings settings);
 		Image *createImageFromSize(glm::vec2 size, ImageSettings settings);
 		void removeImage(Image *image);
@@ -26,7 +25,10 @@ namespace Engine::Rendering {
 		void removeFont(Font *font);
 	}
 	inline Image *createImage(const char *filePath, ImageSettings settings = ImageSettings{}) {
-		return createImageFromFile(filePath, settings);
+		Surface surf;
+		Surface::loadFile(filePath, &surf);
+
+		return createImageFromSurf(&surf, settings);
 	}
 	inline Image *createImage(Surface *surface, ImageSettings settings = ImageSettings{}) {
 		return createImageFromSurf(surface, settings);

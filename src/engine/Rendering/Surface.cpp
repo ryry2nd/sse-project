@@ -8,11 +8,6 @@
 
 using namespace Engine::Rendering;
 
-void Surface::deleteSurf(Surface* surf)
-{
-	delete surf;
-}
-
 void Surface::fillSurf(Surface* surf, Pixel val)
 {
 	if (!surf)

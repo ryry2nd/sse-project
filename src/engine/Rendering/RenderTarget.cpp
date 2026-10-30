@@ -9,17 +9,10 @@
 
 using namespace Engine::Rendering;
 
-static Uint64 now;
-
-Uint64 RenderTarget::getTime() {
-	return now;
-}
-
 extern "C" void hostShutDownAll();
 
 extern "C" {
 	void Init() {
-		now = SDL_GetTicks();
 		if (!SDL_Init(SDL_INIT_VIDEO))
 		{
 			spdlog::critical("SDL_Init Error: {}", SDL_GetError());
@@ -34,7 +27,6 @@ extern "C" {
 		{
 		SCOPE("Rendering::Core::pumpEvents");
 		SDL_PumpEvents();
-		now = SDL_GetTicks();
 		}
 
 	}
@@ -79,4 +71,12 @@ const bool *RenderTarget::getKeystates(int &numKeys) {
 
 void RenderTarget::startLastCounter() {
 	lastCounter = SDL_GetPerformanceCounter();
+}
+
+Uint64 RenderTarget::getCurrTime() {
+	using namespace std::chrono;
+
+	return static_cast<Uint64>(duration<double>(
+        steady_clock::now().time_since_epoch()
+    ).count() * 1000);
 }

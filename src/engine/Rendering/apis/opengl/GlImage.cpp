@@ -262,21 +262,6 @@ void GlImage::updateImage(const Surface* surface)
 		glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-GlImage::GlImage(const char* filePath, ImageSettings settings)
-{
-	SCOPE("Rendering::OpenGL::Image::create");
-
-	if (!filePath)
-		spdlog::warn("Creating image with fallback texture");
-	else
-		spdlog::debug("Creating image at path {}", filePath);
-
-	Surface* surf = nullptr;
-	loadFile(filePath, surf, &settings);
-	setupObject(surf, settings);
-	Surface::deleteSurf(surf);
-}
-
 GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
@@ -294,12 +279,6 @@ GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 
 	textureID = existingTexture;
 	imageSizes = size;
-}
-
-extern "C" std::unique_ptr<Image> createImageFromFile(
-	const char* filePath, ImageSettings settings)
-{
-	return std::make_unique<GlImage>(filePath, settings);
 }
 
 extern "C" std::unique_ptr<Image> createImageFromSurface(

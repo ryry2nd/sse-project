@@ -66,7 +66,6 @@ extern "C" {
 
 		apiFunctions.createShaderFunc = (CreateShaderFn)getFunction(lib, "createShader");
 		apiFunctions.createMeshFunc = (CreateMeshFn)getFunction(lib, "createMesh");
-		apiFunctions.createImageFromFileFunc = (CreateImageFromFileFn)getFunction(lib, "createImageFromFile");
 		apiFunctions.createImageFromSurfaceFunc = (CreateImageFromSurfaceFn)getFunction(lib, "createImageFromSurface");
 		apiFunctions.createImageFromSizeFunc = (CreateImageFromSizeFn)getFunction(lib, "createImageFromSize");
 		apiFunctions.createWindowFunc = (CreateWindowFn)getFunction(lib, "createWindow");
@@ -77,12 +76,12 @@ extern "C" {
 
 		if (!apiFunctions.createShaderFunc ||
 			!apiFunctions.createMeshFunc ||
-			!apiFunctions.createImageFromFileFunc ||
 			!apiFunctions.createWindowFunc ||
 			!apiFunctions.createBuffFunc ||
 			!apiFunctions.createDrawFunc ||
 			!apiFunctions.createFboFunc ||
 			!apiFunctions.createDrawCompFunc ||
+			!apiFunctions.createImageFromSurfaceFunc ||
 			!apiFunctions.createImageFromSizeFunc
 		)
 		{

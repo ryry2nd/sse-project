@@ -59,14 +59,14 @@ Font::~Font()
 	delete static_cast<stbtt_fontinfo*>(fontInfo);
 }
 
-Surface* Font::RenderText(const char* text, glm::vec4 color)
+void Font::RenderText(const char* text, glm::vec4 color, Surface *surface)
 {
 	SCOPE("Engine::Rendering::Font::renderText");
 
 	auto* info = static_cast<stbtt_fontinfo*>(fontInfo);
 
 	if (!info || !text || !*text)
-		return nullptr;
+		return;
 
 	const std::string str(text);
 
@@ -78,7 +78,7 @@ Surface* Font::RenderText(const char* text, glm::vec4 color)
 		std::ceil((ascent - descent) * scale));
 
 	if (height <= 0)
-		return nullptr;
+		return;
 
 	float penX = 0.0f;
 	int previousGlyph = 0;
@@ -115,7 +115,7 @@ Surface* Font::RenderText(const char* text, glm::vec4 color)
 	const int width = maxX - minX;
 
 	if (width <= 0)
-		return nullptr;
+		return;
 
 	const auto red = static_cast<std::uint8_t>(
 		std::round(std::clamp(color.r, 0.0f, 1.0f) * 255.0f));
@@ -126,7 +126,7 @@ Surface* Font::RenderText(const char* text, glm::vec4 color)
 	const float alpha = std::clamp(color.a, 0.0f, 1.0f);
 
 	// Surface pixels are initialized to transparent black.
-	Surface* surface = new Surface(width, height);
+	surface->resize(width, height);
 
 	// Rasterize glyphs directly into the surface.
 	penX = 0.0f;
@@ -202,6 +202,4 @@ Surface* Font::RenderText(const char* text, glm::vec4 color)
 		penX += advance * scale;
 		previousGlyph = c;
 	}
-
-	return surface;
 }

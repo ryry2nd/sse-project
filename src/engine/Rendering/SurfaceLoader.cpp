@@ -1,4 +1,4 @@
-#include "Image.hpp"
+#include "Surface.hpp"
 
 #include <spdlog/spdlog.h>
 
@@ -9,15 +9,17 @@
 
 using namespace Engine::Rendering;
 
-Surface* MakeSurfaceFromRGBA(
+void MakeSurfaceFromRGBA(
 	const unsigned char* pixels,
 	int w,
-	int h)
+	int h,
+	Surface *surface)
 {
 	if (!pixels || w <= 0 || h <= 0)
-		return nullptr;
+		return;
 
-	Surface* surface = new Surface(w, h);
+
+	surface->resize(w, h);
 
 	const std::size_t count =
 		static_cast<std::size_t>(w) * h;
@@ -31,11 +33,9 @@ Surface* MakeSurfaceFromRGBA(
 			pixels[i * 4 + 3]  // A
 		};
 	}
-
-	return surface;
 }
 
-Surface* LoadImage(const char* path)
+void LoadImage(const char* path, Surface *surface)
 {
 	int width = 0;
 	int height = 0;
@@ -59,17 +59,15 @@ Surface* LoadImage(const char* path)
 				: "Unknown stb_image error"
 		);
 
-		return nullptr;
+		return;
 	}
 
-	Surface* surface = MakeSurfaceFromRGBA(pixels, width, height);
+	MakeSurfaceFromRGBA(pixels, width, height, surface);
 
 	stbi_image_free(pixels);
-
-	return surface;
 }
 
-Surface* getErrorTex()
+void getErrorTex(Surface *surface)
 {
 	const Pixel pixels[] = {
 		{0,   0,   0,   255},
@@ -78,26 +76,22 @@ Surface* getErrorTex()
 		{0,   0,   0,   255}
 	};
 
-	Surface* surface = new Surface(2, 2);
+	surface->resize(2, 2);
 
 	std::copy(
 		std::begin(pixels),
 		std::end(pixels),
 		surface->pixels.begin()
 	);
-
-	return surface;
 }
 
-void Image::loadFile(
+void Surface::loadFile(
 	const char* filePath,
-	Surface*& surface,
-	ImageSettings* settings)
+	Surface *surface)
 {
 	if (!filePath)
 	{
-		surface = getErrorTex();
-		*settings = ImageSettings::err();
+		getErrorTex(surface);
 		return;
 	}
 
@@ -105,15 +99,13 @@ void Image::loadFile(
 
 	if (std::filesystem::exists(file))
 	{
-		surface = LoadImage(filePath);
+		LoadImage(filePath, surface);
 
 		if (!surface || surface->pixels.empty())
 		{
 			spdlog::error("Failed to load image '{}'", filePath);
 
-			delete surface;
-			surface = getErrorTex();
-			*settings = ImageSettings::err();
+			getErrorTex(surface);
 		}
 	}
 	else
@@ -123,7 +115,6 @@ void Image::loadFile(
 			filePath
 		);
 
-		surface = getErrorTex();
-		*settings = ImageSettings::err();
+		getErrorTex(surface);
 	}
 }
