@@ -1,4 +1,4 @@
-#define MINIMAL
+// #define MINIMAL
 
 #include "HeadJIT.hpp"
 #include "HeadJITUnusable.hpp"

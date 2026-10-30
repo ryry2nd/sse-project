@@ -1,7 +1,6 @@
 #include "GlRendering.hpp"
 
 #include <engine/Rendering/Rendering.hpp>
-#include <SDL3/SDL_video.h>
 
 #include "../internal/DrawAgnostic.hpp"
 #include "engine/Rendering/FrameBuffer.hpp"

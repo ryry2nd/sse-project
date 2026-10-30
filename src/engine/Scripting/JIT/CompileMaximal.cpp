@@ -1,9 +1,10 @@
-#define MINIMAL
+// #define MINIMAL
 
 #include "HeadJITUnusable.hpp"
 
 using namespace Engine::Scripting::Internal;
 
+#ifdef MINIMAL
 long Unusable::initModuleJITMax(const char* path) {return -1;}
 void Unusable::setupJITMax(long id) {}
 bool Unusable::loopJITMax(long id) {return false;}
@@ -12,8 +13,7 @@ void Unusable::shutdownJITMax(long id) {}
 void Unusable::removeJITMax(long id) {}
 bool Unusable::JITRunnableMax(long id) {return false;}
 void *Unusable::getFunctionJITMax(long id, const char *funcname) {return nullptr;}
-
-#ifndef MINIMAL
+#else
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -34,19 +34,22 @@ public:
 		InitializeNativeTargetAsmPrinter();
 		InitializeNativeTargetAsmParser();
 
-		m_jit = cantFail(LLJITBuilder().create());
+		auto jtmb = cantFail(JITTargetMachineBuilder::detectHost());
+		jtmb.setRelocationModel(Reloc::PIC_);
+		jtmb.setCodeModel(CodeModel::Small);   // try CodeModel::Large if it still fails
+
+		m_jit = cantFail(LLJITBuilder()
+							.setJITTargetMachineBuilder(std::move(jtmb))
+							.create());
 
 		auto &jd = m_jit->getMainJITDylib();
-
-		jd.addGenerator(
-			cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
-				m_jit->getDataLayout().getGlobalPrefix()
-			))
-		);
+		jd.addGenerator(cantFail(DynamicLibrarySearchGenerator::GetForCurrentProcess(
+			m_jit->getDataLayout().getGlobalPrefix())));
 	}
 
 	~LLVMRuntime() {
 		if (m_jit) {
+			cantFail(m_jit->deinitialize(m_jit->getMainJITDylib()));
 			m_jit.reset();
 		}
 	}
@@ -54,7 +57,6 @@ public:
 	bool loadModule(const std::string& path) {
 		auto context = std::make_unique<LLVMContext>();
 
-		// ---------- IR (.bc / .ll) ----------
 		if (path.ends_with(".bc") || path.ends_with(".ll")) {
 
 			SMDiagnostic err;
@@ -65,6 +67,14 @@ public:
 				return false;
 			}
 
+			if (auto *gv = module->getNamedGlobal("__dso_handle")) {
+				if (gv->isDeclaration()) {
+					gv->setInitializer(ConstantInt::get(Type::getInt8Ty(*context), 0));
+					gv->setLinkage(GlobalValue::InternalLinkage);
+					gv->setConstant(false);
+				}
+			}
+
 			ThreadSafeModule tsm(
 				std::move(module),
 				std::move(context)
@@ -72,6 +82,12 @@ public:
 
 			if (auto e = m_jit->addIRModule(std::move(tsm))) {
 				logAllUnhandledErrors(std::move(e), errs(), "Add IR Module Error: ");
+				return false;
+			}
+
+			// NEW: run static constructors
+			if (auto e = m_jit->initialize(m_jit->getMainJITDylib())) {
+				logAllUnhandledErrors(std::move(e), errs(), "Initialize Error: ");
 				return false;
 			}
 
@@ -90,7 +106,7 @@ public:
 			return nullptr;
 		}
 
-		return symbol->toPtr<void (*)()>;
+		return symbol->toPtr<void (*)()>();
 	}
 
 private:
@@ -107,7 +123,7 @@ struct MyModule {
 
 std::unordered_map<long, MyModule> modsMax;
 
-long initModuleJITMax(const char* path) {
+long Unusable::initModuleJITMax(const char* path) {
 	static long currID = 0;
 
 	auto runtime = new LLVMRuntime();

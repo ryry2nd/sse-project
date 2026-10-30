@@ -77,7 +77,7 @@ set_target_properties(Scripting PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIRECTORY}/lib"
 )
 
-target_link_libraries(Scripting PRIVATE RenderingBase PUBLIC SDL3::SDL3 spdlog::spdlog)
+target_link_libraries(Scripting PRIVATE RenderingBase PUBLIC spdlog::spdlog)
 
 if (SSE_MINIMAL)
 target_compile_definitions(Scripting PRIVATE MINIMAL)
@@ -87,7 +87,7 @@ add_custom_command(
 	COMMENT "---- Stripping JIT ----"
 )
 else()
-# target_link_libraries(Scripting PRIVATE CLANG::CLANG)
+target_link_libraries(Scripting PRIVATE CLANG::CLANG)
 endif()
 
 
