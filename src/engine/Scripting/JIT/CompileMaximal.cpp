@@ -48,12 +48,17 @@ public:
 		jtmb.setCodeModel(CodeModel::Small); // if you still get "out of range", try CodeModel::Large
 
 		auto jitOrErr = LLJITBuilder()
-							.setJITTargetMachineBuilder(std::move(jtmb))
-							.create();
+			.setJITTargetMachineBuilder(std::move(jtmb))
+			.create();
+
 		if (!jitOrErr) {
-			logAllUnhandledErrors(jitOrErr.takeError(), errs(), "[JIT] create failed: ");
+			logAllUnhandledErrors(
+				jitOrErr.takeError(), errs(),
+				"[JIT] create failed: "
+			);
 			return;
 		}
+
 		m_jit = std::move(*jitOrErr);
 
 		auto gen = DynamicLibrarySearchGenerator::GetForCurrentProcess(
@@ -66,13 +71,11 @@ public:
 	}
 
 	~LLVMRuntime() {
-		if (m_jit) {
-			if (m_initialized) {
-				if (auto e = m_jit->deinitialize(m_jit->getMainJITDylib()))
-					logAllUnhandledErrors(std::move(e), errs(), "[JIT] deinitialize failed: ");
-			}
-			m_jit.reset();
-		}
+		if (!m_jit)
+			return;
+
+		m_initialized = false;
+		m_jit.release(); //ToDo make it actually clear the memory
 	}
 
 	bool loadModule(const std::string& path) {
@@ -104,9 +107,6 @@ public:
 			}
 		}
 
-		// Remember which functions the module really defines, BEFORE moving it.
-		// Looking up a name the module doesn't define (like "shutdown") would
-		// otherwise match libc's shutdown() through the process-symbol generator.
 		for (auto &f : *module)
 			if (!f.isDeclaration())
 				m_defined.insert(f.getName().str());
@@ -127,7 +127,6 @@ public:
 		return true;
 	}
 
-	// returns nullptr if the module doesn't define it or it fails to link
 	void *getFunction(const std::string& name) {
 		auto symbol = m_jit->lookup(name);
 		if (!symbol) {
@@ -140,6 +139,7 @@ public:
 private:
 	std::unique_ptr<LLJIT> m_jit;
 	std::set<std::string> m_defined;
+	llvm::orc::LocalCXXRuntimeOverrides m_cxxRuntimeOverrides;
 	bool m_initialized = false;
 };
 
@@ -198,6 +198,10 @@ void Unusable::shutdownJITMax(long id) {
 void Unusable::removeJITMax(long id) {
 	auto it = modsMax.find(id);
 	if (it == modsMax.end()) return;
+	it->second.setup = nullptr;
+	it->second.loop = nullptr;
+	it->second.event = nullptr;
+	it->second.shutdown = nullptr;
 	modsMax.erase(it);
 }
 bool Unusable::JITRunnableMax(long id) {

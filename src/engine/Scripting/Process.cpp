@@ -354,9 +354,10 @@ extern "C" {
 		}
 	}
 
-	void ScriptingDestroy()
-	{
-		for (auto &pkg : pkgs) {
+	void ScriptingDestroy() {
+		for (auto it = pkgs.rbegin(); it != pkgs.rend(); ++it) {
+			auto& pkg = *it;
+
 			try {
 				SCOPE("Scripting::Modules::Destroy");
 				currpkg = &pkg;
@@ -365,7 +366,7 @@ extern "C" {
 			catch (const std::exception& e) {
 				spdlog::error(e.what());
 				#ifdef DEBUG
-				throw e;
+				throw;
 				#endif
 			}
 
@@ -373,6 +374,9 @@ extern "C" {
 
 			spdlog::info("Successfully shut down module: {}", pkg.id);
 		}
+
+		currpkg = nullptr;
+		mainpkg = nullptr;
 
 		pkgs.clear();
 		idTopkg.clear();

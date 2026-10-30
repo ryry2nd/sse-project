@@ -17,7 +17,7 @@ make module interaction work good
 add vulkan
 fix llvm
 get working on as many platforms as possible
-change working directory to module path durring module
+change working directory to module path during module
 add a function to change working directory
 add an alternate way to call class functions using extern.
 	ex: void runModel(Model *, const char *funcname, ...);
