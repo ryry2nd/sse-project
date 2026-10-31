@@ -47,8 +47,12 @@ struct EnginePackage
 std::vector<EnginePackage> pkgs;
 std::unordered_map<std::string, EnginePackage*> idTopkg;
 std::unordered_map<std::string, EnginePackage*> pathTopkg;
-static EnginePackage *mainpkg;
-static EnginePackage *currpkg;
+static std::string mainpkg;
+static std::string currpkg;
+
+static std::atomic<std::string *> mainpkgthread = &mainpkg;
+static std::atomic<std::string *> currpkgthread = &currpkg;
+static std::atomic<std::unordered_map<std::string, EnginePackage*> *> pathTopkgthread = &pathTopkg;
 
 
 void topoSort() {
@@ -88,7 +92,7 @@ void topoSort() {
         std::string cur = q.front();
         q.pop();
 
-        ordered.push_back(pkgs[index[cur]]);
+        ordered.push_back(std::move(pkgs[index[cur]]));
 
         for (const auto& nxt : graph[cur]) {
             if (--indegree[nxt] == 0)
@@ -102,22 +106,20 @@ void topoSort() {
     }
 
     std::string mainId;
-    if (mainpkg)
-        mainId = mainpkg->id;
+
+	mainId = mainpkg;
 
     pkgs = std::move(ordered);
 
     idTopkg.clear();
     pathTopkg.clear();
-    mainpkg = nullptr;
-	currpkg = nullptr;
 
     for (auto& pkg : pkgs) {
         idTopkg[pkg.id] = &pkg;
         pathTopkg[pkg.path] = &pkg;
 
         if (pkg.id == mainId)
-            mainpkg = &pkg;
+            mainpkg = pkg.id;
     }
 }
 
@@ -189,18 +191,18 @@ static bool shouldShutDown = true;
 
 extern "C" {
 	const char *hostGetExe() {
-		if (mainpkg)
-			return mainpkg->id.c_str();
-		return "no exe detected";
+		auto &mainpkg = *mainpkgthread.load();
+		return mainpkg.c_str();
 	}
 
 	const char *hostGetCurrentRunning() {
-		if (currpkg)
-			return currpkg->id.c_str();
-		return "no current detected";
+		auto &currpkg = *currpkgthread.load();
+
+		return currpkg.c_str();
 	}
 
 	const char *hostGetID(const char *path) {
+		auto &pathTopkg = *pathTopkgthread.load();
 		auto ret = pathTopkg.find(std::string(path));
 		if (ret == pathTopkg.end()) {
 			spdlog::error("error: id not found");
@@ -294,7 +296,7 @@ extern "C" {
 				pathTopkg[pk->path] = pk;
 
 				if (strcmp(path, mod_path.c_str()) == 0) {
-					mainpkg = &pkgs.back();
+					mainpkg = pkgs.back().id;
 				}
 			}
 		}
@@ -304,8 +306,9 @@ extern "C" {
 		for (auto &pkg : pkgs) {
 			try {
 				SCOPE("Scripting::Modules::Setup");
-				currpkg = &pkg;
+				currpkg = pkg.id;
 				setupJIT(pkg.llvmLocation);
+
 				spdlog::info("Successfully started {}", pkg.id);
 			}
 			catch (const std::exception& e) {
@@ -321,7 +324,7 @@ extern "C" {
 		for (auto &pkg : pkgs) {
 			try {
 				SCOPE("Scripting::Modules::Loop");
-				currpkg = &pkg;
+				currpkg = pkg.id;
 				loopJIT(pkg.llvmLocation);
 			}
 			catch (const std::exception& e) {
@@ -339,7 +342,7 @@ extern "C" {
 			for (auto &pkg : pkgs) {
 				try {
 					SCOPE("Scripting::Modules::Event");
-					currpkg = &pkg;
+					currpkg = pkg.id;
 					Event rete;
 					ConvertEvent(e, rete);
 					eventJIT(pkg.llvmLocation, &rete);
@@ -360,7 +363,7 @@ extern "C" {
 
 			try {
 				SCOPE("Scripting::Modules::Destroy");
-				currpkg = &pkg;
+				currpkg = pkg.id;
 				shutdownJIT(pkg.llvmLocation);
 			}
 			catch (const std::exception& e) {
@@ -374,9 +377,6 @@ extern "C" {
 
 			spdlog::info("Successfully shut down module: {}", pkg.id);
 		}
-
-		currpkg = nullptr;
-		mainpkg = nullptr;
 
 		pkgs.clear();
 		idTopkg.clear();

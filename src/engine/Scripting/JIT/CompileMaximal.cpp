@@ -1,23 +1,15 @@
-// #define MINIMAL
-
 #include "HeadJITUnusable.hpp"
 
 using namespace Engine::Scripting::Internal;
 
 #ifdef MINIMAL
-long Unusable::initModuleJITMax(const char* path) {return -1;}
-void Unusable::setupJITMax(long id) {}
-bool Unusable::loopJITMax(long id) {return false;}
-bool Unusable::eventJITMax(long id, void *e) {return false;}
-void Unusable::shutdownJITMax(long id) {}
-void Unusable::removeJITMax(long id) {}
-bool Unusable::JITRunnableMax(long id) {return false;}
-void *Unusable::getFunctionJITMax(long id, const char *funcname) {return nullptr;}
+bool Unusable::initModuleJITMax(const char* path) {return false;}
+void Unusable::removeJITMax() {}
+void *Unusable::getFunctionJITMax(const char *funcname) {return nullptr;}
 #else
 #include <memory>
 #include <set>
 #include <string>
-#include <unordered_map>
 
 #include <llvm/ExecutionEngine/Orc/LLJIT.h>
 #include <llvm/IR/Constants.h>
@@ -143,77 +135,27 @@ private:
 	bool m_initialized = false;
 };
 
-struct MyModule {
-	std::unique_ptr<LLVMRuntime> runtime;
-	void (*setup)() = nullptr;
-	void (*loop)() = nullptr;
-	void (*event)(void*) = nullptr;
-	void (*shutdown)() = nullptr;
-};
+std::unique_ptr<LLVMRuntime> runtimeMax = nullptr;
 
-std::unordered_map<long, MyModule> modsMax;
+bool Unusable::initModuleJITMax(const char* path) {
+	if (runtimeMax)
+		runtimeMax.reset();
 
-long Unusable::initModuleJITMax(const char* path) {
-	static long currID = 0;
+	runtimeMax = std::make_unique<LLVMRuntime>();
 
-	auto runtime = std::make_unique<LLVMRuntime>();
-
-	if (!runtime->loadModule(path)) {
-		return -1;
-	}
-
-	MyModule mod;
-	mod.setup    = (void (*)())       runtime->getFunction("setup");
-	mod.loop     = (void (*)())       runtime->getFunction("loop");
-	mod.event    = (void (*)(void *)) runtime->getFunction("event");
-	mod.shutdown = (void (*)())       runtime->getFunction("shutdown");
-	mod.runtime  = std::move(runtime);
-
-	modsMax.emplace(currID, std::move(mod));
-	return currID++;
+	return runtimeMax->loadModule(path);
 }
 
-void Unusable::setupJITMax(long id) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end() || !it->second.setup) return;
-	it->second.setup();
-}
-bool Unusable::loopJITMax(long id) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end() || !it->second.loop) return 1;
-	it->second.loop();
-	return 0;
-}
-bool Unusable::eventJITMax(long id, void *e) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end() || !it->second.event) return 1;
-	it->second.event(e);
-	return 0;
-}
-void Unusable::shutdownJITMax(long id) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end() || !it->second.shutdown) return;
-	it->second.shutdown();
-}
-void Unusable::removeJITMax(long id) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end()) return;
-	it->second.setup = nullptr;
-	it->second.loop = nullptr;
-	it->second.event = nullptr;
-	it->second.shutdown = nullptr;
-	modsMax.erase(it);
-}
-bool Unusable::JITRunnableMax(long id) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end()) return 1;
+void Unusable::removeJITMax() {
+	if (runtimeMax)
+		runtimeMax.reset();
 
-	return !(modsMax[id].loop || modsMax[id].event);
+	runtimeMax = nullptr;
 }
 
-void *Unusable::getFunctionJITMax(long id, const char *funcname) {
-	auto it = modsMax.find(id);
-	if (it == modsMax.end() || !it->second.runtime) return nullptr;
-	return it->second.runtime->getFunction(funcname);
+void *Unusable::getFunctionJITMax(const char *funcname) {
+	if (runtimeMax)
+		return runtimeMax->getFunction(funcname);
+	return nullptr;
 }
 #endif

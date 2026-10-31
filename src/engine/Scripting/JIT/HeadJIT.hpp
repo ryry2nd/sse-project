@@ -3,8 +3,8 @@
 namespace Engine::Scripting::Internal::Useable {
 	long initModuleJIT(const char* path);
 	void setupJIT(long id);
-	bool loopJIT(long id);
-	bool eventJIT(long id, void *e);
+	void loopJIT(long id);
+	void eventJIT(long id, void *e);
 	void shutdownJIT(long id);
 	void removeJIT(long id);
 	bool JITRunnable(long id);
