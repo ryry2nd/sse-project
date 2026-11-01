@@ -1,4 +1,4 @@
-#include "GlRendering.hpp"
+#include "Rendering.hpp"
 
 GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 {

@@ -72,13 +72,19 @@ endif()
 # Packages
 find_package(sdl CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(glad CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(stb CONFIG REQUIRED)
 find_package(objloader CONFIG REQUIRED)
 
 find_package(slang CONFIG REQUIRED)
 find_package(compiler CONFIG REQUIRED)
+
+if(USE_OPENGL)
+find_package(glad CONFIG REQUIRED)
+endif()
+if(USE_VULKAN)
+find_package(vulkan CONFIG REQUIRED)
+endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 find_package(tracy CONFIG REQUIRED)

@@ -1,4 +1,4 @@
-#include "GlRendering.hpp"
+#include "Rendering.hpp"
 
 #define ENTRY_POINT "main"
 

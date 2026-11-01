@@ -1,4 +1,4 @@
-#include "GlRendering.hpp"
+#include "Rendering.hpp"
 
 #include <engine/Rendering/Rendering.hpp>
 

@@ -16,7 +16,5 @@ set(SLANGC_BIN "bin/slangc" CACHE STRING "")
 set(PIP_PATH "bin/pip" CACHE STRING "")
 set(PYTHON_PATH "bin/python" CACHE STRING "")
 
-option(USE_VULKAN "Use Vulkan" OFF)
+option(USE_VULKAN "Use Vulkan" ON)
 option(USE_OPENGL "Use OpenGl" ON)
-
-set(PREFERRED_API "opengl" CACHE STRING "")

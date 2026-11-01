@@ -65,6 +65,9 @@ if(USE_OPENGL)
 	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Rendering/apis/opengl")
 endif()
 
+if(USE_VULKAN)
+	add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/Rendering/apis/vulkan")
+endif()
 
 # Scripting Section
 file(GLOB scriptingJIT_SOURCES "Scripting/JIT/*.cpp")

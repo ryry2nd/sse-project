@@ -87,7 +87,8 @@ extern "C" {
 		buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000.0f));
 
 
-		initAPI("OpenGl4.6");
+		// initAPI("OpenGl4.6");
+		initAPI("Vulkan1.4");
 		win = createWindow(res, "Game", SDL_WINDOW_RESIZABLE, 8, false, 0, true);
 		fbo = createFrameBuffer(res, FrameBuffer::Settings::Color | FrameBuffer::Settings::Depth);
 		Shader *cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
