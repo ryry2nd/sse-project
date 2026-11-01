@@ -135,7 +135,7 @@ private:
 	bool m_initialized = false;
 };
 
-std::unique_ptr<LLVMRuntime> runtimeMax = nullptr;
+thread_local std::unique_ptr<LLVMRuntime> runtimeMax = nullptr;
 
 bool Unusable::initModuleJITMax(const char* path) {
 	if (runtimeMax)

@@ -3,7 +3,7 @@
 
 #include "../../Rendering/apis/internal/dlopen.hpp"
 
-void *runtimeMin = nullptr;
+thread_local void *runtimeMin = nullptr;
 
 
 #include "HeadJITUnusable.hpp"
