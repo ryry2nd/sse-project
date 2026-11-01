@@ -26,17 +26,16 @@ namespace OpenGL {
 class GlBuff : public Buff {
 public:
 	GlBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
+	GlBuff(GLuint existingID, Type type, std::size_t size);
 	~GlBuff();
 	void write(const std::size_t offset, const std::size_t size, const void* data);
 	void read(const std::size_t offset, const std::size_t size, void* data);
 
 	GLuint getID() {return id;}
 	GLenum getTarget() {return target;}
-	GLenum getUsage() {return usage;}
 private:
 	GLuint id;
 	GLenum target;
-	GLenum usage;
 };
 
 class GlWindow : public Window
@@ -121,18 +120,21 @@ public:
 	GlMesh(const Vert *verts, const size_t vert_size, const Ind *indices, const size_t ind_size);
 	~GlMesh();
 
-	void updateVerts(const Vert *verts, const size_t vert_size, const Ind *indices, const size_t ind_size);
-
-	GLuint getVAO() {return VAO;}
-	GLuint getVBO() {return VBO;}
-	GLuint getEBO() {return EBO;}
-
 	size_t getInd() {return ind_size;}
 	size_t getVert() {return vert_size;}
+
+	GLuint getVAO() {return VAO;}
+
+	Buff *vertBuff();
+	Buff *indBuff();
 private:
 	size_t ind_size;
 	size_t vert_size;
-	GLuint VAO, VBO, EBO;
+
+	std::unique_ptr<GlBuff> VBO;
+	std::unique_ptr<GlBuff> EBO;
+
+	GLuint VAO;
 };
 }
 

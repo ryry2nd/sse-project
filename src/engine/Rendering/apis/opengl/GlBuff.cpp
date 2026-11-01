@@ -1,4 +1,5 @@
 #include "GlRendering.hpp"
+#include "glad/gl.h"
 
 GLenum toGLTarget(Buff::Type type) {
 	switch (type) {
@@ -20,13 +21,11 @@ GLenum toGLUsage(Buff::Frequency freq) {
 GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
 {
 	SCOPE("Rendering::OpenGL::Buff::create");
-	this->buffType = type;
-	this->freq = freq;
 	this->allocSize = size;
 
 	spdlog::debug("Creating buffer with {} bytes", size);
 	target = toGLTarget(type);
-	usage  = toGLUsage(freq);
+	GLenum usage  = toGLUsage(freq);
 
 	glGenBuffers(1, &id);
 	glBindBuffer(target, id);
@@ -43,6 +42,13 @@ GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
 	glBindBuffer(target, 0);
 
 	spdlog::debug("Set Buffer id to: 0x{:x}", id);
+}
+
+GlBuff::GlBuff(GLuint existingID, Type type, std::size_t size)
+{
+    id = existingID;
+    allocSize = size;
+    target = toGLTarget(type);
 }
 
 GlBuff::~GlBuff() {

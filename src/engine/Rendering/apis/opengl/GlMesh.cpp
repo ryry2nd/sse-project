@@ -5,37 +5,26 @@ GlMesh::~GlMesh()
 	SCOPE("Rendering::OpenGL::Mesh::destroy");
 	if (VAO != 0)
 		glDeleteVertexArrays(1, &VAO);
-	if (VBO != 0)
-		glDeleteBuffers(1, &VBO);
-	if (EBO != 0)
-		glDeleteBuffers(1, &EBO);
 
-	spdlog::debug("Deleting mesh with VAO: 0x{:x}, VBO: 0x{:x}, EBO: 0x{:x}", VAO, VBO, EBO);
+
+	VBO.reset();
+	EBO.reset();
+
+	spdlog::debug("Deleting mesh");
 }
 
 GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 				const Ind *indices, const size_t ind_size
-			) : VAO(0), VBO(0), EBO(0)
+			)
 {
 	SCOPE("Rendering::OpenGL::Mesh::create");
 	spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
+
+	GLuint VBO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO);
-
-	spdlog::debug("VAO has id: 0x{:x}", VAO);
-
-	updateVerts(verts, vert_size, indices, ind_size);
-}
-
-void GlMesh::updateVerts(
-	const Vert *verts, const size_t vert_size,
-	const Ind *indices, const size_t ind_size
-)
-{
-	SCOPE("Rendering::OpenGL::Mesh::updateVerts");
 	glBindVertexArray(VAO);
 
 	// ---- VBO ----
@@ -69,6 +58,24 @@ void GlMesh::updateVerts(
 
 	// IMPORTANT: unbind VAO LAST
 	glBindVertexArray(0);
+
+	this->VBO = std::make_unique<GlBuff>(
+		VBO, Buff::Type::Storage,
+		vert_size * sizeof(Vert)
+	);
+
+	this->EBO = std::make_unique<GlBuff>(
+		EBO, Buff::Type::Storage,
+		ind_size * sizeof(Ind)
+	);
+}
+
+Buff* GlMesh::vertBuff() {
+    return VBO.get();
+}
+
+Buff* GlMesh::indBuff() {
+    return EBO.get();
 }
 
 extern "C" std::unique_ptr<Mesh> createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {

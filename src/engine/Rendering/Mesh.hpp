@@ -1,8 +1,8 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "Buff.hpp"
+#include "Core.hpp"
 #include <string>
-#include <vector>
 
 namespace Engine::Rendering
 {
@@ -50,5 +50,8 @@ namespace Engine::Rendering
 		Mesh& operator=(Mesh&&) noexcept = default;
 
 		static void getObj(const char *fname, std::vector<Shape> &shapesout);
+
+		virtual Buff *vertBuff() = 0;
+		virtual Buff *indBuff() = 0;
 	};
 }
