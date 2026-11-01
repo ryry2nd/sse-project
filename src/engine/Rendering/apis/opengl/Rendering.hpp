@@ -28,8 +28,8 @@ public:
 	GlBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
 	GlBuff(GLuint existingID, Type type, std::size_t size);
 	~GlBuff();
-	void write(const std::size_t offset, const std::size_t size, const void* data);
-	void read(const std::size_t offset, const std::size_t size, void* data);
+	virtual void write(const std::size_t offset, const std::size_t size, const void* data);
+	virtual void read(const std::size_t offset, const std::size_t size, void* data);
 
 	GLuint getID() {return id;}
 	GLenum getTarget() {return target;}
@@ -42,10 +42,10 @@ class GlWindow : public Window
 {
 public:
 	GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
-	void clearBackground();
-	void swapBuffer();
-	void setBackgroundColor(glm::vec4 color);
-	void updateScreenRes();
+	virtual void clearBackground();
+	virtual void swapBuffer();
+	virtual void setBackgroundColor(glm::vec4 color);
+	virtual void updateScreenRes();
 	void setWindow();
 	~GlWindow();
 
@@ -67,8 +67,8 @@ public:
 	GLuint getID() const {return textureID;}
 	GLuint getSID() const {return samplerID;}
 
-	void updateImage(const Surface *surface);
-	void clearTransparent();
+	virtual void updateImage(const Surface *surface);
+	virtual void clearTransparent();
 
 private:
 	void setupObject(Surface *surface, ImageSettings settings);
@@ -82,7 +82,7 @@ public:
 	GlFrameBuffer(glm::vec2 res, uint32_t settings);
 	virtual ~GlFrameBuffer();
 
-	void setSize(glm::vec2 res);
+	virtual void setSize(glm::vec2 res);
 
 	virtual void setBackgroundColor(glm::vec4 color);
 	virtual void clearBackground();
@@ -125,8 +125,8 @@ public:
 
 	GLuint getVAO() {return VAO;}
 
-	Buff *vertBuff();
-	Buff *indBuff();
+	virtual Buff *vertBuff();
+	virtual Buff *indBuff();
 private:
 	size_t ind_size;
 	size_t vert_size;
