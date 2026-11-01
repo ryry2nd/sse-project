@@ -23,11 +23,11 @@ using namespace Engine::Rendering;
 struct SDL_Window;
 
 namespace OpenGL {
-class GlBuff : public Buff {
+class APIBuff : public Buff {
 public:
-	GlBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
-	GlBuff(GLuint existingID, Type type, std::size_t size);
-	~GlBuff();
+	APIBuff(Type type, Frequency freq, std::size_t size, const void* data = nullptr);
+	APIBuff(GLuint existingID, Type type, std::size_t size);
+	~APIBuff();
 	virtual void write(const std::size_t offset, const std::size_t size, const void* data);
 	virtual void read(const std::size_t offset, const std::size_t size, void* data);
 
@@ -38,16 +38,16 @@ private:
 	GLenum target;
 };
 
-class GlWindow : public Window
+class APIWindow : public Window
 {
 public:
-	GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+	APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
 	virtual void clearBackground();
 	virtual void swapBuffer();
 	virtual void setBackgroundColor(glm::vec4 color);
 	virtual void updateScreenRes();
 	void setWindow();
-	~GlWindow();
+	~APIWindow();
 
 	SDL_Window *getWindow() {return window;}
 	SDL_GLContext getContext() {return glContext;}
@@ -56,14 +56,14 @@ private:
 	SDL_Window *window;
 };
 
-class GlImage : public Image
+class APIImage : public Image
 {
 public:
-	GlImage(const char *filePath, ImageSettings settings);
-	GlImage(GLuint id, glm::vec2 size);
-	GlImage(glm::vec2 size, ImageSettings settings);
-	GlImage(Surface *surface, ImageSettings settings);
-	~GlImage();
+	APIImage(const char *filePath, ImageSettings settings);
+	APIImage(GLuint id, glm::vec2 size);
+	APIImage(glm::vec2 size, ImageSettings settings);
+	APIImage(Surface *surface, ImageSettings settings);
+	~APIImage();
 	GLuint getID() const {return textureID;}
 	GLuint getSID() const {return samplerID;}
 
@@ -77,10 +77,10 @@ private:
 	bool useMip = false;
 };
 
-class GlFrameBuffer : public FrameBuffer {
+class APIFrameBuffer : public FrameBuffer {
 public:
-	GlFrameBuffer(glm::vec2 res, uint32_t settings);
-	virtual ~GlFrameBuffer();
+	APIFrameBuffer(glm::vec2 res, uint32_t settings);
+	virtual ~APIFrameBuffer();
 
 	virtual void setSize(glm::vec2 res);
 
@@ -97,16 +97,16 @@ public:
 private:
 	GLuint id = 0;
 
-	GlImage* colorImage = nullptr;
-	GlImage* depthImage = nullptr;
-	GlImage* stencilImage = nullptr;
+	APIImage* colorImage = nullptr;
+	APIImage* depthImage = nullptr;
+	APIImage* stencilImage = nullptr;
 };
 
-class GlShader : public Shader
+class APIShader : public Shader
 {
 public:
-	GlShader(const char *path, bool isCompute);
-	~GlShader();
+	APIShader(const char *path, bool isCompute);
+	~APIShader();
 
 	GLuint getID() {return id;}
 
@@ -114,11 +114,11 @@ private:
 	GLuint id;
 };
 
-class GlMesh : public Mesh
+class APIMesh : public Mesh
 {
 public:
-	GlMesh(const Vert *verts, const size_t vert_size, const Ind *indices, const size_t ind_size);
-	~GlMesh();
+	APIMesh(const Vert *verts, const size_t vert_size, const Ind *indices, const size_t ind_size);
+	~APIMesh();
 
 	size_t getInd() {return ind_size;}
 	size_t getVert() {return vert_size;}
@@ -131,8 +131,8 @@ private:
 	size_t ind_size;
 	size_t vert_size;
 
-	std::unique_ptr<GlBuff> VBO;
-	std::unique_ptr<GlBuff> EBO;
+	std::unique_ptr<APIBuff> VBO;
+	std::unique_ptr<APIBuff> EBO;
 
 	GLuint VAO;
 };

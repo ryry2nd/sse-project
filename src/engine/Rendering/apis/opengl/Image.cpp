@@ -73,7 +73,7 @@ GLenum toGL(ImageSettings::CompareFunc f)
 	return GL_LEQUAL;
 }
 
-void GlImage::setupObject(Surface* surface, ImageSettings settings)
+void APIImage::setupObject(Surface* surface, ImageSettings settings)
 {
 	SCOPE("Rendering::OpenGL::Image::setupObject");
 
@@ -144,14 +144,14 @@ void GlImage::setupObject(Surface* surface, ImageSettings settings)
 	imageSizes = glm::vec2(surface->width, surface->height);
 }
 
-GlImage::GlImage(Surface* surface, ImageSettings settings)
+APIImage::APIImage(Surface* surface, ImageSettings settings)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
 
 	setupObject(surface, settings);
 }
 
-GlImage::GlImage(glm::vec2 size, ImageSettings settings)
+APIImage::APIImage(glm::vec2 size, ImageSettings settings)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
 
@@ -172,7 +172,7 @@ GlImage::GlImage(glm::vec2 size, ImageSettings settings)
 	setupObject(&blank, settings);
 }
 
-GlImage::~GlImage()
+APIImage::~APIImage()
 {
 	SCOPE("Rendering::OpenGL::Image::destroy");
 
@@ -183,7 +183,7 @@ GlImage::~GlImage()
 		glDeleteSamplers(1, &samplerID);
 }
 
-void GlImage::clearTransparent()
+void APIImage::clearTransparent()
 {
 	SCOPE("Rendering::OpenGL::Image::clearTransparent");
 
@@ -201,7 +201,7 @@ void GlImage::clearTransparent()
 		spdlog::error("clearTransparent GL error: 0x{:x}", err);
 }
 
-void GlImage::updateImage(const Surface* surface)
+void APIImage::updateImage(const Surface* surface)
 {
 	SCOPE("Rendering::OpenGL::Image::update");
 
@@ -256,7 +256,7 @@ void GlImage::updateImage(const Surface* surface)
 		glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
+APIImage::APIImage(GLuint existingTexture, glm::vec2 size)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
 
@@ -273,11 +273,11 @@ GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 extern "C" std::unique_ptr<Image> createImageFromSurface(
 	Surface* surface, ImageSettings settings)
 {
-	return std::make_unique<GlImage>(surface, settings);
+	return std::make_unique<APIImage>(surface, settings);
 }
 
 extern "C" std::unique_ptr<Image> createImageFromSize(
 	glm::vec2 size, ImageSettings settings)
 {
-	return std::make_unique<GlImage>(size, settings);
+	return std::make_unique<APIImage>(size, settings);
 }

@@ -7,7 +7,7 @@
 #define MAJOR_VERSION 4
 #define MINOR_VERSION 6
 
-GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
+APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
 {
 	SCOPE("Rendering::OpenGL::Window::create");
 	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse));
@@ -73,12 +73,12 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void GlWindow::setBackgroundColor(glm::vec4 color) {
+void APIWindow::setBackgroundColor(glm::vec4 color) {
 	SCOPE("Rendering::OpenGL::Window::setBackgroundColor");
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void GlWindow::clearBackground()
+void APIWindow::clearBackground()
 {
 	SCOPE("Rendering::OpenGL::Window::clearBackground");
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -92,7 +92,7 @@ void GlWindow::clearBackground()
 #endif
 
 
-void GlWindow::swapBuffer()
+void APIWindow::swapBuffer()
 {
 	GPUCOLLECT;
 	{
@@ -101,7 +101,7 @@ void GlWindow::swapBuffer()
 	}
 }
 
-void GlWindow::updateScreenRes()
+void APIWindow::updateScreenRes()
 {
 	SCOPE("Rendering::OpenGL::Window::updateRes");
 	int width, height;
@@ -110,12 +110,12 @@ void GlWindow::updateScreenRes()
 	glViewport(0, 0, res.x, res.y);
 }
 
-void GlWindow::setWindow() {
+void APIWindow::setWindow() {
 	SCOPE("Rendering::OpenGL::Window::setWindow");
 	SDL_GL_MakeCurrent(window, glContext);
 }
 
-GlWindow::~GlWindow()
+APIWindow::~APIWindow()
 {
 	SCOPE("Rendering::OpenGL::Window::delete");
 	SDL_GL_DestroyContext(glContext);
@@ -123,5 +123,5 @@ GlWindow::~GlWindow()
 }
 
 extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {
-    return std::make_unique<GlWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
+    return std::make_unique<APIWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
 }

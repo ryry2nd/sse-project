@@ -49,7 +49,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		for (auto &[binding, buf] : buffs) \
 		{ \
 			if (!buf) continue; \
-			auto glbuf = static_cast<GlBuff*>(buf); \
+			auto glbuf = static_cast<APIBuff*>(buf); \
 			GLuint unit = (GLuint)(binding); \
 			glBindBufferBase(type, unit, glbuf->getID()); \
 		} \
@@ -61,7 +61,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         for (auto &[binding, img] : images) \
         { \
             if (!img) continue; \
-            auto *glimg = static_cast<GlImage*>(img); \
+            auto *glimg = static_cast<APIImage*>(img); \
             GLuint unit = (GLuint)(binding); \
             glActiveTexture(GL_TEXTURE0 + unit); \
             glBindTexture(GL_TEXTURE_2D, glimg->getID()); \
@@ -75,7 +75,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         for (auto &[binding, img] : images) \
         { \
             if (!img) continue; \
-            auto *glimg = static_cast<GlImage*>(img); \
+            auto *glimg = static_cast<APIImage*>(img); \
             GLuint unit = static_cast<GLuint>(binding); \
             glBindImageTexture( \
                 unit, glimg->getID(), 0, GL_FALSE, 0, \
@@ -91,10 +91,10 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 
 	bool isWindowTarget = false;
 
-	GlWindow* glwin = dynamic_cast<GlWindow*>(target);
-	GlFrameBuffer* glFBO = dynamic_cast<GlFrameBuffer*>(target);
-	GlShader *glshdr = static_cast<GlShader*>(params.shader);
-	GlMesh *glmesh = static_cast<GlMesh*>(mesh);
+	APIWindow* glwin = dynamic_cast<APIWindow*>(target);
+	APIFrameBuffer* glFBO = dynamic_cast<APIFrameBuffer*>(target);
+	APIShader *glshdr = static_cast<APIShader*>(params.shader);
+	APIMesh *glmesh = static_cast<APIMesh*>(mesh);
 
 	if (glwin) {
 		isWindowTarget = true;
@@ -202,7 +202,7 @@ extern "C" void computeCall(ComputeParams *params) {
 		return;
 	}
 
-	auto *glshdr = static_cast<GlShader*>(params->shader);
+	auto *glshdr = static_cast<APIShader*>(params->shader);
 
 	glUseProgram(glshdr->getID());
 

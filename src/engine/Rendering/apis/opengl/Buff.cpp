@@ -18,7 +18,7 @@ GLenum toGLUsage(Buff::Frequency freq) {
 	return GL_DYNAMIC_DRAW;
 }
 
-GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
+APIBuff::APIBuff(Type type, Frequency freq, std::size_t size, const void* data)
 {
 	SCOPE("Rendering::OpenGL::Buff::create");
 	this->allocSize = size;
@@ -41,19 +41,19 @@ GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
 	glBindBuffer(target, 0);
 }
 
-GlBuff::GlBuff(GLuint existingID, Type type, std::size_t size)
+APIBuff::APIBuff(GLuint existingID, Type type, std::size_t size)
 {
     id = existingID;
     allocSize = size;
     target = toGLTarget(type);
 }
 
-GlBuff::~GlBuff() {
+APIBuff::~APIBuff() {
 	SCOPE("Rendering::OpenGL::Buff::destroy");
 	glDeleteBuffers(1, &id);
 }
 
-void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
+void APIBuff::write(std::size_t offset, std::size_t size, const void* data) {
 	SCOPE("Rendering::OpenGL::Buff::write");
 	#ifdef DEBUG
 	if (offset > allocSize || offset + size > allocSize) {
@@ -66,7 +66,7 @@ void GlBuff::write(std::size_t offset, std::size_t size, const void* data) {
 	glBufferSubData(target, offset, size, data);
 }
 
-void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
+void APIBuff::read(std::size_t offset, std::size_t size, void* outData) {
 	SCOPE("Rendering::OpenGL::Buff::read");
 	#ifdef DEBUG
 	if (offset > allocSize || offset + size > allocSize) {
@@ -80,5 +80,5 @@ void GlBuff::read(std::size_t offset, std::size_t size, void* outData) {
 }
 
 extern "C" std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr) {
-    return std::make_unique<GlBuff>(type, freq, size, data);
+    return std::make_unique<APIBuff>(type, freq, size, data);
 }

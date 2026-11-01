@@ -1,6 +1,6 @@
 #include "Rendering.hpp"
 
-GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
+APIFrameBuffer::APIFrameBuffer(glm::vec2 res, uint32_t settings)
 {
 	SCOPE("Rendering::OpenGL::FBO::create");
 	this->res = res;
@@ -37,7 +37,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 		GLenum drawBuf = GL_COLOR_ATTACHMENT0;
 		glDrawBuffers(1, &drawBuf);
 
-		colorImage = new GlImage(colorTex, res);
+		colorImage = new APIImage(colorTex, res);
 	}
 	else
 	{
@@ -65,7 +65,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 							   depthTex,
 							   0);
 
-		depthImage = new GlImage(depthTex, res);
+		depthImage = new APIImage(depthTex, res);
 		stencilImage = depthImage;
 	}
 	else
@@ -87,7 +87,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 								   depthTex,
 								   0);
 
-			depthImage = new GlImage(depthTex, res);
+			depthImage = new APIImage(depthTex, res);
 		}
 
 		if (settings & Settings::Stencil)
@@ -107,7 +107,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 								   stencilTex,
 								   0);
 
-			stencilImage = new GlImage(stencilTex, res);
+			stencilImage = new APIImage(stencilTex, res);
 		}
 	}
 
@@ -119,7 +119,7 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-GlFrameBuffer::~GlFrameBuffer()
+APIFrameBuffer::~APIFrameBuffer()
 {
 	SCOPE("Rendering::OpenGL::FBO::Destroy");
 	if (colorImage)   delete colorImage;
@@ -129,7 +129,7 @@ GlFrameBuffer::~GlFrameBuffer()
 	if (id) glDeleteFramebuffers(1, &id);
 }
 
-void GlFrameBuffer::setSize(glm::vec2 newSize)
+void APIFrameBuffer::setSize(glm::vec2 newSize)
 {
 	SCOPE("Rendering::OpenGL::FBO::setSize");
 	res = newSize;
@@ -158,18 +158,18 @@ void GlFrameBuffer::setSize(glm::vec2 newSize)
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void GlFrameBuffer::updateRes() {
+void APIFrameBuffer::updateRes() {
 	SCOPE("Rendering::OpenGL::FBO::updateRes");
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
 }
 
-void GlFrameBuffer::setBackgroundColor(glm::vec4 color) {
+void APIFrameBuffer::setBackgroundColor(glm::vec4 color) {
 	SCOPE("Rendering::OpenGL::FBO::setBackgroundColor");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glClearColor(color.r, color.g, color.b, color.a);
 }
 
-void GlFrameBuffer::clearBackground() {
+void APIFrameBuffer::clearBackground() {
 	SCOPE("Rendering::OpenGL::FBO::clearBackGround");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -188,5 +188,5 @@ void GlFrameBuffer::clearBackground() {
 }
 
 extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
-    return std::make_unique<GlFrameBuffer>(size, settings);
+    return std::make_unique<APIFrameBuffer>(size, settings);
 }

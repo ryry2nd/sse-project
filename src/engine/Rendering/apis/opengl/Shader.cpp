@@ -30,7 +30,7 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 	}
 }
 
-GlShader::GlShader(const char *path, bool isCompute)
+APIShader::APIShader(const char *path, bool isCompute)
 {
 	SCOPE("Rendering::OpenGL::Shader::create");
 	this->bisCompute = isCompute;
@@ -74,7 +74,7 @@ GlShader::GlShader(const char *path, bool isCompute)
 	}
 }
 
-GlShader::~GlShader()
+APIShader::~APIShader()
 {
 	SCOPE("Rendering::OpenGL::Shader::destroy");
 	if (id != 0)
@@ -82,5 +82,5 @@ GlShader::~GlShader()
 }
 
 extern "C" std::unique_ptr<Shader> createShader(const char *path, bool isCompute) {
-    return std::make_unique<GlShader>(path, isCompute);
+    return std::make_unique<APIShader>(path, isCompute);
 }

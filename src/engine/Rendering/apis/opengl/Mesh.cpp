@@ -1,6 +1,6 @@
 #include "Rendering.hpp"
 
-GlMesh::~GlMesh()
+APIMesh::~APIMesh()
 {
 	SCOPE("Rendering::OpenGL::Mesh::destroy");
 	if (VAO != 0)
@@ -11,7 +11,7 @@ GlMesh::~GlMesh()
 	EBO.reset();
 }
 
-GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
+APIMesh::APIMesh(const Vert *verts, const size_t vert_size,
 				const Ind *indices, const size_t ind_size
 			)
 {
@@ -52,25 +52,25 @@ GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 	// IMPORTANT: unbind VAO LAST
 	glBindVertexArray(0);
 
-	this->VBO = std::make_unique<GlBuff>(
+	this->VBO = std::make_unique<APIBuff>(
 		VBO, Buff::Type::Storage,
 		vert_size * sizeof(Vert)
 	);
 
-	this->EBO = std::make_unique<GlBuff>(
+	this->EBO = std::make_unique<APIBuff>(
 		EBO, Buff::Type::Storage,
 		ind_size * sizeof(Ind)
 	);
 }
 
-Buff* GlMesh::vertBuff() {
+Buff* APIMesh::vertBuff() {
     return VBO.get();
 }
 
-Buff* GlMesh::indBuff() {
+Buff* APIMesh::indBuff() {
     return EBO.get();
 }
 
 extern "C" std::unique_ptr<Mesh> createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size) {
-    return std::make_unique<GlMesh>(vertices, vert_size, indices, ind_size);
+    return std::make_unique<APIMesh>(vertices, vert_size, indices, ind_size);
 }
