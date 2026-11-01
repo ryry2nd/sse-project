@@ -147,10 +147,6 @@ void GlImage::setupObject(Surface* surface, ImageSettings settings)
 GlImage::GlImage(Surface* surface, ImageSettings settings)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
-	spdlog::debug(
-		"Creating image from surface memory address 0x{:x}",
-		reinterpret_cast<uintptr_t>(surface)
-	);
 
 	setupObject(surface, settings);
 }
@@ -158,7 +154,6 @@ GlImage::GlImage(Surface* surface, ImageSettings settings)
 GlImage::GlImage(glm::vec2 size, ImageSettings settings)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
-	spdlog::debug("Creating blank image {}x{}", size.x, size.y);
 
 	if (size.x <= 0 || size.y <= 0 ||
 		size.x > static_cast<float>(std::numeric_limits<Uint32>::max()) ||
@@ -180,7 +175,6 @@ GlImage::GlImage(glm::vec2 size, ImageSettings settings)
 GlImage::~GlImage()
 {
 	SCOPE("Rendering::OpenGL::Image::destroy");
-	spdlog::debug("Deleting image with id: 0x{:x}", textureID);
 
 	if (textureID != 0)
 		glDeleteTextures(1, &textureID);
@@ -265,11 +259,6 @@ void GlImage::updateImage(const Surface* surface)
 GlImage::GlImage(GLuint existingTexture, glm::vec2 size)
 {
 	SCOPE("Rendering::OpenGL::Image::create");
-
-	spdlog::debug(
-		"Creating image with pre existing texture id: 0x{:x} with size {},{}",
-		existingTexture, size.x, size.y
-	);
 
 	if (existingTexture == 0)
 	{

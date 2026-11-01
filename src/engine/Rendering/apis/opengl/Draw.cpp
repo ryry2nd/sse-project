@@ -69,7 +69,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
-#define setComputeImages(images) \
+#define setRWImages(images) \
 { \
     if (!images.empty()) \
         for (auto &[binding, img] : images) \
@@ -126,6 +126,11 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	{
 	GPUTRACE("Rendering::OpenGl::Draw::Images");
 	setImages(params.images);
+	}
+
+	{
+	GPUTRACE("Rendering::OpenGl::Draw::RWImages");
+	setRWImages(params.rwimages);
 	}
 
 
@@ -204,7 +209,7 @@ extern "C" void computeCall(ComputeParams *params) {
 	// -------------------------
 	// 1. TEXTURES
 	// -------------------------
-	setComputeImages(params->images);
+	setRWImages(params->images);
 
 	// -------------------------
 	// 2. BUFFERS Global

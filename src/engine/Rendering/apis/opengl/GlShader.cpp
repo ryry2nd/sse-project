@@ -72,13 +72,11 @@ GlShader::GlShader(const char *path, bool isCompute)
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 	}
-	spdlog::debug("Set shader id to: 0x{:x}", id);
 }
 
 GlShader::~GlShader()
 {
 	SCOPE("Rendering::OpenGL::Shader::destroy");
-	spdlog::debug("Deleting shader with id: 0x{:x}", id);
 	if (id != 0)
 		glDeleteProgram(id);
 }

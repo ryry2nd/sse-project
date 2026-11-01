@@ -10,12 +10,14 @@ typedef float4 vec4;
 	#define BINDING_CBV(x)     [[vk::binding(x, 2)]]
 	#define BINDING_IMG(x)     [[vk::binding(x, 3)]]
 	#define BINDING_SAMPLER(x) [[vk::binding(x, 4)]]
+	#define BINDING_IMGRW(x)     [[vk::binding(x, 5)]]
 #elif defined(DX12)
 	#define BINDING_SRV(x)     [[register(t##x, space0)]]
 	#define BINDING_UAV(x)     [[register(u##x, space1)]]
 	#define BINDING_CBV(x)     [[register(b##x, space2)]]
 	#define BINDING_IMG(x)     [[register(t##x, space3)]]
 	#define BINDING_SAMPLER(x) [[register(s##x, space4)]]
+	#define BINDING_IMGRW(x)   [[register(u##x, space5)]]
 #else
 	// Read-only buffers
 	#define BINDING_SRV(x)
@@ -25,8 +27,10 @@ typedef float4 vec4;
 	#define BINDING_CBV(x)
 	// Textures
 	#define BINDING_IMG(x)
-	/// Samplers
+	// Samplers
 	#define BINDING_SAMPLER(x)
+	// RWTextures
+	#define BINDING_IMGRW(x)
 #endif
 
 #define DEFAULT_FOG_STRENGTH 0.006

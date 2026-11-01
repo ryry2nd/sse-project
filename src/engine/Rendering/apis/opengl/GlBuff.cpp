@@ -23,7 +23,6 @@ GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
 	SCOPE("Rendering::OpenGL::Buff::create");
 	this->allocSize = size;
 
-	spdlog::debug("Creating buffer with {} bytes", size);
 	target = toGLTarget(type);
 	GLenum usage  = toGLUsage(freq);
 
@@ -40,8 +39,6 @@ GlBuff::GlBuff(Type type, Frequency freq, std::size_t size, const void* data)
 	}
 
 	glBindBuffer(target, 0);
-
-	spdlog::debug("Set Buffer id to: 0x{:x}", id);
 }
 
 GlBuff::GlBuff(GLuint existingID, Type type, std::size_t size)
@@ -53,7 +50,6 @@ GlBuff::GlBuff(GLuint existingID, Type type, std::size_t size)
 
 GlBuff::~GlBuff() {
 	SCOPE("Rendering::OpenGL::Buff::destroy");
-	spdlog::debug("Deleting buffer with id: 0x{:x}", id);
 	glDeleteBuffers(1, &id);
 }
 

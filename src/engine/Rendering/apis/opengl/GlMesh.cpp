@@ -9,8 +9,6 @@ GlMesh::~GlMesh()
 
 	VBO.reset();
 	EBO.reset();
-
-	spdlog::debug("Deleting mesh");
 }
 
 GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
@@ -18,7 +16,6 @@ GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 			)
 {
 	SCOPE("Rendering::OpenGL::Mesh::create");
-	spdlog::debug("Creating mesh with {} vertices, and {} indicies.", vert_size, ind_size);
 
 	GLuint VBO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -34,16 +31,12 @@ GlMesh::GlMesh(const Vert *verts, const size_t vert_size,
 				 verts,
 				 GL_STATIC_DRAW);
 
-	spdlog::debug("FBO has id: 0x{:x}", VBO);
-
 	// ---- EBO (IMPORTANT: while VAO bound) ----
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
 				 ind_size * sizeof(Ind),
 				 indices,
 				 GL_STATIC_DRAW);
-
-	spdlog::debug("EBO has id: 0x{:x}", EBO);
 
 	// ---- ATTRIBUTES ----
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vert), (void*)offsetof(Vert, pos));

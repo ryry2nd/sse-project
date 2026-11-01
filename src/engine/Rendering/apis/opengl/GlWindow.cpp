@@ -11,7 +11,6 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 {
 	SCOPE("Rendering::OpenGL::Window::create");
 	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse));
-	spdlog::debug("Creating window with resolution: {} by {}", res.x, res.y);
 	// this does what it says
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MAJOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MINOR_VERSION);
@@ -56,7 +55,6 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 		nullptr
 	);
 
-	spdlog::debug("OpenGL debug output enabled.");
 	#endif
 
 	glViewport(0, 0, res.x, res.y);
@@ -73,8 +71,6 @@ GlWindow::GlWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, boo
 	glDepthFunc(GL_LESS); // or GL_LEQUAL
 	glDepthMask(GL_TRUE); // enable writing to depth buffer
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	spdlog::debug("Created Window with glContext id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 }
 
 void GlWindow::setBackgroundColor(glm::vec4 color) {
@@ -122,7 +118,6 @@ void GlWindow::setWindow() {
 GlWindow::~GlWindow()
 {
 	SCOPE("Rendering::OpenGL::Window::delete");
-	spdlog::debug("Deleting window with context id: 0x{:x}", reinterpret_cast<uintptr_t>(glContext));
 	SDL_GL_DestroyContext(glContext);
 	_destroyWindow(window);
 }

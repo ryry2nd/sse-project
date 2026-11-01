@@ -59,6 +59,7 @@ namespace Engine::Rendering
 		int arrayCount = 6;
 
 		std::unordered_map<Uint32, Image*> images;
+		std::unordered_map<Uint32, Image*> rwimages;
 		std::unordered_map<Uint32, Buff*> ubo;
 		std::unordered_map<Uint32, Buff*> ssbo;
 	};

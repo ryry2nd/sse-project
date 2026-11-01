@@ -3,7 +3,6 @@
 GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 {
 	SCOPE("Rendering::OpenGL::FBO::create");
-	spdlog::debug("Creating frame buffer with res: {},{}", res.x, res.y);
 	this->res = res;
 	this->settings = settings;
 
@@ -12,8 +11,6 @@ GlFrameBuffer::GlFrameBuffer(glm::vec2 res, uint32_t settings)
 
 	glGenFramebuffers(1, &id);
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
-
-	spdlog::debug("Set FBO id to 0x{:x}", id);
 
 	// -------------------------
 	// COLOR
