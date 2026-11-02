@@ -127,29 +127,29 @@ extern "C" {
 
 		Buff *modelTexBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &texmodel);
 
-		mattex.mat.images[0] = fontimg;
-		mattex.mat.shader = textShader;
-		mattex.mat.ubo[0] = modelTexBuff;
-		mattex.mat.ubo[1] = camBuff;
-		mattex.mat.settings |= Material::EnableClear;
-		mattex.mat.settings |= Material::DisableCulling;
-		mattex.mesh = texplane;
+		mattex.mat[0].images[0] = fontimg;
+		mattex.mat[0].shader = textShader;
+		mattex.mat[0].ubo[0] = modelTexBuff;
+		mattex.mat[0].ubo[1] = camBuff;
+		mattex.mat[0].settings |= Material::EnableClear;
+		mattex.mat[0].settings |= Material::DisableCulling;
+		mattex.mesh[0] = texplane;
 
-		mat.mat.images[0] = img;
-		mat.mat.shader = cubeShader;
-		mat.mat.ubo[0] = modelBuff;
-		mat.mat.ubo[1] = camBuff;
-		mat.mesh = cube;
+		mat.mat[0].images[0] = img;
+		mat.mat[0].shader = cubeShader;
+		mat.mat[0].ubo[0] = modelBuff;
+		mat.mat[0].ubo[1] = camBuff;
+		mat.mesh[0] = cube;
 
-		bigMat.mat.images[0] = img;
-		bigMat.mat.shader = cubeShader;
-		bigMat.mat.ubo[0] = megaBuff;
-		bigMat.mat.ubo[1] = camBuff;
-		bigMat.mesh = megaCube;
+		bigMat.mat[0].images[0] = img;
+		bigMat.mat[0].shader = cubeShader;
+		bigMat.mat[0].ubo[0] = megaBuff;
+		bigMat.mat[0].ubo[1] = camBuff;
+		bigMat.mesh[0] = megaCube;
 
-		inMat.mat.shader = cubeInstanceShader;
-		inMat.mat.ubo[0] = camBuff;
-		inMat.mesh = cube;
+		inMat.mat[0].shader = cubeInstanceShader;
+		inMat.mat[0].ubo[0] = camBuff;
+		inMat.mesh[0] = cube;
 
 		glm::vec3 gridSize(32);
 		std::vector<ModelStruct> models;
@@ -165,13 +165,13 @@ extern "C" {
 
 		Buff *cubeInstanceBuff = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(ModelStruct)*models.size(), models.data());
 
-		inMat.mat.instanceCount = models.size();
-		inMat.mat.ssbo[0] = cubeInstanceBuff;
+		inMat.mat[0].instanceCount = models.size();
+		inMat.mat[0].ssbo[0] = cubeInstanceBuff;
 
-		debugMat.mat.shader = debugVectorShader;
-		debugMat.mat.meshType = InternalParams::MeshTypes::Lines;
-		debugMat.mat.ubo[0] = camBuff;
-		debugMat.mesh = nullptr;
+		debugMat.mat[0].shader = debugVectorShader;
+		debugMat.mat[0].meshType = InternalParams::MeshTypes::Lines;
+		debugMat.mat[0].ubo[0] = camBuff;
+		debugMat.mesh[0] = nullptr;
 
 		std::vector<Vert> vertsfbo;
 		std::vector<Ind> indsfbo;
@@ -190,20 +190,20 @@ extern "C" {
 
 		glm::mat4 fboMpv = fboMPV(res);
 		Buff *fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fboMpv);
-		fboMat.mat.shader = tex2dShader;
-		fboMat.mat.ubo[0] = fboBuff;
-		fboMat.mat.images[0] = fbo->getColorImage();
-		fboMat.mat.settings |= Material::EnableClear;
-		fboMat.mesh = fboMesh;
+		fboMat.mat[0].shader = tex2dShader;
+		fboMat.mat[0].ubo[0] = fboBuff;
+		fboMat.mat[0].images[0] = fbo->getColorImage();
+		fboMat.mat[0].settings |= Material::EnableClear;
+		fboMat.mesh[0] = fboMesh;
 
 		glm::mat4 fpsMpv = fboMPV(res, {0, res.y - 100, 0.5}, {100, 100});
 		Buff *fpsBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fpsMpv);
 		Image *fpsimg = createImage(ImageSettings::tex());
-		fpsMat.mat.shader = tex2dShader;
-		fpsMat.mat.ubo[0] = fpsBuff;
-		fpsMat.mat.images[0] = fpsimg;
-		fpsMat.mat.settings |= Material::EnableClear;
-		fpsMat.mesh = flatMesh;
+		fpsMat.mat[0].shader = tex2dShader;
+		fpsMat.mat[0].ubo[0] = fpsBuff;
+		fpsMat.mat[0].images[0] = fpsimg;
+		fpsMat.mat[0].settings |= Material::EnableClear;
+		fpsMat.mesh[0] = flatMesh;
 
 
 		std::vector<Shape> monkeyShapes;
@@ -216,10 +216,10 @@ extern "C" {
 
 		Buff *monkeyModel = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &monkeyMod);
 
-		monkeyMat.mat.shader = monkeyShader;
-		monkeyMat.mat.ubo[0] = monkeyModel;
-		monkeyMat.mat.ubo[1] = camBuff;
-		monkeyMat.mesh = monkeyMesh;
+		monkeyMat.mat[0].shader = monkeyShader;
+		monkeyMat.mat[0].ubo[0] = monkeyModel;
+		monkeyMat.mat[0].ubo[1] = camBuff;
+		monkeyMat.mesh[0] = monkeyMesh;
 
 
 		std::vector<Shape> teaShapes;
@@ -232,22 +232,16 @@ extern "C" {
 
 		Buff *teaModel = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &teaMod);
 
-		teaMat.mat.shader = monkeyShader;
-		teaMat.mat.ubo[0] = teaModel;
-		teaMat.mat.ubo[1] = camBuff;
-		teaMat.mat.settings |= Material::DisableCulling;
-		teaMat.mesh = teaMesh;
+		teaMat.mat[0].shader = monkeyShader;
+		teaMat.mat[0].ubo[0] = teaModel;
+		teaMat.mat[0].ubo[1] = camBuff;
+		teaMat.mat[0].settings |= Material::DisableCulling;
+		teaMat.mesh[0] = teaMesh;
 
 		std::vector<Shape> sunShape;
-		Mesh::getObj((MODULE_PATH + "/assets/models/ActualSolarSystem.obj").c_str(), sunShape);
-		const Shape &sshape = sunShape[0];
+		Mesh::getObj((MODULE_PATH + "/assets/models/gift-box-obj/gift-box.obj").c_str(), sunShape);
 
-		Mesh *sunmodel = createMesh(sshape.verts.data(), sshape.verts.size(), sshape.inds.data(), sshape.inds.size());
-
-		glm::mat4 sunmod = glm::scale(glm::translate(glm::mat4(1.0f), {15, 0, -3}), glm::vec3(0.5f));
-		Buff *sunbuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &sunmod);
-
-		struct alignas(16) Material
+		struct alignas(16) Mat
 		{
 			glm::vec3 ambient;
 			float pad0 = 0;
@@ -267,24 +261,42 @@ extern "C" {
 			float pad4 = 0;
 		};
 
-		Material sunmatyeet;
-		sunmatyeet.ambient = sshape.ambient;
-		sunmatyeet.diffuse = sshape.diffuse;
-		sunmatyeet.specular = sshape.specular;
-		sunmatyeet.emissive = sshape.emissive;
-		sunmatyeet.shininess = sshape.shininess;
-		sunmatyeet.opacity = sshape.opacity;
-		sunmatyeet.ior = sshape.ior;
+		glm::mat4 sunmod = glm::scale(glm::translate(glm::mat4(1.0f), {15, 0, -3}), glm::vec3(5.0f));
+		Buff *sunbuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &sunmod);
 
-		// sshape.print();
+		for (int i = 0; i < sunShape.size(); i++) {
+			const Shape &sshape = sunShape[i];
 
-		Buff *sunMatBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Material), &sunmatyeet);
+			Mat sunmatyeet;
+			sunmatyeet.ambient = sshape.ambient;
+			sunmatyeet.diffuse = sshape.diffuse;
+			sunmatyeet.specular = sshape.specular;
+			sunmatyeet.emissive = sshape.emissive;
+			sunmatyeet.shininess = sshape.shininess;
+			sunmatyeet.opacity = sshape.opacity;
+			sunmatyeet.ior = sshape.ior;
 
-		sun.mat.shader = objectShader;
-		sun.mat.ubo[0] = sunbuff;
-		sun.mat.ubo[1] = camBuff;
-		sun.mat.ubo[2] = sunMatBuff;
-		sun.mesh = sunmodel;
+			sshape.print();
+
+			Image *diffuse = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.diffuseTex).c_str());
+			Image *bump = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.bumpTex).c_str());
+			Image *metallic = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.metallicTex).c_str());
+			Image *roughness = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.roughnessTex).c_str());
+
+			Buff *sunMatBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Material), &sunmatyeet);
+
+			Material mat;
+			mat.shader = objectShader;
+			mat.ubo[0] = sunbuff;
+			mat.ubo[1] = camBuff;
+			mat.ubo[2] = sunMatBuff;
+			mat.images[0] = diffuse;
+			mat.images[1] = bump;
+			mat.images[2] = metallic;
+			mat.images[3] = roughness;
+			sun.mat.push_back(mat);
+			sun.mesh.push_back(createMesh(sshape.verts.data(), sshape.verts.size(), sshape.inds.data(), sshape.inds.size()));
+		}
 	}
 
 	void loop() {
@@ -315,13 +327,13 @@ extern "C" {
 			float fps = win->getFPS();
 			Surface fpstexsurf;
 			font->RenderText(std::format("{:.2f}", fps).c_str(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), &fpstexsurf);
-			Image *fpsimg = fpsMat.mat.images[0];
+			Image *fpsimg = fpsMat.mat[0].images[0];
 			fpsimg->clearTransparent();
 			fpsimg->updateImage(&fpstexsurf);
 
 			#define fpsScale 40
 			glm::mat4 fpsMpv = fboMPV(res, {0, res.y - fpsScale, 0.5}, {(fpsimg->getWidth() / fpsimg->getHeight()) * fpsScale, fpsScale});
-			fpsMat.mat.ubo[0]->write(0, sizeof(glm::mat4), &fpsMpv);
+			fpsMat.mat[0].ubo[0]->write(0, sizeof(glm::mat4), &fpsMpv);
 
 			start = RenderTarget::getCurrTime();
 		}
@@ -369,7 +381,7 @@ extern "C" {
 
 		cam.view = cameraGetView(camPos, camRot);
 
-		mat.mat.ubo[0]->write(0, sizeof(ModelStruct), &model);
+		mat.mat[0].ubo[0]->write(0, sizeof(ModelStruct), &model);
 		camBuff->write(0, sizeof(CameraStruct), &cam);
 
 		mat.draw(fbo);

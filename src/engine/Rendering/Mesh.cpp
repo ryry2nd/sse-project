@@ -117,6 +117,8 @@ void Mesh::getObj(const char* fname, std::vector<Shape>& shapesout)
             out.bumpTex = mat.bump_texname;
             out.normalTex = mat.normal_texname;
             out.displacementTex = mat.displacement_texname;
+			out.metallicTex = mat.metallic_texname;
+			out.roughnessTex = mat.roughness_texname;
         }
 
         for (size_t i = 0; i < mesh.indices.size(); ++i) {
@@ -136,9 +138,9 @@ void Mesh::getObj(const char* fname, std::vector<Shape>& shapesout)
                     static_cast<size_t>(idx.texcoord_index) * 2;
 
                 v.tex = {
-                    attrib.texcoords[ti],
-                    attrib.texcoords[ti + 1]
-                };
+					attrib.texcoords[ti],
+					1.0f - attrib.texcoords[ti + 1]
+				};
             } else {
                 v.tex = { 0.0f, 0.0f };
             }
@@ -216,6 +218,13 @@ void Shape::print() const
 
     spdlog::info("Displacement texture: {}",
         displacementTex.empty() ? "<none>" : displacementTex);
+
+	spdlog::info("Metallic texture:     {}",
+        metallicTex.empty() ? "<none>" : metallicTex);
+
+	spdlog::info("Roughness texture:    {}",
+        roughnessTex.empty() ? "<none>" : roughnessTex);
+
 
     spdlog::info("===============================");
 }

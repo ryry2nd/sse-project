@@ -39,6 +39,8 @@ namespace Engine::Rendering
 		std::string bumpTex;      // bump / map_Bump
 		std::string normalTex;    // norm
 		std::string displacementTex; // disp
+		std::string metallicTex; // map_Pm
+		std::string roughnessTex; // map_Pr
 
 		void print() const;
 	};
