@@ -40,96 +40,146 @@ typedef float4 vec4;
 #define DEFAULT_EDGE_STRENGTH 0.15f
 
 
-struct Input
-{
-	vec3 aPos      : POSITION;
-	vec2 aTexCoord : TEXCOORD0;
-	vec3 aNormal   : NORMAL;
-};
+static const float PI = float.getPi();
 
-struct Output
-{
-	vec2 TexCoord;
-	vec3 Normal;
-	vec3 WorldPos;
-	vec4 ViewPos;
-	vec4 position : SV_Position;
-};
+namespace Structs {
+	struct Input
+	{
+		vec3 aPos      : POSITION;
+		vec2 aTexCoord : TEXCOORD0;
+		vec3 aNormal   : NORMAL;
+	};
 
-struct Camera
-{
-	mat4 view;
-	mat4 proj;
-};
+	struct Output
+	{
+		vec2 TexCoord;
+		vec3 Normal;
+		vec3 WorldPos;
+		vec4 ViewPos;
+		vec4 position : SV_Position;
+	};
 
-struct Material
-{
-    float3 ambient;
-    float pad0;
+	struct Camera
+	{
+		mat4 view;
+		mat4 proj;
+	};
 
-    float3 diffuse;
-    float pad1;
+	struct Material
+	{
+		float3 ambient;
+		float pad0;
 
-    float3 specular;
-    float pad2;
+		float3 diffuse;
+		float pad1;
 
-    float3 emissive;
-    float shininess;
+		float3 specular;
+		float pad2;
 
-    float opacity;
-    float ior;
-    float pad3;
-    float pad4;
-};
+		float3 emissive;
+		float shininess;
 
-typedef mat4 Model;
+		float opacity;
+		float ior;
+		float pad3;
+		float pad4;
+	};
 
-vec3 transformNormal(vec3 normal, mat4 model)
-{
-    return normalize(mul((mat3)model, normal));
+	typedef mat4 Model;
 }
 
-float edgeDarken(vec2 texCoord, float inner, float outer, float strength)
-{
-	vec2 uv = vec2(frac(texCoord.x), frac(texCoord.y)) - 0.5f;
-    float edge = length(uv);
-    float dark = smoothstep(inner, outer, edge);
-    return 1.0 - dark * strength;
+namespace Normals {
+	vec3 transformNormal(vec3 normal, mat4 model)
+	{
+		return normalize(mul((mat3)model, normal));
+	}
+
+	vec3 SafeNormalize(vec3 v, vec3 fallback)
+	{
+		float lenSq = dot(v, v);
+
+		if (lenSq < 0.000001)
+			return fallback;
+
+		return v * rsqrt(lenSq);
+	}
+
+	vec3 GetNormalFromMap(vec3 normal, vec3 position, vec2 uv, Sampler2D bumpTexture)
+	{
+		vec3 N = SafeNormalize(normal, vec3(0.0, 0.0, 1.0));
+
+		vec3 dp1 = ddx(position);
+		vec3 dp2 = ddy(position);
+
+		vec2 duv1 = ddx(uv);
+		vec2 duv2 = ddy(uv);
+
+		vec3 T = dp1 * duv2.y - dp2 * duv1.y;
+		vec3 B = -dp1 * duv2.x + dp2 * duv1.x;
+
+		T = T - N * dot(N, T);
+		T = SafeNormalize(T, vec3(1.0, 0.0, 0.0));
+
+		// Preserve UV orientation.
+		float handedness = dot(cross(N, T), B) < 0.0 ? -1.0 : 1.0;
+		B = cross(N, T) * handedness;
+
+		vec3 normalMap = bumpTexture.Sample(uv).rgb;
+		normalMap = normalMap * 2.0 - 1.0;
+
+		return SafeNormalize(
+			T * normalMap.x +
+			B * normalMap.y +
+			N * normalMap.z,
+			N
+		);
+	}
 }
 
+namespace Fog {
+	float fogExp2(float dist, float density)
+	{
+		return exp(-(dist * density) * (dist * density));
+	}
 
-float fogExp2(float dist, float density)
-{
-    return exp(-(dist * density) * (dist * density));
+
+	vec3 applyFog(vec3 inColor, vec3 fogColor, vec4 viewPos, float density) {
+		float dist = length(viewPos.xyz);
+		float fog = fogExp2(dist, density);
+		return lerp(fogColor, inColor, fog);
+	}
 }
 
+namespace Utils {
+	vec3 applyAO(vec3 normal, vec3 color) {
+		vec3 N = normalize(normal);
+		float shade = 0.65 + 0.35 * abs(N.y);
+		return color * shade;
+	}
 
-vec3 applyFog(vec3 inColor, vec3 fogColor, vec4 viewPos, float density) {
-	float dist = length(viewPos.xyz);
-	float fog = fogExp2(dist, density);
-	return lerp(fogColor, inColor, fog);
-}
+	float edgeDarken(vec2 texCoord, float inner, float outer, float strength)
+	{
+		vec2 uv = vec2(frac(texCoord.x), frac(texCoord.y)) - 0.5f;
+		float edge = length(uv);
+		float dark = smoothstep(inner, outer, edge);
+		return 1.0 - dark * strength;
+	}
 
-vec3 applyAO(vec3 normal, vec3 color) {
-	vec3 N = normalize(normal);
-    float shade = 0.65 + 0.35 * abs(N.y);
-	return color * shade;
-}
+	Structs::Output getPosition(mat4 model, mat4 view, mat4 proj, Structs::Input input) {
+		Structs::Output output;
 
-Output getPosition(mat4 model, mat4 view, mat4 proj, Input input) {
-	Output output;
+		vec4 worldPos = mul(model, vec4(input.aPos, 1.0));
 
-	vec4 worldPos = mul(model, vec4(input.aPos, 1.0));
+		output.WorldPos = worldPos.xyz;
 
-	output.WorldPos = worldPos.xyz;
+		output.Normal = Normals::transformNormal(input.aNormal, model);
 
-	output.Normal = transformNormal(input.aNormal, model);
+		output.TexCoord = input.aTexCoord;
 
-	output.TexCoord = input.aTexCoord;
+		output.ViewPos = mul(view, worldPos);
 
-	output.ViewPos = mul(view, worldPos);
+		output.position = mul(proj, output.ViewPos);
 
-	output.position = mul(proj, output.ViewPos);
-
-	return output;
+		return output;
+	}
 }

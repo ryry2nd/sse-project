@@ -1,5 +1,9 @@
 #include ".base.slang"
 
+using namespace Structs;
+using namespace Normals;
+using namespace Utils;
+
 struct VSOutput
 {
 	vec4 position : SV_Position;

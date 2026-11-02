@@ -1,6 +1,10 @@
 #include ".base.slang"
 #include ".colors.slang"
 
+using namespace Structs;
+using namespace Normals;
+using namespace Utils;
+
 typedef Input VSInput;
 typedef Output VSOutput;
 

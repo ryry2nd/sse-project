@@ -1,5 +1,9 @@
 #include ".base.slang"
 
+using namespace Structs;
+using namespace Normals;
+using namespace Utils;
+
 BINDING_SRV(0)
 RWStructuredBuffer<uint> outputBuffer;
 
