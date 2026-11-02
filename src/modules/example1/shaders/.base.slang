@@ -62,6 +62,26 @@ struct Camera
 	mat4 proj;
 };
 
+struct Material
+{
+    float3 ambient;
+    float pad0;
+
+    float3 diffuse;
+    float pad1;
+
+    float3 specular;
+    float pad2;
+
+    float3 emissive;
+    float shininess;
+
+    float opacity;
+    float ior;
+    float pad3;
+    float pad4;
+};
+
 typedef mat4 Model;
 
 vec3 transformNormal(vec3 normal, mat4 model)

@@ -30,6 +30,7 @@ Object fboMat;
 Object fpsMat;
 Object monkeyMat;
 Object teaMat;
+Object sun;
 
 CameraStruct cam;
 Buff *camBuff;
@@ -96,6 +97,7 @@ extern "C" {
 		Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 		Shader *textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
 		Shader *monkeyShader = createShader((MODULE_PATH + "/shaders/monkey").c_str());
+		Shader *objectShader = createShader((MODULE_PATH + "/shaders/object").c_str());
 		Mesh *cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
 		Mesh *megaCube = createMesh(vertsbox.data(), vertsbox.size(), indsbox.data(), indsbox.size());
 		Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
@@ -235,6 +237,54 @@ extern "C" {
 		teaMat.mat.ubo[1] = camBuff;
 		teaMat.mat.settings |= Material::DisableCulling;
 		teaMat.mesh = teaMesh;
+
+		std::vector<Shape> sunShape;
+		Mesh::getObj((MODULE_PATH + "/assets/models/ActualSolarSystem.obj").c_str(), sunShape);
+		const Shape &sshape = sunShape[0];
+
+		Mesh *sunmodel = createMesh(sshape.verts.data(), sshape.verts.size(), sshape.inds.data(), sshape.inds.size());
+
+		glm::mat4 sunmod = glm::scale(glm::translate(glm::mat4(1.0f), {15, 0, -3}), glm::vec3(0.5f));
+		Buff *sunbuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &sunmod);
+
+		struct alignas(16) Material
+		{
+			glm::vec3 ambient;
+			float pad0 = 0;
+
+			glm::vec3 diffuse;
+			float pad1 = 0;
+
+			glm::vec3 specular;
+			float pad2 = 0;
+
+			glm::vec3 emissive;
+			float shininess = 1.0f;
+
+			float opacity = 1.0f;
+			float ior = 1.0f;
+			float pad3 = 0;
+			float pad4 = 0;
+		};
+
+		Material sunmatyeet;
+		sunmatyeet.ambient = sshape.ambient;
+		sunmatyeet.diffuse = sshape.diffuse;
+		sunmatyeet.specular = sshape.specular;
+		sunmatyeet.emissive = sshape.emissive;
+		sunmatyeet.shininess = sshape.shininess;
+		sunmatyeet.opacity = sshape.opacity;
+		sunmatyeet.ior = sshape.ior;
+
+		// sshape.print();
+
+		Buff *sunMatBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Material), &sunmatyeet);
+
+		sun.mat.shader = objectShader;
+		sun.mat.ubo[0] = sunbuff;
+		sun.mat.ubo[1] = camBuff;
+		sun.mat.ubo[2] = sunMatBuff;
+		sun.mesh = sunmodel;
 	}
 
 	void loop() {
@@ -328,6 +378,7 @@ extern "C" {
 		monkeyMat.draw(fbo);
 		teaMat.draw(fbo);
 		debugMat.draw(fbo);
+		sun.draw(fbo);
 		mattex.draw(fbo);
 		fboMat.draw(win);
 		fpsMat.draw(win);

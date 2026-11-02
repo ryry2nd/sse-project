@@ -1,4 +1,5 @@
 
+#include <filesystem>
 #include <spdlog/spdlog.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -18,13 +19,17 @@ void Mesh::getObj(const char* fname, std::vector<Shape>& shapesout)
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
+	const std::filesystem::path objPath(fname);
+	const std::string baseDir = objPath.parent_path().string();
+
     const bool ok = tinyobj::LoadObj(
         &attrib,
         &objShapes,
         &materials,
         &warn,
         &err,
-        fname
+        fname,
+		baseDir.c_str()
     );
 
     if (!warn.empty()) {
@@ -160,4 +165,57 @@ void Mesh::getObj(const char* fname, std::vector<Shape>& shapesout)
 
     // Replace output only after successful construction.
     shapesout = std::move(loaded);
+}
+
+void Shape::print() const
+{
+    spdlog::info("========== OBJ SHAPE ==========");
+
+    // Colors
+    spdlog::info("Ambient:  ({}, {}, {})",
+        ambient.x, ambient.y, ambient.z);
+
+    spdlog::info("Diffuse:  ({}, {}, {})",
+        diffuse.x, diffuse.y, diffuse.z);
+
+    spdlog::info("Specular: ({}, {}, {})",
+        specular.x, specular.y, specular.z);
+
+    spdlog::info("Emissive: ({}, {}, {})",
+        emissive.x, emissive.y, emissive.z);
+
+    // Surface properties
+    spdlog::info("Shininess: {}", shininess);
+    spdlog::info("Opacity:   {}", opacity);
+    spdlog::info("IOR:       {}", ior);
+
+    // Textures
+    spdlog::info("Ambient texture:      {}",
+        ambientTex.empty() ? "<none>" : ambientTex);
+
+    spdlog::info("Diffuse texture:      {}",
+        diffuseTex.empty() ? "<none>" : diffuseTex);
+
+    spdlog::info("Specular texture:     {}",
+        specularTex.empty() ? "<none>" : specularTex);
+
+    spdlog::info("Emissive texture:     {}",
+        emissiveTex.empty() ? "<none>" : emissiveTex);
+
+    spdlog::info("Shininess texture:    {}",
+        shininessTex.empty() ? "<none>" : shininessTex);
+
+    spdlog::info("Opacity texture:      {}",
+        opacityTex.empty() ? "<none>" : opacityTex);
+
+    spdlog::info("Bump texture:         {}",
+        bumpTex.empty() ? "<none>" : bumpTex);
+
+    spdlog::info("Normal texture:       {}",
+        normalTex.empty() ? "<none>" : normalTex);
+
+    spdlog::info("Displacement texture: {}",
+        displacementTex.empty() ? "<none>" : displacementTex);
+
+    spdlog::info("===============================");
 }

@@ -39,6 +39,8 @@ namespace Engine::Rendering
 		std::string bumpTex;      // bump / map_Bump
 		std::string normalTex;    // norm
 		std::string displacementTex; // disp
+
+		void print() const;
 	};
 
 	class Mesh
