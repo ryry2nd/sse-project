@@ -31,10 +31,12 @@ This is an example of how my module system works and how to interact with the en
 extern "C" {
     void setup() {
         std::cout << "Hello from example!\n";
-        std::cout << "Path: " << MODULE_PATH << "\n";
     }
     void loop() {
         std::cout << "loop\n";
+    }
+    void shutdown() {
+        std::cout << "Shutting down example\n";
     }
 }
 ```
