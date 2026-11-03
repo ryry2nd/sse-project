@@ -14,6 +14,8 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	}
 }
 
+#define MESH_CLAMP(mesh) (GLsizei)((mesh->limit == 0 && mesh->limit < mesh->getInd()) ? mesh->getInd() : mesh->limit)
+
 #define DRAW_CALL(mesh, params) \
 { \
 	if (params.useArray || !mesh) \
@@ -28,7 +30,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		if (params.instanceCount) \
 			glDrawElementsInstanced( \
 				convertMeshType(params.meshType), \
-				(GLsizei)mesh->getInd(), \
+				MESH_CLAMP(mesh), \
 				GL_UNSIGNED_INT, \
 				nullptr, \
 				params.instanceCount \
@@ -36,7 +38,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		else \
 			glDrawElements( \
 				convertMeshType(params.meshType), \
-				(GLsizei)mesh->getInd(), \
+				MESH_CLAMP(mesh), \
 				GL_UNSIGNED_INT, \
 				nullptr \
 			); \
@@ -221,11 +223,7 @@ extern "C" void computeCall(ComputeParams *params) {
 
 	glDispatchCompute(groups.x, groups.y, groups.z);
 
-	enum Outputs : Uint8
-	{
-		SSBO	= 1 << 0,
-		IMAGE	= 1 << 1,
-	};
+	typedef ComputeParams::Outputs Outputs;
 
 	if ((params->output & Outputs::SSBO) && (params->output & Outputs::IMAGE))
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);

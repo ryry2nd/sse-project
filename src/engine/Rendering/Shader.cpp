@@ -23,8 +23,6 @@ std::pair<std::vector<Uint32>, std::vector<Uint32>> Shader::getRaw(std::string p
 		std::exit(1);
 	}
 
-	spdlog::debug("creating shader with paths: \n{}\n{}", vertexPath, fragmentPath);
-
 	size_t size;
 
 	std::ifstream vertFile(vertexPath, std::ios::binary | std::ios::ate);
@@ -51,8 +49,6 @@ std::vector<Uint32> Shader::getRawCompute(std::string prePath) {
 		spdlog::critical("Shader path {} does not exist.", path);
 		std::exit(1);
 	}
-
-	spdlog::debug("creating shader with path: \n{}", compPath);
 
 	size_t size;
 

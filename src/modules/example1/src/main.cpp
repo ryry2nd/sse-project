@@ -276,7 +276,7 @@ extern "C" {
 			sunmatyeet.opacity = sshape.opacity;
 			sunmatyeet.ior = sshape.ior;
 
-			sshape.print();
+			// sshape.print();
 
 			Image *diffuse = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.diffuseTex).c_str());
 			Image *bump = createImage((MODULE_PATH + "/assets/models/gift-box-obj/" + sshape.bumpTex).c_str());

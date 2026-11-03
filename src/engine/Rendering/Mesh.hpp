@@ -57,5 +57,7 @@ namespace Engine::Rendering
 
 		virtual Buff *vertBuff() = 0;
 		virtual Buff *indBuff() = 0;
+
+		size_t limit = 0;
 	};
 }
