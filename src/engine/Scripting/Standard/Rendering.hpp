@@ -7,7 +7,7 @@ namespace Engine::Rendering {
 		void initAPI(const char *apiName);
 		void draw(RenderTarget *target, Mesh *mesh, DrawParams *params, size_t size = 1);
 		void computeCall(ComputeParams *params);
-		Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse);
+		Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, Uint8 mode, int vsync);
 		void removeWindow(Window *win);
 		Mesh *createMesh(const Vert *vertices, const size_t vert_size, const Ind *indices, const size_t ind_size);
 		void removeMesh(Mesh *mesh);

@@ -7,10 +7,10 @@
 #define MAJOR_VERSION 4
 #define MINOR_VERSION 6
 
-APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse)
+APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync)
 {
 	SCOPE("Rendering::OpenGL::Window::create");
-	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, fullscreen, hideMouse));
+	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, mode));
 	// this does what it says
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, MAJOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MINOR_VERSION);
@@ -115,6 +115,10 @@ void APIWindow::setWindow() {
 	SDL_GL_MakeCurrent(window, glContext);
 }
 
+void APIWindow::setMode(Uint8 mode) {
+	_setMode(window, mode);
+}
+
 APIWindow::~APIWindow()
 {
 	SCOPE("Rendering::OpenGL::Window::delete");
@@ -122,6 +126,6 @@ APIWindow::~APIWindow()
 	_destroyWindow(window);
 }
 
-extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true) {
-    return std::make_unique<APIWindow>(res, name, flags, aa, fullscreen, vsync, hideMouse);
+extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync) {
+    return std::make_unique<APIWindow>(res, name, flags, aa, mode, vsync);
 }

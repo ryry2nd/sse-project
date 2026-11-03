@@ -59,8 +59,8 @@ extern "C" {
 		getApiFunctions()->createDrawCompFunc(params);
 	}
 
-	Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, bool fullscreen, int vsync, bool hideMouse) {
-		auto win = getApiFunctions()->createWindowFunc(res, winName, flags, aa, fullscreen, vsync, hideMouse);
+	Window *createWindow(glm::vec2 res, const char *winName, Uint32 flags, Uint32 aa, Uint8 mode, int vsync) {
+		auto win = getApiFunctions()->createWindowFunc(res, winName, flags, aa, mode, vsync);
 		auto ret = win.get();
 		TRACK_ADD(ret, sizeof(Window), "Windows");
 		wins.push_back(std::move(win));

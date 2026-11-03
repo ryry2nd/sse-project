@@ -41,11 +41,12 @@ private:
 class APIWindow : public Window
 {
 public:
-	APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa = 0, bool fullscreen = false, int vsync = 0, bool hideMouse = true);
+	APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync);
 	virtual void clearBackground();
 	virtual void swapBuffer();
 	virtual void setBackgroundColor(glm::vec4 color);
 	virtual void updateScreenRes();
+	virtual void setMode(Uint8);
 	void setWindow();
 	~APIWindow();
 
