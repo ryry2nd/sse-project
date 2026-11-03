@@ -170,6 +170,7 @@ extern "C" {
 
 		debugMat.mat[0].shader = debugVectorShader;
 		debugMat.mat[0].meshType = InternalParams::MeshTypes::Lines;
+		debugMat.mat[0].idxCount = 6;
 		debugMat.mat[0].ubo[0] = camBuff;
 		debugMat.mesh[0] = nullptr;
 
@@ -264,6 +265,8 @@ extern "C" {
 		glm::mat4 sunmod = glm::scale(glm::translate(glm::mat4(1.0f), {15, 0, -3}), glm::vec3(5.0f));
 		Buff *sunbuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &sunmod);
 
+		sun.mat.resize(sunShape.size());
+		sun.mesh.resize(sunShape.size());
 		for (int i = 0; i < sunShape.size(); i++) {
 			const Shape &sshape = sunShape[i];
 
@@ -294,8 +297,8 @@ extern "C" {
 			mat.images[1] = bump;
 			mat.images[2] = metallic;
 			mat.images[3] = roughness;
-			sun.mat.push_back(mat);
-			sun.mesh.push_back(createMesh(sshape.verts.data(), sshape.verts.size(), sshape.inds.data(), sshape.inds.size()));
+			sun.mat[i] = mat;
+			sun.mesh[i] = createMesh(sshape.verts.data(), sshape.verts.size(), sshape.inds.data(), sshape.inds.size());
 		}
 	}
 

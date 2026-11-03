@@ -14,15 +14,16 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	}
 }
 
-#define MESH_CLAMP(mesh) (GLsizei)((mesh->limit == 0 && mesh->limit < mesh->getInd()) ? mesh->getInd() : mesh->limit)
+#define MESH_CLAMP(mesh, params) (GLsizei)((params.idxCount == 0 || params.idxCount > mesh->getInd()) ? mesh->getInd() : params.idxCount)
+#define MESH_START(mesh, params) (void*)(params.idxFirst * sizeof(uint32_t))
 
 #define DRAW_CALL(mesh, params) \
 { \
-	if (params.useArray || !mesh) \
+	if (!mesh) \
 	{ \
 		glDrawArrays( \
 			convertMeshType(params.meshType), \
-			params.arrayFirst, params.arrayCount \
+			params.idxFirst, params.idxCount \
 		); \
 	} \
 	else \
@@ -30,17 +31,17 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 		if (params.instanceCount) \
 			glDrawElementsInstanced( \
 				convertMeshType(params.meshType), \
-				MESH_CLAMP(mesh), \
+				MESH_CLAMP(mesh, params), \
 				GL_UNSIGNED_INT, \
-				nullptr, \
+				MESH_START(mesh, params), \
 				params.instanceCount \
 			); \
 		else \
 			glDrawElements( \
 				convertMeshType(params.meshType), \
-				MESH_CLAMP(mesh), \
+				MESH_CLAMP(mesh, params), \
 				GL_UNSIGNED_INT, \
-				nullptr \
+				MESH_START(mesh, params) \
 			); \
 	} \
 }
@@ -104,6 +105,11 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	}
 	else if (!glFBO){
 		spdlog::error("Target is neither a window or an fbo");
+		return;
+	}
+
+	if (!params.shader) {
+		spdlog::error("Shader program not found");
 		return;
 	}
 

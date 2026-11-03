@@ -16,7 +16,7 @@ APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, b
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, MINOR_VERSION);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-	spdlog::debug("Setting OpenGl version to {}.{}", MAJOR_VERSION, MINOR_VERSION);
+	spdlog::info("Setting OpenGl version to {}.{}", MAJOR_VERSION, MINOR_VERSION);
 
 	#ifdef DEBUG
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);

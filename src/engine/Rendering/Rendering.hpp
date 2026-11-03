@@ -21,8 +21,7 @@ namespace Engine::Rendering
 		{
 			HasInstanceCount	= 1 << 0,
 			HasSettings			= 1 << 1,
-			HasUseArray     	= 1 << 2,
-			HasArrayData    	= 1 << 3,
+			HasIdxData    		= 1 << 2,
 		};
 
 		static const uint32_t ENABLE_ALL = ~ uint32_t(0); // all 1s
@@ -30,10 +29,9 @@ namespace Engine::Rendering
 		uint32_t fieldMask = ENABLE_ALL;
 
 		enum Settings : uint32_t {
-			DisableScreen		= 1 << 0,
-			EnableClear			= 1 << 1,
-			DisableCulling		= 1 << 2,
-			DisableDepth		= 1 << 3,
+			EnableClear			= 1 << 0,
+			DisableCulling		= 1 << 1,
+			DisableDepth		= 1 << 2,
 		};
 
 		uint32_t settings = 0;
@@ -48,15 +46,13 @@ namespace Engine::Rendering
 		MeshTypes meshType = MeshTypes::Triangles;
 
 
-
 		size_t instanceCount = 0;
 
 
 		Shader* shader = nullptr;
 
-		bool useArray = false;
-		int arrayFirst = 0;
-		int arrayCount = 6;
+		int idxFirst = 0;
+		int idxCount = 0;
 
 		std::unordered_map<Uint32, Image*> images;
 		std::unordered_map<Uint32, Image*> rwimages;
