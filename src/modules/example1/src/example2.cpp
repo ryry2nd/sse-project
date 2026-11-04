@@ -64,6 +64,26 @@ void setup() {
 	Shader *chunkComputeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
 	// Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
+	Surface atlas;
+	atlas.width = 128;
+	atlas.height = 128 * 4;
+
+	std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png"};
+
+	for (int i = 0; i < 4; i++) {
+		Surface surf;
+		Surface::loadFile((MODULE_PATH + "/assets/textures/" + texts[i]).c_str(), &surf);
+
+		atlas.pixels.insert(atlas.pixels.end(), surf.pixels.begin(), surf.pixels.end());
+	}
+
+	ImageSettings imset;
+	imset.minFilter = ImageSettings::Filter::NearestMipmapNearest;
+	imset.magFilter = ImageSettings::Filter::Nearest;
+	imset.maxLevel = 5;
+
+	Image *imgatlas = createImage(&atlas, imset);
+	atlas.clear();
 
 	std::vector<Vert> vertsflat;
 	std::vector<Ind> indsflat;
@@ -171,6 +191,7 @@ void setup() {
 	Buff *chunkbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &chunkmd);
 
 	chunk.mesh[0] = chunkMesh;
+	chunk.mat[0].images[0] = imgatlas;
 	chunk.mat[0].shader = chunkShader;
 	chunk.mat[0].ubo[0] = chunkbuff;
 	chunk.mat[0].ubo[1] = camBuff;

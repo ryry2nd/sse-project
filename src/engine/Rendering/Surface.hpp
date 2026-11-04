@@ -102,8 +102,8 @@ namespace Engine::Rendering {
 		Uint8 a;
 	};
 	struct Surface {
-		Uint32 width;
-		Uint32 height;
+		Uint32 width = 0;
+		Uint32 height = 0;
 		std::vector<Pixel> pixels;
 
 		Surface(std::uint32_t width, std::uint32_t height)
@@ -114,6 +114,12 @@ namespace Engine::Rendering {
 
 		Surface()
 		{}
+
+		void clear() {
+			pixels.clear();
+			width = 0;
+			height = 0;
+		}
 
 		void resize(Uint32 width, Uint32 height) {
 			pixels.resize(width * height);

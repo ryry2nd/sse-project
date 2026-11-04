@@ -26,6 +26,17 @@ ConstantBuffer<float> seed;
 BINDING_CBV(1)
 ConstantBuffer<uint> size;
 
+static const float2 ATLAS_TILE_SIZE = float2(1.0, 0.25);
+
+static const float2 STONE_TILE = float2(0.0, 0.75);
+static const float2 GRASS_TILE  = float2(0.0, 0.50);
+static const float2 GRASS_SIDE_TILE = float2(0.0, 0.25);
+static const float2 DIRT_TILE  = float2(0.0, 0.00);
+
+#define DIRT 0
+#define GRASS 1
+#define STONE 2
+
 static const int3 directions[6] =
 {
     int3( 1, 0, 0),
@@ -113,7 +124,7 @@ float terrainHeight(int x, int z)
     float height = 16.0;
 
     height += continental * 13.0;
-    height += mountains * 9.0;
+    height += mountains * 18.0;
     height += hills * 4.0;
     height += detail * 1.5;
 
@@ -131,7 +142,9 @@ bool isSolid(int3 p)
     if (p.y >= size)
         return false;
 
-    return float(p.y) <= terrainHeight(p.x, p.z);
+	float height = terrainHeight(p.x, p.z);
+
+    return float(p.y) <= height;
 }
 
 void writeVertex(
@@ -166,11 +179,38 @@ void generateFace(int3 p, uint face)
     InterlockedAdd(sizesout[0].i, 6, indexBase);
 
     float3 base = float3(p);
+	vec2 tile;
 
-    writeVertex(vertexBase + 0, base + corners[face][0], float2(0,0), normals[face]);
-	writeVertex(vertexBase + 1, base + corners[face][1], float2(1,0), normals[face]);
-	writeVertex(vertexBase + 2, base + corners[face][2], float2(1,1), normals[face]);
-	writeVertex(vertexBase + 3, base + corners[face][3], float2(0,1), normals[face]);
+	float h = terrainHeight(p.x, p.z);
+	int sub = (int)floor(h) - p.y;
+
+	if (sub == 0)
+	{
+		tile = (face == 2) ? GRASS_TILE : GRASS_SIDE_TILE;
+	}
+	else if (sub == 1)
+	{
+		tile = DIRT_TILE;
+	}
+	else
+	{
+		tile = STONE_TILE;
+	}
+
+	#define ROTATION 3
+
+	float2 startUV = tile + float2(0.0, 0.25);
+	float2 endUV   = tile + float2(1.0, 0.0);
+
+	float2 uv0 = lerp(startUV, endUV, rotateUV(float2(0, 1), ROTATION));
+	float2 uv1 = lerp(startUV, endUV, rotateUV(float2(1, 1), ROTATION));
+	float2 uv2 = lerp(startUV, endUV, rotateUV(float2(1, 0), ROTATION));
+	float2 uv3 = lerp(startUV, endUV, rotateUV(float2(0, 0), ROTATION));
+
+    writeVertex(vertexBase + 0, base + corners[face][0], uv0, normals[face]);
+	writeVertex(vertexBase + 1, base + corners[face][1], uv1, normals[face]);
+	writeVertex(vertexBase + 2, base + corners[face][2], uv2, normals[face]);
+	writeVertex(vertexBase + 3, base + corners[face][3], uv3, normals[face]);
 
     inds[indexBase + 0] = vertexBase + 0;
     inds[indexBase + 1] = vertexBase + 1;

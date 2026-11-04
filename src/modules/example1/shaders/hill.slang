@@ -17,6 +17,9 @@ ConstantBuffer<Model> model;
 BINDING_CBV(1)
 ConstantBuffer<Camera> cam;
 
+BINDING_IMG(0)
+Sampler2D diffuseTexture;
+
 
 [shader("vertex")]
 VSOutput vertMain(VSInput input)
@@ -31,11 +34,14 @@ VSOutput vertMain(VSInput input)
 [shader("fragment")]
 vec4 fragMain(VSOutput input) : SV_Target
 {
-	float edgeFactor = edgeDarken(input.TexCoord, DEFAULT_EDGE_INNER, DEFAULT_EDGE_OUTER, DEFAULT_EDGE_STRENGTH);
+	vec4 texRaw = diffuseTexture.Sample(input.TexCoord);
 
-	vec3 rawColor = vec3(1.0f, 1.0f, 1.0f);
-	vec3 color = rawColor * edgeFactor;
+	// vec2 edgecoord = input.TexCoord;
+	// edgecoord.x /= 4;
+	// float edgeFactor = edgeDarken(edgecoord, DEFAULT_EDGE_INNER, DEFAULT_EDGE_OUTER, DEFAULT_EDGE_STRENGTH);
+
+	vec3 color = texRaw.xyz;
 	vec3 fogColor = Color::GRAY_FOG;
 
-	return vec4(applyFog(color, fogColor, input.ViewPos, DEFAULT_FOG_STRENGTH), 1.0f);
+	return vec4(applyFog(color, fogColor, input.ViewPos, DEFAULT_FOG_STRENGTH), texRaw.a);
 }

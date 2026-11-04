@@ -209,6 +209,18 @@ namespace Utils {
 		return 1.0 - dark * strength;
 	}
 
+	float2 rotateUV(float2 uv, uint rotations)
+	{
+		rotations %= 4;
+
+		for (uint i = 0; i < rotations; i++)
+		{
+			uv = float2(uv.y, 1.0 - uv.x);
+		}
+
+		return uv;
+	}
+
 	Structs::Output getPosition(mat4 model, mat4 view, mat4 proj, Structs::Input input) {
 		Structs::Output output;
 
