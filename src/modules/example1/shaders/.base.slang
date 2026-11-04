@@ -50,6 +50,8 @@ namespace Structs {
 		vec3 aNormal   : NORMAL;
 	};
 
+	typedef Input Vert;
+
 	struct Output
 	{
 		vec2 TexCoord;
@@ -147,6 +149,43 @@ namespace Fog {
 		float dist = length(viewPos.xyz);
 		float fog = fogExp2(dist, density);
 		return lerp(fogColor, inColor, fog);
+	}
+}
+
+namespace Random {
+	float2 randomGradient(int2 p, float seed)
+	{
+		float angle = frac(
+			sin(dot(float2(p) + seed, float2(127.1, 311.7)))
+			* 43758.5453
+		) * 6.2831853;
+
+		return float2(cos(angle), sin(angle));
+	}
+
+	float perlinNoise(float2 p, float seed)
+	{
+		int2 i = int2(floor(p));
+		float2 f = frac(p);
+
+		float2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+		float n00 = dot(randomGradient(i + int2(0, 0), seed), f - float2(0, 0));
+		float n10 = dot(randomGradient(i + int2(1, 0), seed), f - float2(1, 0));
+		float n01 = dot(randomGradient(i + int2(0, 1), seed), f - float2(0, 1));
+		float n11 = dot(randomGradient(i + int2(1, 1), seed), f - float2(1, 1));
+
+		float nx0 = lerp(n00, n10, u.x);
+		float nx1 = lerp(n01, n11, u.x);
+
+		return lerp(nx0, nx1, u.y);
+	}
+
+	float random(float2 p)
+	{
+		float3 p3 = frac(float3(p.xyx) * 0.1031);
+		p3 += dot(p3, p3.yzx + 33.33);
+		return frac((p3.x + p3.y) * p3.z);
 	}
 }
 

@@ -23,15 +23,13 @@ using namespace Engine::Input;
 using namespace ObjectSpace;
 
 namespace Example2 {
-Object mat;
 Object debugMat;
 Object fboMat;
 Object fpsMat;
+Object hill;
 
 CameraStruct cam;
 Buff *camBuff;
-
-ModelStruct model;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
@@ -45,8 +43,6 @@ void setup() {
 	cam.proj = cameraGetProj(res);
 	cam.view = cameraGetView(camPos, camRot);
 
-	model = glm::mat4(1.0f);
-
 	auto build2DFace = (void (*) (
 		std::vector<Vert>& vertices,
 		std::vector<Ind>& indices,
@@ -57,26 +53,17 @@ void setup() {
 	)) Module::getFunction("com.ryan.std", "build2DFace");
 
 
-	Shader *cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
 	Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 	Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
-	Shader *textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
-	Mesh *cube = createMesh(Objects::cubeVertices, Objects::vertCount, Objects::cubeIndices, Objects::indexCount);
-	Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
+	Shader *hillShader = createShader((MODULE_PATH + "/shaders/hill").c_str());
+	Shader *hillComputeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
+	// Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
 
 	std::vector<Vert> vertsflat;
 	std::vector<Ind> indsflat;
 
 	camBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(CameraStruct), &cam);
-	Buff *modelBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(ModelStruct), &model);
-
-	mat.mat[0].images[0] = img;
-	mat.mat[0].shader = cubeShader;
-	mat.mat[0].ubo[0] = modelBuff;
-	mat.mat[0].ubo[1] = camBuff;
-	mat.mesh[0] = cube;
-
 
 	debugMat.mat[0].shader = debugVectorShader;
 	debugMat.mat[0].meshType = InternalParams::MeshTypes::Lines;
@@ -115,6 +102,69 @@ void setup() {
 	fpsMat.mat[0].images[0] = fpsimg;
 	fpsMat.mat[0].settings |= Material::EnableClear;
 	fpsMat.mesh[0] = flatMesh;
+
+	#define length 100
+	#define width 100
+
+	std::vector<Vert> vertices;
+	std::vector<Ind> indices;
+
+	vertices.resize((length + 1) * (width + 1));
+
+	for (int z = 0; z <= width; z++) {
+		for (int x = 0; x <= length; x++) {
+
+			int index = z * (length + 1) + x;
+
+			vertices[index] = {
+				glm::vec3((float)x, 0.0f, (float)z),
+				glm::vec2((float)x,
+						 (float)z),
+				glm::vec3(0.0f, 1.0f, 0.0f)
+			};
+		}
+	}
+
+	for (int z = 0; z < width; z++) {
+		for (int x = 0; x < length; x++) {
+			unsigned int topLeft = z * (length + 1) + x;
+			unsigned int topRight = topLeft + 1;
+			unsigned int bottomLeft = topLeft + (length + 1);
+			unsigned int bottomRight = bottomLeft + 1;
+
+			indices.insert(indices.end(), {
+				topLeft, bottomLeft, topRight,
+				topRight, bottomLeft, bottomRight
+			});
+		}
+	}
+
+	glm::mat4 hillmd = glm::translate(glm::mat4(1.0f), {0, -30, 0});
+
+	Buff *hillbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &hillmd);
+
+	Uint32 hillsize = vertices.size();
+	Buff *hillsizebuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Uint32), &hillsize);
+
+	Mesh *planeMesh = createMesh(vertices.data(), vertices.size(), indices.data(), indices.size());
+
+	hill.mesh[0] = planeMesh;
+	hill.mat[0].shader = hillShader;
+	hill.mat[0].ubo[0] = hillbuff;
+	hill.mat[0].ubo[1] = camBuff;
+
+	ComputeParams pms;
+	pms.shader = hillComputeShader;
+	pms.ssbo[0] = planeMesh->vertBuff();
+	pms.ubo[0] = hillsizebuff;
+	pms.groups.x = (hillsize + 255) / 256;
+	pms.groups.y = 1;
+	pms.groups.z = 1;
+
+	computeCall(&pms);
+
+	removeShader(hillComputeShader);
+	removeBuff(hillsizebuff);
 }
 
 void loop() {
@@ -145,15 +195,6 @@ void loop() {
 
 		start = RenderTarget::getCurrTime();
 	}
-
-	static float rotate = 0.0f;
-
-	#define ROTATE_SPEED 1.0f
-
-	rotate += ROTATE_SPEED * deltaTime;
-
-	model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 2.0f, 0.0f));
-	model = glm::rotate(model, rotate, glm::vec3({0, 1, 0}));
 
 
 	int numKeys;
@@ -188,12 +229,10 @@ void loop() {
 	}
 
 	cam.view = cameraGetView(camPos, camRot);
-
-	mat.mat[0].ubo[0]->write(0, sizeof(ModelStruct), &model);
 	camBuff->write(0, sizeof(CameraStruct), &cam);
 
-	mat.draw(fbo);
 	debugMat.draw(fbo);
+	hill.draw(fbo);
 	fboMat.draw(win);
 	fpsMat.draw(win);
 	win->swapBuffer();
@@ -216,9 +255,9 @@ void event(Event *event) {
 }
 
 void shutdown() {
-	mat.clear();
 	debugMat.clear();
 	fboMat.clear();
 	fpsMat.clear();
+	hill.clear();
 }
 }
