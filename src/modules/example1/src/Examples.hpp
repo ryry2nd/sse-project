@@ -18,6 +18,7 @@ enum Mode : Uint32
 {
 	Men		= 0,
 	Ex1		= 1,
+	Ex2		= 2,
 };
 
 inline Uint32 mode = Mode::Ex1;
@@ -31,6 +32,13 @@ namespace Menu {
 }
 
 namespace Example1 {
+    void setup();
+    void loop();
+    void event(Engine::Input::Event *);
+	void shutdown();
+}
+
+namespace Example2 {
     void setup();
     void loop();
     void event(Engine::Input::Event *);

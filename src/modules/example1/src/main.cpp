@@ -36,6 +36,9 @@ extern "C" {
 			case Mode::Ex1:
 				Example1::setup();
 				break;
+			case Mode::Ex2:
+				Example2::setup();
+				break;
 		}
 
 	}
@@ -51,6 +54,9 @@ extern "C" {
 				break;
 			case Mode::Ex1:
 				Example1::loop();
+				break;
+			case Mode::Ex2:
+				Example2::loop();
 				break;
 		}
 	}
@@ -70,6 +76,9 @@ extern "C" {
 				break;
 			case Mode::Ex1:
 				Example1::event(event);
+				break;
+			case Mode::Ex2:
+				Example2::event(event);
 				break;
 		}
 	}

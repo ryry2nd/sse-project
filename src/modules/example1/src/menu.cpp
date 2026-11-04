@@ -84,6 +84,12 @@ void Menu::event(Event *event) {
 			mode = Mode::Ex1;
 			return;
 		}
+		else if (key == SDLK_2) {
+			Menu::shutdown();
+			Example2::setup();
+			mode = Mode::Ex2;
+			return;
+		}
 	}
 }
 

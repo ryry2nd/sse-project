@@ -22,6 +22,7 @@ using namespace Engine::Input;
 
 using namespace ObjectSpace;
 
+namespace Example1 {
 Object mattex;
 Object mat;
 Object inMat;
@@ -43,7 +44,7 @@ glm::vec3 camPos;
 glm::vec3 camRot;
 
 
-void Example1::setup() {
+void setup() {
 	win->setMode(Window::WindowMode::WindowedMouseMode);
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -284,7 +285,7 @@ void Example1::setup() {
 	}
 }
 
-void Example1::loop() {
+void loop() {
 	win->update();
 	win->clearBackground();
 	fbo->update();
@@ -379,7 +380,7 @@ void Example1::loop() {
 	win->swapBuffer();
 }
 
-void Example1::event(Event *event) {
+void event(Event *event) {
 	auto type = event->type;
 	auto dt = win->getDeltaTime();
 	if (type == EventType::KeyDown) {
@@ -395,7 +396,7 @@ void Example1::event(Event *event) {
 		rotateCamera(dt, &camRot, {event->mouse.xrel, event->mouse.yrel}, 0.1f);
 }
 
-void Example1::shutdown() {
+void shutdown() {
 	mattex.clear();
 	mat.clear();
 	inMat.clear();
@@ -407,4 +408,5 @@ void Example1::shutdown() {
 	monkeyMat.clear();
 	teaMat.clear();
 	sun.clear();
+}
 }
