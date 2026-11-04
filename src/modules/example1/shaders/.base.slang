@@ -50,7 +50,12 @@ namespace Structs {
 		vec3 aNormal   : NORMAL;
 	};
 
-	typedef Input Vert;
+	struct Vert
+	{
+		vec3 aPos;
+		vec2 aTexCoord;
+		vec3 aNormal;
+	};
 
 	struct Output
 	{

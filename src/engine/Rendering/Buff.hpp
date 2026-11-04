@@ -24,6 +24,7 @@ namespace Engine::Rendering
 
 		virtual void write(const std::size_t offset, const std::size_t size, const void* data) = 0;
 		virtual void read(const std::size_t offset, const std::size_t size, void* data) = 0;
+		virtual void copy(const Buff *src, std::size_t sourceOffset, std::size_t destinationOffset, std::size_t size) = 0;
 
 	protected:
 		std::size_t allocSize;

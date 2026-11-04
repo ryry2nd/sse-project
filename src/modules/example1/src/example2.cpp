@@ -13,6 +13,8 @@
 #include <Object.hpp>
 
 #include "Examples.hpp"
+#include "SDL3/SDL_scancode.h"
+#include "SDL3/SDL_stdinc.h"
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -26,13 +28,16 @@ namespace Example2 {
 Object debugMat;
 Object fboMat;
 Object fpsMat;
-Object hill;
+Object chunk;
 
 CameraStruct cam;
 Buff *camBuff;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
+
+#define SPEED 10.0f
+#define SPRINT 100.0f
 
 
 void setup() {
@@ -55,8 +60,8 @@ void setup() {
 
 	Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 	Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
-	Shader *hillShader = createShader((MODULE_PATH + "/shaders/hill").c_str());
-	Shader *hillComputeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
+	Shader *chunkShader = createShader((MODULE_PATH + "/shaders/hill").c_str());
+	Shader *chunkComputeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
 	// Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
 
 
@@ -103,68 +108,79 @@ void setup() {
 	fpsMat.mat[0].settings |= Material::EnableClear;
 	fpsMat.mesh[0] = flatMesh;
 
-	#define length 100
-	#define width 100
+	#define SIZE 128
+	#define AREA SIZE * SIZE * SIZE
+	#define MAX_FACES 3 * AREA
+	#define MAX_VERTS 4 * MAX_FACES
+	#define MAX_INDS  6 * MAX_FACES
 
-	std::vector<Vert> vertices;
-	std::vector<Ind> indices;
+	Buff *worstcaseVert = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Vert) * MAX_VERTS, nullptr);
+	Buff *worstcaseInd = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Ind) * MAX_INDS, nullptr);
 
-	vertices.resize((length + 1) * (width + 1));
+	struct Sizes {
+		unsigned int v;
+		unsigned int i;
+	};
 
-	for (int z = 0; z <= width; z++) {
-		for (int x = 0; x <= length; x++) {
+	Sizes zeros {0, 0};
 
-			int index = z * (length + 1) + x;
+	Uint32 s = SIZE;
 
-			vertices[index] = {
-				glm::vec3((float)x, 0.0f, (float)z),
-				glm::vec2((float)x,
-						 (float)z),
-				glm::vec3(0.0f, 1.0f, 0.0f)
-			};
-		}
-	}
+	Buff *sizeB = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Uint32), &s);
+	Buff *sizesOut = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Sizes), &zeros);
 
-	for (int z = 0; z < width; z++) {
-		for (int x = 0; x < length; x++) {
-			unsigned int topLeft = z * (length + 1) + x;
-			unsigned int topRight = topLeft + 1;
-			unsigned int bottomLeft = topLeft + (length + 1);
-			unsigned int bottomRight = bottomLeft + 1;
-
-			indices.insert(indices.end(), {
-				topLeft, bottomLeft, topRight,
-				topRight, bottomLeft, bottomRight
-			});
-		}
-	}
-
-	glm::mat4 hillmd = glm::translate(glm::mat4(1.0f), {0, -30, 0});
-
-	Buff *hillbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &hillmd);
-
-	Uint32 hillsize = vertices.size();
-	Buff *hillsizebuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(Uint32), &hillsize);
-
-	Mesh *planeMesh = createMesh(vertices.data(), vertices.size(), indices.data(), indices.size());
-
-	hill.mesh[0] = planeMesh;
-	hill.mat[0].shader = hillShader;
-	hill.mat[0].ubo[0] = hillbuff;
-	hill.mat[0].ubo[1] = camBuff;
+	float seed = 42;
+	Buff *seedBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(float), &seed);
 
 	ComputeParams pms;
-	pms.shader = hillComputeShader;
-	pms.ssbo[0] = planeMesh->vertBuff();
-	pms.ubo[0] = hillsizebuff;
-	pms.groups.x = (hillsize + 255) / 256;
+	pms.shader = chunkComputeShader;
+	pms.ssbo[0] = worstcaseVert;
+	pms.ssbo[1] = worstcaseInd;
+	pms.ssbo[2] = sizesOut;
+	pms.ubo[0] = seedBuff;
+	pms.ubo[1] = sizeB;
+	pms.groups.x = (AREA + 255) / 256;
 	pms.groups.y = 1;
 	pms.groups.z = 1;
 
 	computeCall(&pms);
 
-	removeShader(hillComputeShader);
-	removeBuff(hillsizebuff);
+	Sizes sizesize;
+	sizesOut->read(0, sizeof(Sizes), &sizesize);
+
+	Mesh *chunkMesh = createMesh(nullptr, sizeof(Vert) * sizesize.v, nullptr, sizeof(Ind) * sizesize.i);
+
+	// Copy generated vertices
+	chunkMesh->vertBuff()->copy(
+		worstcaseVert,
+		0,
+		0,
+		sizeof(Vert) * sizesize.v
+	);
+
+	// Copy generated indices
+	chunkMesh->indBuff()->copy(
+		worstcaseInd,
+		0,
+		0,
+		sizeof(Ind) * sizesize.i
+	);
+
+	glm::mat4 chunkmd = glm::translate(glm::mat4(1.0f), {0, -50, 0});
+
+	Buff *chunkbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &chunkmd);
+
+	chunk.mesh[0] = chunkMesh;
+	chunk.mat[0].shader = chunkShader;
+	chunk.mat[0].ubo[0] = chunkbuff;
+	chunk.mat[0].ubo[1] = camBuff;
+
+
+	removeShader(chunkComputeShader);
+	removeBuff(worstcaseVert);
+	removeBuff(worstcaseInd);
+	removeBuff(sizesOut);
+	removeBuff(seedBuff);
 }
 
 void loop() {
@@ -200,39 +216,47 @@ void loop() {
 	int numKeys;
 	const bool *keystates = Rendering::Window::getKeystates(numKeys);
 
+	float speed;
+	if (keystates[SDL_SCANCODE_LSHIFT]) {
+		speed = SPRINT;
+	}
+	else {
+		speed = SPEED;
+	}
+
 	// movement
 	if (keystates[SDL_SCANCODE_W])
 	{
-		camPos += -(getForwardVector(camRot) * deltaTime * 10.0f);
+		camPos += -(getForwardVector(camRot) * deltaTime * speed);
 	}
 	if (keystates[SDL_SCANCODE_S])
 	{
-		camPos += (getForwardVector(camRot) * deltaTime * 10.0f);
+		camPos += (getForwardVector(camRot) * deltaTime * speed);
 	}
 
 	if (keystates[SDL_SCANCODE_D])
 	{
-		camPos += -(getRightVector(camRot) * deltaTime * 10.0f);
+		camPos += -(getRightVector(camRot) * deltaTime * speed);
 	}
 	if (keystates[SDL_SCANCODE_A])
 	{
-		camPos += (getRightVector(camRot) * deltaTime * 10.0f);
+		camPos += (getRightVector(camRot) * deltaTime * speed);
 	}
 
 	if (keystates[SDL_SCANCODE_SPACE])
 	{
-		camPos += (getDownVector(camRot) * deltaTime * 10.0f);
+		camPos += (getDownVector(camRot) * deltaTime * speed);
 	}
 	if (keystates[SDL_SCANCODE_LCTRL])
 	{
-		camPos += -(getDownVector(camRot) * deltaTime * 10.0f);
+		camPos += -(getDownVector(camRot) * deltaTime * speed);
 	}
 
 	cam.view = cameraGetView(camPos, camRot);
 	camBuff->write(0, sizeof(CameraStruct), &cam);
 
 	debugMat.draw(fbo);
-	hill.draw(fbo);
+	chunk.draw(fbo);
 	fboMat.draw(win);
 	fpsMat.draw(win);
 	win->swapBuffer();
@@ -258,6 +282,6 @@ void shutdown() {
 	debugMat.clear();
 	fboMat.clear();
 	fpsMat.clear();
-	hill.clear();
+	chunk.clear();
 }
 }

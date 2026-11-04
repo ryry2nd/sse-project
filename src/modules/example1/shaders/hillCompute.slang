@@ -5,30 +5,180 @@ using namespace Normals;
 using namespace Utils;
 using namespace Random;
 
+struct Sizes
+{
+    uint v;
+    uint i;
+};
+
 BINDING_UAV(0)
 RWStructuredBuffer<float> verts;
 
+BINDING_UAV(1)
+RWStructuredBuffer<uint> inds;
+
+BINDING_UAV(2)
+RWStructuredBuffer<Sizes> sizesout;
+
 BINDING_CBV(0)
-ConstantBuffer<uint> vertexCount;
+ConstantBuffer<float> seed;
 
+BINDING_CBV(1)
+ConstantBuffer<uint> size;
 
-float generateNoise(float x, float z)
+static const int3 directions[6] =
+{
+    int3( 1, 0, 0),
+    int3(-1, 0, 0),
+    int3( 0, 1, 0),
+    int3( 0,-1, 0),
+    int3( 0, 0, 1),
+    int3( 0, 0,-1)
+};
+
+// Four corners per cube face, outward-facing winding.
+static const float3 corners[6][4] =
+{
+    {
+        float3(1,0,0), float3(1,1,0),
+        float3(1,1,1), float3(1,0,1)
+    },
+    {
+        float3(0,0,1), float3(0,1,1),
+        float3(0,1,0), float3(0,0,0)
+    },
+    {
+        float3(0,1,1), float3(1,1,1),
+        float3(1,1,0), float3(0,1,0)
+    },
+    {
+        float3(0,0,0), float3(1,0,0),
+        float3(1,0,1), float3(0,0,1)
+    },
+    {
+        float3(1,0,1), float3(1,1,1),
+        float3(0,1,1), float3(0,0,1)
+    },
+    {
+        float3(0,0,0), float3(0,1,0),
+        float3(1,1,0), float3(1,0,0)
+    }
+};
+
+static const float3 normals[6] =
+{
+    float3( 1, 0, 0),
+    float3(-1, 0, 0),
+    float3( 0, 1, 0),
+    float3( 0,-1, 0),
+    float3( 0, 0, 1),
+    float3( 0, 0,-1)
+};
+
+float terrainHeight(int x, int z)
 {
     float2 p = float2(x, z);
-    float seed = 42.0;
 
-    float large = perlinNoise(p * 0.003, seed);
+    // Large-scale continental shape
+    float continental = perlinNoise(
+        p * 0.008,
+        seed
+    );
 
-    float ridge1 = 1.0 - abs(perlinNoise(p * 0.008, seed + 1.0));
-    float ridge2 = 1.0 - abs(perlinNoise(p * 0.02, seed + 2.0));
-    float ridge3 = 1.0 - abs(perlinNoise(p * 0.05, seed + 3.0));
+    // Mountain ranges and large hills
+    float mountains = perlinNoise(
+        p * 0.018,
+        seed + 13.7
+    );
 
-    float height = max(large, 0.0) * 4.0;
-    height += pow(ridge1, 3.0) * 18.0;
-    height += pow(ridge2, 3.0) * 4.0;
-    height += ridge3 * 1.0;
+    // Medium-scale hills
+    float hills = perlinNoise(
+        p * 0.045,
+        seed + 37.2
+    );
 
-    return height;
+    // Small-scale surface variation
+    float detail = perlinNoise(
+        p * 0.12,
+        seed + 71.9
+    );
+
+    // Ridged noise creates sharp mountain peaks
+    float ridges = 1.0 - abs(perlinNoise(
+        p * 0.025,
+        seed + 109.3
+    ));
+
+    // Combine terrain layers
+    float height = 16.0;
+
+    height += continental * 13.0;
+    height += mountains * 9.0;
+    height += hills * 4.0;
+    height += detail * 1.5;
+
+    // Add mountain ridges
+    height += pow(ridges, 2.5) * 14.0;
+
+    return clamp(height, 1.0, 31.0);
+}
+
+bool isSolid(int3 p)
+{
+    if (p.y < 0)
+        return true;
+
+    if (p.y >= size)
+        return false;
+
+    return float(p.y) <= terrainHeight(p.x, p.z);
+}
+
+void writeVertex(
+    uint index,
+    float3 position,
+    float2 uv,
+    float3 normal)
+{
+    uint offset = index * 8;
+
+    // Position
+    verts[offset + 0] = position.x;
+    verts[offset + 1] = position.y;
+    verts[offset + 2] = position.z;
+
+    // UV
+    verts[offset + 3] = uv.x;
+    verts[offset + 4] = uv.y;
+
+    // Normal
+    verts[offset + 5] = normal.x;
+    verts[offset + 6] = normal.y;
+    verts[offset + 7] = normal.z;
+}
+
+void generateFace(int3 p, uint face)
+{
+    uint vertexBase;
+    uint indexBase;
+
+    InterlockedAdd(sizesout[0].v, 4, vertexBase);
+    InterlockedAdd(sizesout[0].i, 6, indexBase);
+
+    float3 base = float3(p);
+
+    writeVertex(vertexBase + 0, base + corners[face][0], float2(0,0), normals[face]);
+	writeVertex(vertexBase + 1, base + corners[face][1], float2(1,0), normals[face]);
+	writeVertex(vertexBase + 2, base + corners[face][2], float2(1,1), normals[face]);
+	writeVertex(vertexBase + 3, base + corners[face][3], float2(0,1), normals[face]);
+
+    inds[indexBase + 0] = vertexBase + 0;
+    inds[indexBase + 1] = vertexBase + 1;
+    inds[indexBase + 2] = vertexBase + 2;
+
+    inds[indexBase + 3] = vertexBase + 0;
+    inds[indexBase + 4] = vertexBase + 2;
+    inds[indexBase + 5] = vertexBase + 3;
 }
 
 [shader("compute")]
@@ -37,13 +187,21 @@ void computeMain(uint3 id : SV_DispatchThreadID)
 {
     uint index = id.x;
 
-    if (index >= vertexCount)
+    if (index >= size * size * size)
         return;
 
-    uint base = index * 8;
+    int3 p = int3(
+        index % size,
+        (index / size) % size,
+        index / (size * size)
+    );
 
-    float x = verts[base + 0];
-    float z = verts[base + 2];
+    if (!isSolid(p))
+        return;
 
-    verts[base + 1] = generateNoise(x, z);
+    for (uint face = 0; face < 6; face++)
+    {
+        if (!isSolid(p + directions[face]))
+            generateFace(p, face);
+    }
 }

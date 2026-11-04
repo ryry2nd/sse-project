@@ -30,6 +30,7 @@ public:
 	~APIBuff();
 	virtual void write(const std::size_t offset, const std::size_t size, const void* data);
 	virtual void read(const std::size_t offset, const std::size_t size, void* data);
+	virtual void copy(const Buff *src, std::size_t sourceOffset, std::size_t destinationOffset, std::size_t size);
 
 	GLuint getID() {return id;}
 	GLenum getTarget() {return target;}
