@@ -32,8 +32,9 @@ ConstantBuffer<uint> size;
 BINDING_CBV(2)
 ConstantBuffer<vec3> chunkOffset;
 
-#define NUM_TILES 7.0
+#define NUM_TILES 8.0
 
+static const float2 BEDROCK_TILE = float2(0.0, 7.0/NUM_TILES);
 static const float2 LEAVES_TILE = float2(0.0, 6.0/NUM_TILES);
 static const float2 WOOD_TOP_TILE = float2(0.0, 5.0/NUM_TILES);
 static const float2 WOOD_SIDE_TILE = float2(0.0, 4.0/NUM_TILES);
@@ -48,6 +49,7 @@ static const float2 DIRT_TILE = float2(0.0, 0.00);
 #define STONE 3
 #define WOOD 4
 #define LEAVES 5
+#define BEDROCK 6
 
 static const int3 directions[6] =
 {
@@ -151,7 +153,10 @@ bool isTreePosition(int2 column)
 Uint16 getBlock(int3 worldPos)
 {
     if (worldPos.y < 0)
-        return STONE;
+        return AIR;
+
+	if (worldPos.y == 0)
+		return BEDROCK;
 
     float height = terrainHeight(worldPos.x, worldPos.z);
     int groundY = (int)floor(height);
@@ -274,17 +279,20 @@ void generateFace(int3 p, uint face, uint16_t block)
 
     if (block == GRASS)
     {
-        tile = (face == 2) ? GRASS_TILE : GRASS_SIDE_TILE;
+        tile = (face == 2) ? GRASS_TILE : (face == 3) ? DIRT_TILE : GRASS_SIDE_TILE;
     }
     else if (block == DIRT)
     {
         tile = DIRT_TILE;
     }
 	else if (block == WOOD) {
-		tile = (face == 2) ? WOOD_TOP_TILE : WOOD_SIDE_TILE;
+		tile = (face == 2 || face == 3) ? WOOD_TOP_TILE : WOOD_SIDE_TILE;
 	}
 	else if (block == LEAVES) {
 		tile = LEAVES_TILE;
+	}
+	else if (block == BEDROCK) {
+		tile = BEDROCK_TILE;
 	}
 
     #define ROTATION 3
@@ -347,10 +355,6 @@ void computeMain(uint3 id : SV_DispatchThreadID)
     // Check all six neighboring blocks.
     for (uint face = 0; face < 6; face++)
     {
-        // Don't generate bottom boundary geometry.
-        if (face == 3 && p.y == 0)
-            continue;
-
         int3 neighborPos = worldPos + directions[face];
 
         uint16_t neighborBlock = getBlock(neighborPos);

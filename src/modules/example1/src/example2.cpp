@@ -41,15 +41,17 @@ glm::vec3 camRot;
 #define SPRINT 100.0f
 
 
-#define SIZE 8
+#define SIZE 64
 #define AREA SIZE * SIZE * SIZE
 #define MAX_FACES 3 * AREA
 #define MAX_VERTS 4 * MAX_FACES
 #define MAX_INDS  6 * MAX_FACES
 
 #define CHUNK_DISTANCE_X 16
-#define CHUNK_DISTANCE_Y 16
+#define CHUNK_DISTANCE_Y 4
 #define CHUNK_DISTANCE_Z 16
+
+#define COMPUTE_SHADER_THREADS 256
 
 class Chunk {
 private:
@@ -95,11 +97,11 @@ public:
 
 		Surface atlasS;
 		atlasS.width = 128;
-		atlasS.height = 128 * 7;
+		atlasS.height = 128 * 8;
 
-		std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png", "wood_side.png", "wood_top.png", "leaves.png"};
+		std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png", "wood_side.png", "wood_top.png", "leaves.png", "bedrock.png"};
 
-		for (int i = 0; i < 7; i++) {
+		for (int i = 0; i < 8; i++) {
 			Surface surf;
 			Surface::loadFile((MODULE_PATH + "/assets/textures/" + texts[i]).c_str(), &surf);
 
@@ -144,7 +146,7 @@ public:
 		pms.ubo[0] = seedBuff;
 		pms.ubo[1] = sizeB;
 		pms.ubo[2] = chunkOffset;
-		pms.groups.x = (AREA + 255) / 256;
+		pms.groups.x = (AREA + COMPUTE_SHADER_THREADS) / COMPUTE_SHADER_THREADS;
 		pms.groups.y = 1;
 		pms.groups.z = 1;
 
@@ -153,7 +155,7 @@ public:
 		Sizes sizesize;
 		sizesOut->read(0, sizeof(Sizes), &sizesize);
 
-		Mesh *chunkMesh = createMesh(nullptr, sizeof(Vert) * sizesize.v, nullptr, sizeof(Ind) * sizesize.i);
+		Mesh *chunkMesh = createMesh(nullptr, sizesize.v, nullptr, sizesize.i);
 
 		// Copy generated vertices
 		chunkMesh->vertBuff()->copy(

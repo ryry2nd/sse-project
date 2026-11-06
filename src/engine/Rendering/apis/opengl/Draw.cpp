@@ -14,7 +14,9 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
 	}
 }
 
-#define MESH_CLAMP(mesh, params) (GLsizei)((params.idxCount == 0 || params.idxCount > mesh->getInd()) ? mesh->getInd() : params.idxCount)
+#define MESH_CLAMP(mesh, params) \
+    (GLsizei)((params.idxCount == 0 || params.idxCount > mesh->getInd() - params.idxFirst) \
+    ? mesh->getInd() - params.idxFirst : params.idxCount)
 #define MESH_START(mesh, params) (void*)(params.idxFirst * sizeof(uint32_t))
 
 #define DRAW_CALL(mesh, params) \
