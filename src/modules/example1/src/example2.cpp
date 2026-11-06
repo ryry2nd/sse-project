@@ -114,7 +114,7 @@ public:
 		ImageSettings imset;
 		imset.minFilter = ImageSettings::Filter::NearestMipmapNearest;
 		imset.magFilter = ImageSettings::Filter::Nearest;
-		imset.maxLevel = 3;
+		imset.maxLevel = 5;
 
 		atlas = createImage(&atlasS, imset);
 		atlasS.clear();

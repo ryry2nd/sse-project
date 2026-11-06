@@ -37,7 +37,7 @@ typedef uint8_t Uint8;
 	#define BINDING_IMGRW(x)
 #endif
 
-#define DEFAULT_FOG_STRENGTH 0.006
+#define DEFAULT_FOG_STRENGTH 0.003f
 
 #define DEFAULT_EDGE_INNER 0.2f
 #define DEFAULT_EDGE_OUTER 0.5f

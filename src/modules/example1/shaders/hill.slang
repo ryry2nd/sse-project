@@ -36,10 +36,6 @@ vec4 fragMain(VSOutput input) : SV_Target
 {
 	vec4 texRaw = diffuseTexture.Sample(input.TexCoord);
 
-	// vec2 edgecoord = input.TexCoord;
-	// edgecoord.x /= 4;
-	// float edgeFactor = edgeDarken(edgecoord, DEFAULT_EDGE_INNER, DEFAULT_EDGE_OUTER, DEFAULT_EDGE_STRENGTH);
-
 	vec3 color = texRaw.xyz;
 	vec3 fogColor = Color::GRAY_FOG;
 
