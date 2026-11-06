@@ -1,15 +1,10 @@
 #include ".base.slang"
+#include ".chunkCommon.slang"
 
 using namespace Structs;
 using namespace Normals;
 using namespace Utils;
 using namespace Random;
-
-struct Sizes
-{
-    uint v;
-    uint i;
-};
 
 BINDING_UAV(0)
 RWStructuredBuffer<float> verts;
@@ -23,6 +18,9 @@ RWStructuredBuffer<Sizes> sizesout;
 BINDING_UAV(3)
 RWStructuredBuffer<Uint16> chunkData;
 
+BINDING_UAV(4)
+RWStructuredBuffer<float> heightMap;
+
 BINDING_CBV(0)
 ConstantBuffer<float> seed;
 
@@ -31,25 +29,6 @@ ConstantBuffer<uint> size;
 
 BINDING_CBV(2)
 ConstantBuffer<vec3> chunkOffset;
-
-#define NUM_TILES 8.0
-
-static const float2 BEDROCK_TILE = float2(0.0, 7.0/NUM_TILES);
-static const float2 LEAVES_TILE = float2(0.0, 6.0/NUM_TILES);
-static const float2 WOOD_TOP_TILE = float2(0.0, 5.0/NUM_TILES);
-static const float2 WOOD_SIDE_TILE = float2(0.0, 4.0/NUM_TILES);
-static const float2 STONE_TILE = float2(0.0, 3.0/NUM_TILES);
-static const float2 GRASS_TILE = float2(0.0, 2.0/NUM_TILES);
-static const float2 GRASS_SIDE_TILE = float2(0.0, 1.0/NUM_TILES);
-static const float2 DIRT_TILE = float2(0.0, 0.00);
-
-#define AIR 0
-#define DIRT 1
-#define GRASS 2
-#define STONE 3
-#define WOOD 4
-#define LEAVES 5
-#define BEDROCK 6
 
 static const int3 directions[6] =
 {
@@ -105,6 +84,28 @@ static const float3 normals[6] =
 
 float terrainHeight(int x, int z)
 {
+    int3 offset = (int3)chunkOffset;
+
+    // Convert world coordinates to local chunk coordinates.
+    int localX = x - offset.x;
+    int localZ = z - offset.z;
+
+    // Check whether the coordinate is inside this chunk.
+    bool insideChunk =
+        localX >= 0 && localX < (int)size &&
+        localZ >= 0 && localZ < (int)size;
+
+    // Read cached height if available.
+    if (insideChunk)
+    {
+        uint index = localZ * size + localX;
+        float t = heightMap[index];
+		if (t >= 0) {
+			return t;
+		}
+    }
+
+    // Otherwise calculate without caching.
     float2 p = float2(x, z);
 
     float continental = perlinNoise(p * 0.008, seed);
@@ -124,7 +125,15 @@ float terrainHeight(int x, int z)
     height += detail * 1.5;
     height += pow(ridges, 2.5) * 14.0;
 
-    return max(height, 0.0);
+	height = max(height, 0.0);
+
+	if (insideChunk)
+    {
+        uint index = localZ * size + localX;
+        heightMap[index] = height;
+    }
+
+    return height;
 }
 
 // --------------------------------------------------

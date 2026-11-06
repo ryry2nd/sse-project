@@ -41,15 +41,15 @@ glm::vec3 camRot;
 #define SPRINT 100.0f
 
 
-#define SIZE 64
+#define SIZE 128
 #define AREA SIZE * SIZE * SIZE
 #define MAX_FACES 3 * AREA
 #define MAX_VERTS 4 * MAX_FACES
 #define MAX_INDS  6 * MAX_FACES
 
-#define CHUNK_DISTANCE_X 16
-#define CHUNK_DISTANCE_Y 4
-#define CHUNK_DISTANCE_Z 16
+#define CHUNK_DISTANCE_X 8
+#define CHUNK_DISTANCE_Y 2
+#define CHUNK_DISTANCE_Z 8
 
 #define COMPUTE_SHADER_THREADS 256
 
@@ -66,8 +66,9 @@ private:
 	static Buff *seedBuff;
 	static Buff *sizesOut;
 	static Buff *chunkOffset;
+	static Buff *heightCache;
 
-	static Shader *computeShader;
+	static Shader *generateShader;
 	static Shader *shader;
 
 	static Image *atlas;
@@ -79,6 +80,8 @@ public:
 	static void init(float seed = 0.0f) {
 		worstVert = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Vert) * MAX_VERTS, nullptr);
 		worstInd = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Ind) * MAX_INDS, nullptr);
+
+		heightCache = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(float) * AREA, nullptr);
 
 		chunkOffset = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::vec3), nullptr);
 
@@ -92,7 +95,7 @@ public:
 
 		seedBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(float), &seed);
 
-		computeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
+		generateShader = createShader((MODULE_PATH + "/shaders/chunkGenerate").c_str(), true);
 		shader = createShader((MODULE_PATH + "/shaders/hill").c_str());
 
 		Surface atlasS;
@@ -118,7 +121,7 @@ public:
 	}
 
 	static void deinit() {
-		removeShader(computeShader);
+		removeShader(generateShader);
 		removeShader(shader);
 		removeImage(atlas);
 		removeBuff(worstVert);
@@ -127,10 +130,14 @@ public:
 		removeBuff(seedBuff);
 		removeBuff(sizesOut);
 		removeBuff(chunkOffset);
+		removeBuff(heightCache);
 	}
 
 	Chunk(glm::vec3 offset = glm::vec3(0.0f)) {
 		chunkOffset->write(0, sizeof(glm::vec3), &offset);
+
+		std::vector<float> zs(AREA, -1);
+		heightCache->write(0, AREA * sizeof(float), zs.data());
 
 		Sizes zeros {0, 0};
 		sizesOut->write(0, sizeof(Sizes), &zeros);
@@ -138,11 +145,12 @@ public:
 		chunkData = createBuff(Buff::Type::Storage, Buff::Frequency::Dynamic, sizeof(Uint16) * AREA, nullptr);
 
 		ComputeParams pms;
-		pms.shader = computeShader;
+		pms.shader = generateShader;
 		pms.ssbo[0] = worstVert;
 		pms.ssbo[1] = worstInd;
 		pms.ssbo[2] = sizesOut;
 		pms.ssbo[3] = chunkData;
+		pms.ssbo[4] = heightCache;
 		pms.ubo[0] = seedBuff;
 		pms.ubo[1] = sizeB;
 		pms.ubo[2] = chunkOffset;
@@ -196,8 +204,9 @@ Buff *Chunk::sizeB = nullptr;
 Buff *Chunk::seedBuff = nullptr;
 Buff *Chunk::sizesOut = nullptr;
 Buff *Chunk::chunkOffset = nullptr;
+Buff *Chunk::heightCache = nullptr;
 
-Shader *Chunk::computeShader = nullptr;
+Shader *Chunk::generateShader = nullptr;
 Shader *Chunk::shader = nullptr;
 
 Image *Chunk::atlas = nullptr;
