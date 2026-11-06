@@ -4,6 +4,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <cstring>
 #include <string>
+#include <random>
 
 #include <SDL3/SDL_events.h>
 
@@ -25,10 +26,10 @@ using namespace Engine::Input;
 using namespace ObjectSpace;
 
 namespace Example2 {
+
 Object debugMat;
 Object fboMat;
 Object fpsMat;
-Object chunk;
 
 CameraStruct cam;
 Buff *camBuff;
@@ -39,6 +40,168 @@ glm::vec3 camRot;
 #define SPEED 10.0f
 #define SPRINT 100.0f
 
+
+#define SIZE 8
+#define AREA SIZE * SIZE * SIZE
+#define MAX_FACES 3 * AREA
+#define MAX_VERTS 4 * MAX_FACES
+#define MAX_INDS  6 * MAX_FACES
+
+#define CHUNK_DISTANCE_X 16
+#define CHUNK_DISTANCE_Y 16
+#define CHUNK_DISTANCE_Z 16
+
+class Chunk {
+private:
+	struct Sizes {
+		unsigned int v;
+		unsigned int i;
+	};
+
+	static Buff *worstVert;
+	static Buff *worstInd;
+	static Buff *sizeB;
+	static Buff *seedBuff;
+	static Buff *sizesOut;
+	static Buff *chunkOffset;
+
+	static Shader *computeShader;
+	static Shader *shader;
+
+	static Image *atlas;
+
+	Object chunk;
+	Buff *chunkData;
+
+public:
+	static void init(float seed = 0.0f) {
+		worstVert = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Vert) * MAX_VERTS, nullptr);
+		worstInd = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Ind) * MAX_INDS, nullptr);
+
+		chunkOffset = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::vec3), nullptr);
+
+		Uint32 s = SIZE;
+
+		sizeB = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(Uint32), &s);
+
+		Sizes zeros {0, 0};
+
+		sizesOut = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Sizes), &zeros);
+
+		seedBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(float), &seed);
+
+		computeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
+		shader = createShader((MODULE_PATH + "/shaders/hill").c_str());
+
+		Surface atlasS;
+		atlasS.width = 128;
+		atlasS.height = 128 * 7;
+
+		std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png", "wood_side.png", "wood_top.png", "leaves.png"};
+
+		for (int i = 0; i < 7; i++) {
+			Surface surf;
+			Surface::loadFile((MODULE_PATH + "/assets/textures/" + texts[i]).c_str(), &surf);
+
+			atlasS.pixels.insert(atlasS.pixels.end(), surf.pixels.begin(), surf.pixels.end());
+		}
+
+		ImageSettings imset;
+		imset.minFilter = ImageSettings::Filter::NearestMipmapNearest;
+		imset.magFilter = ImageSettings::Filter::Nearest;
+		imset.maxLevel = 3;
+
+		atlas = createImage(&atlasS, imset);
+		atlasS.clear();
+	}
+
+	static void deinit() {
+		removeShader(computeShader);
+		removeShader(shader);
+		removeImage(atlas);
+		removeBuff(worstVert);
+		removeBuff(worstInd);
+		removeBuff(sizeB);
+		removeBuff(seedBuff);
+		removeBuff(sizesOut);
+		removeBuff(chunkOffset);
+	}
+
+	Chunk(glm::vec3 offset = glm::vec3(0.0f)) {
+		chunkOffset->write(0, sizeof(glm::vec3), &offset);
+
+		Sizes zeros {0, 0};
+		sizesOut->write(0, sizeof(Sizes), &zeros);
+
+		chunkData = createBuff(Buff::Type::Storage, Buff::Frequency::Dynamic, sizeof(Uint16) * AREA, nullptr);
+
+		ComputeParams pms;
+		pms.shader = computeShader;
+		pms.ssbo[0] = worstVert;
+		pms.ssbo[1] = worstInd;
+		pms.ssbo[2] = sizesOut;
+		pms.ssbo[3] = chunkData;
+		pms.ubo[0] = seedBuff;
+		pms.ubo[1] = sizeB;
+		pms.ubo[2] = chunkOffset;
+		pms.groups.x = (AREA + 255) / 256;
+		pms.groups.y = 1;
+		pms.groups.z = 1;
+
+		computeCall(&pms);
+
+		Sizes sizesize;
+		sizesOut->read(0, sizeof(Sizes), &sizesize);
+
+		Mesh *chunkMesh = createMesh(nullptr, sizeof(Vert) * sizesize.v, nullptr, sizeof(Ind) * sizesize.i);
+
+		// Copy generated vertices
+		chunkMesh->vertBuff()->copy(
+			worstVert,
+			0,
+			0,
+			sizeof(Vert) * sizesize.v
+		);
+
+		// Copy generated indices
+		chunkMesh->indBuff()->copy(
+			worstInd,
+			0,
+			0,
+			sizeof(Ind) * sizesize.i
+		);
+
+		glm::mat4 chunkmd = glm::translate(glm::mat4(1.0f), offset);
+
+		Buff *chunkbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &chunkmd);
+
+		chunk.mesh[0] = chunkMesh;
+		chunk.mat[0].images[0] = atlas;
+		chunk.mat[0].shader = shader;
+		chunk.mat[0].ubo[0] = chunkbuff;
+		chunk.mat[0].ubo[1] = camBuff;
+		chunk.mat[0].settings |= Material::EnableClear;
+	}
+
+	void draw(RenderTarget *t) {
+		chunk.draw(t);
+	}
+};
+
+Buff *Chunk::worstVert = nullptr;
+Buff *Chunk::worstInd = nullptr;
+Buff *Chunk::sizeB = nullptr;
+Buff *Chunk::seedBuff = nullptr;
+Buff *Chunk::sizesOut = nullptr;
+Buff *Chunk::chunkOffset = nullptr;
+
+Shader *Chunk::computeShader = nullptr;
+Shader *Chunk::shader = nullptr;
+
+Image *Chunk::atlas = nullptr;
+
+
+std::vector<Chunk> chunks;
 
 void setup() {
 	win->setMode(Window::WindowMode::WindowedMouseMode);
@@ -60,30 +223,8 @@ void setup() {
 
 	Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
 	Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
-	Shader *chunkShader = createShader((MODULE_PATH + "/shaders/hill").c_str());
-	Shader *chunkComputeShader = createShader((MODULE_PATH + "/shaders/hillCompute").c_str(), true);
+
 	// Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
-
-	Surface atlas;
-	atlas.width = 128;
-	atlas.height = 128 * 4;
-
-	std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png"};
-
-	for (int i = 0; i < 4; i++) {
-		Surface surf;
-		Surface::loadFile((MODULE_PATH + "/assets/textures/" + texts[i]).c_str(), &surf);
-
-		atlas.pixels.insert(atlas.pixels.end(), surf.pixels.begin(), surf.pixels.end());
-	}
-
-	ImageSettings imset;
-	imset.minFilter = ImageSettings::Filter::NearestMipmapNearest;
-	imset.magFilter = ImageSettings::Filter::Nearest;
-	imset.maxLevel = 5;
-
-	Image *imgatlas = createImage(&atlas, imset);
-	atlas.clear();
 
 	std::vector<Vert> vertsflat;
 	std::vector<Ind> indsflat;
@@ -110,7 +251,6 @@ void setup() {
 
 	Mesh *flatMesh = createMesh(vertsfbo.data(), vertsfbo.size(), indsfbo.data(), indsfbo.size());
 
-
 	glm::mat4 fboMpv = fboMPV(res);
 	Buff *fboBuff = createBuff(Rendering::Buff::Type::Uniform, Rendering::Buff::Frequency::Dynamic, sizeof(glm::mat4), &fboMpv);
 	fboMat.mat[0].shader = tex2dShader;
@@ -128,80 +268,23 @@ void setup() {
 	fpsMat.mat[0].settings |= Material::EnableClear;
 	fpsMat.mesh[0] = flatMesh;
 
-	#define SIZE 128
-	#define AREA SIZE * SIZE * SIZE
-	#define MAX_FACES 3 * AREA
-	#define MAX_VERTS 4 * MAX_FACES
-	#define MAX_INDS  6 * MAX_FACES
 
-	Buff *worstcaseVert = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Vert) * MAX_VERTS, nullptr);
-	Buff *worstcaseInd = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Ind) * MAX_INDS, nullptr);
+	std::random_device rd;
+	std::mt19937 gen(rd());
 
-	struct Sizes {
-		unsigned int v;
-		unsigned int i;
-	};
+	std::uniform_real_distribution<float> dist(0.0f, 100000.0f);
 
-	Sizes zeros {0, 0};
+	float random = dist(gen);
 
-	Uint32 s = SIZE;
+	Chunk::init(random);
 
-	Buff *sizeB = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Uint32), &s);
-	Buff *sizesOut = createBuff(Rendering::Buff::Type::Storage, Rendering::Buff::Frequency::Dynamic, sizeof(Sizes), &zeros);
-
-	float seed = 42;
-	Buff *seedBuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(float), &seed);
-
-	ComputeParams pms;
-	pms.shader = chunkComputeShader;
-	pms.ssbo[0] = worstcaseVert;
-	pms.ssbo[1] = worstcaseInd;
-	pms.ssbo[2] = sizesOut;
-	pms.ubo[0] = seedBuff;
-	pms.ubo[1] = sizeB;
-	pms.groups.x = (AREA + 255) / 256;
-	pms.groups.y = 1;
-	pms.groups.z = 1;
-
-	computeCall(&pms);
-
-	Sizes sizesize;
-	sizesOut->read(0, sizeof(Sizes), &sizesize);
-
-	Mesh *chunkMesh = createMesh(nullptr, sizeof(Vert) * sizesize.v, nullptr, sizeof(Ind) * sizesize.i);
-
-	// Copy generated vertices
-	chunkMesh->vertBuff()->copy(
-		worstcaseVert,
-		0,
-		0,
-		sizeof(Vert) * sizesize.v
-	);
-
-	// Copy generated indices
-	chunkMesh->indBuff()->copy(
-		worstcaseInd,
-		0,
-		0,
-		sizeof(Ind) * sizesize.i
-	);
-
-	glm::mat4 chunkmd = glm::translate(glm::mat4(1.0f), {0, -50, 0});
-
-	Buff *chunkbuff = createBuff(Buff::Type::Uniform, Buff::Frequency::Dynamic, sizeof(glm::mat4), &chunkmd);
-
-	chunk.mesh[0] = chunkMesh;
-	chunk.mat[0].images[0] = imgatlas;
-	chunk.mat[0].shader = chunkShader;
-	chunk.mat[0].ubo[0] = chunkbuff;
-	chunk.mat[0].ubo[1] = camBuff;
-
-
-	removeShader(chunkComputeShader);
-	removeBuff(worstcaseVert);
-	removeBuff(worstcaseInd);
-	removeBuff(sizesOut);
-	removeBuff(seedBuff);
+	for (int x = 0; x < CHUNK_DISTANCE_X; x++) {
+		for (int z = 0; z < CHUNK_DISTANCE_Z; z++) {
+			for (int y = 0; y < CHUNK_DISTANCE_Y; y++) {
+				chunks.emplace_back(glm::vec3(x * SIZE, y * SIZE, z * SIZE));
+			}
+		}
+	}
 }
 
 void loop() {
@@ -277,7 +360,9 @@ void loop() {
 	camBuff->write(0, sizeof(CameraStruct), &cam);
 
 	debugMat.draw(fbo);
-	chunk.draw(fbo);
+	for (Chunk & c : chunks) {
+		c.draw(fbo);
+	}
 	fboMat.draw(win);
 	fpsMat.draw(win);
 	win->swapBuffer();
@@ -303,6 +388,7 @@ void shutdown() {
 	debugMat.clear();
 	fboMat.clear();
 	fpsMat.clear();
-	chunk.clear();
+	chunks.clear();
+	Chunk::deinit();
 }
 }

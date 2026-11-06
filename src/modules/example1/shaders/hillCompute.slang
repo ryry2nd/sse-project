@@ -20,22 +20,34 @@ RWStructuredBuffer<uint> inds;
 BINDING_UAV(2)
 RWStructuredBuffer<Sizes> sizesout;
 
+BINDING_UAV(3)
+RWStructuredBuffer<Uint16> chunkData;
+
 BINDING_CBV(0)
 ConstantBuffer<float> seed;
 
 BINDING_CBV(1)
 ConstantBuffer<uint> size;
 
-static const float2 ATLAS_TILE_SIZE = float2(1.0, 0.25);
+BINDING_CBV(2)
+ConstantBuffer<vec3> chunkOffset;
 
-static const float2 STONE_TILE = float2(0.0, 0.75);
-static const float2 GRASS_TILE  = float2(0.0, 0.50);
-static const float2 GRASS_SIDE_TILE = float2(0.0, 0.25);
-static const float2 DIRT_TILE  = float2(0.0, 0.00);
+#define NUM_TILES 7.0
 
-#define DIRT 0
-#define GRASS 1
-#define STONE 2
+static const float2 LEAVES_TILE = float2(0.0, 6.0/NUM_TILES);
+static const float2 WOOD_TOP_TILE = float2(0.0, 5.0/NUM_TILES);
+static const float2 WOOD_SIDE_TILE = float2(0.0, 4.0/NUM_TILES);
+static const float2 STONE_TILE = float2(0.0, 3.0/NUM_TILES);
+static const float2 GRASS_TILE = float2(0.0, 2.0/NUM_TILES);
+static const float2 GRASS_SIDE_TILE = float2(0.0, 1.0/NUM_TILES);
+static const float2 DIRT_TILE = float2(0.0, 0.00);
+
+#define AIR 0
+#define DIRT 1
+#define GRASS 2
+#define STONE 3
+#define WOOD 4
+#define LEAVES 5
 
 static const int3 directions[6] =
 {
@@ -47,7 +59,6 @@ static const int3 directions[6] =
     int3( 0, 0,-1)
 };
 
-// Four corners per cube face, outward-facing winding.
 static const float3 corners[6][4] =
 {
     {
@@ -86,66 +97,150 @@ static const float3 normals[6] =
     float3( 0, 0,-1)
 };
 
+// --------------------------------------------------
+// TERRAIN GENERATION
+// --------------------------------------------------
+
 float terrainHeight(int x, int z)
 {
     float2 p = float2(x, z);
 
-    // Large-scale continental shape
-    float continental = perlinNoise(
-        p * 0.008,
-        seed
+    float continental = perlinNoise(p * 0.008, seed);
+    float mountains = perlinNoise(p * 0.018, seed + 13.7);
+    float hills = perlinNoise(p * 0.045, seed + 37.2);
+    float detail = perlinNoise(p * 0.12, seed + 71.9);
+
+    float ridges = 1.0 - abs(
+        perlinNoise(p * 0.025, seed + 109.3)
     );
 
-    // Mountain ranges and large hills
-    float mountains = perlinNoise(
-        p * 0.018,
-        seed + 13.7
-    );
-
-    // Medium-scale hills
-    float hills = perlinNoise(
-        p * 0.045,
-        seed + 37.2
-    );
-
-    // Small-scale surface variation
-    float detail = perlinNoise(
-        p * 0.12,
-        seed + 71.9
-    );
-
-    // Ridged noise creates sharp mountain peaks
-    float ridges = 1.0 - abs(perlinNoise(
-        p * 0.025,
-        seed + 109.3
-    ));
-
-    // Combine terrain layers
-    float height = 16.0;
+    float height = 60.0;
 
     height += continental * 13.0;
-    height += mountains * 18.0;
+    height += mountains * 36.0;
     height += hills * 4.0;
     height += detail * 1.5;
-
-    // Add mountain ridges
     height += pow(ridges, 2.5) * 14.0;
 
-    return clamp(height, 1.0, 31.0);
+    return max(height, 0.0);
 }
 
-bool isSolid(int3 p)
+// --------------------------------------------------
+// BLOCK LOOKUP
+// --------------------------------------------------
+uint hash(int2 p)
 {
-    if (p.y < 0)
-        return true;
-
-    if (p.y >= size)
-        return false;
-
-	float height = terrainHeight(p.x, p.z);
-
-    return float(p.y) <= height;
+    uint h = uint(p.x) * 374761393u + uint(p.y) * 668265263u;
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return h ^ (h >> 16);
 }
+
+static const float TREE_DENSITY = 1.0; // Percentage (0-100)
+
+bool isTreePosition(int2 column)
+{
+    uint h = hash(
+        column + int2((int)seed, (int)(seed * 127.0))
+    );
+
+    float randomValue = (float)(h % 10000u) / 10000.0;
+
+    return randomValue < (TREE_DENSITY / 100.0);
+}
+
+Uint16 getBlock(int3 worldPos)
+{
+    if (worldPos.y < 0)
+        return STONE;
+
+    float height = terrainHeight(worldPos.x, worldPos.z);
+    int groundY = (int)floor(height);
+
+    // --------------------------------------------------
+    // TERRAIN
+    // --------------------------------------------------
+
+    if (worldPos.y <= groundY)
+    {
+        int depth = groundY - worldPos.y;
+
+        if (depth == 0)
+            return GRASS;
+
+        if (depth <= 3)
+            return DIRT;
+
+        return STONE;
+    }
+
+    // --------------------------------------------------
+    // TREE TRUNK
+    // --------------------------------------------------
+
+    int2 column = worldPos.xz;
+
+	uint h = hash(
+		column + int2((int)seed, (int)(seed * 127.0))
+	);
+
+	if (isTreePosition(column))
+	{
+		int treeHeight = 4 + int((h >> 8) % 4u);
+		int treeTop = groundY + treeHeight;
+
+		if (worldPos.y <= treeTop)
+			return WOOD;
+	}
+
+    // --------------------------------------------------
+    // TREE LEAVES
+    // --------------------------------------------------
+
+    for (int x = -2; x <= 2; x++)
+    {
+        for (int z = -2; z <= 2; z++)
+        {
+            int2 treeColumn = worldPos.xz + int2(x, z);
+
+            uint treeHash = hash(
+                treeColumn + int2((int)seed, (int)(seed * 127.0))
+            );
+
+            if (!isTreePosition(treeColumn))
+    			continue;
+
+            int treeGround = (int)floor(
+                terrainHeight(treeColumn.x, treeColumn.y)
+            );
+
+            int treeHeight = 4 + int((treeHash >> 8) % 4u);
+            int treeTop = treeGround + treeHeight;
+
+            int dx = abs(worldPos.x - treeColumn.x);
+            int dz = abs(worldPos.z - treeColumn.y);
+            int dy = worldPos.y - treeTop;
+
+            // Canopy extends 2 blocks horizontally.
+            if (dy >= -2 && dy <= 1)
+            {
+                int radius = (dy == 1) ? 1 : 2;
+
+                if (dx <= radius && dz <= radius)
+                {
+                    // Trim canopy corners.
+                    if (dx + dz <= radius + 1)
+                        return LEAVES;
+                }
+            }
+        }
+    }
+
+    return AIR;
+}
+
+// --------------------------------------------------
+// MESH GENERATION
+// --------------------------------------------------
 
 void writeVertex(
     uint index,
@@ -155,22 +250,19 @@ void writeVertex(
 {
     uint offset = index * 8;
 
-    // Position
     verts[offset + 0] = position.x;
     verts[offset + 1] = position.y;
     verts[offset + 2] = position.z;
 
-    // UV
     verts[offset + 3] = uv.x;
     verts[offset + 4] = uv.y;
 
-    // Normal
     verts[offset + 5] = normal.x;
     verts[offset + 6] = normal.y;
     verts[offset + 7] = normal.z;
 }
 
-void generateFace(int3 p, uint face)
+void generateFace(int3 p, uint face, uint16_t block)
 {
     uint vertexBase;
     uint indexBase;
@@ -178,39 +270,39 @@ void generateFace(int3 p, uint face)
     InterlockedAdd(sizesout[0].v, 4, vertexBase);
     InterlockedAdd(sizesout[0].i, 6, indexBase);
 
+    float2 tile = STONE_TILE;
+
+    if (block == GRASS)
+    {
+        tile = (face == 2) ? GRASS_TILE : GRASS_SIDE_TILE;
+    }
+    else if (block == DIRT)
+    {
+        tile = DIRT_TILE;
+    }
+	else if (block == WOOD) {
+		tile = (face == 2) ? WOOD_TOP_TILE : WOOD_SIDE_TILE;
+	}
+	else if (block == LEAVES) {
+		tile = LEAVES_TILE;
+	}
+
+    #define ROTATION 3
+
+    float2 startUV = tile + float2(0.0, 1.0/NUM_TILES);
+    float2 endUV = tile + float2(1.0, 0.0);
+
+    float2 uv0 = lerp(startUV, endUV, rotateUV(float2(0, 1), ROTATION));
+    float2 uv1 = lerp(startUV, endUV, rotateUV(float2(1, 1), ROTATION));
+    float2 uv2 = lerp(startUV, endUV, rotateUV(float2(1, 0), ROTATION));
+    float2 uv3 = lerp(startUV, endUV, rotateUV(float2(0, 0), ROTATION));
+
     float3 base = float3(p);
-	vec2 tile;
-
-	float h = terrainHeight(p.x, p.z);
-	int sub = (int)floor(h) - p.y;
-
-	if (sub == 0)
-	{
-		tile = (face == 2) ? GRASS_TILE : GRASS_SIDE_TILE;
-	}
-	else if (sub == 1)
-	{
-		tile = DIRT_TILE;
-	}
-	else
-	{
-		tile = STONE_TILE;
-	}
-
-	#define ROTATION 3
-
-	float2 startUV = tile + float2(0.0, 0.25);
-	float2 endUV   = tile + float2(1.0, 0.0);
-
-	float2 uv0 = lerp(startUV, endUV, rotateUV(float2(0, 1), ROTATION));
-	float2 uv1 = lerp(startUV, endUV, rotateUV(float2(1, 1), ROTATION));
-	float2 uv2 = lerp(startUV, endUV, rotateUV(float2(1, 0), ROTATION));
-	float2 uv3 = lerp(startUV, endUV, rotateUV(float2(0, 0), ROTATION));
 
     writeVertex(vertexBase + 0, base + corners[face][0], uv0, normals[face]);
-	writeVertex(vertexBase + 1, base + corners[face][1], uv1, normals[face]);
-	writeVertex(vertexBase + 2, base + corners[face][2], uv2, normals[face]);
-	writeVertex(vertexBase + 3, base + corners[face][3], uv3, normals[face]);
+    writeVertex(vertexBase + 1, base + corners[face][1], uv1, normals[face]);
+    writeVertex(vertexBase + 2, base + corners[face][2], uv2, normals[face]);
+    writeVertex(vertexBase + 3, base + corners[face][3], uv3, normals[face]);
 
     inds[indexBase + 0] = vertexBase + 0;
     inds[indexBase + 1] = vertexBase + 1;
@@ -220,6 +312,10 @@ void generateFace(int3 p, uint face)
     inds[indexBase + 4] = vertexBase + 2;
     inds[indexBase + 5] = vertexBase + 3;
 }
+
+// --------------------------------------------------
+// COMPUTE SHADER
+// --------------------------------------------------
 
 [shader("compute")]
 [numthreads(256, 1, 1)]
@@ -236,12 +332,39 @@ void computeMain(uint3 id : SV_DispatchThreadID)
         index / (size * size)
     );
 
-    if (!isSolid(p))
+    int3 offset = (int3)chunkOffset;
+    int3 worldPos = p + offset;
+
+    // Get and store this voxel's block.
+    uint16_t block = getBlock(worldPos);
+
+    chunkData[index] = block;
+
+    // Air has no geometry.
+    if (block == AIR)
         return;
 
+    // Check all six neighboring blocks.
     for (uint face = 0; face < 6; face++)
     {
-        if (!isSolid(p + directions[face]))
-            generateFace(p, face);
+        // Don't generate bottom boundary geometry.
+        if (face == 3 && p.y == 0)
+            continue;
+
+        int3 neighborPos = worldPos + directions[face];
+
+        uint16_t neighborBlock = getBlock(neighborPos);
+
+        // Generate faces against air.
+		// Also generate opaque block faces against leaves,
+		// so opaque blocks remain visible through transparent leaf pixels.
+		bool shouldGenerateFace =
+			neighborBlock == AIR ||
+			(block != LEAVES && neighborBlock == LEAVES);
+
+		if (shouldGenerateFace)
+		{
+			generateFace(p, face, block);
+		}
     }
 }

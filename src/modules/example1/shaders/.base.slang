@@ -4,6 +4,10 @@ typedef float2 vec2;
 typedef float3 vec3;
 typedef float4 vec4;
 
+typedef uint32_t Uint32;
+typedef uint16_t Uint16;
+typedef uint8_t Uint8;
+
 #if defined(VULKAN) || defined(GL)
 	#define BINDING_SRV(x)     [[vk::binding(x, 0)]]
 	#define BINDING_UAV(x)     [[vk::binding(x, 1)]]
@@ -160,10 +164,17 @@ namespace Fog {
 namespace Random {
 	float2 randomGradient(int2 p, float seed)
 	{
-		float angle = frac(
-			sin(dot(float2(p) + seed, float2(127.1, 311.7)))
-			* 43758.5453
-		) * 6.2831853;
+		uint2 q = asuint(p);
+
+		uint h = q.x * 374761393u
+			+ q.y * 668265263u
+			+ (uint)seed * 1442695041u;
+
+		h = (h ^ (h >> 13)) * 1274126177u;
+		h ^= h >> 16;
+
+		float angle = (float)(h & 0x00FFFFFFu) / 16777216.0
+					* 6.28318530718;
 
 		return float2(cos(angle), sin(angle));
 	}

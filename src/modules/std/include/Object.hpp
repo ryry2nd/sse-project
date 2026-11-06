@@ -17,6 +17,10 @@ namespace ObjectSpace {
 			mesh = std::vector<Mesh *>(1);
 		}
 
+		~Object() {
+			clear();
+		}
+
 		void clear() {
 			for (int i = 0; i < mesh.size(); i++) {
 				removeMesh(mesh[i]);

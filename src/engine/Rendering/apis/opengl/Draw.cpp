@@ -231,10 +231,12 @@ extern "C" void computeCall(ComputeParams *params) {
 
 	typedef ComputeParams::Outputs Outputs;
 
-	if ((params->output & Outputs::SSBO) && (params->output & Outputs::IMAGE))
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
-	else if (params->output & Outputs::SSBO)
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	else if(params->output & Outputs::IMAGE)
-		glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
+	uint barrier = 0;
+
+	if (params->output & Outputs::SSBO)
+		barrier |= GL_BUFFER_UPDATE_BARRIER_BIT;
+	if(params->output & Outputs::IMAGE)
+		barrier |= GL_TEXTURE_FETCH_BARRIER_BIT;
+
+	glMemoryBarrier(barrier);
 }
