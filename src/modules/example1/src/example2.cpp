@@ -100,11 +100,15 @@ public:
 
 		Surface atlasS;
 		atlasS.width = 128;
-		atlasS.height = 128 * 8;
+		atlasS.height = 128 * 10;
 
-		std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png", "stone.png", "wood_side.png", "wood_top.png", "leaves.png", "bedrock.png"};
+		std::string texts[] = {"dirt.png", "grass_side.png", "grass_top.png",
+			"stone.png", "wood_side.png", "wood_top.png",
+			"leaves.png", "bedrock.png", "sand.png",
+			"water.png"
+		};
 
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 10; i++) {
 			Surface surf;
 			Surface::loadFile((MODULE_PATH + "/assets/textures/" + texts[i]).c_str(), &surf);
 

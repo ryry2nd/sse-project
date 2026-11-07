@@ -32,50 +32,50 @@ ConstantBuffer<vec3> chunkOffset;
 
 static const int3 directions[6] =
 {
-    int3( 1, 0, 0),
-    int3(-1, 0, 0),
-    int3( 0, 1, 0),
-    int3( 0,-1, 0),
-    int3( 0, 0, 1),
-    int3( 0, 0,-1)
+	int3( 1, 0, 0),
+	int3(-1, 0, 0),
+	int3( 0, 1, 0),
+	int3( 0,-1, 0),
+	int3( 0, 0, 1),
+	int3( 0, 0,-1)
 };
 
 static const float3 corners[6][4] =
 {
-    {
-        float3(1,0,0), float3(1,1,0),
-        float3(1,1,1), float3(1,0,1)
-    },
-    {
-        float3(0,0,1), float3(0,1,1),
-        float3(0,1,0), float3(0,0,0)
-    },
-    {
-        float3(0,1,1), float3(1,1,1),
-        float3(1,1,0), float3(0,1,0)
-    },
-    {
-        float3(0,0,0), float3(1,0,0),
-        float3(1,0,1), float3(0,0,1)
-    },
-    {
-        float3(1,0,1), float3(1,1,1),
-        float3(0,1,1), float3(0,0,1)
-    },
-    {
-        float3(0,0,0), float3(0,1,0),
-        float3(1,1,0), float3(1,0,0)
-    }
+	{
+		float3(1,0,0), float3(1,1,0),
+		float3(1,1,1), float3(1,0,1)
+	},
+	{
+		float3(0,0,1), float3(0,1,1),
+		float3(0,1,0), float3(0,0,0)
+	},
+	{
+		float3(0,1,1), float3(1,1,1),
+		float3(1,1,0), float3(0,1,0)
+	},
+	{
+		float3(0,0,0), float3(1,0,0),
+		float3(1,0,1), float3(0,0,1)
+	},
+	{
+		float3(1,0,1), float3(1,1,1),
+		float3(0,1,1), float3(0,0,1)
+	},
+	{
+		float3(0,0,0), float3(0,1,0),
+		float3(1,1,0), float3(1,0,0)
+	}
 };
 
 static const float3 normals[6] =
 {
-    float3( 1, 0, 0),
-    float3(-1, 0, 0),
-    float3( 0, 1, 0),
-    float3( 0,-1, 0),
-    float3( 0, 0, 1),
-    float3( 0, 0,-1)
+	float3( 1, 0, 0),
+	float3(-1, 0, 0),
+	float3( 0, 1, 0),
+	float3( 0,-1, 0),
+	float3( 0, 0, 1),
+	float3( 0, 0,-1)
 };
 
 // --------------------------------------------------
@@ -84,56 +84,58 @@ static const float3 normals[6] =
 
 float terrainHeight(int x, int z)
 {
-    int3 offset = (int3)chunkOffset;
+	int3 offset = (int3)chunkOffset;
 
-    // Convert world coordinates to local chunk coordinates.
-    int localX = x - offset.x;
-    int localZ = z - offset.z;
+	// Convert world coordinates to local chunk coordinates.
+	int localX = x - offset.x;
+	int localZ = z - offset.z;
 
-    // Check whether the coordinate is inside this chunk.
-    bool insideChunk =
-        localX >= 0 && localX < (int)size &&
-        localZ >= 0 && localZ < (int)size;
+	// Check whether the coordinate is inside this chunk.
+	bool insideChunk =
+		localX >= 0 && localX < (int)size &&
+		localZ >= 0 && localZ < (int)size;
 
-    // Read cached height if available.
-    if (insideChunk)
-    {
-        uint index = localZ * size + localX;
-        float t = heightMap[index];
+	// Read cached height if available.
+	if (insideChunk)
+	{
+		uint index = localZ * size + localX;
+		float t = heightMap[index];
 		if (t >= 0) {
 			return t;
 		}
-    }
+	}
 
-    // Otherwise calculate without caching.
-    float2 p = float2(x, z);
+	// Otherwise calculate without caching.
+	float2 p = float2(x, z);
 
-    float continental = perlinNoise(p * 0.008, seed);
-    float mountains = perlinNoise(p * 0.018, seed + 13.7);
-    float hills = perlinNoise(p * 0.045, seed + 37.2);
-    float detail = perlinNoise(p * 0.12, seed + 71.9);
+	float continental = perlinNoise(p * 0.002, seed) * 70.0f;
+	float landMask = smoothstep(50.0f, 65.0f, continental);
 
-    float ridges = 1.0 - abs(
-        perlinNoise(p * 0.025, seed + 109.3)
-    );
+	float mountains = perlinNoise(p * 0.010, seed) * 50.0f * landMask;
+	float hills = perlinNoise(p * 0.045, seed + 37.2) * 2.0f;
+	float detail = perlinNoise(p * 0.12, seed + 71.9) * 1.5f;
 
-    float height = 60.0;
+	float ridges = 1.0 - abs(
+		perlinNoise(p * 0.025, seed + 109.3)
+	);
 
-    height += continental * 13.0;
-    height += mountains * 36.0;
-    height += hills * 4.0;
-    height += detail * 1.5;
-    height += pow(ridges, 2.5) * 14.0;
+	float height = 20.0;
+
+	height += continental;
+	height += mountains;
+	height += hills;
+	height += detail;
+	height += pow(ridges, 2.5) * 14.0;
 
 	height = max(height, 0.0);
 
 	if (insideChunk)
-    {
-        uint index = localZ * size + localX;
-        heightMap[index] = height;
-    }
+	{
+		uint index = localZ * size + localX;
+		heightMap[index] = height;
+	}
 
-    return height;
+	return height;
 }
 
 // --------------------------------------------------
@@ -141,57 +143,67 @@ float terrainHeight(int x, int z)
 // --------------------------------------------------
 uint hash(int2 p)
 {
-    uint h = uint(p.x) * 374761393u + uint(p.y) * 668265263u;
-    h = (h ^ (h >> 13)) * 1274126177u;
-    return h ^ (h >> 16);
+	uint h = uint(p.x) * 374761393u + uint(p.y) * 668265263u;
+	h = (h ^ (h >> 13)) * 1274126177u;
+	return h ^ (h >> 16);
 }
 
 static const float TREE_DENSITY = 1.0; // Percentage (0-100)
 
 bool isTreePosition(int2 column)
 {
-    uint h = hash(
-        column + int2((int)seed, (int)(seed * 127.0))
-    );
+	if (terrainHeight(column.x, column.y) < 62) {
+		return false;
+	}
+	uint h = hash(
+		column + int2((int)seed, (int)(seed * 127.0))
+	);
 
-    float randomValue = (float)(h % 10000u) / 10000.0;
+	float randomValue = (float)(h % 10000u) / 10000.0;
 
-    return randomValue < (TREE_DENSITY / 100.0);
+	return randomValue < (TREE_DENSITY / 100.0);
 }
 
-Uint16 getBlock(int3 worldPos)
+Blocks getBlock(int3 worldPos)
 {
-    if (worldPos.y < 0)
-        return AIR;
+	if (worldPos.y < 0)
+		return Blocks::AIR;
 
 	if (worldPos.y == 0)
-		return BEDROCK;
+		return Blocks::BEDROCK;
 
-    float height = terrainHeight(worldPos.x, worldPos.z);
-    int groundY = (int)floor(height);
+	float height = terrainHeight(worldPos.x, worldPos.z);
+	int groundY = (int)floor(height);
 
-    // --------------------------------------------------
-    // TERRAIN
-    // --------------------------------------------------
+	// --------------------------------------------------
+	// TERRAIN
+	// --------------------------------------------------
 
-    if (worldPos.y <= groundY)
-    {
-        int depth = groundY - worldPos.y;
+	if (worldPos.y <= groundY)
+	{
+		int depth = groundY - worldPos.y;
 
-        if (depth == 0)
-            return GRASS;
+		if (worldPos.y < 62 && depth <= 3) {
+			return Blocks::SAND;
+		}
+		if (depth == 0)
+			return Blocks::GRASS;
 
-        if (depth <= 3)
-            return DIRT;
+		if (depth <= 3)
+			return Blocks::DIRT;
 
-        return STONE;
-    }
+		return Blocks::STONE;
+	}
 
-    // --------------------------------------------------
-    // TREE TRUNK
-    // --------------------------------------------------
+	if (worldPos.y < 61) {
+		return Blocks::WATER;
+	}
 
-    int2 column = worldPos.xz;
+	// --------------------------------------------------
+	// TREE TRUNK
+	// --------------------------------------------------
+
+	int2 column = worldPos.xz;
 
 	uint h = hash(
 		column + int2((int)seed, (int)(seed * 127.0))
@@ -203,53 +215,53 @@ Uint16 getBlock(int3 worldPos)
 		int treeTop = groundY + treeHeight;
 
 		if (worldPos.y <= treeTop)
-			return WOOD;
+			return Blocks::WOOD;
 	}
 
-    // --------------------------------------------------
-    // TREE LEAVES
-    // --------------------------------------------------
+	// --------------------------------------------------
+	// TREE LEAVES
+	// --------------------------------------------------
 
-    for (int x = -2; x <= 2; x++)
-    {
-        for (int z = -2; z <= 2; z++)
-        {
-            int2 treeColumn = worldPos.xz + int2(x, z);
+	for (int x = -2; x <= 2; x++)
+	{
+		for (int z = -2; z <= 2; z++)
+		{
+			int2 treeColumn = worldPos.xz + int2(x, z);
 
-            uint treeHash = hash(
-                treeColumn + int2((int)seed, (int)(seed * 127.0))
-            );
+			uint treeHash = hash(
+				treeColumn + int2((int)seed, (int)(seed * 127.0))
+			);
 
-            if (!isTreePosition(treeColumn))
-    			continue;
+			if (!isTreePosition(treeColumn))
+				continue;
 
-            int treeGround = (int)floor(
-                terrainHeight(treeColumn.x, treeColumn.y)
-            );
+			int treeGround = (int)floor(
+				terrainHeight(treeColumn.x, treeColumn.y)
+			);
 
-            int treeHeight = 4 + int((treeHash >> 8) % 4u);
-            int treeTop = treeGround + treeHeight;
+			int treeHeight = 4 + int((treeHash >> 8) % 4u);
+			int treeTop = treeGround + treeHeight;
 
-            int dx = abs(worldPos.x - treeColumn.x);
-            int dz = abs(worldPos.z - treeColumn.y);
-            int dy = worldPos.y - treeTop;
+			int dx = abs(worldPos.x - treeColumn.x);
+			int dz = abs(worldPos.z - treeColumn.y);
+			int dy = worldPos.y - treeTop;
 
-            // Canopy extends 2 blocks horizontally.
-            if (dy >= -2 && dy <= 1)
-            {
-                int radius = (dy == 1) ? 1 : 2;
+			// Canopy extends 2 blocks horizontally.
+			if (dy >= -2 && dy <= 1)
+			{
+				int radius = (dy == 1) ? 1 : 2;
 
-                if (dx <= radius && dz <= radius)
-                {
-                    // Trim canopy corners.
-                    if (dx + dz <= radius + 1)
-                        return LEAVES;
-                }
-            }
-        }
-    }
+				if (dx <= radius && dz <= radius)
+				{
+					// Trim canopy corners.
+					if (dx + dz <= radius + 1)
+						return Blocks::LEAVES;
+				}
+			}
+		}
+	}
 
-    return AIR;
+	return Blocks::AIR;
 }
 
 // --------------------------------------------------
@@ -257,77 +269,83 @@ Uint16 getBlock(int3 worldPos)
 // --------------------------------------------------
 
 void writeVertex(
-    uint index,
-    float3 position,
-    float2 uv,
-    float3 normal)
+	uint index,
+	float3 position,
+	float2 uv,
+	float3 normal)
 {
-    uint offset = index * 8;
+	uint offset = index * 8;
 
-    verts[offset + 0] = position.x;
-    verts[offset + 1] = position.y;
-    verts[offset + 2] = position.z;
+	verts[offset + 0] = position.x;
+	verts[offset + 1] = position.y;
+	verts[offset + 2] = position.z;
 
-    verts[offset + 3] = uv.x;
-    verts[offset + 4] = uv.y;
+	verts[offset + 3] = uv.x;
+	verts[offset + 4] = uv.y;
 
-    verts[offset + 5] = normal.x;
-    verts[offset + 6] = normal.y;
-    verts[offset + 7] = normal.z;
+	verts[offset + 5] = normal.x;
+	verts[offset + 6] = normal.y;
+	verts[offset + 7] = normal.z;
 }
 
-void generateFace(int3 p, uint face, uint16_t block)
+void generateFace(int3 p, uint face, Blocks block)
 {
-    uint vertexBase;
-    uint indexBase;
+	uint vertexBase;
+	uint indexBase;
 
-    InterlockedAdd(sizesout[0].v, 4, vertexBase);
-    InterlockedAdd(sizesout[0].i, 6, indexBase);
+	InterlockedAdd(sizesout[0].v, 4, vertexBase);
+	InterlockedAdd(sizesout[0].i, 6, indexBase);
 
-    float2 tile = STONE_TILE;
+	float2 tile = STONE_TILE;
 
-    if (block == GRASS)
-    {
-        tile = (face == 2) ? GRASS_TILE : (face == 3) ? DIRT_TILE : GRASS_SIDE_TILE;
-    }
-    else if (block == DIRT)
-    {
-        tile = DIRT_TILE;
-    }
-	else if (block == WOOD) {
+	if (block == Blocks::GRASS)
+	{
+		tile = (face == 2) ? GRASS_TILE : (face == 3) ? DIRT_TILE : GRASS_SIDE_TILE;
+	}
+	else if (block == Blocks::DIRT)
+	{
+		tile = DIRT_TILE;
+	}
+	else if (block == Blocks::WOOD) {
 		tile = (face == 2 || face == 3) ? WOOD_TOP_TILE : WOOD_SIDE_TILE;
 	}
-	else if (block == LEAVES) {
+	else if (block == Blocks::LEAVES) {
 		tile = LEAVES_TILE;
 	}
-	else if (block == BEDROCK) {
+	else if (block == Blocks::SAND)  {
+		tile = SAND_TILE;
+	}
+	else if (block == Blocks::BEDROCK) {
 		tile = BEDROCK_TILE;
 	}
+	else if (block == Blocks::WATER) {
+		tile = WATER_TILE;
+	}
 
-    #define ROTATION 3
+	#define ROTATION 3
 
-    float2 startUV = tile + float2(0.0, 1.0/NUM_TILES);
-    float2 endUV = tile + float2(1.0, 0.0);
+	float2 startUV = tile + float2(0.0, 1.0/NUM_TILES);
+	float2 endUV = tile + float2(1.0, 0.0);
 
-    float2 uv0 = lerp(startUV, endUV, rotateUV(float2(0, 1), ROTATION));
-    float2 uv1 = lerp(startUV, endUV, rotateUV(float2(1, 1), ROTATION));
-    float2 uv2 = lerp(startUV, endUV, rotateUV(float2(1, 0), ROTATION));
-    float2 uv3 = lerp(startUV, endUV, rotateUV(float2(0, 0), ROTATION));
+	float2 uv0 = lerp(startUV, endUV, rotateUV(float2(0, 1), ROTATION));
+	float2 uv1 = lerp(startUV, endUV, rotateUV(float2(1, 1), ROTATION));
+	float2 uv2 = lerp(startUV, endUV, rotateUV(float2(1, 0), ROTATION));
+	float2 uv3 = lerp(startUV, endUV, rotateUV(float2(0, 0), ROTATION));
 
-    float3 base = float3(p);
+	float3 base = float3(p);
 
-    writeVertex(vertexBase + 0, base + corners[face][0], uv0, normals[face]);
-    writeVertex(vertexBase + 1, base + corners[face][1], uv1, normals[face]);
-    writeVertex(vertexBase + 2, base + corners[face][2], uv2, normals[face]);
-    writeVertex(vertexBase + 3, base + corners[face][3], uv3, normals[face]);
+	writeVertex(vertexBase + 0, base + corners[face][0], uv0, normals[face]);
+	writeVertex(vertexBase + 1, base + corners[face][1], uv1, normals[face]);
+	writeVertex(vertexBase + 2, base + corners[face][2], uv2, normals[face]);
+	writeVertex(vertexBase + 3, base + corners[face][3], uv3, normals[face]);
 
-    inds[indexBase + 0] = vertexBase + 0;
-    inds[indexBase + 1] = vertexBase + 1;
-    inds[indexBase + 2] = vertexBase + 2;
+	inds[indexBase + 0] = vertexBase + 0;
+	inds[indexBase + 1] = vertexBase + 1;
+	inds[indexBase + 2] = vertexBase + 2;
 
-    inds[indexBase + 3] = vertexBase + 0;
-    inds[indexBase + 4] = vertexBase + 2;
-    inds[indexBase + 5] = vertexBase + 3;
+	inds[indexBase + 3] = vertexBase + 0;
+	inds[indexBase + 4] = vertexBase + 2;
+	inds[indexBase + 5] = vertexBase + 3;
 }
 
 // --------------------------------------------------
@@ -338,46 +356,47 @@ void generateFace(int3 p, uint face, uint16_t block)
 [numthreads(256, 1, 1)]
 void computeMain(uint3 id : SV_DispatchThreadID)
 {
-    uint index = id.x;
+	uint index = id.x;
 
-    if (index >= size * size * size)
-        return;
+	if (index >= size * size * size)
+		return;
 
-    int3 p = int3(
-        index % size,
-        (index / size) % size,
-        index / (size * size)
-    );
+	int3 p = int3(
+		index % size,
+		(index / size) % size,
+		index / (size * size)
+	);
 
-    int3 offset = (int3)chunkOffset;
-    int3 worldPos = p + offset;
+	int3 offset = (int3)chunkOffset;
+	int3 worldPos = p + offset;
 
-    // Get and store this voxel's block.
-    uint16_t block = getBlock(worldPos);
+	// Get and store this voxel's block.
+	Blocks block = getBlock(worldPos);
 
-    chunkData[index] = block;
+	chunkData[index] = block;
 
-    // Air has no geometry.
-    if (block == AIR)
-        return;
+	// Air has no geometry.
+	if (block == Blocks::AIR)
+		return;
 
-    // Check all six neighboring blocks.
-    for (uint face = 0; face < 6; face++)
-    {
-        int3 neighborPos = worldPos + directions[face];
+	// Check all six neighboring blocks.
+	for (uint face = 0; face < 6; face++)
+	{
+		int3 neighborPos = worldPos + directions[face];
 
-        uint16_t neighborBlock = getBlock(neighborPos);
+		Blocks neighborBlock = getBlock(neighborPos);
 
-        // Generate faces against air.
+		// Generate faces against air.
 		// Also generate opaque block faces against leaves,
 		// so opaque blocks remain visible through transparent leaf pixels.
 		bool shouldGenerateFace =
-			neighborBlock == AIR ||
-			(block != LEAVES && neighborBlock == LEAVES);
+			neighborBlock == Blocks::AIR ||
+			(block != Blocks::LEAVES && neighborBlock == Blocks::LEAVES) ||
+			(block != Blocks::WATER && neighborBlock == Blocks::WATER);
 
 		if (shouldGenerateFace)
 		{
 			generateFace(p, face, block);
 		}
-    }
+	}
 }

@@ -4,16 +4,23 @@ struct Sizes
     uint i;
 };
 
-#define AIR 0
-#define DIRT 1
-#define GRASS 2
-#define STONE 3
-#define WOOD 4
-#define LEAVES 5
-#define BEDROCK 6
+enum Blocks : uint16_t
+{
+    AIR = 0,
+    DIRT = 1,
+    GRASS = 2,
+    STONE = 3,
+	WOOD = 4,
+	LEAVES = 5,
+	BEDROCK = 6,
+	SAND = 7,
+	WATER = 8,
+};
 
-#define NUM_TILES 8.0
+#define NUM_TILES 10.0
 
+static const float2 WATER_TILE = float2(0.0, 9.0/NUM_TILES);
+static const float2 SAND_TILE = float2(0.0, 8.0/NUM_TILES);
 static const float2 BEDROCK_TILE = float2(0.0, 7.0/NUM_TILES);
 static const float2 LEAVES_TILE = float2(0.0, 6.0/NUM_TILES);
 static const float2 WOOD_TOP_TILE = float2(0.0, 5.0/NUM_TILES);

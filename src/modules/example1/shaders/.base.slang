@@ -194,7 +194,9 @@ namespace Random {
 		float nx0 = lerp(n00, n10, u.x);
 		float nx1 = lerp(n01, n11, u.x);
 
-		return lerp(nx0, nx1, u.y);
+		float noise = lerp(nx0, nx1, u.y);
+
+		return noise * 0.5 + 0.5;
 	}
 
 	float random(float2 p)
