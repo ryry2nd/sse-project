@@ -1,6 +1,6 @@
 #include "Rendering.hpp"
 
-APIMesh::~APIMesh()
+APIMesh::~APIMesh() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Mesh::destroy");
 	if (VAO != 0)
@@ -9,11 +9,11 @@ APIMesh::~APIMesh()
 
 	VBO.reset();
 	EBO.reset();
-}
+} END_STATIC_THREAD
 
 APIMesh::APIMesh(const Vert *verts, const size_t vert_size,
 				const Ind *indices, const size_t ind_size
-			)
+			) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Mesh::create");
 
@@ -61,13 +61,13 @@ APIMesh::APIMesh(const Vert *verts, const size_t vert_size,
 		EBO, Buff::Type::Storage,
 		ind_size * sizeof(Ind)
 	);
-}
+} END_STATIC_THREAD
 
-Buff* APIMesh::vertBuff() {
+Buff* APIMesh::vertBuff()  {
     return VBO.get();
 }
 
-Buff* APIMesh::indBuff() {
+Buff* APIMesh::indBuff()  {
     return EBO.get();
 }
 

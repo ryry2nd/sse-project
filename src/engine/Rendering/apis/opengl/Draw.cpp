@@ -89,7 +89,7 @@ inline GLenum convertMeshType(InternalParams::MeshTypes meshType) {
         } \
 }
 
-extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t size) {
+extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t size) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGl::Draw");
 	InternalParams params;
 	combineParams(params, pms, size);
@@ -197,12 +197,18 @@ extern "C" void draw(RenderTarget *target, Mesh* mesh, DrawParams* pms, size_t s
 	{
 	GPUTRACE("Rendering::OpenGl::Draw::FinalCall");
 	DRAW_CALL(glmesh, params);
+
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+		spdlog::error("draw GL error 0x{:x}", err);
+
 	glBindVertexArray(0);
 	}
-}
+} END_STATIC_THREAD
 
-extern "C" void computeCall(ComputeParams *params) {
+extern "C" void computeCall(ComputeParams *params) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGl::ComputeCall");
+
 	bool renderScreen;
 	bool renderFBO;
 	FrameBuffer *fbo;
@@ -231,6 +237,10 @@ extern "C" void computeCall(ComputeParams *params) {
 
 	glDispatchCompute(groups.x, groups.y, groups.z);
 
+	GLenum err = glGetError();
+	if (err != GL_NO_ERROR)
+		spdlog::error("compute GL error 0x{:x}", err);
+
 	typedef ComputeParams::Outputs Outputs;
 
 	uint barrier = 0;
@@ -241,4 +251,4 @@ extern "C" void computeCall(ComputeParams *params) {
 		barrier |= GL_TEXTURE_FETCH_BARRIER_BIT;
 
 	glMemoryBarrier(barrier);
-}
+} END_STATIC_THREAD

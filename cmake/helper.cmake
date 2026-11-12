@@ -293,6 +293,8 @@ endfunction()
 
 
 function(compile_shaders)
+	set(ALL_ITEMS "")
+
     if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         set(SLANGC_CMD "wine" "${slang_SOURCE_DIR}/${SLANGC_BIN}")
     else()
@@ -311,6 +313,16 @@ function(compile_shaders)
                 "${MODULE_OUT_DIR}/shaders/gl"
         )
 
+		list(APPEND ALL_ITEMS "-I${MODULE}/shaders_include")
+
+		get_module_deps(OUT_VAR DEPS MODULE_FILE "${MODULE}/config.txt")
+
+		foreach(dep IN LISTS DEPS)
+			if(NOT "${dep}" STREQUAL "")
+				list(APPEND ALL_ITEMS "-I${dep}/shaders_include")
+			endif()
+		endforeach()
+
         foreach(SHADER IN LISTS SLANG_SHADERS)
             get_filename_component(NAME "${SHADER}" NAME_WE)
             file(READ "${SHADER}" SHADER_SOURCE)
@@ -326,6 +338,7 @@ function(compile_shaders)
                     POST_BUILD
                     COMMAND ${SLANGC_CMD}
                         "${SHADER}"
+						${ALL_ITEMS}
                         -O3 -line-directive-mode none -matrix-layout-column-major
                         -target spirv -stage vertex
                         -DGL
@@ -345,6 +358,7 @@ function(compile_shaders)
                     POST_BUILD
                     COMMAND ${SLANGC_CMD}
                         "${SHADER}"
+						${ALL_ITEMS}
                         -O3 -line-directive-mode none -matrix-layout-column-major
                         -target spirv -stage fragment
                         -DGL
@@ -364,6 +378,7 @@ function(compile_shaders)
                     POST_BUILD
                     COMMAND ${SLANGC_CMD}
                         "${SHADER}"
+						${ALL_ITEMS}
                         -O3 -line-directive-mode none -matrix-layout-column-major
                         -target spirv -stage compute
                         -DGL

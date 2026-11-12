@@ -6,7 +6,7 @@
             "name": "Example1 (CDT GDB)",
             "type": "gdb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example1",
+            "program": "${workspaceFolder}/build/linux-Debug/sse-project/bin/example",
             "cwd": "${workspaceFolder}/build/linux-Debug/sse-project",
             "arguments": "",
             "gdb": "/usr/bin/gdb",

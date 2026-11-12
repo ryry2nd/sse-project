@@ -7,12 +7,11 @@
 
 #include <SDL3/SDL_events.h>
 
+#include <ExApi.hpp>
 #include <Meshes.hpp>
 #include <MathTest.hpp>
 #include <FooTest.hpp>
 #include <Object.hpp>
-
-#include "Examples.hpp"
 
 using namespace Engine;
 using namespace Engine::Rendering;
@@ -22,7 +21,7 @@ using namespace Engine::Input;
 
 using namespace ObjectSpace;
 
-namespace Example1 {
+namespace Ex1 {
 Object mattex;
 Object mat;
 Object inMat;
@@ -43,8 +42,21 @@ ModelStruct model;
 glm::vec3 camPos;
 glm::vec3 camRot;
 
+std::string MODULE_PATH;
+std::string MODULE_ID;
 
-void setup() {
+#define win ExApi::win
+#define fbo ExApi::fbo
+#define font ExApi::font
+#define res ExApi::res
+#define ratio ExApi::ratio
+
+extern "C" {
+	void exitModule();
+	void setLoader(int, ExApi::Loader);
+}
+
+void setup1() {
 	win->setMode(Window::WindowMode::WindowedMouseMode);
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -75,9 +87,9 @@ void setup() {
 	buildVoxelGrid(vertsbox, indsbox, glm::vec3(1000.0f));
 
 	Shader *cubeShader = createShader((MODULE_PATH + "/shaders/floatCube").c_str());
-	Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
+	Shader *tex2dShader = createShader((ExApi::MODULE_PATH + "/shaders/tex2d").c_str());
 	Shader *cubeInstanceShader = createShader((MODULE_PATH + "/shaders/instanceCube").c_str());
-	Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
+	Shader *debugVectorShader = createShader((ExApi::MODULE_PATH + "/shaders/debugVector").c_str());
 	Shader *textShader = createShader((MODULE_PATH + "/shaders/text").c_str());
 	Shader *monkeyShader = createShader((MODULE_PATH + "/shaders/monkey").c_str());
 	Shader *objectShader = createShader((MODULE_PATH + "/shaders/object").c_str());
@@ -285,7 +297,7 @@ void setup() {
 	}
 }
 
-void loop() {
+void loop1() {
 	win->update();
 	win->clearBackground();
 	fbo->update();
@@ -380,15 +392,13 @@ void loop() {
 	win->swapBuffer();
 }
 
-void event(Event *event) {
+void event1(Event *event) {
 	auto type = event->type;
 	auto dt = win->getDeltaTime();
 	if (type == EventType::KeyDown) {
 		auto key = event->key;
 		if (key == SDLK_ESCAPE) {
-			Example1::shutdown();
-			Menu::setup();
-			mode = Mode::Men;
+			exitModule();
 			return;
 		}
 	}
@@ -396,7 +406,7 @@ void event(Event *event) {
 		rotateCamera(dt, &camRot, {event->mouse.xrel, event->mouse.yrel}, 0.1f);
 }
 
-void shutdown() {
+void shutdown1() {
 	mattex.clear();
 	mat.clear();
 	inMat.clear();
@@ -408,5 +418,18 @@ void shutdown() {
 	monkeyMat.clear();
 	teaMat.clear();
 	sun.clear();
+}
+
+extern "C" void setup() {
+	MODULE_ID = Engine::Module::getCurrentRunning();
+	MODULE_PATH = Engine::Module::idToPath(MODULE_ID.c_str());
+
+	ExApi::Loader e;
+	e.setup = (void *)&setup1;
+	e.loop = (void *)&loop1;
+	e.event = (void *)&event1;
+	e.shutdown = (void *)&shutdown1;
+
+	setLoader(1, e);
 }
 }

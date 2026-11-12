@@ -21,6 +21,26 @@ namespace ObjectSpace {
 			clear();
 		}
 
+		Object(const Object&) = delete;
+		Object& operator=(const Object&) = delete;
+
+		Object(Object&& o) noexcept
+			: mat(std::move(o.mat)), mesh(std::move(o.mesh)) {
+			o.mat.clear();
+			o.mesh.clear();
+		}
+
+		Object& operator=(Object&& o) noexcept {
+			if (this != &o) {
+				clear();
+				mat = std::move(o.mat);
+				mesh = std::move(o.mesh);
+				o.mat.clear();
+				o.mesh.clear();
+			}
+			return *this;
+		}
+
 		void clear() {
 			for (int i = 0; i < mesh.size(); i++) {
 				removeMesh(mesh[i]);

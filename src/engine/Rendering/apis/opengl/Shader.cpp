@@ -30,7 +30,7 @@ void compileShader(std::vector<Uint32> data, GLuint shader)
 	}
 }
 
-APIShader::APIShader(const char *path, bool isCompute)
+APIShader::APIShader(const char *path, bool isCompute) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Shader::create");
 	this->bisCompute = isCompute;
@@ -72,14 +72,14 @@ APIShader::APIShader(const char *path, bool isCompute)
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
 	}
-}
+} END_STATIC_THREAD
 
-APIShader::~APIShader()
+APIShader::~APIShader() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Shader::destroy");
 	if (id != 0)
 		glDeleteProgram(id);
-}
+} END_STATIC_THREAD
 
 extern "C" std::unique_ptr<Shader> createShader(const char *path, bool isCompute) {
     return std::make_unique<APIShader>(path, isCompute);

@@ -40,6 +40,7 @@ struct EnginePackage
 	std::string id;
 	std::string version;
 	std::string path;
+	std::string fullpath;
 	std::vector<std::string> deps;
 	long llvmLocation;
 };
@@ -261,7 +262,7 @@ extern "C" {
 					else if (key == "VERSION")
 						pkg.version = value;
 					else if (key == "DEPS")
-						pkg.deps = split(value, ';');
+						pkg.deps = split(value, ',');
 				}
 				pkg.path = mod_path;
 
@@ -271,22 +272,15 @@ extern "C" {
 					std::string ext = entry.path().extension().string();
 					if (ext == ".bc" || ext == ".ll" || ext == ".o" || ext == ".obj" || ext == ".so" || ext == ".dll") {
 						hasCode = true;
-						codeFile = entry.path().string();
+						pkg.fullpath = entry.path().string();
 						break;
 					}
 				}
 
-				if (!hasCode) return;
-
-				long llvmLocation = initModuleJIT(codeFile.c_str());
-				pkg.llvmLocation = llvmLocation;
-
-				if (llvmLocation < 0) return;
-
-				if (!JITRunnable(llvmLocation)) {
-					shouldShutDown = false;
+				if (!hasCode) {
+					spdlog::warn("Skipping module {}: no compiled code found", mod_path);
+					continue;
 				}
-
 
 				pkgs.push_back(std::move(pkg));
 
@@ -303,7 +297,24 @@ extern "C" {
 
 		topoSort();
 
-		for (auto &pkg : pkgs) {
+		for (int i = 0; i < pkgs.size(); i++) {
+			auto &pkg = pkgs[i];
+
+			long llvmLocation = initModuleJIT(pkg.fullpath.c_str());
+			pkg.llvmLocation = llvmLocation;
+
+			if (llvmLocation < 0) {
+				spdlog::error("Skipping module {}: JIT initialization failed", pkg.id);
+				continue;
+			}
+
+			if (!JITRunnable(llvmLocation)) {
+				shouldShutDown = false;
+			}
+		}
+
+		for (int i = pkgs.size() - 1; i >= 0; i--) {
+			auto &pkg = pkgs[i];
 			try {
 				SCOPE("Scripting::Modules::Setup");
 				currpkg = pkg.id;

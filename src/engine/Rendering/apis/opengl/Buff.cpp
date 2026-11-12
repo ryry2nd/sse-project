@@ -18,7 +18,7 @@ GLenum toGLUsage(Buff::Frequency freq) {
 	return GL_DYNAMIC_DRAW;
 }
 
-APIBuff::APIBuff(Type type, Frequency freq, std::size_t size, const void* data)
+APIBuff::APIBuff(Type type, Frequency freq, std::size_t size, const void* data) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Buff::create");
 	this->allocSize = size;
@@ -40,6 +40,7 @@ APIBuff::APIBuff(Type type, Frequency freq, std::size_t size, const void* data)
 
 	glBindBuffer(target, 0);
 }
+END_STATIC_THREAD
 
 APIBuff::APIBuff(GLuint existingID, Type type, std::size_t size)
 {
@@ -48,12 +49,12 @@ APIBuff::APIBuff(GLuint existingID, Type type, std::size_t size)
     target = toGLTarget(type);
 }
 
-APIBuff::~APIBuff() {
+APIBuff::~APIBuff() RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::Buff::destroy");
 	glDeleteBuffers(1, &id);
-}
+} END_STATIC_THREAD
 
-void APIBuff::write(std::size_t offset, std::size_t size, const void* data) {
+void APIBuff::write(std::size_t offset, std::size_t size, const void* data) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::Buff::write");
 	#ifdef DEBUG
 	if (offset > allocSize || offset + size > allocSize) {
@@ -64,9 +65,9 @@ void APIBuff::write(std::size_t offset, std::size_t size, const void* data) {
 
 	glBindBuffer(target, id);
 	glBufferSubData(target, offset, size, data);
-}
+} END_STATIC_THREAD
 
-void APIBuff::read(std::size_t offset, std::size_t size, void* outData) {
+void APIBuff::read(std::size_t offset, std::size_t size, void* outData) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::Buff::read");
 	#ifdef DEBUG
 	if (offset > allocSize || offset + size > allocSize) {
@@ -77,13 +78,13 @@ void APIBuff::read(std::size_t offset, std::size_t size, void* outData) {
 
 	glBindBuffer(target, id);
 	glGetBufferSubData(target, offset, size, outData);
-}
+} END_STATIC_THREAD
 
 void APIBuff::copy(
     const Buff *src,
     std::size_t sourceOffset,
     std::size_t destinationOffset,
-    std::size_t size)
+    std::size_t size) RUN_IN_STATIC_THREAD
 {
     SCOPE("Rendering::OpenGL::Buff::copy");
 
@@ -124,7 +125,7 @@ void APIBuff::copy(
 
     glBindBuffer(GL_COPY_READ_BUFFER, 0);
     glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-}
+} END_STATIC_THREAD
 
 extern "C" std::unique_ptr<Buff> createBuff(Buff::Type type, Buff::Frequency freq, std::size_t size, const void* data = nullptr) {
     return std::make_unique<APIBuff>(type, freq, size, data);

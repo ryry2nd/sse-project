@@ -7,7 +7,7 @@
 #define MAJOR_VERSION 4
 #define MINOR_VERSION 6
 
-APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync)
+APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Window::create");
 	window = static_cast<SDL_Window *>(_create_window(res, name, flags | SDL_WINDOW_OPENGL, aa, mode));
@@ -71,18 +71,18 @@ APIWindow::APIWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, U
 	glDepthFunc(GL_LESS); // or GL_LEQUAL
 	glDepthMask(GL_TRUE); // enable writing to depth buffer
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-}
+} END_STATIC_THREAD
 
-void APIWindow::setBackgroundColor(glm::vec4 color) {
+void APIWindow::setBackgroundColor(glm::vec4 color) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::Window::setBackgroundColor");
 	glClearColor(color.r, color.g, color.b, color.a);
-}
+} END_STATIC_THREAD
 
-void APIWindow::clearBackground()
+void APIWindow::clearBackground() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Window::clearBackground");
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
+} END_STATIC_THREAD
 
 #ifdef DEBUG
 #include <tracy/TracyOpenGL.hpp>
@@ -92,39 +92,39 @@ void APIWindow::clearBackground()
 #endif
 
 
-void APIWindow::swapBuffer()
+void APIWindow::swapBuffer() RUN_IN_STATIC_THREAD
 {
 	GPUCOLLECT;
 	{
 	SCOPE("Rendering::OpenGL::Window::swapBuffer");
 	SDL_GL_SwapWindow(window);
 	}
-}
+} END_STATIC_THREAD
 
-void APIWindow::updateScreenRes()
+void APIWindow::updateScreenRes() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Window::updateRes");
 	int width, height;
 	SDL_GetWindowSize(window, &width, &height);
 	res = glm::vec2(width, height);
 	glViewport(0, 0, res.x, res.y);
-}
+} END_STATIC_THREAD
 
-void APIWindow::setWindow() {
+void APIWindow::setWindow() RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::Window::setWindow");
 	SDL_GL_MakeCurrent(window, glContext);
-}
+} END_STATIC_THREAD
 
-void APIWindow::setMode(Uint8 mode) {
+void APIWindow::setMode(Uint8 mode) RUN_IN_STATIC_THREAD {
 	_setMode(window, mode);
-}
+} END_STATIC_THREAD
 
-APIWindow::~APIWindow()
+APIWindow::~APIWindow() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Window::delete");
 	SDL_GL_DestroyContext(glContext);
 	_destroyWindow(window);
-}
+} END_STATIC_THREAD
 
 extern "C" std::unique_ptr<Window> createWindow(glm::vec2 res, const char *name, Uint32 flags, Uint32 aa, Uint8 mode, int vsync) {
     return std::make_unique<APIWindow>(res, name, flags, aa, mode, vsync);

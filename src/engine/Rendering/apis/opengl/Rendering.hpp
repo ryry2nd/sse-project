@@ -8,6 +8,7 @@
 #include <engine/Rendering/Rendering.hpp>
 
 #include "../internal/Scope.hpp"
+#include "Thread.hpp"
 
 #ifdef DEBUG
 #include <tracy/TracyOpenGL.hpp>

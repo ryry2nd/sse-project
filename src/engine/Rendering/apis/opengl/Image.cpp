@@ -144,14 +144,14 @@ void APIImage::setupObject(Surface* surface, ImageSettings settings)
 	imageSizes = glm::vec2(surface->width, surface->height);
 }
 
-APIImage::APIImage(Surface* surface, ImageSettings settings)
+APIImage::APIImage(Surface* surface, ImageSettings settings) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Image::create");
 
 	setupObject(surface, settings);
-}
+} END_STATIC_THREAD
 
-APIImage::APIImage(glm::vec2 size, ImageSettings settings)
+APIImage::APIImage(glm::vec2 size, ImageSettings settings) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Image::create");
 
@@ -170,9 +170,9 @@ APIImage::APIImage(glm::vec2 size, ImageSettings settings)
 
 	Surface::fillSurf(&blank, Pixel{0, 0, 0, 0});
 	setupObject(&blank, settings);
-}
+} END_STATIC_THREAD
 
-APIImage::~APIImage()
+APIImage::~APIImage() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Image::destroy");
 
@@ -181,9 +181,9 @@ APIImage::~APIImage()
 
 	if (samplerID != 0)
 		glDeleteSamplers(1, &samplerID);
-}
+} END_STATIC_THREAD
 
-void APIImage::clearTransparent()
+void APIImage::clearTransparent() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Image::clearTransparent");
 
@@ -199,9 +199,9 @@ void APIImage::clearTransparent()
 	const GLenum err = glGetError();
 	if (err != GL_NO_ERROR)
 		spdlog::error("clearTransparent GL error: 0x{:x}", err);
-}
+} END_STATIC_THREAD
 
-void APIImage::updateImage(const Surface* surface)
+void APIImage::updateImage(const Surface* surface) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::Image::update");
 
@@ -254,7 +254,7 @@ void APIImage::updateImage(const Surface* surface)
 
 	if (useMip)
 		glGenerateMipmap(GL_TEXTURE_2D);
-}
+} END_STATIC_THREAD
 
 APIImage::APIImage(GLuint existingTexture, glm::vec2 size)
 {

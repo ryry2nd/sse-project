@@ -8,12 +8,12 @@
 
 #include <SDL3/SDL_events.h>
 
+#include <ExApi.hpp>
 #include <Meshes.hpp>
 #include <MathTest.hpp>
 #include <FooTest.hpp>
 #include <Object.hpp>
 
-#include "Examples.hpp"
 #include "SDL3/SDL_scancode.h"
 #include "SDL3/SDL_stdinc.h"
 
@@ -25,14 +25,27 @@ using namespace Engine::Input;
 
 using namespace ObjectSpace;
 
-namespace Example2 {
+namespace Ex2 {
+std::string MODULE_PATH;
+std::string MODULE_ID;
 
-Object debugMat;
-Object fboMat;
-Object fpsMat;
+#define win ExApi::win
+#define fbo ExApi::fbo
+#define font ExApi::font
+#define res ExApi::res
+#define ratio ExApi::ratio
 
-CameraStruct cam;
-Buff *camBuff;
+extern "C" {
+	void exitModule();
+	void setLoader(int, ExApi::Loader);
+}
+
+static Object debugMat;
+static Object fboMat;
+static Object fpsMat;
+
+static CameraStruct cam;
+static Buff *camBuff;
 
 glm::vec3 camPos;
 glm::vec3 camRot;
@@ -218,7 +231,7 @@ Image *Chunk::atlas = nullptr;
 
 std::vector<Chunk> chunks;
 
-void setup() {
+void setup2() {
 	win->setMode(Window::WindowMode::WindowedMouseMode);
 	camPos = glm::vec3(0.0f, 0.0f, 3.0f);
 	camRot = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -236,10 +249,8 @@ void setup() {
 	)) Module::getFunction("com.ryan.std", "build2DFace");
 
 
-	Shader *debugVectorShader = createShader((MODULE_PATH + "/shaders/debugVector").c_str());
-	Shader *tex2dShader = createShader((MODULE_PATH + "/shaders/tex2d").c_str());
-
-	// Image *img = createImage((MODULE_PATH + "/assets/textures/debug.png").c_str());
+	Shader *debugVectorShader = createShader((ExApi::MODULE_PATH + "/shaders/debugVector").c_str());
+	Shader *tex2dShader = createShader((ExApi::MODULE_PATH + "/shaders/tex2d").c_str());
 
 	std::vector<Vert> vertsflat;
 	std::vector<Ind> indsflat;
@@ -293,6 +304,8 @@ void setup() {
 
 	Chunk::init(random);
 
+	chunks.reserve(CHUNK_DISTANCE_X * CHUNK_DISTANCE_Y * CHUNK_DISTANCE_Z);
+
 	for (int x = 0; x < CHUNK_DISTANCE_X; x++) {
 		for (int z = 0; z < CHUNK_DISTANCE_Z; z++) {
 			for (int y = 0; y < CHUNK_DISTANCE_Y; y++) {
@@ -302,7 +315,7 @@ void setup() {
 	}
 }
 
-void loop() {
+void loop2() {
 	win->update();
 	win->clearBackground();
 	fbo->update();
@@ -383,15 +396,13 @@ void loop() {
 	win->swapBuffer();
 }
 
-void event(Event *event) {
+void event2(Event *event) {
 	auto type = event->type;
 	auto dt = win->getDeltaTime();
 	if (type == EventType::KeyDown) {
 		auto key = event->key;
 		if (key == SDLK_ESCAPE) {
-			Example2::shutdown();
-			Menu::setup();
-			mode = Mode::Men;
+			exitModule();
 			return;
 		}
 	}
@@ -399,11 +410,25 @@ void event(Event *event) {
 		rotateCamera(dt, &camRot, {event->mouse.xrel, event->mouse.yrel}, 0.1f);
 }
 
-void shutdown() {
+void shutdown2() {
+	removeBuff(camBuff);
 	debugMat.clear();
 	fboMat.clear();
 	fpsMat.clear();
 	chunks.clear();
 	Chunk::deinit();
+}
+
+extern "C" void setup() {
+	MODULE_ID = Engine::Module::getCurrentRunning();
+	MODULE_PATH = Engine::Module::idToPath(MODULE_ID.c_str());
+
+	ExApi::Loader e;
+	e.setup = (void *)&setup2;
+	e.loop = (void *)&loop2;
+	e.event = (void *)&event2;
+	e.shutdown = (void *)&shutdown2;
+
+	setLoader(2, e);
 }
 }

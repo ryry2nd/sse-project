@@ -356,6 +356,9 @@ void generateFace(int3 p, uint face, Blocks block)
 [numthreads(256, 1, 1)]
 void computeMain(uint3 id : SV_DispatchThreadID)
 {
+	// uint vertexBase, indexBase;
+	// InterlockedAdd(sizesout[0].v, 4, vertexBase);
+	// InterlockedAdd(sizesout[0].i, 6, indexBase);
 	uint index = id.x;
 
 	if (index >= size * size * size)

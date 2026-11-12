@@ -1,6 +1,6 @@
 #include "Rendering.hpp"
 
-APIFrameBuffer::APIFrameBuffer(glm::vec2 res, uint32_t settings)
+APIFrameBuffer::APIFrameBuffer(glm::vec2 res, uint32_t settings) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::FBO::create");
 	this->res = res;
@@ -117,9 +117,9 @@ APIFrameBuffer::APIFrameBuffer(glm::vec2 res, uint32_t settings)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+} END_STATIC_THREAD
 
-APIFrameBuffer::~APIFrameBuffer()
+APIFrameBuffer::~APIFrameBuffer() RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::FBO::Destroy");
 	if (colorImage)   delete colorImage;
@@ -127,9 +127,9 @@ APIFrameBuffer::~APIFrameBuffer()
 	if (stencilImage && stencilImage != depthImage) delete stencilImage;
 
 	if (id) glDeleteFramebuffers(1, &id);
-}
+} END_STATIC_THREAD
 
-void APIFrameBuffer::setSize(glm::vec2 newSize)
+void APIFrameBuffer::setSize(glm::vec2 newSize) RUN_IN_STATIC_THREAD
 {
 	SCOPE("Rendering::OpenGL::FBO::setSize");
 	res = newSize;
@@ -156,20 +156,20 @@ void APIFrameBuffer::setSize(glm::vec2 newSize)
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
+} END_STATIC_THREAD
 
-void APIFrameBuffer::updateRes() {
+void APIFrameBuffer::updateRes() RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::FBO::updateRes");
 	glViewport(0, 0, (GLsizei)res.x, (GLsizei)res.y);
-}
+} END_STATIC_THREAD
 
-void APIFrameBuffer::setBackgroundColor(glm::vec4 color) {
+void APIFrameBuffer::setBackgroundColor(glm::vec4 color) RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::FBO::setBackgroundColor");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 	glClearColor(color.r, color.g, color.b, color.a);
-}
+} END_STATIC_THREAD
 
-void APIFrameBuffer::clearBackground() {
+void APIFrameBuffer::clearBackground() RUN_IN_STATIC_THREAD {
 	SCOPE("Rendering::OpenGL::FBO::clearBackGround");
 	glBindFramebuffer(GL_FRAMEBUFFER, id);
 
@@ -185,7 +185,7 @@ void APIFrameBuffer::clearBackground() {
 		clearMask |= GL_STENCIL_BUFFER_BIT;
 
 	glClear(clearMask);
-}
+} END_STATIC_THREAD
 
 extern "C" std::unique_ptr<FrameBuffer> createFrameBuffer(glm::vec2 size, uint32_t settings) {
     return std::make_unique<APIFrameBuffer>(size, settings);

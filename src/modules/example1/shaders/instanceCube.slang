@@ -1,5 +1,5 @@
-#include ".colors.slang"
-#include ".base.slang"
+#include <.colors.slang>
+#include <.base.slang>
 
 using namespace Structs;
 using namespace Normals;

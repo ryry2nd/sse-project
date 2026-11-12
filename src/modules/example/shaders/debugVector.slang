@@ -1,4 +1,4 @@
-#include ".base.slang"
+#include <.base.slang>
 
 using namespace Structs;
 using namespace Normals;

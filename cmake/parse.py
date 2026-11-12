@@ -45,7 +45,7 @@ def parse_config(path: str):
 				cfg.version = value
 
 			elif key == "DEPS":
-				cfg.deps = [d for d in value.split(";") if d]
+				cfg.deps = [d for d in value.split(",") if d]
 
 	return cfg
 
