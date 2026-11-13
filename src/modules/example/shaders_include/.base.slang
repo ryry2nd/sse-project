@@ -234,6 +234,11 @@ namespace Utils {
 		return uv;
 	}
 
+	float mix(float a, float b, float t)
+	{
+		return a * (1.0f - t) + b * t;
+	}
+
 	Structs::Output getPosition(mat4 model, mat4 view, mat4 proj, Structs::Input input) {
 		Structs::Output output;
 

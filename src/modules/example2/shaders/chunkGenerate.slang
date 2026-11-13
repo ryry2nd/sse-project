@@ -86,16 +86,13 @@ float terrainHeight(int x, int z)
 {
 	int3 offset = (int3)chunkOffset;
 
-	// Convert world coordinates to local chunk coordinates.
 	int localX = x - offset.x;
 	int localZ = z - offset.z;
 
-	// Check whether the coordinate is inside this chunk.
 	bool insideChunk =
 		localX >= 0 && localX < (int)size &&
 		localZ >= 0 && localZ < (int)size;
 
-	// Read cached height if available.
 	if (insideChunk)
 	{
 		uint index = localZ * size + localX;
@@ -105,13 +102,24 @@ float terrainHeight(int x, int z)
 		}
 	}
 
-	// Otherwise calculate without caching.
 	float2 p = float2(x, z);
 
-	float continental = perlinNoise(p * 0.002, seed) * 70.0f;
-	float landMask = smoothstep(50.0f, 65.0f, continental);
+	float landMask = smoothstep(0.35f, 0.55f, perlinNoise(p * 0.004, seed));
 
-	float mountains = perlinNoise(p * 0.010, seed) * 50.0f * landMask;
+	float continents = perlinNoise(p * 0.001, seed) * 95.0f * landMask;
+
+	float mountainsM = perlinNoise(p * 0.01, seed + 34.2) * 50.0f;
+	float mountainsL = perlinNoise(p * 0.005, seed + 34.3) * 100.0f;
+
+	float mask = perlinNoise(p * 0.0015, seed + 91.7);
+	mask = smoothstep(-0.1f, 0.5f, mask);
+	mask = smoothstep(0.15f, 0.85f, mask);
+
+	float mountainPresence = smoothstep(-0.1f, 0.4f, perlinNoise(p * 0.0008, seed + 123.4));
+
+	float mountains = mix(mountainsL, mountainsM, mask) * mountainPresence * landMask;
+
+
 	float hills = perlinNoise(p * 0.045, seed + 37.2) * 2.0f;
 	float detail = perlinNoise(p * 0.12, seed + 71.9) * 1.5f;
 
@@ -121,11 +129,11 @@ float terrainHeight(int x, int z)
 
 	float height = 20.0;
 
-	height += continental;
-	height += mountains;
-	height += hills;
-	height += detail;
-	height += pow(ridges, 2.5) * 14.0;
+	height += continents;
+	// height += mountains;
+	// height += hills;
+	// height += detail;
+	// height += pow(ridges, 2.5) * 14.0;
 
 	height = max(height, 0.0);
 
@@ -356,9 +364,6 @@ void generateFace(int3 p, uint face, Blocks block)
 [numthreads(256, 1, 1)]
 void computeMain(uint3 id : SV_DispatchThreadID)
 {
-	// uint vertexBase, indexBase;
-	// InterlockedAdd(sizesout[0].v, 4, vertexBase);
-	// InterlockedAdd(sizesout[0].i, 6, indexBase);
 	uint index = id.x;
 
 	if (index >= size * size * size)
